@@ -117,11 +117,11 @@ const Container: FC = () => {
       return;
     }
 
-    console.log(error, "error is here");
+    // console.log(error, "error is here");
 
-    if (error?.response?.data?.statusCode === 400) {
-      replace("/404");
-    }
+    // if (error?.response?.data?.statusCode === 400) {
+    //   replace("/404");
+    // }
   }, [error]);
 
   useEffect(() => {
