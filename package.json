@@ -1,0 +1,46 @@
+{
+  "name": "nextjs-boilerplate",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start:local": "cp .env.local-prod .env.local && next dev",
+    "start:dev": "cp .env.development .env.local && next dev",
+    "start:prod": "cp .env.production .env.local && next dev",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "page": "./create_page.sh"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@types/draftjs-to-html": "^0.8.4",
+    "@types/lodash-es": "^4.17.12",
+    "@vis.gl/react-google-maps": "^1.5.5",
+    "axios": "^1.6.8",
+    "dayjs": "^1.11.11",
+    "draft-js": "^0.11.7",
+    "draftjs-to-html": "^0.9.1",
+    "leaflet": "^1.9.4",
+    "lodash-es": "^4.17.21",
+    "mapbox-gl": "^3.14.0",
+    "next": "13.5.6",
+    "react": "^18",
+    "react-cookie": "^7.1.4",
+    "react-dom": "^18",
+    "react-google-map-wrapper": "^1.0.5",
+    "react-leaflet": "^5.0.0",
+    "react-query": "^3.39.3",
+    "zustand": "^4.5.2"
+  },
+  "devDependencies": {
+    "@types/draft-js": "^0.11.18",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "13.5.6",
+    "typescript": "^5"
+  }
+}
