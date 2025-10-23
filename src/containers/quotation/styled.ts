@@ -1,525 +1,1068 @@
 import styled from "@emotion/styled";
-import { munit, unit } from "@shared/utils/base";
-import { backgroundImageCover, mobilePoint } from "@styles/globalStyles";
-import { css } from "@emotion/react";
+import { keyframes } from "@emotion/react";
 
+// 애니메이션 정의
+const fadeInUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+`;
+
+const slideInRight = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+`;
+
+const pulse = keyframes`
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+`;
+
+const shimmer = keyframes`
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+`;
+
+// 전체 컨테이너 - 깔끔한 흰색 배경
 export const Container = styled.div`
-  max-width: ${unit(1200)};
-  margin: 0 auto;
-  padding: ${unit(60)} ${unit(40)};
-  background: #ffffff;
-
-  * {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  }
-
-  #my-map {
-    height: ${unit(600)} !important;
-  }
-
-  @media screen and (max-width: ${mobilePoint}) {
-    padding: ${munit(30)} ${munit(20)};
-
-    #my-map {
-      height: ${munit(400)} !important;
-    }
-  }
-
-  .gm-style-mtc {
-    display: none !important;
-  }
+  min-height: 100vh;
+  background: #fafbfc;
+  animation: ${fadeIn} 0.4s ease-out;
 `;
 
-// Header Section
-export const Information = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: ${unit(60)};
-  padding: ${unit(40)} 0;
-  border-top: 1px solid #e5e5e5;
-  border-bottom: 1px solid #e5e5e5;
-  margin-bottom: ${unit(60)};
-
-  @media screen and (max-width: ${mobilePoint}) {
-    grid-template-columns: 1fr;
-    gap: ${munit(40)};
-    padding: ${munit(30)} 0;
-    margin-bottom: ${munit(40)};
-  }
-`;
-
-export const BatchInfoSection = styled.section`
+// Header - 홈 페이지와 동일한 스타일
+export const Header = styled.header`
   display: flex;
-  flex-direction: column;
-  gap: ${unit(20)};
-`;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid #e2e8f0;
 
-export const BatchInfo = styled.div`
-  label {
-    display: block;
-    font-size: ${unit(12)};
-    font-weight: 600;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: ${unit(6)};
+  @media (max-width: 768px) {
+    padding: 16px 20px;
   }
 
-  p {
-    font-size: ${unit(16)};
-    color: #111827;
-    line-height: 1.5;
-  }
-
-  @media screen and (max-width: ${mobilePoint}) {
-    label {
-      font-size: ${munit(11)};
-      margin-bottom: ${munit(4)};
-    }
-
-    p {
-      font-size: ${munit(14)};
-    }
-  }
-`;
-
-export const Companies = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${unit(16)};
-
-  h1 {
-    font-size: ${unit(28)};
-    font-weight: 700;
-    color: #111827;
-    margin-bottom: ${unit(24)};
-    text-transform: uppercase;
-    letter-spacing: -0.5px;
-  }
-
-  & > div {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: ${unit(12)};
-    font-size: ${unit(14)};
-
-    span {
-      font-weight: 600;
-      color: #6b7280;
-      text-transform: uppercase;
-      font-size: ${unit(11)};
-      letter-spacing: 0.5px;
-    }
-
-    p {
-      color: #111827;
-    }
-  }
-
-  img {
-    width: ${unit(120)};
-    height: auto;
-    margin-top: ${unit(20)};
-    opacity: 0.8;
-    object-fit: contain;
-  }
-
-  @media screen and (max-width: ${mobilePoint}) {
-    h1 {
-      font-size: ${munit(24)};
-      margin-bottom: ${munit(20)};
-    }
-
-    & > div {
-      grid-template-columns: 1fr;
-      gap: ${munit(4)};
-      font-size: ${munit(13)};
-
-      span {
-        font-size: ${munit(10)};
-      }
-    }
-
-    img {
-      width: ${munit(100)};
-      margin-top: ${munit(16)};
-    }
-  }
-`;
-
-// Itinerary Section
-export const TitleDivision = styled.div`
-  width: 100%;
-  margin-bottom: ${unit(40)};
-
-  @media screen and (max-width: ${mobilePoint}) {
-    margin-bottom: ${munit(30)};
-  }
-`;
-
-export const ItineraryText = styled.h2`
-  font-size: ${unit(24)};
-  font-weight: 700;
-  color: #111827;
-  text-transform: uppercase;
-  letter-spacing: -0.5px;
-  padding-bottom: ${unit(12)};
-  border-bottom: 2px solid #111827;
-
-  @media screen and (max-width: ${mobilePoint}) {
-    font-size: ${munit(20)};
-    padding-bottom: ${munit(10)};
-  }
-`;
-
-export const EstimateDetailsSection = styled.section``;
-
-export const EachEstimateBox = styled.article`
-  margin-bottom: ${unit(60)};
-  padding-bottom: ${unit(60)};
-  border-bottom: 2px solid #e5e5e5;
-
-  &:last-child {
+  @media print {
+    position: static;
     border-bottom: none;
   }
-
-  @media screen and (max-width: ${mobilePoint}) {
-    margin-bottom: ${munit(40)};
-    padding-bottom: ${munit(40)};
-  }
 `;
 
-export const DayBox = styled.div`
-  font-size: ${unit(20)};
+export const Logo = styled.div`
+  font-size: 24px;
   font-weight: 700;
-  color: #111827;
-  margin-bottom: ${unit(24)};
-  padding-bottom: ${unit(12)};
-  border-bottom: 1px solid #e5e5e5;
+  color: #667eea;
+  cursor: pointer;
+`;
 
-  span {
-    font-size: ${unit(14)};
-    font-weight: 400;
-    color: #6b7280;
-    margin-left: ${unit(12)};
-  }
+export const HeaderActions = styled.div`
+  display: flex;
+  gap: 12px;
 
-  @media screen and (max-width: ${mobilePoint}) {
-    font-size: ${munit(18)};
-    margin-bottom: ${munit(20)};
-    padding-bottom: ${munit(10)};
-
-    span {
-      display: block;
-      font-size: ${munit(12)};
-      margin-left: 0;
-      margin-top: ${munit(4)};
-    }
+  @media print {
+    display: none;
   }
 `;
 
-export const DetailBox = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: ${unit(40)};
-
-  @media screen and (max-width: ${mobilePoint}) {
-    grid-template-columns: 1fr;
-    gap: ${munit(30)};
-  }
-`;
-
-export const ItemBox = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: ${unit(24)};
-
-  @media screen and (max-width: ${mobilePoint}) {
-    grid-template-columns: 1fr;
-    gap: ${munit(20)};
-  }
-`;
-
-export const ItemDetailBox = styled.div`
-  background: #fafafa;
-  border: 1px solid #e5e5e5;
-  border-radius: ${unit(12)};
-  padding: ${unit(16)};
-  transition: all 0.2s ease;
+export const ActionButton = styled.button`
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4a5568;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
 
   &:hover {
-    background: #ffffff;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  }
-
-  @media screen and (max-width: ${mobilePoint}) {
-    border-radius: ${munit(10)};
-    padding: ${munit(14)};
+    background: #f7fafc;
+    color: #667eea;
   }
 `;
 
-export const ItemThumbnailImgFigure = styled.figure<{ $src: string }>`
-  width: 100%;
-  height: ${unit(180)};
-  border-radius: ${unit(8)};
-  background-image: ${({ $src }) => `url(${$src})`};
-  ${backgroundImageCover}
+// 메인 콘텐츠
+export const Content = styled.main`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+
+  @media (max-width: 768px) {
+    padding: 24px 16px;
+  }
+`;
+
+// 기본 정보 섹션
+export const InfoCard = styled.div`
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 32px;
+  animation: ${fadeInUp} 0.6s ease-out;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.08);
+  }
+
+  @media (max-width: 768px) {
+    padding: 24px;
+  }
+`;
+
+export const InfoHeader = styled.div`
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+`;
+
+export const QuotationTitle = styled.h1`
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+`;
+
+export const QuotationSubtitle = styled.p`
+  font-size: 14px;
+  color: #718096;
+  margin: 0;
+`;
+
+export const InfoGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+`;
+
+export const InfoItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+`;
+
+export const InfoLabel = styled.label`
+  font-size: 12px;
+  font-weight: 600;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+`;
+
+export const InfoValue = styled.p`
+  font-size: 15px;
+  font-weight: 500;
+  color: #2d3748;
+  margin: 0;
+  line-height: 1.5;
+`;
+
+export const PriceHighlight = styled.div`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 24px 32px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
   position: relative;
   overflow: hidden;
-  cursor: pointer;
-  margin-bottom: ${unit(12)};
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+  transition: all 0.3s ease;
 
-  summary {
+  &::before {
+    content: '';
     position: absolute;
-    top: ${unit(12)};
-    left: ${unit(12)};
-    padding: ${unit(6)} ${unit(12)};
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(4px);
-    border-radius: ${unit(6)};
-    font-size: ${unit(11)};
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #111827;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 70%
+    );
+    animation: ${pulse} 3s ease-in-out infinite;
   }
 
-  @media screen and (max-width: ${mobilePoint}) {
-    height: ${munit(160)};
-    border-radius: ${munit(6)};
-    margin-bottom: ${munit(10)};
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.35);
+  }
 
-    summary {
-      top: ${munit(10)};
-      left: ${munit(10)};
-      padding: ${munit(5)} ${munit(10)};
-      font-size: ${munit(10)};
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 20px 24px;
+  }
+
+  @media print {
+    box-shadow: none;
+    &::before {
+      display: none;
     }
   }
 `;
 
-export const ItemName = styled.p`
-  font-size: ${unit(16)};
-  font-weight: 600;
-  color: #111827;
-  line-height: 1.4;
-  margin-bottom: ${unit(4)};
+export const PriceLabel = styled.div`
+  font-size: 14px;
+  opacity: 0.95;
+  font-weight: 500;
+`;
 
-  span {
-    display: block;
-    font-size: ${unit(13)};
-    font-weight: 400;
-    color: #6b7280;
-    margin-top: ${unit(2)};
+export const PriceValue = styled.div`
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+
+  @media (max-width: 768px) {
+    font-size: 28px;
+  }
+`;
+
+// 담당자 정보
+export const AgentInfo = styled.div`
+  background: #f7fafc;
+  padding: 24px;
+  border-radius: 12px;
+  margin-top: 32px;
+  border: 1px solid #e2e8f0;
+`;
+
+export const AgentTitle = styled.h3`
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0 0 20px 0;
+`;
+
+export const AgentGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+`;
+
+// 일정 섹션
+export const ItinerarySection = styled.section`
+  margin-top: 24px;
+`;
+
+export const SectionTitle = styled.h2`
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 24px 0;
+  padding-left: 16px;
+  border-left: 4px solid #667eea;
+  animation: ${slideInRight} 0.6s ease-out;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -8px;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea 0%, transparent 100%);
+    border-radius: 2px;
+  }
+`;
+
+export const DayCard = styled.div`
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+  page-break-inside: avoid;
+  animation: ${fadeInUp} 0.6s ease-out;
+  animation-fill-mode: both;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: all 0.3s ease;
+
+  &:nth-of-type(1) { animation-delay: 0.1s; }
+  &:nth-of-type(2) { animation-delay: 0.2s; }
+  &:nth-of-type(3) { animation-delay: 0.3s; }
+  &:nth-of-type(4) { animation-delay: 0.4s; }
+  &:nth-of-type(5) { animation-delay: 0.5s; }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.12);
+    border-color: #cbd5e0;
   }
 
-  @media screen and (max-width: ${mobilePoint}) {
-    font-size: ${munit(15)};
+  @media (max-width: 768px) {
+    padding: 20px;
+  }
+`;
 
-    span {
-      font-size: ${munit(12)};
+export const DayHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+`;
+
+export const DayTitle = styled.h3`
+  font-size: 20px;
+  font-weight: 700;
+  color: #667eea;
+  margin: 0;
+`;
+
+export const DayDate = styled.span`
+  font-size: 14px;
+  color: #718096;
+  font-weight: 500;
+`;
+
+export const ItemsGrid = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+`;
+
+export const ItemCard = styled.div`
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: #fafbfc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(102, 126, 234, 0.05),
+      transparent
+    );
+    transition: left 0.5s ease;
+  }
+
+  &:hover {
+    background: white;
+    border-color: #667eea;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+    transform: translateX(4px);
+
+    &::before {
+      left: 100%;
     }
+  }
+
+  &:active {
+    transform: translateX(2px);
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+`;
+
+export const ItemThumbnail = styled.div<{ $src?: string }>`
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: ${(props) =>
+    props.$src
+      ? `url(${props.$src}) center/cover`
+      : "linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%)"};
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(0, 0, 0, 0.3) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  &:hover {
+    transform: scale(1.05);
+
+    &::after {
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    height: 160px;
+  }
+`;
+
+export const ItemType = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(26, 32, 44, 0.8);
+  backdrop-filter: blur(4px);
+  color: white;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.03em;
+`;
+
+export const ItemInfo = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+`;
+
+export const ItemName = styled.h4`
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0;
+  line-height: 1.4;
+
+  span {
+    font-size: 14px;
+    color: #718096;
+    font-weight: 400;
+    margin-left: 8px;
   }
 `;
 
 export const ItemAddress = styled.p`
-  font-size: ${unit(12)};
-  color: #9ca3af;
-  margin-bottom: ${unit(8)};
-  cursor: pointer;
-  transition: color 0.2s;
+  font-size: 13px;
+  color: #718096;
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  line-height: 1.5;
 
-  &:hover {
-    color: #111827;
+  &::before {
+    content: "📍";
+    flex-shrink: 0;
   }
 
-  @media screen and (max-width: ${mobilePoint}) {
-    font-size: ${munit(11)};
-    margin-bottom: ${munit(6)};
+  &:hover {
+    color: #667eea;
   }
 `;
 
 export const ItemPrice = styled.div`
-  font-size: ${unit(15)};
+  font-size: 16px;
   font-weight: 700;
-  color: #111827;
+  color: #667eea;
   margin-top: auto;
-  padding-top: ${unit(8)};
-  border-top: 1px solid #e5e5e5;
 
   span {
-    font-size: ${unit(12)};
-    font-weight: 400;
-    color: #6b7280;
+    font-size: 13px;
+    color: #a0aec0;
+    font-weight: 500;
   }
+`;
 
-  @media screen and (max-width: ${mobilePoint}) {
-    font-size: ${munit(14)};
-    padding-top: ${munit(6)};
+// 타임라인
+export const TimelineCard = styled.div`
+  background: #fffaf0;
+  border: 1px solid #fbd38d;
+  border-left: 3px solid #ed8936;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 16px;
+`;
 
-    span {
-      font-size: ${munit(11)};
+export const TimelineTitle = styled.h5`
+  font-size: 14px;
+  font-weight: 700;
+  color: #744210;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+`;
+
+export const TimelineContent = styled.div`
+  font-size: 14px;
+  line-height: 1.7;
+  color: #744210;
+  white-space: pre-wrap;
+
+  a {
+    color: #667eea;
+    text-decoration: underline;
+    &:hover {
+      color: #5568d3;
     }
   }
 `;
 
-export const TimelineBox = styled.div`
-  background: #fafafa;
-  border: 1px solid #e5e5e5;
-  border-radius: ${unit(12)};
-  padding: ${unit(24)};
-  position: sticky;
-  top: ${unit(20)};
-
-  h5 {
-    font-size: ${unit(14)};
-    font-weight: 700;
-    color: #111827;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: ${unit(16)};
-    padding-bottom: ${unit(12)};
-    border-bottom: 1px solid #e5e5e5;
-  }
-
-  div {
-    font-size: ${unit(13)};
-    line-height: 1.8;
-    color: #4b5563;
-    white-space: pre-line;
-
-    a {
-      color: #111827;
-      text-decoration: underline;
-      transition: opacity 0.2s;
-
-      &:hover {
-        opacity: 0.7;
-      }
-    }
-  }
-
-  @media screen and (max-width: ${mobilePoint}) {
-    position: static;
-    border-radius: ${munit(10)};
-    padding: ${munit(20)};
-
-    h5 {
-      font-size: ${munit(13)};
-      margin-bottom: ${munit(14)};
-      padding-bottom: ${munit(10)};
-    }
-
-    div {
-      font-size: ${munit(12)};
-      line-height: 1.6;
-    }
-  }
-`;
-
-// Map Section
+// 지도 섹션
 export const MapSection = styled.div`
-  margin-top: ${unit(60)};
-  margin-bottom: ${unit(40)};
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 20px;
+`;
 
-  @media screen and (max-width: ${mobilePoint}) {
-    margin-top: ${munit(40)};
-    margin-bottom: ${munit(30)};
+export const MapTitle = styled.h4`
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  &::before {
+    content: "🗺️";
+    font-size: 18px;
   }
 `;
 
-// Memo Section
+export const MapInfo = styled.div`
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #718096;
+`;
+
+// 메모 섹션
 export const MemoSection = styled.div`
-  margin-top: ${unit(60)};
-  padding: ${unit(32)};
-  background: #fafafa;
-  border: 1px solid #e5e5e5;
-  border-radius: ${unit(12)};
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  border: 1px solid #e2e8f0;
+  margin-top: 32px;
 
   label {
     display: block;
-    font-size: ${unit(14)};
+    font-size: 18px;
     font-weight: 700;
-    color: #111827;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: ${unit(16)};
-    padding-bottom: ${unit(12)};
-    border-bottom: 1px solid #e5e5e5;
+    color: #2d3748;
+    margin-bottom: 16px;
+
+    &::before {
+      content: "📝 ";
+    }
   }
 
-  & > div {
-    font-size: ${unit(14)};
-    line-height: 1.8;
-    color: #4b5563;
-    white-space: pre-line;
+  div {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #4a5568;
 
     a {
-      color: #111827;
-      text-decoration: underline;
-
+      color: #667eea;
+      text-decoration: none;
       &:hover {
-        opacity: 0.7;
+        text-decoration: underline;
       }
     }
   }
 
-  @media screen and (max-width: ${mobilePoint}) {
-    margin-top: ${munit(40)};
-    padding: ${munit(24)};
-    border-radius: ${munit(10)};
-
-    label {
-      font-size: ${munit(13)};
-      margin-bottom: ${munit(14)};
-      padding-bottom: ${munit(10)};
-    }
-
-    & > div {
-      font-size: ${munit(13)};
-      line-height: 1.6;
-    }
+  @media (max-width: 768px) {
+    padding: 24px;
   }
 `;
 
-// Map Info Window
+// 인포윈도우 컨텐츠
 export const WindowContent = styled.div`
-  padding: ${unit(12)};
-  max-width: ${unit(220)};
+  padding: 8px;
+  min-width: 200px;
 
-  & > div {
-    margin-bottom: ${unit(8)};
-
-    img {
-      width: 100%;
-      border-radius: ${unit(6)};
-    }
+  img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 8px;
   }
 
-  & > span {
+  span {
     display: block;
-    font-size: ${unit(12)};
-    font-weight: 400;
-    color: #6b7280;
-    margin-bottom: ${unit(4)};
+    font-size: 12px;
+    color: #718096;
+    margin-bottom: 4px;
   }
 
-  & > h1 {
-    font-size: ${unit(14)};
+  h1 {
+    font-size: 14px;
     font-weight: 600;
-    color: #111827;
-    margin-bottom: ${unit(4)};
-    line-height: 1.4;
+    color: #2d3748;
+    margin: 4px 0;
   }
 
-  & > p {
-    font-size: ${unit(11)};
-    color: #9ca3af;
+  p {
+    font-size: 12px;
+    color: #718096;
+    margin: 4px 0 0;
     line-height: 1.4;
   }
 `;
 
-export const ItemType = styled.p``;
-export const ItemDesc = styled.p``;
-export const ItemDetailImgFigure = styled.figure<{ $src: string }>``;
-export const DisableButton = styled.button``;
+// 로딩 상태
+export const LoadingContainer = styled.div`
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafbfc;
+`;
+
+export const LoadingSpinner = styled.div`
+  text-align: center;
+  color: #667eea;
+  font-size: 16px;
+  font-weight: 600;
+
+  &::before {
+    content: "";
+    display: block;
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 16px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
+// 에러 상태
+export const ErrorContainer = styled.div`
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafbfc;
+  padding: 20px;
+`;
+
+export const ErrorCard = styled.div`
+  background: white;
+  border-radius: 12px;
+  padding: 48px;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    padding: 32px 24px;
+  }
+`;
+
+export const ErrorIcon = styled.div`
+  font-size: 64px;
+  margin-bottom: 16px;
+`;
+
+export const ErrorText = styled.p`
+  font-size: 16px;
+  color: #718096;
+  margin-bottom: 32px;
+  line-height: 1.6;
+`;
+
+// 반응형
+export const TitleDivision = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+`;
+
+export const ItineraryText = styled.h2`
+  font-size: 20px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+`;
+
+// 새로운 고급 컴포넌트들
+export const ShareButtons = styled.div`
+  display: flex;
+  gap: 8px;
+
+  @media print {
+    display: none;
+  }
+`;
+
+export const ShareButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4a5568;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+export const StatisticsCard = styled.div`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 32px;
+  color: white;
+  animation: ${fadeInUp} 0.6s ease-out;
+  animation-delay: 0.2s;
+  animation-fill-mode: both;
+
+  @media print {
+    background: white;
+    color: #2d3748;
+    border: 1px solid #e2e8f0;
+  }
+`;
+
+export const StatGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+`;
+
+export const StatItem = styled.div`
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-4px);
+  }
+
+  @media print {
+    background: #f7fafc;
+  }
+`;
+
+export const StatLabel = styled.div`
+  font-size: 13px;
+  opacity: 0.9;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  @media print {
+    color: #718096;
+  }
+`;
+
+export const StatValue = styled.div`
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+
+  @media print {
+    color: #667eea;
+  }
+`;
+
+export const TimelineVisual = styled.div`
+  position: relative;
+  padding-left: 40px;
+  margin-top: 24px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+  }
+`;
+
+export const TimelineItem = styled.div`
+  position: relative;
+  padding-bottom: 32px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: -33px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    z-index: 1;
+  }
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+`;
+
+export const TimelineDay = styled.div`
+  font-size: 14px;
+  font-weight: 700;
+  color: #667eea;
+  margin-bottom: 4px;
+`;
+
+export const TimelineDescription = styled.div`
+  font-size: 14px;
+  color: #4a5568;
+  line-height: 1.6;
+`;
+
+export const ProgressBar = styled.div`
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 16px;
+`;
+
+export const ProgressFill = styled.div<{ $progress: number }>`
+  height: 100%;
+  width: ${props => props.$progress}%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  border-radius: 4px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: ${shimmer} 2s infinite;
+  background-size: 200% 100%;
+`;
+
+export const Badge = styled.span`
+  display: inline-block;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  margin-left: 8px;
+`;
+
+export const TooltipWrapper = styled.div`
+  position: relative;
+  display: inline-block;
+
+  &:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+`;
+
+export const Tooltip = styled.div`
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  background: #1a202c;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 1000;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: #1a202c;
+  }
+`;
+
+export const FloatingActionButton = styled.button`
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+
+  &:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
+  }
+
+  &:active {
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  @media print {
+    display: none;
+  }
+`;
+
+export const PriceBreakdown = styled.div`
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 24px;
+  margin-top: 24px;
+`;
+
+export const PriceBreakdownTitle = styled.h4`
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &::before {
+    content: '💰';
+    font-size: 20px;
+  }
+`;
+
+export const PriceRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e2e8f0;
+
+  &:last-child {
+    border-bottom: none;
+    font-weight: 700;
+    font-size: 16px;
+    color: #667eea;
+    padding-top: 16px;
+    margin-top: 8px;
+    border-top: 2px solid #667eea;
+  }
+`;
+
+export const PriceCategory = styled.div`
+  font-size: 14px;
+  color: #4a5568;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+export const PriceCategoryAmount = styled.div`
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d3748;
+`;
