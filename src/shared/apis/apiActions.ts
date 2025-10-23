@@ -32,86 +32,69 @@ const axiosApiRefreshToken = axios.create({
 
 axiosApiInstance.interceptors.request.use(
   (config: any) => {
-    if (typeof window !== undefined) {
-      const accessTokenByCookies = getCookie(COOKIE_KEYS.ACCESS_TOKEN);
-      if (accessTokenByCookies) {
-        config.headers = {
-          ...config.headers,
-          Authorization: `Bearer ${accessTokenByCookies}`,
-          withCredentials: true,
-        };
-      }
+    const accessToken = getCookie(COOKIE_KEYS.ACCESS_TOKEN);
+    if (accessToken) {
+      config.headers = {
+        ...config.headers,
+        Authorization: `Bearer ${accessToken}`,
+      };
     }
     return config;
   },
   (error) => {
-    Promise.reject(error);
+    return Promise.reject(error);
   }
 );
 
 axiosApiInstance.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   async (error) => {
-    if (error.response?.status === 401 && typeof window !== undefined) {
-      // 1. 세션 만료 시, API 재호출
+    const originalRequest = error.config;
+
+    // 401 에러이고, 재시도하지 않은 요청인 경우
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
       try {
-        const originalRequest = error.config;
-        const refreshTokenByCookies: string = getCookie(
-          COOKIE_KEYS.REFRESH_TOKEN
-        );
+        const refreshToken = getCookie(COOKIE_KEYS.REFRESH_TOKEN);
 
-        if (originalRequest && refreshTokenByCookies) {
-          const getRefreshToken: AxiosResponse<{
-            accessToken: string;
-            accessTokenExpiresIn: number;
-          }> = await axiosApiRefreshToken.put(API_PATHS.REFRESH_TOKEN);
+        if (refreshToken) {
+          // 리프레시 토큰으로 새 액세스 토큰 발급
+          const response = await axiosApiRefreshToken.get(API_PATHS.REFRESH_TOKEN);
+          const { accessToken, accessTokenExpiresIn } = response.data;
 
-          removeCookie(COOKIE_KEYS.ACCESS_TOKEN);
+          // 새 액세스 토큰 저장
+          setCookie(COOKIE_KEYS.ACCESS_TOKEN, accessToken, {
+            maxAge: accessTokenExpiresIn,
+          });
 
-          const { accessToken, accessTokenExpiresIn } = getRefreshToken?.data;
-
-          if (accessToken) {
-            setCookie(COOKIE_KEYS.ACCESS_TOKEN, accessToken, {
-              maxAge: accessTokenExpiresIn,
-            });
-            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-            return axios(originalRequest);
-          }
-
-          removeCookie(COOKIE_KEYS.ACCESS_TOKEN);
-          removeCookie(COOKIE_KEYS.REFRESH_TOKEN);
-          window.location.href = PATHS.HOME;
-
-          //
-        } else {
-          removeCookie(COOKIE_KEYS.ACCESS_TOKEN);
-          removeCookie(COOKIE_KEYS.REFRESH_TOKEN);
-          window.location.href = PATHS.HOME;
+          // 원래 요청 재시도
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          return axios(originalRequest);
         }
-      } catch (e) {
-        // 2. 토큰 발급 실패, 로그아웃
+      } catch (refreshError) {
+        // 리프레시 토큰도 만료된 경우
         removeCookie(COOKIE_KEYS.ACCESS_TOKEN);
         removeCookie(COOKIE_KEYS.REFRESH_TOKEN);
-        window.location.href = PATHS.HOME;
+        if (typeof window !== 'undefined') {
+          window.location.href = PATHS.LOGIN;
+        }
       }
     }
+
     return Promise.reject(error);
   }
 );
 
 axiosApiRefreshToken.interceptors.request.use(
   async (config: any) => {
-    if (typeof window !== undefined) {
-      const refreshTokenByCookies = getCookie(COOKIE_KEYS.REFRESH_TOKEN);
-      if (refreshTokenByCookies) {
-        config.headers = {
-          ...config.headers,
-          Authorization: `Bearer ${refreshTokenByCookies}`,
-          withCredentials: true,
-        };
-      }
+    const refreshTokenByCookies = getCookie(COOKIE_KEYS.REFRESH_TOKEN);
+    if (refreshTokenByCookies) {
+      config.headers = {
+        ...config.headers,
+        Authorization: `Bearer ${refreshTokenByCookies}`,
+        withCredentials: true,
+      };
     }
     return config;
   },
@@ -129,7 +112,7 @@ export const postRequest = (
   payload?: any,
   options?: any
 ): Promise<any> => {
-  return axiosApiInstance.post(`${url}`, payload, options);
+  return axiosApiInstance.post(`${url}`, payload, options).then(successHandler);
 };
 
 export const putRequest = (
@@ -137,9 +120,9 @@ export const putRequest = (
   payload: any,
   options?: any
 ): Promise<any> => {
-  return axiosApiInstance.put(`${url}`, payload, options);
+  return axiosApiInstance.put(`${url}`, payload, options).then(successHandler);
 };
 
 export const deleteRequest = (url: string, params?: any): Promise<any> => {
-  return axiosApiInstance.delete(`${url}`, { params });
+  return axiosApiInstance.delete(`${url}`, { params }).then(successHandler);
 };
