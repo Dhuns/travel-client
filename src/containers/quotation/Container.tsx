@@ -83,9 +83,9 @@ const Container: FC = () => {
    */
 
   const [memo, setMemo] = useState<any>("");
-  const [markers, setMarkers] = useState<any[]>([]);
   const [zoom, setZoom] = useState<number>(11);
-  const [activeWindowId, setActiveWindowId] = useState<number>(0);
+  const [activeWindowIds, setActiveWindowIds] = useState<{[key: number]: number}>({});
+  const [dayDirections, setDayDirections] = useState<{[key: number]: any}>({});
 
   /**
    * Queries
@@ -128,8 +128,40 @@ const Container: FC = () => {
     if (!estimateDetails || isEmpty(estimateDetails)) {
       return;
     }
-    const locations = estimateDetails
-      .filter((o: any) => o.item.type !== "이동수단")
+
+    const groupByDays = groupBy(estimateDetails, "days");
+    const splitTimeline =
+      estimateInfo?.timeline?.split(TIMELINE_JOIN_KEY) ?? [];
+
+    setGroupByDays(groupByDays);
+    setTimeline(splitTimeline);
+  }, [estimateDetails, estimateInfo]);
+
+  useEffect(() => {
+    if (estimateInfo?.comment) {
+      const parse = safeJsonParse(estimateInfo.comment);
+      setMemo(draftToHtml(parse));
+    }
+  }, [estimateInfo?.comment]);
+
+  // 일자별 마커와 경로를 계산하는 헬퍼 함수
+  const getMarkersForDay = (dayEstimates: any[]) => {
+    return dayEstimates
+      .filter((o: any) => {
+        // 이동수단 제외
+        if (o.item.type === "이동수단") return false;
+
+        // 컨텐츠 타입 제외 (영어가이드 등)
+        if (o.item.type === "컨텐츠") return false;
+
+        // 위도/경도가 없거나 0이면 제외
+        if (!o.item.lat || !o.item.lng || o.item.lat === "0" || o.item.lng === "0") {
+          return false;
+        }
+
+        // 여행지와 숙박만 표시
+        return o.item.type === "여행지" || o.item.type === "숙박";
+      })
       .map((o: any, idx: number) => {
         const src = o.item?.files?.find(
           (img: any) => img.type === "썸네일"
@@ -144,30 +176,97 @@ const Container: FC = () => {
           src,
         };
       });
-    setMarkers(locations);
+  };
 
-    const groupByDays = groupBy(estimateDetails, "days");
-    const splitTimeline =
-      estimateInfo?.timeline?.split(TIMELINE_JOIN_KEY) ?? [];
-
-    setGroupByDays(groupByDays);
-    setTimeline(splitTimeline);
-  }, [estimateDetails]);
-
-  useEffect(() => {
-    if (estimateInfo?.comment) {
-      const parse = safeJsonParse(estimateInfo.comment);
-      setMemo(draftToHtml(parse));
+  // Directions API를 사용한 경로 계산
+  const calculateDirections = useCallback(async (markers: any[], day: number) => {
+    // 이미 계산되었으면 스킵
+    if (dayDirections[day] !== undefined) {
+      return;
     }
-  }, [estimateInfo?.comment]);
+
+    if (markers.length < 2 || typeof window === "undefined" || !window.google) {
+      setDayDirections(prev => ({ ...prev, [day]: null }));
+      return;
+    }
+
+    const directionsService = new google.maps.DirectionsService();
+
+    // 경유지가 너무 많으면 경로 계산 스킵 (Polyline 사용)
+    if (markers.length > 10) {
+      console.log(`Day ${day}: Too many markers (${markers.length}), using polyline`);
+      setDayDirections(prev => ({ ...prev, [day]: null }));
+      return;
+    }
+
+    // 경유지 샘플링 (최대 8개로 제한)
+    const maxWaypoints = 8;
+    const middleMarkers = markers.slice(1, -1);
+    let sampledWaypoints = middleMarkers;
+
+    if (middleMarkers.length > maxWaypoints) {
+      const step = Math.floor(middleMarkers.length / maxWaypoints);
+      sampledWaypoints = [];
+      for (let i = 0; i < maxWaypoints; i++) {
+        const idx = Math.min(i * step, middleMarkers.length - 1);
+        sampledWaypoints.push(middleMarkers[idx]);
+      }
+    }
+
+    const origin = { lat: markers[0].lat, lng: markers[0].lng };
+    const destination = {
+      lat: markers[markers.length - 1].lat,
+      lng: markers[markers.length - 1].lng,
+    };
+
+    // 출발지와 도착지가 같으면 경로 계산 스킵
+    const isSameLocation =
+      Math.abs(origin.lat - destination.lat) < 0.0001 &&
+      Math.abs(origin.lng - destination.lng) < 0.0001;
+
+    if (isSameLocation && sampledWaypoints.length === 0) {
+      console.log(`Day ${day}: Same origin and destination, using polyline`);
+      setDayDirections(prev => ({ ...prev, [day]: null }));
+      return;
+    }
+
+    const waypoints = sampledWaypoints.map((m) => ({
+      location: { lat: m.lat, lng: m.lng },
+      stopover: true,
+    }));
+
+    console.log(`Day ${day}: Calculating route with ${waypoints.length} waypoints`);
+
+    directionsService.route(
+      {
+        origin,
+        destination,
+        waypoints,
+        travelMode: google.maps.TravelMode.DRIVING,
+        optimizeWaypoints: false,
+        region: 'KR', // 한국 지역 설정
+        language: 'en', // 주소는 영어로
+      },
+      (result, status) => {
+        if (status === google.maps.DirectionsStatus.OK) {
+          console.log(`Day ${day}: Directions success!`);
+          setDayDirections(prev => ({ ...prev, [day]: result }));
+        } else {
+          console.log(`Day ${day}: Directions failed (${status}), using polyline`);
+          setDayDirections(prev => ({ ...prev, [day]: null }));
+        }
+      }
+    );
+  }, [dayDirections]);
 
   /**
    * Handlers
    */
 
-  const onAddressHandler = (address: string) => {
-    // const url = `https://google.co.kr/maps/@${lng},${lat},${17}z`;
-    const url = `https://www.google.com/maps/search/?api=1&query=${address}`;
+  const onAddressHandler = (placeName: string, address: string) => {
+    // 장소명으로 구글맵 검색 (장소명 + 주소로 더 정확한 검색)
+    const searchQuery = `${placeName} ${address}`;
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchQuery)}`;
     window.open(url, "_blank");
   };
 
@@ -224,7 +323,7 @@ const Container: FC = () => {
     // 입력된 text를 정규 표현식으로 나눈 후, URL이면 a태그로 변환하고, 아니면 그대로 반환
     return text
       .split(urlRegex)
-      .map((part, index) => {
+      .map((part) => {
         if (part.match(urlRegex)) {
           // 'www'로 시작하는 URL은 'https'를 자동으로 추가
           const href = part.startsWith("www.") ? `https://${part}` : part;
@@ -316,6 +415,8 @@ const Container: FC = () => {
       <S.EstimateDetailsSection>
         {keys(groupByDays).map((day) => {
           const getTimeline = timeline?.[Number(day) - 1] ?? "";
+          const dayMarkers = getMarkersForDay(groupByDays?.[Number(day)] ?? []);
+
           return (
             <div key={day}>
               <S.EachEstimateBox>
@@ -348,10 +449,6 @@ const Container: FC = () => {
                         (img) => img.type === "썸네일"
                       )?.itemSrc;
 
-                      const getDetailImg = item?.files?.filter(
-                        (img) => img.type !== "썸네일"
-                      );
-
                       return (
                         <S.ItemDetailBox key={id}>
                           <div>
@@ -366,7 +463,7 @@ const Container: FC = () => {
                             {item?.nameEng} <span>{item.nameKor}</span>
                           </S.ItemName>
                           <S.ItemAddress
-                            onClick={() => onAddressHandler(item.address)}
+                            onClick={() => onAddressHandler(item.nameEng, item.addressEnglish)}
                           >
                             {item?.addressEnglish}
                           </S.ItemAddress>
@@ -399,88 +496,23 @@ const Container: FC = () => {
                     <div>{linkify(getTimeline)}</div>
                   </S.TimelineBox>
                 </S.DetailBox>
+
+                {/* Day별 지도 */}
+                {dayMarkers?.length > 0 && (
+                  <DayMapSection
+                    day={Number(day)}
+                    markers={dayMarkers}
+                    zoom={zoom}
+                    dayDirections={dayDirections}
+                    calculateDirections={calculateDirections}
+                    activeWindowIds={activeWindowIds}
+                    setActiveWindowIds={setActiveWindowIds}
+                  />
+                )}
               </S.EachEstimateBox>
             </div>
           );
         })}
-
-        <S.TitleDivision>
-          <S.ItineraryText>Travel Route</S.ItineraryText>
-          {/* <S.DisableButton onClick={() => setOnlyPlaces((prev) => !prev)}>{onlyPlaces ? 'Show All' : 'Only Places'}</S.DisableButton> */}
-        </S.TitleDivision>
-        {markers?.length && (
-          <GoogleMapApiLoader
-            language="en"
-            apiKey="AIzaSyAnX6B3sNw-OG7TxZXtQxAoFT000z7kMDU"
-            suspense
-          >
-            <GoogleMap
-              className="h-[400px]"
-              containerProps={{ id: "my-map" }}
-              style={{ width: "100%", height: "500px" }}
-              zoom={zoom}
-              center={{ lat: markers[0].lat, lng: markers[0].lng }}
-              mapOptions={{
-                mapTypeId: MapTypeId.TERRAIN,
-                disableDefaultUI:false, // Removes all default controls
-                gestureHandling: 'cooperative', // Requires ctrl+scroll to zoom
-                styles: [
-                  {
-                    featureType: "all",
-                    stylers: [{ visibility: "off" }]
-                  },
-                  {
-                    featureType: "geometry",
-                    stylers: [{ visibility: "on", color: "#f5f5f5" }]
-                  },
-                  {
-                    featureType: 'administrative',
-                    elementType: 'geometry',
-                    stylers: [{ visibility: 'off' }],
-                  },
-                  {
-                    featureType: 'administrative.country',
-                    elementType: 'labels',
-                    stylers: [{ visibility: 'off' }],
-                  },
-                  {
-                    featureType: 'road',
-                    stylers: [{ visibility: 'off' }], // Optional: Hide roads as well
-                  },
-                  {
-                    featureType: 'poi',
-                    stylers: [{ visibility: 'off' }], // Optional: Hide points of interest
-                  },
-                ]
-              }}
-            >
-              {markers.map(
-                ({ id, lat, lng, name, nameKor, address, src }: any) => (
-                  <MarkerWithWindowInfo
-                    key={id}
-                    id={id}
-                    lat={lat}
-                    lng={lng}
-                    address={address}
-                    nameKor={nameKor}
-                    name={name}
-                    src={src}
-                    activeWindowId={activeWindowId}
-                    setActiveWindowId={setActiveWindowId}
-                  />
-                )
-              )}
-
-              <Polyline
-                path={markers}
-                strokeColor="#0066ca"
-                strokeOpacity={1.0}
-                strokeWeight={4}
-                geodesic
-              />
-            </GoogleMap>
-          </GoogleMapApiLoader>
-        )}
 
         {memo && memo?.length > 0 && memo !== "" ? (
           <S.MemoSection>
@@ -494,6 +526,143 @@ const Container: FC = () => {
 };
 
 export default Container;
+
+// Day별 지도 섹션 컴포넌트
+const DayMapSection: FC<{
+  day: number;
+  markers: any[];
+  zoom: number;
+  dayDirections: {[key: number]: any};
+  calculateDirections: (markers: any[], day: number) => void;
+  activeWindowIds: {[key: number]: number};
+  setActiveWindowIds: React.Dispatch<React.SetStateAction<{[key: number]: number}>>;
+}> = ({ day, markers, zoom, dayDirections, calculateDirections, activeWindowIds, setActiveWindowIds }) => {
+
+  const [hasCalculated, setHasCalculated] = useState(false);
+
+  useEffect(() => {
+    if (!hasCalculated && markers.length >= 2 && typeof window !== "undefined") {
+      setHasCalculated(true);
+      calculateDirections(markers, day);
+    }
+  }, [markers.length, day]);
+
+  const activeWindowId = activeWindowIds[day] || 0;
+  const setActiveWindowId = (id: number) => {
+    setActiveWindowIds(prev => ({ ...prev, [day]: id }));
+  };
+
+  const directions = dayDirections[day];
+
+  // 모든 마커를 포함하는 bounds 계산
+  const getBounds = () => {
+    if (!window.google || markers.length === 0) return null;
+
+    const bounds = new google.maps.LatLngBounds();
+    markers.forEach((marker) => {
+      bounds.extend(new google.maps.LatLng(marker.lat, marker.lng));
+    });
+    return bounds;
+  };
+
+  const [map, setMap] = useState<any>(null);
+
+  useEffect(() => {
+    if (map && markers.length > 0) {
+      const bounds = getBounds();
+      if (bounds) {
+        map.fitBounds(bounds);
+        // 여백 추가
+        google.maps.event.addListenerOnce(map, 'bounds_changed', () => {
+          const currentZoom = map.getZoom();
+          if (currentZoom && currentZoom > 15) {
+            map.setZoom(15);
+          }
+        });
+      }
+    }
+  }, [map, markers.length]);
+
+  return (
+    <S.MapSection>
+      <S.TitleDivision>
+        <S.ItineraryText>Day {day} Route Map</S.ItineraryText>
+      </S.TitleDivision>
+      <div style={{
+        marginBottom: '16px',
+        fontSize: '14px',
+        color: '#6b7280',
+        lineHeight: '1.6'
+      }}>
+        {markers.length} location{markers.length > 1 ? 's' : ''} • {directions ? 'Road-based route' : 'Direct path'}
+      </div>
+      <GoogleMapApiLoader
+        language="en"
+        apiKey={process.env.NEXT_PUBLIC_GOOGLE_API_KEY || ""}
+        suspense
+      >
+        <GoogleMap
+          className="h-[300px]"
+          containerProps={{ id: `day-${day}-map` }}
+          style={{ width: "100%", height: "400px" }}
+          zoom={zoom}
+          center={{ lat: markers[0].lat, lng: markers[0].lng }}
+          onLoad={(mapInstance) => setMap(mapInstance)}
+          mapOptions={{
+            mapTypeId: "roadmap",
+            disableDefaultUI: false,
+            gestureHandling: 'cooperative',
+            styles: [
+              {
+                featureType: "poi",
+                stylers: [{ visibility: "off" }]
+              },
+              {
+                featureType: "transit",
+                stylers: [{ visibility: "off" }]
+              },
+            ]
+          }}
+        >
+          {markers.map(
+            ({ id, lat, lng, name, nameKor, address, src }: any) => (
+              <MarkerWithWindowInfo
+                key={id}
+                id={id}
+                lat={lat}
+                lng={lng}
+                address={address}
+                nameKor={nameKor}
+                name={name}
+                src={src}
+                activeWindowId={activeWindowId}
+                setActiveWindowId={setActiveWindowId}
+              />
+            )
+          )}
+
+          {directions ? (
+            <Polyline
+              path={directions.routes[0].overview_path.map((p: any) => ({ lat: p.lat(), lng: p.lng() }))}
+              strokeColor="#FF5722"
+              strokeOpacity={0.9}
+              strokeWeight={5}
+              geodesic
+            />
+          ) : (
+            <Polyline
+              path={markers}
+              strokeColor="#FF5722"
+              strokeOpacity={0.9}
+              strokeWeight={5}
+              geodesic
+            />
+          )}
+        </GoogleMap>
+      </GoogleMapApiLoader>
+    </S.MapSection>
+  );
+};
 
 const MarkerWithWindowInfo = (props: any) => {
   const [isOpen, setOpen] = useState<boolean>(false);

@@ -2,6 +2,9 @@
 export const PATHS = {
   HOME: "/",
   LOGIN: "/login",
+  SIGNUP: "/signup",
+  MY_ESTIMATES: "/my-estimates",
+  REQUEST_ESTIMATE: "/request",
 };
 
 export const GUARD_ROUTES = [];

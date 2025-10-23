@@ -1,31 +1,8 @@
-import { useRouter } from "next/router";
-import React, { FC, useState, useEffect } from "react";
+import HomeContainer from "@containers/home/HomeContainer";
+import React, { FC } from "react";
 
 const Home: FC = () => {
-  /**
-   * States
-   */
-  const { replace } = useRouter();
-
-  /**
-   * Queries
-   */
-
-  /**
-   * Side-Effects
-   */
-  useEffect(() => {
-    replace("/404");
-  }, []);
-
-  /**
-   * Handlers
-   */
-
-  /**
-   * Helpers
-   */
-  return <></>;
+  return <HomeContainer />;
 };
 
 export default Home;

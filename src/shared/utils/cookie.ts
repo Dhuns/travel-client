@@ -1,7 +1,7 @@
 import { Cookies } from "react-cookie";
 
-const baseURL = process.env.NEXT_PUBLICE_API_URL;
-const prefix = process.env.NEXT_PUBLIC_COOKIE_PREFIX;
+const baseURL = process.env.NEXT_PUBLIC_API_URL;
+const prefix = process.env.NEXT_PUBLIC_COOKIE_PREFIX || 'diy';
 const secure = baseURL?.includes("https");
 const cookies = new Cookies();
 
