@@ -83,6 +83,9 @@ const HomeContainer: React.FC = () => {
       <S.Header>
         <S.Logo onClick={() => router.push(PATHS.HOME)}>✈️ DIY Travel</S.Logo>
         <S.Nav>
+          <S.NavButton onClick={() => router.push("/packages")}>
+            여행 상품
+          </S.NavButton>
           {isAuthenticated && user ? (
             <S.UserMenu ref={dropdownRef}>
               <S.UserButton onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
@@ -135,8 +138,8 @@ const HomeContainer: React.FC = () => {
             <S.PrimaryButton onClick={handleGetStarted}>
               지금 시작하기 →
             </S.PrimaryButton>
-            <S.SecondaryButton onClick={() => router.push(PATHS.LOGIN)}>
-              데모 보기
+            <S.SecondaryButton onClick={() => router.push("/packages")}>
+              여행 상품 둘러보기
             </S.SecondaryButton>
           </S.CTAButtons>
           <S.TrustBadge>

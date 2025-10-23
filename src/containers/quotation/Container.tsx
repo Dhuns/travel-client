@@ -10,16 +10,12 @@ import React, {
   FC,
   useState,
   useEffect,
-  use,
   useCallback,
-  Suspense,
 } from "react";
 import * as S from "./styled";
 import { groupBy, isEmpty, isNil, keys } from "lodash-es";
 import dayjs from "dayjs";
-import Image from "next/image";
 import { useRouter } from "next/router";
-import { convertFromRaw } from "draft-js";
 import draftToHtml from "draftjs-to-html";
 import {
   GoogleMap,
@@ -28,6 +24,7 @@ import {
   Marker,
   Polyline,
 } from "react-google-map-wrapper";
+import { PATHS } from "@shared/path";
 
 interface IGroupByDays {
   [day: number]: {
@@ -70,26 +67,15 @@ interface IGroupByDays {
   }[];
 }
 
-const MapTypeId = {
-  HYBRID: "hybrid",
-  ROADMAP: "roadmap",
-  SATELLITE: "satellite",
-  TERRAIN: "terrain",
-};
-
 const Container: FC = () => {
-  /**
-   * States
-   */
-
+  const router = useRouter();
   const [memo, setMemo] = useState<any>("");
   const [zoom, setZoom] = useState<number>(11);
   const [activeWindowIds, setActiveWindowIds] = useState<{[key: number]: number}>({});
   const [dayDirections, setDayDirections] = useState<{[key: number]: any}>({});
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
-  /**
-   * Queries
-   */
   const { query, replace } = useRouter();
 
   const {
@@ -102,26 +88,15 @@ const Container: FC = () => {
       : undefined
   );
 
-  // const { data: estimateDetail, isLoading, error } = useGetEstimateDetail(TEMP_HASH);
-
   const { batchInfo, estimateDetails, estimateInfo } = estimateDetail || {};
 
   const [groupByDays, setGroupByDays] = useState<IGroupByDays>();
   const [timeline, setTimeline] = useState<string[]>([]);
 
-  /**
-   * Side-Effects
-   */
   useEffect(() => {
     if (!error) {
       return;
     }
-
-    // console.log(error, "error is here");
-
-    // if (error?.response?.data?.statusCode === 400) {
-    //   replace("/404");
-    // }
   }, [error]);
 
   useEffect(() => {
@@ -144,22 +119,69 @@ const Container: FC = () => {
     }
   }, [estimateInfo?.comment]);
 
-  // 일자별 마커와 경로를 계산하는 헬퍼 함수
+  // 스크롤 이벤트 리스너
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // 공유 기능
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // 가격 통계 계산
+  const calculatePriceStats = () => {
+    if (!estimateDetails || estimateDetails.length === 0) {
+      return {
+        totalDays: 0,
+        totalItems: 0,
+        avgPerDay: 0,
+        categories: {} as Record<string, number>
+      };
+    }
+
+    const categories: Record<string, number> = {};
+    estimateDetails.forEach((detail: any) => {
+      const type = detail.item?.type || 'Other';
+      categories[type] = (categories[type] || 0) + detail.price;
+    });
+
+    const totalDays = Math.max(...estimateDetails.map((d: any) => d.days));
+    const totalPrice = estimateDetails.reduce((sum: number, d: any) => sum + d.price, 0);
+
+    return {
+      totalDays,
+      totalItems: estimateDetails.length,
+      avgPerDay: totalDays > 0 ? totalPrice / totalDays : 0,
+      categories
+    };
+  };
+
+  const stats = calculatePriceStats();
+
   const getMarkersForDay = (dayEstimates: any[]) => {
     return dayEstimates
       .filter((o: any) => {
-        // 이동수단 제외
         if (o.item.type === "이동수단") return false;
-
-        // 컨텐츠 타입 제외 (영어가이드 등)
         if (o.item.type === "컨텐츠") return false;
-
-        // 위도/경도가 없거나 0이면 제외
         if (!o.item.lat || !o.item.lng || o.item.lat === "0" || o.item.lng === "0") {
           return false;
         }
-
-        // 여행지와 숙박만 표시
         return o.item.type === "여행지" || o.item.type === "숙박";
       })
       .map((o: any, idx: number) => {
@@ -178,9 +200,7 @@ const Container: FC = () => {
       });
   };
 
-  // Directions API를 사용한 경로 계산
   const calculateDirections = useCallback(async (markers: any[], day: number) => {
-    // 이미 계산되었으면 스킵
     if (dayDirections[day] !== undefined) {
       return;
     }
@@ -192,14 +212,11 @@ const Container: FC = () => {
 
     const directionsService = new google.maps.DirectionsService();
 
-    // 경유지가 너무 많으면 경로 계산 스킵 (Polyline 사용)
     if (markers.length > 10) {
-      console.log(`Day ${day}: Too many markers (${markers.length}), using polyline`);
       setDayDirections(prev => ({ ...prev, [day]: null }));
       return;
     }
 
-    // 경유지 샘플링 (최대 8개로 제한)
     const maxWaypoints = 8;
     const middleMarkers = markers.slice(1, -1);
     let sampledWaypoints = middleMarkers;
@@ -219,13 +236,11 @@ const Container: FC = () => {
       lng: markers[markers.length - 1].lng,
     };
 
-    // 출발지와 도착지가 같으면 경로 계산 스킵
     const isSameLocation =
       Math.abs(origin.lat - destination.lat) < 0.0001 &&
       Math.abs(origin.lng - destination.lng) < 0.0001;
 
     if (isSameLocation && sampledWaypoints.length === 0) {
-      console.log(`Day ${day}: Same origin and destination, using polyline`);
       setDayDirections(prev => ({ ...prev, [day]: null }));
       return;
     }
@@ -235,8 +250,6 @@ const Container: FC = () => {
       stopover: true,
     }));
 
-    console.log(`Day ${day}: Calculating route with ${waypoints.length} waypoints`);
-
     directionsService.route(
       {
         origin,
@@ -244,27 +257,20 @@ const Container: FC = () => {
         waypoints,
         travelMode: google.maps.TravelMode.DRIVING,
         optimizeWaypoints: false,
-        region: 'KR', // 한국 지역 설정
-        language: 'en', // 주소는 영어로
+        region: 'KR',
+        language: 'en',
       },
       (result, status) => {
         if (status === google.maps.DirectionsStatus.OK) {
-          console.log(`Day ${day}: Directions success!`);
           setDayDirections(prev => ({ ...prev, [day]: result }));
         } else {
-          console.log(`Day ${day}: Directions failed (${status}), using polyline`);
           setDayDirections(prev => ({ ...prev, [day]: null }));
         }
       }
     );
   }, [dayDirections]);
 
-  /**
-   * Handlers
-   */
-
   const onAddressHandler = (placeName: string, address: string) => {
-    // 장소명으로 구글맵 검색 (장소명 + 주소로 더 정확한 검색)
     const searchQuery = `${placeName} ${address}`;
     const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchQuery)}`;
     window.open(url, "_blank");
@@ -276,10 +282,6 @@ const Container: FC = () => {
     }
     window.open(link, "_blank");
   };
-
-  /**
-   * Helpers
-   */
 
   const totalPeople =
     Number(batchInfo?.adultsCount ?? 0) +
@@ -317,153 +319,244 @@ const Container: FC = () => {
   };
 
   const linkifyStr = (text: string) => {
-    // URL을 매칭하는 정규 표현식 (http, https, www) - '<' 또는 '>' 포함되지 않도록 수정
     const urlRegex = /(https?:\/\/[^\s<>\)]+|www\.[^\s<>\)]+)/g;
 
-    // 입력된 text를 정규 표현식으로 나눈 후, URL이면 a태그로 변환하고, 아니면 그대로 반환
     return text
       .split(urlRegex)
       .map((part) => {
         if (part.match(urlRegex)) {
-          // 'www'로 시작하는 URL은 'https'를 자동으로 추가
           const href = part.startsWith("www.") ? `https://${part}` : part;
-
-          // a 태그로 변환하여 반환
-          return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color: blue; text-decoration: underline;">${part}</a>`;
+          return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color: #667eea; text-decoration: none;">${part}</a>`;
         }
         return part;
       })
-      .join(""); // 배열을 문자열로 변환하여 반환
+      .join("");
   };
 
-  // const onChangeHandler = (ev: any) => {
-  // 	setZoom(Number(Math.round(ev.target.value)));
-  // };
+  if (isLoading) {
+    return (
+      <S.LoadingContainer>
+        <S.LoadingSpinner>Loading quotation...</S.LoadingSpinner>
+      </S.LoadingContainer>
+    );
+  }
 
-  if (isLoading) return null;
+  if (error || !estimateDetail) {
+    return (
+      <S.ErrorContainer>
+        <S.ErrorCard>
+          <S.ErrorIcon>❌</S.ErrorIcon>
+          <S.ErrorText>Quotation not found or has been deleted.</S.ErrorText>
+          <S.ActionButton onClick={() => router.push(PATHS.HOME)}>
+            Go to Home
+          </S.ActionButton>
+        </S.ErrorCard>
+      </S.ErrorContainer>
+    );
+  }
 
   return (
     <S.Container>
-      {/* <S.ItineraryText>Information</S.ItineraryText> */}
-      <S.Information>
-        <S.BatchInfoSection>
-          <S.BatchInfo>
-            <label>Customer</label>
-            <p>{batchInfo?.recipient ?? ""}</p>
-          </S.BatchInfo>
-          <S.BatchInfo>
-            <label>Title</label>
-            <p>{batchInfo?.title ?? ""}</p>
-          </S.BatchInfo>
-          <S.BatchInfo>
-            <label>Price for {totalPeople} people</label>
-            <p>${comma(batchInfo?.autoSumAmount)} USD</p>
-          </S.BatchInfo>
-          <S.BatchInfo>
-            <label>Travel date</label>
-            <p>{`${dayjs(batchInfo?.startDate).format(
-              "dddd, DD MMMM YYYY"
-            )} ~ ${dayjs(batchInfo?.endDate).format("dddd, DD MMMM YYYY") ||
-            dayjs(batchInfo?.startDate).format("dddd, DD MMMM YYYY")
-              }`}</p>
-          </S.BatchInfo>
-          <S.BatchInfo>
-            <label>Headcount composition</label>
-            <p>{`Adults : ${batchInfo?.adultsCount ?? 0} / Children : ${batchInfo?.childrenCount ?? 0
-              } / FOC : ${batchInfo?.infantsCount ?? 0}`}</p>
-          </S.BatchInfo>
-          <S.BatchInfo>
-            <label>Date of Issue</label>
-            <p>{dayjs(estimateInfo?.createdAt).format("dddd, DD MMMM YYYY")}</p>
-          </S.BatchInfo>
-        </S.BatchInfoSection>
-        <S.Companies>
-          <h1>{batchInfo?.quotation}</h1>
-          <div>
-            <span>Prepared by</span>
-            <p>{batchInfo?.preparedBy}</p>
-          </div>
-          <div>
-            <span>Email</span>
-            <p>{batchInfo?.email}</p>
-          </div>
-          <div>
-            <span>Office hours (weekdays)</span>
-            <p>{batchInfo?.officeHours}</p>
-          </div>
-          <div>
-            <span>Office number</span>
-            <p>{batchInfo?.officeNumber}</p>
-          </div>
-          <div>
-            <span>Emergency number</span>
-            <p>{batchInfo?.emergencyNumber}</p>
-          </div>
-          <div style={{ flexDirection: "column" }}>
-            <span>Address</span>
-            <p>{batchInfo?.address}</p>
-          </div>
-          <img src="/images/signature.png" alt="main_img" />
-        </S.Companies>
-      </S.Information>
+      {/* Header */}
+      <S.Header>
+        <S.Logo onClick={() => router.push(PATHS.HOME)}>✈️ DIY Travel</S.Logo>
+        <S.HeaderActions>
+          <S.ShareButtons>
+            <S.ShareButton onClick={handleCopyLink}>
+              {copiedLink ? '✓ Copied!' : '🔗 Share'}
+            </S.ShareButton>
+          </S.ShareButtons>
+          <S.ActionButton onClick={() => window.print()}>
+            🖨️ Print
+          </S.ActionButton>
+          <S.ActionButton onClick={() => router.push(PATHS.HOME)}>
+            🏠 Home
+          </S.ActionButton>
+        </S.HeaderActions>
+      </S.Header>
 
-      <S.TitleDivision>
-        <S.ItineraryText>Itinerary</S.ItineraryText>
-        {/* <S.DisableButton onClick={() => setOnlyPlaces((prev) => !prev)}>{onlyPlaces ? 'Show All' : 'Only Places'}</S.DisableButton> */}
-      </S.TitleDivision>
+      <S.Content>
+        {/* 기본 정보 카드 */}
+        <S.InfoCard>
+          <S.InfoHeader>
+            <S.QuotationTitle>{batchInfo?.title ?? "Travel Quotation"}</S.QuotationTitle>
+            <S.QuotationSubtitle>
+              {dayjs(estimateInfo?.createdAt).format("MMMM DD, YYYY")}
+            </S.QuotationSubtitle>
+          </S.InfoHeader>
 
-      <S.EstimateDetailsSection>
-        {keys(groupByDays).map((day) => {
-          const getTimeline = timeline?.[Number(day) - 1] ?? "";
-          const dayMarkers = getMarkersForDay(groupByDays?.[Number(day)] ?? []);
+          <S.InfoGrid>
+            <S.InfoItem>
+              <S.InfoLabel>Customer</S.InfoLabel>
+              <S.InfoValue>{batchInfo?.recipient ?? "-"}</S.InfoValue>
+            </S.InfoItem>
 
-          return (
-            <div key={day}>
-              <S.EachEstimateBox>
-                <S.DayBox key={day}>
-                  Day {day}
-                  <span>
+            <S.InfoItem>
+              <S.InfoLabel>Travel Date</S.InfoLabel>
+              <S.InfoValue>
+                {dayjs(batchInfo?.startDate).format("MMM DD, YYYY")} ~{" "}
+                {dayjs(batchInfo?.endDate).format("MMM DD, YYYY")}
+              </S.InfoValue>
+            </S.InfoItem>
+
+            <S.InfoItem>
+              <S.InfoLabel>Headcount</S.InfoLabel>
+              <S.InfoValue>
+                Adults: {batchInfo?.adultsCount ?? 0} / Children:{" "}
+                {batchInfo?.childrenCount ?? 0} / FOC: {batchInfo?.infantsCount ?? 0}
+              </S.InfoValue>
+            </S.InfoItem>
+
+            <S.InfoItem>
+              <S.InfoLabel>Total Participants</S.InfoLabel>
+              <S.InfoValue>{totalPeople} People</S.InfoValue>
+            </S.InfoItem>
+          </S.InfoGrid>
+
+          {!batchInfo?.hidePrice && (
+            <S.PriceHighlight>
+              <S.PriceLabel>Total Price for {totalPeople} people</S.PriceLabel>
+              <S.PriceValue>${comma(batchInfo?.autoSumAmount)} USD</S.PriceValue>
+            </S.PriceHighlight>
+          )}
+
+          {/* 담당자 정보 */}
+          <S.AgentInfo>
+            <S.AgentTitle>{batchInfo?.quotation || "Travel Agency"}</S.AgentTitle>
+            <S.AgentGrid>
+              <S.InfoItem>
+                <S.InfoLabel>Prepared by</S.InfoLabel>
+                <S.InfoValue>{batchInfo?.preparedBy ?? "-"}</S.InfoValue>
+              </S.InfoItem>
+              <S.InfoItem>
+                <S.InfoLabel>Email</S.InfoLabel>
+                <S.InfoValue>{batchInfo?.email ?? "-"}</S.InfoValue>
+              </S.InfoItem>
+              <S.InfoItem>
+                <S.InfoLabel>Office Hours</S.InfoLabel>
+                <S.InfoValue>{batchInfo?.officeHours ?? "-"}</S.InfoValue>
+              </S.InfoItem>
+              <S.InfoItem>
+                <S.InfoLabel>Office Number</S.InfoLabel>
+                <S.InfoValue>{batchInfo?.officeNumber ?? "-"}</S.InfoValue>
+              </S.InfoItem>
+              <S.InfoItem>
+                <S.InfoLabel>Emergency Number</S.InfoLabel>
+                <S.InfoValue>{batchInfo?.emergencyNumber ?? "-"}</S.InfoValue>
+              </S.InfoItem>
+              <S.InfoItem>
+                <S.InfoLabel>Address</S.InfoLabel>
+                <S.InfoValue>{batchInfo?.address ?? "-"}</S.InfoValue>
+              </S.InfoItem>
+            </S.AgentGrid>
+          </S.AgentInfo>
+        </S.InfoCard>
+
+        {/* 통계 카드 */}
+        {!batchInfo?.hidePrice && (
+          <S.StatisticsCard>
+            <S.QuotationTitle style={{ color: 'white', margin: 0 }}>
+              📊 Travel Statistics
+            </S.QuotationTitle>
+            <S.StatGrid>
+              <S.StatItem>
+                <S.StatLabel>Total Days</S.StatLabel>
+                <S.StatValue>{stats.totalDays}</S.StatValue>
+              </S.StatItem>
+              <S.StatItem>
+                <S.StatLabel>Total Items</S.StatLabel>
+                <S.StatValue>{stats.totalItems}</S.StatValue>
+              </S.StatItem>
+              <S.StatItem>
+                <S.StatLabel>Avg / Day</S.StatLabel>
+                <S.StatValue>${comma(Math.round(stats.avgPerDay))}</S.StatValue>
+              </S.StatItem>
+              <S.StatItem>
+                <S.StatLabel>Per Person</S.StatLabel>
+                <S.StatValue>
+                  ${comma(Math.round((batchInfo?.autoSumAmount || 0) / totalPeople))}
+                </S.StatValue>
+              </S.StatItem>
+            </S.StatGrid>
+
+            {/* 가격 분류 breakdown */}
+            {Object.keys(stats.categories).length > 0 && (
+              <S.PriceBreakdown style={{ marginTop: 24, background: 'rgba(255,255,255,0.15)' }}>
+                <S.PriceBreakdownTitle style={{ color: 'white' }}>
+                  Price Breakdown by Category
+                </S.PriceBreakdownTitle>
+                {Object.entries(stats.categories).map(([category, amount]) => (
+                  <S.PriceRow key={category}>
+                    <S.PriceCategory style={{ color: 'rgba(255,255,255,0.9)' }}>
+                      {category === '여행지' && '🏞️'}
+                      {category === '숙박' && '🏨'}
+                      {category === '이동수단' && '🚗'}
+                      {category === '컨텐츠' && '🎭'}
+                      {' '}{category}
+                    </S.PriceCategory>
+                    <S.PriceCategoryAmount style={{ color: 'white' }}>
+                      ${comma(Math.round(amount as number))}
+                    </S.PriceCategoryAmount>
+                  </S.PriceRow>
+                ))}
+              </S.PriceBreakdown>
+            )}
+          </S.StatisticsCard>
+        )}
+
+        {/* 일정 섹션 */}
+        <S.ItinerarySection>
+          <S.SectionTitle>Travel Itinerary</S.SectionTitle>
+
+          {keys(groupByDays).map((day) => {
+            const getTimeline = timeline?.[Number(day) - 1] ?? "";
+            const dayMarkers = getMarkersForDay(groupByDays?.[Number(day)] ?? []);
+
+            return (
+              <S.DayCard key={day}>
+                <S.DayHeader>
+                  <S.DayTitle>Day {day}</S.DayTitle>
+                  <S.DayDate>
                     {dayjs(batchInfo?.startDate)
                       .add(Number(day) - 1, "day")
-                      .format("dddd, DD.MMMM.YYYY")}
-                  </span>
-                </S.DayBox>
-                <S.DetailBox>
-                  <S.ItemBox>
-                    {groupByDays?.[Number(day)]?.sort().map((estimate) => {
-                      const {
-                        item,
-                        id,
-                        enableContent,
-                        item: { type },
-                      } = estimate;
+                      .format("dddd, MMMM DD, YYYY")}
+                  </S.DayDate>
+                </S.DayHeader>
 
-                      if (
-                        batchInfo?.onlyPlace &&
-                        type !== "여행지" &&
-                        !enableContent
-                      )
-                        return null;
+                <S.ItemsGrid>
+                  {groupByDays?.[Number(day)]?.sort().map((estimate) => {
+                    const {
+                      item,
+                      id,
+                      enableContent,
+                      item: { type },
+                    } = estimate;
 
-                      const getThumbnailImg = item?.files?.find(
-                        (img) => img.type === "썸네일"
-                      )?.itemSrc;
+                    if (
+                      batchInfo?.onlyPlace &&
+                      type !== "여행지" &&
+                      !enableContent
+                    )
+                      return null;
 
-                      return (
-                        <S.ItemDetailBox key={id}>
-                          <div>
-                            <S.ItemThumbnailImgFigure
-                              $src={getItemImg(getThumbnailImg)}
-                              onClick={() => goWebsite(item?.websiteLink)}
-                            >
-                              <summary>{transType(item?.type)}</summary>
-                            </S.ItemThumbnailImgFigure>
-                          </div>
+                    const getThumbnailImg = item?.files?.find(
+                      (img) => img.type === "썸네일"
+                    )?.itemSrc;
+
+                    return (
+                      <S.ItemCard key={id} onClick={() => goWebsite(item?.websiteLink)}>
+                        <S.ItemThumbnail $src={getItemImg(getThumbnailImg)}>
+                          <S.ItemType>{transType(item?.type)}</S.ItemType>
+                        </S.ItemThumbnail>
+                        <S.ItemInfo>
                           <S.ItemName>
                             {item?.nameEng} <span>{item.nameKor}</span>
                           </S.ItemName>
                           <S.ItemAddress
-                            onClick={() => onAddressHandler(item.nameEng, item.addressEnglish)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onAddressHandler(item.nameEng, item.addressEnglish);
+                            }}
                           >
                             {item?.addressEnglish}
                           </S.ItemAddress>
@@ -477,27 +570,19 @@ const Container: FC = () => {
                               </span>
                             </S.ItemPrice>
                           )}
-                          {/* <S.ItemDesc>{item?.description}</S.ItemDesc> */}
-                          {/* <div>
-														{getDetailImg.map((img) => {
-															return (
-																<div key={img.id}>
-																	<S.ItemDetailImgFigure $src={getItemImg(img.itemSrc)} />
-																</div>
-															);
-														})}
-													</div> */}
-                        </S.ItemDetailBox>
-                      );
-                    })}
-                  </S.ItemBox>
-                  <S.TimelineBox>
-                    <h5>Day {day} Itinerary</h5>
-                    <div>{linkify(getTimeline)}</div>
-                  </S.TimelineBox>
-                </S.DetailBox>
+                        </S.ItemInfo>
+                      </S.ItemCard>
+                    );
+                  })}
+                </S.ItemsGrid>
 
-                {/* Day별 지도 */}
+                {getTimeline && (
+                  <S.TimelineCard>
+                    <S.TimelineTitle>Day {day} Itinerary</S.TimelineTitle>
+                    <S.TimelineContent>{linkify(getTimeline)}</S.TimelineContent>
+                  </S.TimelineCard>
+                )}
+
                 {dayMarkers?.length > 0 && (
                   <DayMapSection
                     day={Number(day)}
@@ -509,18 +594,25 @@ const Container: FC = () => {
                     setActiveWindowIds={setActiveWindowIds}
                   />
                 )}
-              </S.EachEstimateBox>
-            </div>
-          );
-        })}
+              </S.DayCard>
+            );
+          })}
 
-        {memo && memo?.length > 0 && memo !== "" ? (
-          <S.MemoSection>
-            <label />
-            <div dangerouslySetInnerHTML={{ __html: linkifyStr(memo) }} />
-          </S.MemoSection>
-        ) : null}
-      </S.EstimateDetailsSection>
+          {memo && memo?.length > 0 && memo !== "" && (
+            <S.MemoSection>
+              <label>Additional Notes</label>
+              <div dangerouslySetInnerHTML={{ __html: linkifyStr(memo) }} />
+            </S.MemoSection>
+          )}
+        </S.ItinerarySection>
+      </S.Content>
+
+      {/* Floating Action Button - Scroll to Top */}
+      {showScrollTop && (
+        <S.FloatingActionButton onClick={scrollToTop} title="Scroll to top">
+          ↑
+        </S.FloatingActionButton>
+      )}
     </S.Container>
   );
 };
@@ -554,7 +646,6 @@ const DayMapSection: FC<{
 
   const directions = dayDirections[day];
 
-  // 모든 마커를 포함하는 bounds 계산
   const getBounds = () => {
     if (!window.google || markers.length === 0) return null;
 
@@ -572,7 +663,6 @@ const DayMapSection: FC<{
       const bounds = getBounds();
       if (bounds) {
         map.fitBounds(bounds);
-        // 여백 추가
         google.maps.event.addListenerOnce(map, 'bounds_changed', () => {
           const currentZoom = map.getZoom();
           if (currentZoom && currentZoom > 15) {
@@ -585,17 +675,10 @@ const DayMapSection: FC<{
 
   return (
     <S.MapSection>
-      <S.TitleDivision>
-        <S.ItineraryText>Day {day} Route Map</S.ItineraryText>
-      </S.TitleDivision>
-      <div style={{
-        marginBottom: '16px',
-        fontSize: '14px',
-        color: '#6b7280',
-        lineHeight: '1.6'
-      }}>
+      <S.MapTitle>Day {day} Route Map</S.MapTitle>
+      <S.MapInfo>
         {markers.length} location{markers.length > 1 ? 's' : ''} • {directions ? 'Road-based route' : 'Direct path'}
-      </div>
+      </S.MapInfo>
       <GoogleMapApiLoader
         language="en"
         apiKey={process.env.NEXT_PUBLIC_GOOGLE_API_KEY || ""}
