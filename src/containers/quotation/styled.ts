@@ -203,43 +203,12 @@ export const PriceHighlight = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-top: 32px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
-  transition: all 0.3s ease;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(
-      circle,
-      rgba(255, 255, 255, 0.1) 0%,
-      transparent 70%
-    );
-    animation: ${pulse} 3s ease-in-out infinite;
-  }
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.35);
-  }
 
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
     padding: 20px 24px;
-  }
-
-  @media print {
-    box-shadow: none;
-    &::before {
-      display: none;
-    }
   }
 `;
 
@@ -293,19 +262,6 @@ export const SectionTitle = styled.h2`
   margin: 0 0 24px 0;
   padding-left: 16px;
   border-left: 4px solid #667eea;
-  animation: ${slideInRight} 0.6s ease-out;
-  position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: -8px;
-    width: 60px;
-    height: 3px;
-    background: linear-gradient(90deg, #667eea 0%, transparent 100%);
-    border-radius: 2px;
-  }
 `;
 
 export const DayCard = styled.div`
@@ -379,48 +335,17 @@ export const ItemCard = styled.div`
   background: #fafbfc;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(102, 126, 234, 0.05),
-      transparent
-    );
-    transition: left 0.5s ease;
-  }
 
   &:hover {
     background: white;
-    border-color: #667eea;
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
-    transform: translateX(4px);
-
-    &::before {
-      left: 100%;
-    }
-  }
-
-  &:active {
-    transform: translateX(2px);
+    border-color: #cbd5e0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   }
 
   @media (max-width: 768px) {
     flex-direction: column;
-
-    &:hover {
-      transform: translateY(-2px);
-    }
   }
 `;
 
@@ -435,28 +360,6 @@ export const ItemThumbnail = styled.div<{ $src?: string }>`
       : "linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%)"};
   position: relative;
   overflow: hidden;
-  transition: transform 0.3s ease;
-
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      180deg,
-      transparent 0%,
-      rgba(0, 0, 0, 0.3) 100%
-    );
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  &:hover {
-    transform: scale(1.05);
-
-    &::after {
-      opacity: 1;
-    }
-  }
 
   @media (max-width: 768px) {
     width: 100%;
@@ -755,314 +658,4 @@ export const ItineraryText = styled.h2`
   font-weight: 700;
   color: #2d3748;
   margin: 0;
-`;
-
-// 새로운 고급 컴포넌트들
-export const ShareButtons = styled.div`
-  display: flex;
-  gap: 8px;
-
-  @media print {
-    display: none;
-  }
-`;
-
-export const ShareButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #4a5568;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    background: #667eea;
-    color: white;
-    border-color: #667eea;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-`;
-
-export const StatisticsCard = styled.div`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px;
-  padding: 32px;
-  margin-bottom: 32px;
-  color: white;
-  animation: ${fadeInUp} 0.6s ease-out;
-  animation-delay: 0.2s;
-  animation-fill-mode: both;
-
-  @media print {
-    background: white;
-    color: #2d3748;
-    border: 1px solid #e2e8f0;
-  }
-`;
-
-export const StatGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 24px;
-  margin-top: 24px;
-`;
-
-export const StatItem = styled.div`
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border-radius: 10px;
-  padding: 20px;
-  text-align: center;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.25);
-    transform: translateY(-4px);
-  }
-
-  @media print {
-    background: #f7fafc;
-  }
-`;
-
-export const StatLabel = styled.div`
-  font-size: 13px;
-  opacity: 0.9;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-
-  @media print {
-    color: #718096;
-  }
-`;
-
-export const StatValue = styled.div`
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-
-  @media print {
-    color: #667eea;
-  }
-`;
-
-export const TimelineVisual = styled.div`
-  position: relative;
-  padding-left: 40px;
-  margin-top: 24px;
-
-  &::before {
-    content: '';
-    position: absolute;
-    left: 15px;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
-    border-radius: 2px;
-  }
-`;
-
-export const TimelineItem = styled.div`
-  position: relative;
-  padding-bottom: 32px;
-
-  &::before {
-    content: '';
-    position: absolute;
-    left: -33px;
-    top: 6px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: white;
-    border: 3px solid #667eea;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-    z-index: 1;
-  }
-
-  &:last-child {
-    padding-bottom: 0;
-  }
-`;
-
-export const TimelineDay = styled.div`
-  font-size: 14px;
-  font-weight: 700;
-  color: #667eea;
-  margin-bottom: 4px;
-`;
-
-export const TimelineDescription = styled.div`
-  font-size: 14px;
-  color: #4a5568;
-  line-height: 1.6;
-`;
-
-export const ProgressBar = styled.div`
-  width: 100%;
-  height: 8px;
-  background: #e2e8f0;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-top: 16px;
-`;
-
-export const ProgressFill = styled.div<{ $progress: number }>`
-  height: 100%;
-  width: ${props => props.$progress}%;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-  border-radius: 4px;
-  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: ${shimmer} 2s infinite;
-  background-size: 200% 100%;
-`;
-
-export const Badge = styled.span`
-  display: inline-block;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  border-radius: 6px;
-  background: rgba(102, 126, 234, 0.1);
-  color: #667eea;
-  margin-left: 8px;
-`;
-
-export const TooltipWrapper = styled.div`
-  position: relative;
-  display: inline-block;
-
-  &:hover .tooltip {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-  }
-`;
-
-export const Tooltip = styled.div`
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%) translateY(-4px);
-  background: #1a202c;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.2s ease;
-  z-index: 1000;
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 4px solid transparent;
-    border-top-color: #1a202c;
-  }
-`;
-
-export const FloatingActionButton = styled.button`
-  position: fixed;
-  bottom: 32px;
-  right: 32px;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-
-  &:hover {
-    transform: translateY(-4px) scale(1.05);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
-  }
-
-  &:active {
-    transform: translateY(-2px) scale(1.02);
-  }
-
-  @media print {
-    display: none;
-  }
-`;
-
-export const PriceBreakdown = styled.div`
-  background: #f7fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 24px;
-  margin-top: 24px;
-`;
-
-export const PriceBreakdownTitle = styled.h4`
-  font-size: 16px;
-  font-weight: 700;
-  color: #2d3748;
-  margin: 0 0 16px 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  &::before {
-    content: '💰';
-    font-size: 20px;
-  }
-`;
-
-export const PriceRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #e2e8f0;
-
-  &:last-child {
-    border-bottom: none;
-    font-weight: 700;
-    font-size: 16px;
-    color: #667eea;
-    padding-top: 16px;
-    margin-top: 8px;
-    border-top: 2px solid #667eea;
-  }
-`;
-
-export const PriceCategory = styled.div`
-  font-size: 14px;
-  color: #4a5568;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-export const PriceCategoryAmount = styled.div`
-  font-size: 14px;
-  font-weight: 600;
-  color: #2d3748;
 `;
