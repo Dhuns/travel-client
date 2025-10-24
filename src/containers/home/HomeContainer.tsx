@@ -213,7 +213,7 @@ const HomeContainer: React.FC = () => {
             <S.StepNumber>1</S.StepNumber>
             <S.StepTitle>여행 계획 입력</S.StepTitle>
             <S.StepDescription>
-              "3박 4일 서울 여행, 2명, 호텔 위주"처럼 자연어로 원하는 여행을
+              &quot;3박 4일 서울 여행, 2명, 호텔 위주&quot;처럼 자연어로 원하는 여행을
               설명하세요.
             </S.StepDescription>
           </S.Step>
