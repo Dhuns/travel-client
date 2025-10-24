@@ -530,11 +530,11 @@ const Container: FC = () => {
                               </div>
                             </td>
                             <td style={{ padding: '16px', textAlign: 'right' }}>
-                              <div style={{ fontSize: '16px', fontWeight: '700', color: '#667eea' }}>
+                              <div style={{ fontSize: '16px', fontWeight: '700', color: '#495057' }}>
                                 ${comma(service.totalPrice)}
                               </div>
                               <div style={{ fontSize: '11px', color: '#868e96', marginTop: '4px' }}>
-                                ${comma(service.pricePerUnit)} × {service.quantity} {service.quantity === 1 ? 'person' : 'people'} × {service.dayCount} {service.dayCount === 1 ? 'day' : 'days'}
+                                {service.quantity} {service.quantity === 1 ? 'person' : 'people'} × {service.dayCount} {service.dayCount === 1 ? 'day' : 'days'}
                               </div>
                             </td>
                           </>

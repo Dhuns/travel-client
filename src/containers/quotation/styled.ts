@@ -195,8 +195,8 @@ export const InfoValue = styled.p`
 `;
 
 export const PriceHighlight = styled.div`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #f8f9fa;
+  border: 2px solid #e2e8f0;
   padding: 24px 32px;
   border-radius: 12px;
   display: flex;
@@ -214,13 +214,14 @@ export const PriceHighlight = styled.div`
 
 export const PriceLabel = styled.div`
   font-size: 14px;
-  opacity: 0.95;
+  color: #64748b;
   font-weight: 500;
 `;
 
 export const PriceValue = styled.div`
   font-size: 32px;
   font-weight: 700;
+  color: #1e293b;
   letter-spacing: -0.02em;
 
   @media (max-width: 768px) {
