@@ -167,12 +167,18 @@ const Container: FC = () => {
 
     // 각 항목의 통계 계산
     return Object.entries(groupedByName).map(([name, items]) => {
-      const totalPrice = items.reduce((sum, item) => sum + item.price, 0);
+      const totalPrice = items.reduce((sum, item) => sum + Number(item.price), 0);
       const dayCount = items.length;
       const sampleItem = items[0].item;
       const days = items.map(item => item.days).sort((a, b) => a - b);
       const quantity = items[0].quantity || 1;
-      const pricePerUnit = items[0].price / quantity; // 1인당 하루 가격
+      const dailyPrice = Number(items[0].price);
+
+      // 그룹 서비스 여부 확인 (가이드, 버스 등)
+      const isGroupService = sampleItem.type === '이동수단' || sampleItem.type === '컨텐츠';
+
+      // 그룹 서비스는 그대로, 개인 서비스는 인원수로 나눔
+      const pricePerUnit = isGroupService ? dailyPrice : dailyPrice / quantity;
 
       return {
         name,
@@ -181,8 +187,9 @@ const Container: FC = () => {
         dayCount,
         days, // Day 배열
         totalPrice, // 전체 일수의 총 가격
-        pricePerUnit, // 1인당 하루 가격
+        pricePerUnit, // 1인당 하루 가격 (또는 그룹당 하루 가격)
         quantity, // 인원수
+        isGroupService, // 그룹 서비스 여부
         item: sampleItem,
       };
     });
@@ -495,8 +502,10 @@ const Container: FC = () => {
                 </thead>
                 <tbody>
                   {includedServices.map((service, idx) => {
-                    const icon = service.item.type === '이동수단' ? '🚗' : '🎭';
                     const daysText = service.days.map((d: number) => `Day ${d}`).join(', ');
+                    const thumbnailImg = service.item?.files?.find(
+                      (img: any) => img.type === "썸네일"
+                    )?.itemSrc;
 
                     return (
                       <tr key={idx} style={{
@@ -504,8 +513,25 @@ const Container: FC = () => {
                         background: idx % 2 === 0 ? '#ffffff' : '#f8f9fa'
                       }}>
                         <td style={{ padding: '16px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <span style={{ fontSize: '20px' }}>{icon}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{
+                              width: '50px',
+                              height: '50px',
+                              borderRadius: '8px',
+                              overflow: 'hidden',
+                              flexShrink: 0,
+                              background: '#e9ecef'
+                            }}>
+                              <img
+                                src={getItemImg(thumbnailImg)}
+                                alt={service.nameEng}
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  objectFit: 'cover'
+                                }}
+                              />
+                            </div>
                             <div style={{ fontWeight: '600', color: '#212529' }}>
                               {service.nameEng}
                             </div>
@@ -526,7 +552,7 @@ const Container: FC = () => {
                                 ${comma(service.pricePerUnit)}
                               </div>
                               <div style={{ fontSize: '12px', color: '#868e96', marginTop: '2px' }}>
-                                per person per day
+                                {service.isGroupService ? 'per day' : 'per person per day'}
                               </div>
                             </td>
                             <td style={{ padding: '16px', textAlign: 'right' }}>
@@ -534,7 +560,8 @@ const Container: FC = () => {
                                 ${comma(service.totalPrice)}
                               </div>
                               <div style={{ fontSize: '11px', color: '#868e96', marginTop: '4px' }}>
-                                {service.quantity} {service.quantity === 1 ? 'person' : 'people'} × {service.dayCount} {service.dayCount === 1 ? 'day' : 'days'}
+                                {service.dayCount} {service.dayCount === 1 ? 'day' : 'days'}
+                                {!service.isGroupService && ` × ${service.quantity} ${service.quantity === 1 ? 'person' : 'people'}`}
                               </div>
                             </td>
                           </>
