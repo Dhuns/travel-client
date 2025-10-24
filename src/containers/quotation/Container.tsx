@@ -144,35 +144,43 @@ const Container: FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // 가격 통계 계산
-  const calculatePriceStats = () => {
+  // 공통 서비스 항목 추출 (컨텐츠 타입)
+  const getIncludedServices = () => {
     if (!estimateDetails || estimateDetails.length === 0) {
-      return {
-        totalDays: 0,
-        totalItems: 0,
-        avgPerDay: 0,
-        categories: {} as Record<string, number>
-      };
+      return [];
     }
 
-    const categories: Record<string, number> = {};
-    estimateDetails.forEach((detail: any) => {
-      const type = detail.item?.type || 'Other';
-      categories[type] = (categories[type] || 0) + detail.price;
+    // 컨텐츠 항목들만 필터링
+    const contentItems = estimateDetails.filter((detail: any) => detail.item?.type === '컨텐츠');
+
+    // 항목별로 그룹핑 (이름 기준)
+    const groupedByName: Record<string, any[]> = {};
+    contentItems.forEach((item: any) => {
+      const key = item.item.nameEng || item.item.nameKor;
+      if (!groupedByName[key]) {
+        groupedByName[key] = [];
+      }
+      groupedByName[key].push(item);
     });
 
-    const totalDays = Math.max(...estimateDetails.map((d: any) => d.days));
-    const totalPrice = estimateDetails.reduce((sum: number, d: any) => sum + d.price, 0);
+    // 각 항목의 통계 계산
+    return Object.entries(groupedByName).map(([name, items]) => {
+      const totalPrice = items.reduce((sum, item) => sum + item.price, 0);
+      const dayCount = items.length;
+      const sampleItem = items[0].item;
 
-    return {
-      totalDays,
-      totalItems: estimateDetails.length,
-      avgPerDay: totalDays > 0 ? totalPrice / totalDays : 0,
-      categories
-    };
+      return {
+        name,
+        nameKor: sampleItem.nameKor,
+        nameEng: sampleItem.nameEng,
+        dayCount,
+        totalPrice,
+        item: sampleItem,
+      };
+    });
   };
 
-  const stats = calculatePriceStats();
+  const includedServices = getIncludedServices();
 
   const getMarkersForDay = (dayEstimates: any[]) => {
     return dayEstimates
@@ -358,11 +366,9 @@ const Container: FC = () => {
       <S.Header>
         <S.Logo onClick={() => router.push(PATHS.HOME)}>✈️ DIY Travel</S.Logo>
         <S.HeaderActions>
-          <S.ShareButtons>
-            <S.ShareButton onClick={handleCopyLink}>
-              {copiedLink ? '✓ Copied!' : '🔗 Share'}
-            </S.ShareButton>
-          </S.ShareButtons>
+          <S.ActionButton onClick={handleCopyLink}>
+            {copiedLink ? '✓ Copied!' : '🔗 Share'}
+          </S.ActionButton>
           <S.ActionButton onClick={() => window.print()}>
             🖨️ Print
           </S.ActionButton>
@@ -449,56 +455,40 @@ const Container: FC = () => {
           </S.AgentInfo>
         </S.InfoCard>
 
-        {/* 통계 카드 */}
-        {!batchInfo?.hidePrice && (
-          <S.StatisticsCard>
-            <S.QuotationTitle style={{ color: 'white', margin: 0 }}>
-              📊 Travel Statistics
-            </S.QuotationTitle>
-            <S.StatGrid>
-              <S.StatItem>
-                <S.StatLabel>Total Days</S.StatLabel>
-                <S.StatValue>{stats.totalDays}</S.StatValue>
-              </S.StatItem>
-              <S.StatItem>
-                <S.StatLabel>Total Items</S.StatLabel>
-                <S.StatValue>{stats.totalItems}</S.StatValue>
-              </S.StatItem>
-              <S.StatItem>
-                <S.StatLabel>Avg / Day</S.StatLabel>
-                <S.StatValue>${comma(Math.round(stats.avgPerDay))}</S.StatValue>
-              </S.StatItem>
-              <S.StatItem>
-                <S.StatLabel>Per Person</S.StatLabel>
-                <S.StatValue>
-                  ${comma(Math.round((batchInfo?.autoSumAmount || 0) / totalPeople))}
-                </S.StatValue>
-              </S.StatItem>
-            </S.StatGrid>
+        {/* 공통 서비스 섹션 */}
+        {includedServices.length > 0 && (
+          <S.InfoCard style={{ marginTop: 24 }}>
+            <S.SectionTitle>📋 Included Services</S.SectionTitle>
+            <S.ItemsGrid>
+              {includedServices.map((service, idx) => {
+                const getThumbnailImg = service.item?.files?.find(
+                  (img: any) => img.type === "썸네일"
+                )?.itemSrc;
 
-            {/* 가격 분류 breakdown */}
-            {Object.keys(stats.categories).length > 0 && (
-              <S.PriceBreakdown style={{ marginTop: 24, background: 'rgba(255,255,255,0.15)' }}>
-                <S.PriceBreakdownTitle style={{ color: 'white' }}>
-                  Price Breakdown by Category
-                </S.PriceBreakdownTitle>
-                {Object.entries(stats.categories).map(([category, amount]) => (
-                  <S.PriceRow key={category}>
-                    <S.PriceCategory style={{ color: 'rgba(255,255,255,0.9)' }}>
-                      {category === '여행지' && '🏞️'}
-                      {category === '숙박' && '🏨'}
-                      {category === '이동수단' && '🚗'}
-                      {category === '컨텐츠' && '🎭'}
-                      {' '}{category}
-                    </S.PriceCategory>
-                    <S.PriceCategoryAmount style={{ color: 'white' }}>
-                      ${comma(Math.round(amount as number))}
-                    </S.PriceCategoryAmount>
-                  </S.PriceRow>
-                ))}
-              </S.PriceBreakdown>
-            )}
-          </S.StatisticsCard>
+                return (
+                  <S.ItemCard key={idx} onClick={() => handlePlaceClick(service.item)}>
+                    <S.ItemThumbnail $src={getItemImg(getThumbnailImg)}>
+                      <S.ItemType>Contents</S.ItemType>
+                    </S.ItemThumbnail>
+                    <S.ItemInfo>
+                      <S.ItemName>
+                        {service.nameEng} <span>{service.nameKor}</span>
+                      </S.ItemName>
+                      <S.ItemAddress>
+                        Included for {service.dayCount} {service.dayCount === 1 ? 'day' : 'days'}
+                      </S.ItemAddress>
+                      {!batchInfo?.hidePrice && (
+                        <S.ItemPrice>
+                          ${comma(service.totalPrice)} USD
+                          <span> / Total</span>
+                        </S.ItemPrice>
+                      )}
+                    </S.ItemInfo>
+                  </S.ItemCard>
+                );
+              })}
+            </S.ItemsGrid>
+          </S.InfoCard>
         )}
 
         {/* 일정 섹션 */}
@@ -604,11 +594,25 @@ const Container: FC = () => {
         </S.ItinerarySection>
       </S.Content>
 
-      {/* Floating Action Button - Scroll to Top */}
+      {/* Scroll to Top Button */}
       {showScrollTop && (
-        <S.FloatingActionButton onClick={scrollToTop} title="Scroll to top">
+        <S.ActionButton
+          onClick={scrollToTop}
+          title="Scroll to top"
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            borderRadius: '50%',
+            width: '50px',
+            height: '50px',
+            fontSize: '24px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            zIndex: 1000
+          }}
+        >
           ↑
-        </S.FloatingActionButton>
+        </S.ActionButton>
       )}
     </S.Container>
   );
