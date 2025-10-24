@@ -16,7 +16,6 @@ const successHandler = (res: AxiosResponse): any => res.data;
 const axiosApiInstance = axios.create({
   baseURL,
   headers: {
-    "Access-Control-Allow-Origin": "*",
     "Content-Type": "application/json;charset=UTF-8",
   },
 });
@@ -25,7 +24,6 @@ const axiosApiInstance = axios.create({
 const axiosApiRefreshToken = axios.create({
   baseURL,
   headers: {
-    "Access-Control-Allow-Origin": "*",
     "Content-Type": "application/json;charset=UTF-8",
   },
 });
