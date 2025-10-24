@@ -602,8 +602,8 @@ const Container: FC = () => {
                       item: { type },
                     } = estimate;
 
-                    // Travel Itinerary에는 여행지만 표시
-                    if (type !== "여행지") {
+                    // Travel Itinerary에는 여행지와 숙박만 표시
+                    if (type !== "여행지" && type !== "숙박") {
                       return null;
                     }
 
