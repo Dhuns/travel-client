@@ -170,13 +170,19 @@ const Container: FC = () => {
       const totalPrice = items.reduce((sum, item) => sum + item.price, 0);
       const dayCount = items.length;
       const sampleItem = items[0].item;
+      const days = items.map(item => item.days).sort((a, b) => a - b);
+      const pricePerUnit = items[0].price; // 첫 번째 항목의 가격을 단가로 사용
+      const quantity = items[0].quantity || 1;
 
       return {
         name,
         nameKor: sampleItem.nameKor,
         nameEng: sampleItem.nameEng,
         dayCount,
+        days, // Day 배열
         totalPrice,
+        pricePerUnit, // 단가
+        quantity, // 수량
         item: sampleItem,
       };
     });
@@ -461,56 +467,80 @@ const Container: FC = () => {
         {includedServices.length > 0 && (
           <S.InfoCard style={{ marginTop: 24 }}>
             <S.SectionTitle>📋 Included Services</S.SectionTitle>
-            <div style={{
-              display: 'grid',
-              gap: '12px',
-              marginTop: '16px'
-            }}>
-              {includedServices.map((service, idx) => {
-                const icon = service.item.type === '이동수단' ? '🚗' : '🎭';
-
-                return (
-                  <div
-                    key={idx}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '16px 20px',
-                      background: '#f8f9fa',
-                      borderRadius: '8px',
-                      border: '1px solid #e9ecef'
-                    }}
-                  >
-                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ fontSize: '24px' }}>{icon}</span>
-                      <div>
-                        <div style={{
-                          fontSize: '16px',
-                          fontWeight: '600',
-                          color: '#212529',
-                          marginBottom: '4px'
-                        }}>
-                          {service.nameEng} <span style={{ color: '#868e96', fontWeight: '400' }}>({service.nameKor})</span>
-                        </div>
-                        <div style={{ fontSize: '14px', color: '#868e96' }}>
-                          {service.dayCount} {service.dayCount === 1 ? 'day' : 'days'}
-                        </div>
-                      </div>
-                    </div>
+            <div style={{ marginTop: '20px', overflowX: 'auto' }}>
+              <table style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                fontSize: '14px'
+              }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid #dee2e6' }}>
+                    <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#495057' }}>
+                      Service
+                    </th>
+                    <th style={{ padding: '12px', textAlign: 'center', fontWeight: '600', color: '#495057' }}>
+                      Days
+                    </th>
                     {!batchInfo?.hidePrice && (
-                      <div style={{
-                        fontSize: '16px',
-                        fontWeight: '700',
-                        color: '#667eea',
-                        textAlign: 'right'
-                      }}>
-                        ${comma(service.totalPrice)}
-                      </div>
+                      <>
+                        <th style={{ padding: '12px', textAlign: 'right', fontWeight: '600', color: '#495057' }}>
+                          Unit Price
+                        </th>
+                        <th style={{ padding: '12px', textAlign: 'right', fontWeight: '600', color: '#495057' }}>
+                          Total
+                        </th>
+                      </>
                     )}
-                  </div>
-                );
-              })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {includedServices.map((service, idx) => {
+                    const icon = service.item.type === '이동수단' ? '🚗' : '🎭';
+                    const daysText = service.days.map((d: number) => `Day ${d}`).join(', ');
+
+                    return (
+                      <tr key={idx} style={{
+                        borderBottom: '1px solid #e9ecef',
+                        background: idx % 2 === 0 ? '#ffffff' : '#f8f9fa'
+                      }}>
+                        <td style={{ padding: '16px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ fontSize: '20px' }}>{icon}</span>
+                            <div style={{ fontWeight: '600', color: '#212529' }}>
+                              {service.nameEng}
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ padding: '16px', textAlign: 'center', color: '#495057' }}>
+                          <div style={{ fontSize: '13px', fontWeight: '500' }}>
+                            {daysText}
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#868e96', marginTop: '2px' }}>
+                            ({service.dayCount} {service.dayCount === 1 ? 'day' : 'days'})
+                          </div>
+                        </td>
+                        {!batchInfo?.hidePrice && (
+                          <>
+                            <td style={{ padding: '16px', textAlign: 'right', color: '#495057' }}>
+                              <div style={{ fontWeight: '500' }}>
+                                ${comma(service.pricePerUnit)}
+                              </div>
+                              <div style={{ fontSize: '12px', color: '#868e96', marginTop: '2px' }}>
+                                per day
+                              </div>
+                            </td>
+                            <td style={{ padding: '16px', textAlign: 'right' }}>
+                              <div style={{ fontSize: '16px', fontWeight: '700', color: '#667eea' }}>
+                                ${comma(service.totalPrice)}
+                              </div>
+                            </td>
+                          </>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </S.InfoCard>
         )}
@@ -539,16 +569,13 @@ const Container: FC = () => {
                     const {
                       item,
                       id,
-                      enableContent,
                       item: { type },
                     } = estimate;
 
-                    if (
-                      batchInfo?.onlyPlace &&
-                      type !== "여행지" &&
-                      !enableContent
-                    )
+                    // Travel Itinerary에는 여행지만 표시
+                    if (type !== "여행지") {
                       return null;
+                    }
 
                     const getThumbnailImg = item?.files?.find(
                       (img) => img.type === "썸네일"
@@ -561,7 +588,7 @@ const Container: FC = () => {
                         </S.ItemThumbnail>
                         <S.ItemInfo>
                           <S.ItemName>
-                            {item?.nameEng} <span>{item.nameKor}</span>
+                            {item?.nameEng}
                           </S.ItemName>
                           <S.ItemAddress
                             onClick={(e) => {
