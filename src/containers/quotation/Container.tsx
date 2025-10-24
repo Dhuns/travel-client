@@ -270,17 +270,14 @@ const Container: FC = () => {
     );
   }, [dayDirections]);
 
-  const onAddressHandler = (placeName: string, address: string) => {
-    const searchQuery = `${placeName} ${address}`;
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchQuery)}`;
-    window.open(url, "_blank");
-  };
-
-  const goWebsite = (link: string) => {
-    if (!link || isNil(link) || link === "") {
-      return;
+  // 여행지 클릭 핸들러 - websiteLink 우선, 없으면 Google Places 검색
+  const handlePlaceClick = (item: any) => {
+    if (item?.websiteLink && !isNil(item.websiteLink) && item.websiteLink !== "") {
+      window.open(item.websiteLink, "_blank");
+    } else {
+      const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item?.nameEng || '')}`;
+      window.open(url, "_blank");
     }
-    window.open(link, "_blank");
   };
 
   const totalPeople =
@@ -544,7 +541,7 @@ const Container: FC = () => {
                     )?.itemSrc;
 
                     return (
-                      <S.ItemCard key={id} onClick={() => goWebsite(item?.websiteLink)}>
+                      <S.ItemCard key={id} onClick={() => handlePlaceClick(item)}>
                         <S.ItemThumbnail $src={getItemImg(getThumbnailImg)}>
                           <S.ItemType>{transType(item?.type)}</S.ItemType>
                         </S.ItemThumbnail>
@@ -555,7 +552,7 @@ const Container: FC = () => {
                           <S.ItemAddress
                             onClick={(e) => {
                               e.stopPropagation();
-                              onAddressHandler(item.nameEng, item.addressEnglish);
+                              handlePlaceClick(item);
                             }}
                           >
                             {item?.addressEnglish}
