@@ -144,18 +144,20 @@ const Container: FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // 공통 서비스 항목 추출 (컨텐츠 타입)
+  // 공통 서비스 항목 추출 (컨텐츠, 이동수단)
   const getIncludedServices = () => {
     if (!estimateDetails || estimateDetails.length === 0) {
       return [];
     }
 
-    // 컨텐츠 항목들만 필터링
-    const contentItems = estimateDetails.filter((detail: any) => detail.item?.type === '컨텐츠');
+    // 컨텐츠 및 이동수단 항목들 필터링
+    const commonItems = estimateDetails.filter(
+      (detail: any) => detail.item?.type === '컨텐츠' || detail.item?.type === '이동수단'
+    );
 
     // 항목별로 그룹핑 (이름 기준)
     const groupedByName: Record<string, any[]> = {};
-    contentItems.forEach((item: any) => {
+    commonItems.forEach((item: any) => {
       const key = item.item.nameEng || item.item.nameKor;
       if (!groupedByName[key]) {
         groupedByName[key] = [];
@@ -459,35 +461,57 @@ const Container: FC = () => {
         {includedServices.length > 0 && (
           <S.InfoCard style={{ marginTop: 24 }}>
             <S.SectionTitle>📋 Included Services</S.SectionTitle>
-            <S.ItemsGrid>
+            <div style={{
+              display: 'grid',
+              gap: '12px',
+              marginTop: '16px'
+            }}>
               {includedServices.map((service, idx) => {
-                const getThumbnailImg = service.item?.files?.find(
-                  (img: any) => img.type === "썸네일"
-                )?.itemSrc;
+                const icon = service.item.type === '이동수단' ? '🚗' : '🎭';
 
                 return (
-                  <S.ItemCard key={idx} onClick={() => handlePlaceClick(service.item)}>
-                    <S.ItemThumbnail $src={getItemImg(getThumbnailImg)}>
-                      <S.ItemType>Contents</S.ItemType>
-                    </S.ItemThumbnail>
-                    <S.ItemInfo>
-                      <S.ItemName>
-                        {service.nameEng} <span>{service.nameKor}</span>
-                      </S.ItemName>
-                      <S.ItemAddress>
-                        Included for {service.dayCount} {service.dayCount === 1 ? 'day' : 'days'}
-                      </S.ItemAddress>
-                      {!batchInfo?.hidePrice && (
-                        <S.ItemPrice>
-                          ${comma(service.totalPrice)} USD
-                          <span> / Total</span>
-                        </S.ItemPrice>
-                      )}
-                    </S.ItemInfo>
-                  </S.ItemCard>
+                  <div
+                    key={idx}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '16px 20px',
+                      background: '#f8f9fa',
+                      borderRadius: '8px',
+                      border: '1px solid #e9ecef'
+                    }}
+                  >
+                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontSize: '24px' }}>{icon}</span>
+                      <div>
+                        <div style={{
+                          fontSize: '16px',
+                          fontWeight: '600',
+                          color: '#212529',
+                          marginBottom: '4px'
+                        }}>
+                          {service.nameEng} <span style={{ color: '#868e96', fontWeight: '400' }}>({service.nameKor})</span>
+                        </div>
+                        <div style={{ fontSize: '14px', color: '#868e96' }}>
+                          {service.dayCount} {service.dayCount === 1 ? 'day' : 'days'}
+                        </div>
+                      </div>
+                    </div>
+                    {!batchInfo?.hidePrice && (
+                      <div style={{
+                        fontSize: '16px',
+                        fontWeight: '700',
+                        color: '#667eea',
+                        textAlign: 'right'
+                      }}>
+                        ${comma(service.totalPrice)}
+                      </div>
+                    )}
+                  </div>
                 );
               })}
-            </S.ItemsGrid>
+            </div>
           </S.InfoCard>
         )}
 
