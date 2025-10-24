@@ -179,7 +179,7 @@ export const InfoItem = styled.div`
 `;
 
 export const InfoLabel = styled.label`
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   color: #a0aec0;
   text-transform: uppercase;
@@ -187,7 +187,7 @@ export const InfoLabel = styled.label`
 `;
 
 export const InfoValue = styled.p`
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
   color: #2d3748;
   margin: 0;
@@ -392,14 +392,14 @@ export const ItemInfo = styled.div`
 `;
 
 export const ItemName = styled.h4`
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: #2d3748;
   margin: 0;
   line-height: 1.4;
 
   span {
-    font-size: 14px;
+    font-size: 15px;
     color: #718096;
     font-weight: 400;
     margin-left: 8px;
@@ -407,7 +407,7 @@ export const ItemName = styled.h4`
 `;
 
 export const ItemAddress = styled.p`
-  font-size: 13px;
+  font-size: 15px;
   color: #718096;
   margin: 0;
   display: flex;
@@ -426,13 +426,13 @@ export const ItemAddress = styled.p`
 `;
 
 export const ItemPrice = styled.div`
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   color: #667eea;
   margin-top: auto;
 
   span {
-    font-size: 13px;
+    font-size: 14px;
     color: #a0aec0;
     font-weight: 500;
   }
