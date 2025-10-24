@@ -171,8 +171,8 @@ const Container: FC = () => {
       const dayCount = items.length;
       const sampleItem = items[0].item;
       const days = items.map(item => item.days).sort((a, b) => a - b);
-      const pricePerUnit = items[0].price; // 첫 번째 항목의 가격을 단가로 사용
       const quantity = items[0].quantity || 1;
+      const pricePerUnit = items[0].price / quantity; // 1인당 하루 가격
 
       return {
         name,
@@ -180,9 +180,9 @@ const Container: FC = () => {
         nameEng: sampleItem.nameEng,
         dayCount,
         days, // Day 배열
-        totalPrice,
-        pricePerUnit, // 단가
-        quantity, // 수량
+        totalPrice, // 전체 일수의 총 가격
+        pricePerUnit, // 1인당 하루 가격
+        quantity, // 인원수
         item: sampleItem,
       };
     });
@@ -526,12 +526,15 @@ const Container: FC = () => {
                                 ${comma(service.pricePerUnit)}
                               </div>
                               <div style={{ fontSize: '12px', color: '#868e96', marginTop: '2px' }}>
-                                per day
+                                per person per day
                               </div>
                             </td>
                             <td style={{ padding: '16px', textAlign: 'right' }}>
                               <div style={{ fontSize: '16px', fontWeight: '700', color: '#667eea' }}>
                                 ${comma(service.totalPrice)}
+                              </div>
+                              <div style={{ fontSize: '11px', color: '#868e96', marginTop: '4px' }}>
+                                ${comma(service.pricePerUnit)} × {service.quantity} {service.quantity === 1 ? 'person' : 'people'} × {service.dayCount} {service.dayCount === 1 ? 'day' : 'days'}
                               </div>
                             </td>
                           </>
