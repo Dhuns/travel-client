@@ -4,6 +4,32 @@ import AppleProvider from "next-auth/providers/apple";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { signIn as apiSignIn } from "@shared/apis/user";
 
+// Extend next-auth types
+declare module "next-auth" {
+  interface Session {
+    user: {
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      accessToken?: string;
+      refreshToken?: string;
+    };
+  }
+
+  interface User {
+    accessToken?: string;
+    refreshToken?: string;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    accessToken?: string;
+    refreshToken?: string;
+    provider?: string;
+  }
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     // Google OAuth

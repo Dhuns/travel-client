@@ -634,7 +634,7 @@ const DayMapSection: FC<{
       setHasCalculated(true);
       calculateDirections(markers, day);
     }
-  }, [markers.length, day]);
+  }, [markers.length, day, hasCalculated, markers, calculateDirections]);
 
   const activeWindowId = activeWindowIds[day] || 0;
   const setActiveWindowId = (id: number) => {
@@ -643,20 +643,20 @@ const DayMapSection: FC<{
 
   const directions = dayDirections[day];
 
-  const getBounds = () => {
-    if (!window.google || markers.length === 0) return null;
-
-    const bounds = new google.maps.LatLngBounds();
-    markers.forEach((marker) => {
-      bounds.extend(new google.maps.LatLng(marker.lat, marker.lng));
-    });
-    return bounds;
-  };
-
   const [map, setMap] = useState<any>(null);
 
   useEffect(() => {
     if (map && markers.length > 0) {
+      const getBounds = () => {
+        if (!window.google || markers.length === 0) return null;
+
+        const bounds = new google.maps.LatLngBounds();
+        markers.forEach((marker) => {
+          bounds.extend(new google.maps.LatLng(marker.lat, marker.lng));
+        });
+        return bounds;
+      };
+
       const bounds = getBounds();
       if (bounds) {
         map.fitBounds(bounds);
@@ -668,7 +668,7 @@ const DayMapSection: FC<{
         });
       }
     }
-  }, [map, markers.length]);
+  }, [map, markers]);
 
   return (
     <S.MapSection>
@@ -762,7 +762,7 @@ const MarkerWithWindowInfo = (props: any) => {
     if (isOpen) {
       setActiveWindowId(id);
     }
-  }, [isOpen]);
+  }, [isOpen, id, setActiveWindowId]);
 
   const close = () => {
     setOpen(false);
