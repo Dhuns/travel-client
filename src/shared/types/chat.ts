@@ -2,7 +2,7 @@
 export type MessageRole = 'user' | 'assistant' | 'system';
 
 // 메시지 타입
-export type MessageType = 'text' | 'estimate' | 'quick-reply';
+export type MessageType = 'text' | 'estimate' | 'quick-reply' | 'system';
 
 // 퀵 리플라이 옵션
 export interface QuickReplyOption {
@@ -38,23 +38,26 @@ export interface MessageMetadata {
 // 채팅 메시지
 export interface ChatMessage {
   id: string;
+  messageId?: string; // 백엔드 ID
   role: MessageRole;
   type: MessageType;
   content: string;
   metadata?: MessageMetadata;
   timestamp: Date;
+  sentAt?: Date; // 백엔드 전송 시간
   isStreaming?: boolean;
 }
 
 // 채팅 세션
 export interface ChatSession {
   sessionId: string;
-  status: 'active' | 'completed';
+  status: 'active' | 'converted' | 'abandoned';
   messages: ChatMessage[];
   context: ChatContext;
   title?: string; // 대화 제목 (첫 메시지에서 생성)
   createdAt: Date;
   lastMessageAt?: Date;
+  updatedAt?: Date; // 백엔드 업데이트 시간
 }
 
 // 대화 컨텍스트 (추출된 정보)

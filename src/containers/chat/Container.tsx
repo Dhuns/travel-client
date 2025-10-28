@@ -5,17 +5,16 @@ import ChatMessageList from '@/components/Chat/ChatMessageList';
 import ChatInput from '@/components/Chat/ChatInput';
 import ChatInfoPanel from '@/components/Chat/ChatInfoPanel';
 import ChatSidebar from '@/components/Chat/ChatSidebar';
-import { getMockAIResponse, simulateAITyping } from '@/shared/utils/mockAI';
 
 const Container: FC = () => {
   const {
     sessions,
     getCurrentSession,
     isTyping,
+    isLoading,
     initSession,
     loadSession,
-    addMessage,
-    setIsTyping,
+    sendUserMessage,
     updateContext,
     clearSession,
     loadFromStorage,
@@ -51,14 +50,7 @@ const Container: FC = () => {
   const handleSendMessage = async (content: string) => {
     if (!session) return;
 
-    // 사용자 메시지 추가
-    addMessage({
-      role: 'user',
-      type: 'text',
-      content,
-    });
-
-    // 컨텍스트 추출 (간단한 키워드 매칭)
+    // 컨텍스트 추출 (간단한 키워드 매칭 - UI 즉시 업데이트용)
     const lowerContent = content.toLowerCase();
 
     // 목적지 추출
@@ -103,39 +95,8 @@ const Container: FC = () => {
       updateContext({ preferences: [...(context.preferences || []), '체험형'] });
     }
 
-    // 대화 히스토리 생성
-    const conversationHistory = session.messages.map(m => m.content);
-
-    // AI 타이핑 시작
-    setIsTyping(true);
-
-    // Mock AI 응답 생성
-    await simulateAITyping(() => {
-      const response = getMockAIResponse(content, conversationHistory);
-
-      // AI 텍스트 응답
-      addMessage({
-        role: 'assistant',
-        type: 'text',
-        content: response.text,
-      });
-
-      // 견적서가 포함된 경우
-      if (response.estimate) {
-        setTimeout(() => {
-          addMessage({
-            role: 'assistant',
-            type: 'estimate',
-            content: '이렇게 준비해봤어요!',
-            metadata: {
-              estimatePreview: response.estimate,
-            },
-          });
-        }, 800);
-      }
-
-      setIsTyping(false);
-    });
+    // 백엔드 API로 메시지 전송 및 AI 응답 받기 (Gemini AI)
+    await sendUserMessage(content);
   };
 
   if (!session) {
