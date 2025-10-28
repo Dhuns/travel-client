@@ -135,9 +135,12 @@ const HomeContainer: React.FC = () => {
             있습니다.
           </S.HeroDescription>
           <S.CTAButtons>
-            <S.PrimaryButton onClick={handleGetStarted}>
-              지금 시작하기 →
+            <S.PrimaryButton onClick={() => router.push("/chat")}>
+              💬 AI와 채팅으로 견적 받기
             </S.PrimaryButton>
+            <S.SecondaryButton onClick={handleGetStarted}>
+              직접 견적 요청하기
+            </S.SecondaryButton>
             <S.SecondaryButton onClick={() => router.push("/packages")}>
               여행 상품 둘러보기
             </S.SecondaryButton>
