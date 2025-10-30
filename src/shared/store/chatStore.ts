@@ -55,7 +55,11 @@ const useChatStore = create<ChatStore>((set, get) => ({
 
     // 최대 개수 체크
     if (sessions.length >= MAX_SESSIONS) {
-      alert(`최대 ${MAX_SESSIONS}개의 채팅만 생성할 수 있습니다.\n기존 채팅을 삭제해주세요.`);
+      alert(
+        `최대 ${MAX_SESSIONS}개의 채팅만 생성할 수 있습니다.\n\n` +
+        `💡 좌측 사이드바에서 기존 채팅을 선택하거나\n` +
+        `불필요한 채팅을 삭제한 후 새 채팅을 시작해주세요.`
+      );
       return false;
     }
 

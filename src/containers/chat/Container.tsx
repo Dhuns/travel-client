@@ -34,12 +34,25 @@ const Container: FC = () => {
     }
   }, [isInitialized, loadFromStorage]);
 
-  // 세션이 없으면 자동으로 새 세션 생성 (메시지는 추가하지 않음)
+  // 세션이 없으면 자동으로 새 세션 생성 또는 기존 세션 로드
   useEffect(() => {
     if (isInitialized && !session) {
-      initSession();
+      // 세션이 없는 경우
+      if (sessions.length === 0) {
+        // 저장된 세션이 없으면 새로 생성
+        initSession();
+      } else {
+        // 저장된 세션이 있으면 가장 최근 세션 로드
+        const latestSession = sessions.sort((a, b) =>
+          new Date(b.lastMessageAt || b.createdAt).getTime() -
+          new Date(a.lastMessageAt || a.createdAt).getTime()
+        )[0];
+        if (latestSession) {
+          loadSession(latestSession.sessionId);
+        }
+      }
     }
-  }, [isInitialized, session]);
+  }, [isInitialized, session, sessions.length]);
 
   // 새 채팅 시작
   const handleNewChat = () => {
@@ -65,7 +78,6 @@ const Container: FC = () => {
     // 기간 추출
     const dayMatch = lowerContent.match(/(\d+)박\s*(\d+)일/);
     if (dayMatch) {
-      const nights = parseInt(dayMatch[1]);
       const days = parseInt(dayMatch[2]);
       // 임시로 오늘부터 계산
       const today = new Date();

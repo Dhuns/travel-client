@@ -11,6 +11,12 @@ interface SignUpFormData {
   password: string;
   passwordConfirm: string;
   name: string;
+  email?: string;
+  phone?: string;
+  birthDate?: string;
+  gender?: 'male' | 'female' | 'other';
+  termsAgreed: boolean;
+  privacyAgreed: boolean;
 }
 
 const SignUpContainer: React.FC = () => {
@@ -63,14 +69,26 @@ const SignUpContainer: React.FC = () => {
       return;
     }
 
+    if (!data.termsAgreed || !data.privacyAgreed) {
+      setErrorMessage("이용약관 및 개인정보처리방침에 동의해주세요.");
+      return;
+    }
+
     setIsLoading(true);
     setErrorMessage("");
 
     try {
+      const now = new Date().toISOString();
       const payload: SignUpPayload = {
         username: data.username,
         password: data.password,
         name: data.name,
+        email: data.email,
+        phone: data.phone,
+        birthDate: data.birthDate,
+        gender: data.gender,
+        termsAgreedAt: data.termsAgreed ? now : undefined,
+        privacyAgreedAt: data.privacyAgreed ? now : undefined,
       };
 
       await signUp(payload);
@@ -176,6 +194,93 @@ const SignUpContainer: React.FC = () => {
               <S.ErrorText>{errors.passwordConfirm.message}</S.ErrorText>
             )}
           </S.FormGroup>
+
+          {/* 이메일 (선택) */}
+          <S.FormGroup>
+            <S.Label>이메일 (선택)</S.Label>
+            <S.Input
+              type="email"
+              placeholder="email@example.com"
+              {...register("email", {
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "올바른 이메일 형식이 아닙니다.",
+                },
+              })}
+            />
+            {errors.email && <S.ErrorText>{errors.email.message}</S.ErrorText>}
+          </S.FormGroup>
+
+          {/* 전화번호 (선택) */}
+          <S.FormGroup>
+            <S.Label>전화번호 (선택)</S.Label>
+            <S.Input
+              type="tel"
+              placeholder="010-1234-5678"
+              {...register("phone", {
+                pattern: {
+                  value: /^[0-9-]+$/,
+                  message: "올바른 전화번호 형식이 아닙니다.",
+                },
+              })}
+            />
+            {errors.phone && <S.ErrorText>{errors.phone.message}</S.ErrorText>}
+          </S.FormGroup>
+
+          {/* 생년월일 (선택) */}
+          <S.FormGroup>
+            <S.Label>생년월일 (선택)</S.Label>
+            <S.Input
+              type="date"
+              {...register("birthDate")}
+            />
+          </S.FormGroup>
+
+          {/* 성별 (선택) */}
+          <S.FormGroup>
+            <S.Label>성별 (선택)</S.Label>
+            <S.Select {...register("gender")}>
+              <option value="">선택 안함</option>
+              <option value="male">남성</option>
+              <option value="female">여성</option>
+              <option value="other">기타</option>
+            </S.Select>
+          </S.FormGroup>
+
+          {/* 약관 동의 */}
+          <S.CheckboxGroup>
+            <S.CheckboxLabel>
+              <input
+                type="checkbox"
+                {...register("termsAgreed", {
+                  required: true,
+                })}
+              />
+              <span>
+                <S.Link onClick={() => router.push(PATHS.TERMS)}>
+                  이용약관
+                </S.Link>
+                에 동의합니다. (필수)
+              </span>
+            </S.CheckboxLabel>
+          </S.CheckboxGroup>
+
+          <S.CheckboxGroup>
+            <S.CheckboxLabel>
+              <input
+                type="checkbox"
+                {...register("privacyAgreed", {
+                  required: true,
+                })}
+              />
+              <span>
+                <S.Link onClick={() => router.push(PATHS.PRIVACY)}>
+                  개인정보처리방침
+                </S.Link>
+                에 동의합니다. (필수)
+              </span>
+            </S.CheckboxLabel>
+          </S.CheckboxGroup>
 
           {/* 에러 메시지 */}
           {errorMessage && <S.ErrorText>{errorMessage}</S.ErrorText>}

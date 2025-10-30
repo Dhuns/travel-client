@@ -204,6 +204,59 @@ export const OAuthIcon = styled.span`
   font-size: 16px;
 `;
 
+export const Select = styled.select`
+  padding: 12px 16px;
+  font-size: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.2s;
+  background: white;
+  cursor: pointer;
+
+  &:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+`;
+
+export const CheckboxGroup = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+`;
+
+export const CheckboxLabel = styled.label`
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  color: #4a5568;
+  cursor: pointer;
+  user-select: none;
+
+  input[type="checkbox"] {
+    margin-top: 2px;
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    min-height: 18px;
+    flex-shrink: 0;
+    accent-color: #667eea;
+    appearance: auto;
+    -webkit-appearance: checkbox;
+    -moz-appearance: checkbox;
+    opacity: 1;
+    visibility: visible;
+    display: block;
+  }
+
+  span {
+    flex: 1;
+  }
+`;
+
 export const LinkText = styled.p`
   text-align: center;
   margin-top: 24px;
