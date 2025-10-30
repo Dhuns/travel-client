@@ -5,6 +5,8 @@ export const PATHS = {
   SIGNUP: "/signup",
   MY_ESTIMATES: "/my-estimates",
   REQUEST_ESTIMATE: "/request",
+  TERMS: "/terms",
+  PRIVACY: "/privacy",
 };
 
 export const GUARD_ROUTES = [];

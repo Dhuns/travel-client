@@ -5,6 +5,13 @@ export interface SignUpPayload {
   username: string;
   password: string;
   name: string;
+  email?: string;
+  phone?: string;
+  birthDate?: string; // YYYY-MM-DD format
+  gender?: 'male' | 'female' | 'other';
+  profileImage?: string;
+  termsAgreedAt?: string; // ISO datetime string
+  privacyAgreedAt?: string; // ISO datetime string
 }
 
 export interface SignInPayload {

@@ -162,12 +162,12 @@ const globalStyles = css`
     outline: none;
   }
 
-  input:not([type="radio"]) {
+  input:not([type="radio"]):not([type="checkbox"]) {
     outline: none;
     -webkit-appearance: none;
   }
 
-  input:not([type="radio"]),
+  input:not([type="radio"]):not([type="checkbox"]),
   textarea {
     -webkit-appearance: none;
     -moz-user-select: auto !important;
