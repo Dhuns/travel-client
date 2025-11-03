@@ -5,6 +5,7 @@ import Footer from "@/components/footer";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import Header from "@/components/header";
+import { MessageCircle } from "lucide-react";
 import type { Metadata } from "next";
 import type React from "react";
 import { Suspense } from "react";
@@ -48,6 +49,14 @@ html {
             <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
           </main>
           <Footer />
+          {/* 플로팅 챗봇 버튼 (모든 페이지에 표시) */}
+          <a
+            href="/chat"
+            className="fixed bottom-8 right-8 z-50 h-16 w-16 rounded-full shadow-lg transition-transform duration-300 ease-in-out hover:scale-110 bg-sky-600 hover:bg-sky-700 text-white flex items-center justify-center"
+            aria-label="Open chat page"
+          >
+            <MessageCircle className="h-8 w-8" />
+          </a>
         </ThemeProvider>
 
         <Analytics />
