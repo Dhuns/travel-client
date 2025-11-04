@@ -179,12 +179,39 @@ const useChatStore = create<ChatStore>((set, get) => ({
       if (session.sessionId === currentSessionId) {
         const updatedMessages = [...session.messages, newMessage];
 
-        // 제목 자동 생성 (첫 사용자 메시지)
+        // 제목 자동 생성 (컨텍스트 기반)
         let title = session.title;
-        if (!title && message.role === "user" && updatedMessages.length > 0) {
-          title =
-            message.content.slice(0, 30) +
-            (message.content.length > 30 ? "..." : "");
+        if (!title || title === "New Chat") {
+          // 컨텍스트 정보를 기반으로 제목 생성
+          const ctx = session.context;
+          const parts: string[] = [];
+
+          if (ctx.destination) {
+            parts.push(ctx.destination);
+          }
+
+          if (ctx.startDate && ctx.endDate) {
+            const start = new Date(ctx.startDate);
+            const end = new Date(ctx.endDate);
+            const nights = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+            const days = nights + 1;
+            parts.push(`${nights}박${days}일`);
+          }
+
+          const totalPeople = (ctx.adults || 0) + (ctx.children || 0) + (ctx.infants || 0);
+          if (totalPeople > 0) {
+            parts.push(`${totalPeople}명`);
+          }
+
+          // 컨텍스트 기반 제목이 있으면 사용
+          if (parts.length > 0) {
+            title = parts.join(" ");
+          } else if (message.role === "user" && updatedMessages.length > 0) {
+            // 컨텍스트가 없으면 첫 메시지 사용
+            title =
+              message.content.slice(0, 30) +
+              (message.content.length > 30 ? "..." : "");
+          }
         }
 
         return {
@@ -302,12 +329,42 @@ const useChatStore = create<ChatStore>((set, get) => ({
       // 로컬 상태 업데이트
       const updatedSessions = sessions.map((session) => {
         if (session.sessionId === currentSessionId) {
+          const updatedContext = {
+            ...session.context,
+            ...newContext,
+          };
+
+          // 컨텍스트 기반 제목 자동 생성
+          let title = session.title;
+          if (!title || title === "New Chat" || title.endsWith("...")) {
+            const parts: string[] = [];
+
+            if (updatedContext.destination) {
+              parts.push(updatedContext.destination);
+            }
+
+            if (updatedContext.startDate && updatedContext.endDate) {
+              const start = new Date(updatedContext.startDate);
+              const end = new Date(updatedContext.endDate);
+              const nights = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+              const days = nights + 1;
+              parts.push(`${nights}박${days}일`);
+            }
+
+            const totalPeople = (updatedContext.adults || 0) + (updatedContext.children || 0) + (updatedContext.infants || 0);
+            if (totalPeople > 0) {
+              parts.push(`${totalPeople}명`);
+            }
+
+            if (parts.length > 0) {
+              title = parts.join(" ");
+            }
+          }
+
           return {
             ...session,
-            context: {
-              ...session.context,
-              ...newContext,
-            },
+            context: updatedContext,
+            title,
           };
         }
         return session;
@@ -322,6 +379,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
       if (session) {
         await updateChatSession(currentSessionId, {
           context: session.context,
+          title: session.title,
         });
       }
 

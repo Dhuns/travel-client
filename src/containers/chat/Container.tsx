@@ -115,6 +115,17 @@ const Container: FC = () => {
       });
     }
 
+    // 예산 추출
+    const budgetMatch = content.match(/(\d{1,3}(?:,\d{3})*(?:\.\d+)?)\s*(?:만원|만|원)/);
+    if (budgetMatch) {
+      let budgetValue = parseFloat(budgetMatch[1].replace(/,/g, ""));
+      // "만원" 또는 "만"이 포함되어 있으면 10000을 곱함
+      if (content.includes("만")) {
+        budgetValue = budgetValue * 10000;
+      }
+      updateContext({ budget: budgetValue });
+    }
+
     // 백엔드 API로 메시지 전송 및 AI 응답 받기 (Gemini AI)
     await sendUserMessage(content);
   };
