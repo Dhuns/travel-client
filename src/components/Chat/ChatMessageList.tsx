@@ -1,5 +1,6 @@
 import React, { FC, useEffect, useRef } from "react";
 
+import ChatInput from "./ChatInput";
 import ChatMessage from "./ChatMessage";
 import { ChatMessage as ChatMessageType } from "@shared/types/chat";
 import EstimateCard from "./EstimateCard";
@@ -9,9 +10,16 @@ import styled from "@emotion/styled";
 interface Props {
   messages: ChatMessageType[];
   isTyping?: boolean;
+  hasMessages?: boolean;
+  onSend?: (message: string) => void;
 }
 
-const ChatMessageList: FC<Props> = ({ messages, isTyping = false }) => {
+const ChatMessageList: FC<Props> = ({
+  messages,
+  isTyping = false,
+  hasMessages = true,
+  onSend,
+}) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 새 메시지가 추가되면 자동 스크롤 (더 부드럽게)
@@ -27,8 +35,30 @@ const ChatMessageList: FC<Props> = ({ messages, isTyping = false }) => {
   }, [messages.length, isTyping]);
 
   return (
-    <Container>
-      <MessagesList>
+    <Container hasMessages={hasMessages}>
+      <MessagesList hasMessages={hasMessages}>
+        {/* 메시지가 없을 때 안내 멘트와 입력창 표시 */}
+        {messages.length === 0 && !isTyping && (
+          <WelcomeMessageContainer>
+            <WelcomeMessage>
+              <WelcomeIcon>✈️</WelcomeIcon>
+              <WelcomeText>어떤 여행 계획을 원하시나요?</WelcomeText>
+              <WelcomeSubtext>
+                여행지, 날짜, 인원 등을 자유롭게 말씀해주세요
+              </WelcomeSubtext>
+            </WelcomeMessage>
+            {onSend && (
+              <WelcomeInputWrapper>
+                <ChatInput
+                  onSend={onSend}
+                  disabled={isTyping}
+                  placeholder="메시지를 입력하세요..."
+                />
+              </WelcomeInputWrapper>
+            )}
+          </WelcomeMessageContainer>
+        )}
+
         {messages.map((message) => {
           // 견적서 카드 타입
           if (
@@ -59,16 +89,24 @@ const ChatMessageList: FC<Props> = ({ messages, isTyping = false }) => {
 export default ChatMessageList;
 
 // Styled Components
-const Container = styled.div`
+const Container = styled.div<{ hasMessages: boolean }>`
   flex: 1;
   overflow-y: auto;
   background-color: #ffffff;
   min-height: 0;
+  ${({ hasMessages }) =>
+    !hasMessages &&
+    `
+    display: flex;
+    align-items: start;
+    justify-content: center;
+    padding-top: 10vh;
+  `}
 `;
 
-const MessagesList = styled.div`
+const MessagesList = styled.div<{ hasMessages: boolean }>`
   padding: 0;
-  min-height: 100%;
+  min-height: ${({ hasMessages }) => (hasMessages ? "100%" : "auto")};
   display: flex;
   flex-direction: column;
   max-width: 800px;
@@ -79,4 +117,46 @@ const MessagesList = styled.div`
 const EstimateCardWrapper = styled.div`
   padding: 16px 24px;
   background-color: #f9f9f9;
+`;
+
+const WelcomeMessageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 32px;
+`;
+
+const WelcomeMessage = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px 0;
+  text-align: center;
+`;
+
+const WelcomeIcon = styled.div`
+  font-size: 48px;
+  margin-bottom: 16px;
+`;
+
+const WelcomeText = styled.h2`
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+`;
+
+const WelcomeSubtext = styled.p`
+  font-size: 15px;
+  color: #888;
+  margin: 0;
+`;
+
+const WelcomeInputWrapper = styled.div`
+  width: 100%;
+  max-width: 800px;
+  padding: 0 24px 40px;
 `;
