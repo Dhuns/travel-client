@@ -85,13 +85,12 @@ export default ChatSidebar;
 // Styled Components
 const Container = styled.div`
   width: 260px;
-  height: 100vh;
   background-color: #ffffff;
-  border-right: 1px solid #e0e0e0;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
   padding: 0 12px;
+  flex-shrink: 0;
 
   @media (max-width: 1024px) {
     display: none;
@@ -100,7 +99,7 @@ const Container = styled.div`
 
 const LogoSection = styled.div`
   padding: 18px 4px;
-  border-bottom: 1px solid #e8e8e8;
+  flex-shrink: 0;
 `;
 
 const Logo = styled.div`
@@ -130,6 +129,7 @@ const NewChatButton = styled.button`
   gap: 8px;
   cursor: pointer;
   transition: all 0.15s;
+  flex-shrink: 0;
 
   &:hover {
     background-color: #f0f0f0;
@@ -152,6 +152,7 @@ const ChatListSection = styled.div`
   flex: 1;
   padding: 8px 0;
   overflow-y: auto;
+  min-height: 0;
 `;
 
 const SectionTitle = styled.div`
@@ -256,7 +257,7 @@ const DeleteButton = styled.button`
 
 const BottomMenu = styled.div`
   padding: 14px 0;
-  border-top: 1px solid #e8e8e8;
+  flex-shrink: 0;
 `;
 
 const MenuItem = styled.div`

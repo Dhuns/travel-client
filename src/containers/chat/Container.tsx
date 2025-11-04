@@ -195,14 +195,14 @@ const Container: FC = () => {
         </ChatWrapper>
 
         {/* 우측 정보 패널 (토글 가능) */}
-        {showInfoPanel && (
-          <InfoPanel>
+        <InfoPanel isVisible={showInfoPanel}>
+          <InfoPanelContent isVisible={showInfoPanel}>
             <ChatInfoPanel
               context={context}
               messageCount={session.messages.length}
             />
-          </InfoPanel>
-        )}
+          </InfoPanelContent>
+        </InfoPanel>
       </MainArea>
     </PageContainer>
   );
@@ -213,7 +213,8 @@ export default Container;
 // Styled Components
 const PageContainer = styled.div`
   display: flex;
-  height: 100vh;
+  flex: 1;
+  min-height: 0;
   background-color: #ffffff;
   overflow: hidden;
 `;
@@ -223,7 +224,7 @@ const MainArea = styled.div`
   display: flex;
   overflow: hidden;
   position: relative;
-  background-color: #fafafa;
+  background-color: #ffffff;
 `;
 
 const ChatWrapper = styled.div`
@@ -231,17 +232,16 @@ const ChatWrapper = styled.div`
   display: flex;
   justify-content: center;
   overflow: hidden;
-  background-color: #fafafa;
+  background-color: #ffffff;
 `;
 
 const ChatSection = styled.div`
   width: 100%;
-  max-width: 800px;
   display: flex;
   flex-direction: column;
   background-color: #ffffff;
   position: relative;
-  box-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
+  min-height: 0;
 `;
 
 const TopBar = styled.div`
@@ -249,10 +249,12 @@ const TopBar = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 14px 24px;
-  border-bottom: 1px solid #e8e8e8;
   background-color: #ffffff;
   z-index: 10;
   flex-shrink: 0;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
 `;
 
 const TopBarLeft = styled.div`
@@ -299,15 +301,18 @@ const IconButton = styled.button`
 const InputArea = styled.div`
   padding: 16px 24px 24px 24px;
   background-color: #ffffff;
-  border-top: 1px solid #e8e8e8;
   flex-shrink: 0;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
 `;
 
-const InfoPanel = styled.div`
-  width: 340px;
-  background-color: #fafafa;
-  overflow-y: auto;
+const InfoPanel = styled.div<{ isVisible: boolean }>`
+  width: ${({ isVisible }) => (isVisible ? "340px" : "0")};
+  background-color: #ffffff;
+  overflow: hidden;
   flex-shrink: 0;
+  transition: width 0.3s ease-in-out;
 
   @media (max-width: 1280px) {
     position: absolute;
@@ -319,12 +324,20 @@ const InfoPanel = styled.div`
   }
 `;
 
+const InfoPanelContent = styled.div<{ isVisible: boolean }>`
+  width: 340px;
+  height: 100%;
+  opacity: ${({ isVisible }) => (isVisible ? "1" : "0")};
+  transition: opacity ${({ isVisible }) => (isVisible ? "0.3s 0.15s" : "0.15s")} ease-in-out;
+`;
+
 const LoadingContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  background-color: #fafafa;
+  flex: 1;
+  min-height: 0;
+  background-color: #ffffff;
 `;
 
 const LoadingText = styled.p`
@@ -336,9 +349,14 @@ const EmptyStateContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  flex: 1;
+  min-height: 0;
   background-color: #ffffff;
   padding: 24px;
+  overflow-y: auto;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
 `;
 
 const EmptyStateContent = styled.div`
