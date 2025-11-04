@@ -32,7 +32,7 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount }) => {
 
   return (
     <Container>
-      {/* 헤더 */}
+      {/* 헤더 - 데스크톱에서만 표시 */}
       <Header>
         <Title>여행 정보</Title>
         <Badge>{messageCount}개 메시지</Badge>
@@ -125,6 +125,10 @@ const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  @media (max-width: 1280px) {
+    display: none;
+  }
 `;
 
 const Title = styled.h2`
