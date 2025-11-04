@@ -37,7 +37,7 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
 
       {/* 대화 목록 */}
       <ChatListSection>
-        <SectionTitle>최근 대화</SectionTitle>
+        <SectionTitle>채팅</SectionTitle>
         <ChatList>
           {sessions.length === 0 ? (
             <EmptyState>아직 대화가 없습니다</EmptyState>
