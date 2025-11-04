@@ -63,6 +63,7 @@ const Container = styled.div`
   flex: 1;
   overflow-y: auto;
   background-color: #ffffff;
+  min-height: 0;
 `;
 
 const MessagesList = styled.div`
@@ -70,6 +71,9 @@ const MessagesList = styled.div`
   min-height: 100%;
   display: flex;
   flex-direction: column;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
 `;
 
 const EstimateCardWrapper = styled.div`

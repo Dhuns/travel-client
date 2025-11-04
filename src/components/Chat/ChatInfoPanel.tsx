@@ -112,7 +112,7 @@ export default ChatInfoPanel;
 const Container = styled.div`
   width: 100%;
   height: 100%;
-  background-color: #fafafa;
+  background-color: #ffffff;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -122,7 +122,6 @@ const Container = styled.div`
 const Header = styled.div`
   padding: 18px 4px;
   background-color: transparent;
-  border-bottom: 1px solid #e8e8e8;
   display: flex;
   justify-content: space-between;
   align-items: center;
