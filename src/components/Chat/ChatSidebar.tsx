@@ -42,29 +42,35 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
           {sessions.length === 0 ? (
             <EmptyState>아직 대화가 없습니다</EmptyState>
           ) : (
-            sessions.map((session) => (
-              <ChatItem
-                key={session.sessionId}
-                active={currentSession?.sessionId === session.sessionId}
-                onClick={() => loadSession(session.sessionId)}
-              >
-                <ChatItemLeft>
-                  <ChatItemIcon>💬</ChatItemIcon>
-                  <ChatItemTextWrapper>
-                    <ChatItemText>{session.title || "새 대화"}</ChatItemText>
-                    <ChatItemDate>
-                      {dayjs(session.createdAt).format("MM/DD HH:mm")}
-                    </ChatItemDate>
-                  </ChatItemTextWrapper>
-                </ChatItemLeft>
-                <DeleteButton
-                  onClick={(e) => handleDeleteSession(e, session.sessionId)}
-                  title="삭제"
+            [...sessions]
+              .sort((a, b) => {
+                const aTime = a.lastMessageAt || a.createdAt;
+                const bTime = b.lastMessageAt || b.createdAt;
+                return new Date(bTime).getTime() - new Date(aTime).getTime();
+              })
+              .map((session) => (
+                <ChatItem
+                  key={session.sessionId}
+                  active={currentSession?.sessionId === session.sessionId}
+                  onClick={() => loadSession(session.sessionId)}
                 >
-                  ×
-                </DeleteButton>
-              </ChatItem>
-            ))
+                  <ChatItemLeft>
+                    <ChatItemIcon>💬</ChatItemIcon>
+                    <ChatItemTextWrapper>
+                      <ChatItemText>{session.title || "새 대화"}</ChatItemText>
+                      <ChatItemDate>
+                        {dayjs(session.lastMessageAt || session.createdAt).format("MM/DD HH:mm")}
+                      </ChatItemDate>
+                    </ChatItemTextWrapper>
+                  </ChatItemLeft>
+                  <DeleteButton
+                    onClick={(e) => handleDeleteSession(e, session.sessionId)}
+                    title="삭제"
+                  >
+                    ×
+                  </DeleteButton>
+                </ChatItem>
+              ))
           )}
         </ChatList>
       </ChatListSection>
