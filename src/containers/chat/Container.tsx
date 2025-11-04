@@ -203,8 +203,13 @@ const Container: FC = () => {
         </ChatWrapper>
 
         {/* 우측 정보 패널 (토글 가능) */}
+        {showInfoPanel && <InfoPanelBackdrop onClick={() => setShowInfoPanel(false)} />}
         <InfoPanel isVisible={showInfoPanel}>
           <InfoPanelContent isVisible={showInfoPanel}>
+            <InfoPanelHeader>
+              <InfoPanelTitle>여행 정보</InfoPanelTitle>
+              <CloseButton onClick={() => setShowInfoPanel(false)}>✕</CloseButton>
+            </InfoPanelHeader>
             <ChatInfoPanel
               context={context}
               messageCount={session.messages.length}
@@ -326,12 +331,15 @@ const InfoPanel = styled.div<{ isVisible: boolean }>`
   transition: width 0.3s ease-in-out;
 
   @media (max-width: 1280px) {
-    position: absolute;
-    right: 0;
-    top: 0;
+    position: fixed;
+    right: ${({ isVisible }) => (isVisible ? "0" : "-340px")};
+    top: 80px;
     bottom: 0;
+    width: 340px;
+    max-width: 85vw;
     box-shadow: -4px 0 12px rgba(0, 0, 0, 0.08);
-    z-index: 20;
+    z-index: 1001;
+    transition: right 0.3s ease-in-out;
   }
 `;
 
@@ -340,6 +348,63 @@ const InfoPanelContent = styled.div<{ isVisible: boolean }>`
   height: 100%;
   opacity: ${({ isVisible }) => (isVisible ? "1" : "0")};
   transition: opacity ${({ isVisible }) => (isVisible ? "0.3s 0.15s" : "0.15s")} ease-in-out;
+  display: flex;
+  flex-direction: column;
+`;
+
+const InfoPanelBackdrop = styled.div`
+  display: none;
+
+  @media (max-width: 1280px) {
+    display: block;
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+  }
+`;
+
+const InfoPanelHeader = styled.div`
+  display: none;
+
+  @media (max-width: 1280px) {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #e8e8e8;
+    background-color: #ffffff;
+  }
+`;
+
+const InfoPanelTitle = styled.h3`
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+`;
+
+const CloseButton = styled.button`
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  background-color: transparent;
+  color: #888;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+
+  &:hover {
+    background-color: #f0f0f0;
+    color: #000;
+  }
 `;
 
 const LoadingContainer = styled.div`
