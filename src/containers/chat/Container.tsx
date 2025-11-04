@@ -127,10 +127,11 @@ const Container: FC = () => {
     );
   }
 
-  // 메시지가 없으면 EmptyState 표시
+  // 메시지가 없고 세션도 없으면 EmptyState 표시 (최초 방문자)
   const hasMessages = session.messages.length > 0;
+  const isFirstVisit = sessions.length === 0 && !hasMessages;
 
-  if (!hasMessages) {
+  if (isFirstVisit) {
     return (
       <EmptyStateContainer>
         <EmptyStateContent>
@@ -162,7 +163,7 @@ const Container: FC = () => {
       <MainArea>
         {/* 중앙 채팅 영역 */}
         <ChatWrapper>
-          <ChatSection>
+          <ChatSection hasMessages={hasMessages}>
             {/* 상단 툴바 */}
             <TopBar>
               <TopBarLeft>
@@ -179,18 +180,25 @@ const Container: FC = () => {
             </TopBar>
 
             {/* 메시지 리스트 */}
-            <ChatMessageList messages={session.messages} isTyping={isTyping} />
+            <ChatMessageList
+              messages={session.messages}
+              isTyping={isTyping}
+              hasMessages={hasMessages}
+              onSend={handleSendMessage}
+            />
 
-            {/* 입력창 */}
-            <InputArea>
-              <ChatInput
-                onSend={handleSendMessage}
-                disabled={isTyping}
-                placeholder={
-                  isTyping ? "AI가 답변 중입니다..." : "메시지를 입력하세요..."
-                }
-              />
-            </InputArea>
+            {/* 입력창 - 메시지가 있을 때만 하단에 표시 */}
+            {hasMessages && (
+              <InputArea>
+                <ChatInput
+                  onSend={handleSendMessage}
+                  disabled={isTyping}
+                  placeholder={
+                    isTyping ? "AI가 답변 중입니다..." : "메시지를 입력하세요..."
+                  }
+                />
+              </InputArea>
+            )}
           </ChatSection>
         </ChatWrapper>
 
@@ -235,13 +243,16 @@ const ChatWrapper = styled.div`
   background-color: #ffffff;
 `;
 
-const ChatSection = styled.div`
+const ChatSection = styled.div<{ hasMessages: boolean }>`
   width: 100%;
   display: flex;
   flex-direction: column;
   background-color: #ffffff;
   position: relative;
   min-height: 0;
+  ${({ hasMessages }) => !hasMessages && `
+    justify-content: flex-start;
+  `}
 `;
 
 const TopBar = styled.div`

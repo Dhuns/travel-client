@@ -26,7 +26,7 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
     <Container>
       {/* 로고 */}
       <LogoSection>
-        <Logo onClick={() => router.push("/")}>✈️ DIY Travel</Logo>
+        <Logo>✈️ DIY Travel</Logo>
       </LogoSection>
 
       {/* 새 채팅 버튼 */}
@@ -37,7 +37,7 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
 
       {/* 대화 목록 */}
       <ChatListSection>
-        <SectionTitle>최근 대화</SectionTitle>
+        <SectionTitle>채팅</SectionTitle>
         <ChatList>
           {sessions.length === 0 ? (
             <EmptyState>아직 대화가 없습니다</EmptyState>
@@ -85,7 +85,7 @@ export default ChatSidebar;
 // Styled Components
 const Container = styled.div`
   width: 260px;
-  background-color: #ffffff;
+  background-color: #f8f9fa;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -106,19 +106,13 @@ const Logo = styled.div`
   font-size: 17px;
   font-weight: 600;
   color: #1a1a1a;
-  cursor: pointer;
-  transition: color 0.15s;
-
-  &:hover {
-    color: #007aff;
-  }
 `;
 
 const NewChatButton = styled.button`
   margin: 14px 0;
   padding: 11px 14px;
   background-color: #f8f8f8;
-  border: 1px solid #e0e0e0;
+  border: none;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
@@ -133,7 +127,6 @@ const NewChatButton = styled.button`
 
   &:hover {
     background-color: #f0f0f0;
-    border-color: #007aff;
   }
 `;
 
