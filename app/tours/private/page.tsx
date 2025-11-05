@@ -12,6 +12,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
 export default function PrivateTourPage() {
   return (
@@ -242,157 +243,163 @@ export default function PrivateTourPage() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {/* Tour 1 */}
-            <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-              <div className="relative h-64">
-                <img
-                  src="/seoul-royal-palace-gyeongbokgung.jpg"
-                  alt="Seoul Royal Palace"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#651d2a]">
-                  Dedicated Guide
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                  <div className="flex items-center gap-1">
-                    <MapPin size={16} />
-                    <span>Seoul</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock size={16} />
-                    <span>6 hours</span>
+            <Link href="/tours/private/1">
+              <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow cursor-pointer">
+                <div className="relative h-64">
+                  <img
+                    src="/seoul-royal-palace-gyeongbokgung.jpg"
+                    alt="Seoul Royal Palace"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#651d2a]">
+                    Dedicated Guide
                   </div>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">
-                  Seoul Royal Palace Private Tour
-                </h3>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                    Gyeongbokgung
-                  </span>
-                  <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                    Changdeokgung
-                  </span>
-                  <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                    Hanbok Experience
-                  </span>
-                  <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                    Traditional Tea
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold text-[#651d2a]">
-                    $280
-                  </span>
-                  <Button className="bg-[#651d2a] hover:bg-[#651d2a]/90 text-white">
-                    Book Now
-                  </Button>
+                <div className="p-6">
+                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                    <div className="flex items-center gap-1">
+                      <MapPin size={16} />
+                      <span>Seoul</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock size={16} />
+                      <span>6 hours</span>
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                    Seoul Royal Palace Private Tour
+                  </h3>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
+                      Gyeongbokgung
+                    </span>
+                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
+                      Changdeokgung
+                    </span>
+                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
+                      Hanbok Experience
+                    </span>
+                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
+                      Traditional Tea
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl font-bold text-[#651d2a]">
+                      $280
+                    </span>
+                    <Button className="bg-[#651d2a] hover:bg-[#651d2a]/90 text-white">
+                      Book Now
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Link>
 
             {/* Tour 2 */}
-            <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-              <div className="relative h-64">
-                <img
-                  src="/jeju-island-traditional-architecture.jpg"
-                  alt="Jeju Island"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#c4982a]">
-                  Dedicated Guide
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                  <div className="flex items-center gap-1">
-                    <MapPin size={16} />
-                    <span>Jeju Island</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock size={16} />
-                    <span>8 hours</span>
+            <Link href="/tours/private/2">
+              <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow cursor-pointer">
+                <div className="relative h-64">
+                  <img
+                    src="/jeju-island-traditional-architecture.jpg"
+                    alt="Jeju Island"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#c4982a]">
+                    Dedicated Guide
                   </div>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">
-                  Jeju Hidden Gems Tour
-                </h3>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                    Secret Beaches
-                  </span>
-                  <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                    Local Cuisine
-                  </span>
-                  <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                    Oreum Hiking
-                  </span>
-                  <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                    Tangerine Farm
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold text-[#c4982a]">
-                    $335
-                  </span>
-                  <Button className="bg-[#c4982a] hover:bg-[#c4982a]/90 text-white">
-                    Book Now
-                  </Button>
+                <div className="p-6">
+                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                    <div className="flex items-center gap-1">
+                      <MapPin size={16} />
+                      <span>Jeju Island</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock size={16} />
+                      <span>8 hours</span>
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                    Jeju Hidden Gems Tour
+                  </h3>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
+                      Secret Beaches
+                    </span>
+                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
+                      Local Cuisine
+                    </span>
+                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
+                      Oreum Hiking
+                    </span>
+                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
+                      Tangerine Farm
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl font-bold text-[#c4982a]">
+                      $335
+                    </span>
+                    <Button className="bg-[#c4982a] hover:bg-[#c4982a]/90 text-white">
+                      Book Now
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Link>
 
             {/* Tour 3 */}
-            <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-              <div className="relative h-64">
-                <img
-                  src="/busan-coastal-scenery-haeundae.jpg"
-                  alt="Busan Coast"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#6d8675]">
-                  Dedicated Guide
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                  <div className="flex items-center gap-1">
-                    <MapPin size={16} />
-                    <span>Busan</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock size={16} />
-                    <span>7 hours</span>
+            <Link href="/tours/private/3">
+              <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow cursor-pointer">
+                <div className="relative h-64">
+                  <img
+                    src="/busan-coastal-scenery-haeundae.jpg"
+                    alt="Busan Coast"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#6d8675]">
+                    Dedicated Guide
                   </div>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">
-                  Busan Coastal Private Tour
-                </h3>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                    Haeundae Port
-                  </span>
-                  <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                    Gamcheon Village
-                  </span>
-                  <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                    Jagalchi Market
-                  </span>
-                  <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                    Haeundae Beach
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold text-[#6d8675]">
-                    $305
-                  </span>
-                  <Button className="bg-[#6d8675] hover:bg-[#6d8675]/90 text-white">
-                    Book Now
-                  </Button>
+                <div className="p-6">
+                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                    <div className="flex items-center gap-1">
+                      <MapPin size={16} />
+                      <span>Busan</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock size={16} />
+                      <span>7 hours</span>
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                    Busan Coastal Private Tour
+                  </h3>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
+                      Haeundae Port
+                    </span>
+                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
+                      Gamcheon Village
+                    </span>
+                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
+                      Jagalchi Market
+                    </span>
+                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
+                      Haeundae Beach
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl font-bold text-[#6d8675]">
+                      $305
+                    </span>
+                    <Button className="bg-[#6d8675] hover:bg-[#6d8675]/90 text-white">
+                      Book Now
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </section>
