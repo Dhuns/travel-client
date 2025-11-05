@@ -5,8 +5,10 @@ import { BookOpen, Calendar, Sparkles, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import Link from "next/link";
 import type React from "react";
 import { useState } from "react";
+import { historyTours } from "@/data/mockTours";
 
 export default function HistoryTourPage() {
   // 폼 상태 관리
@@ -197,61 +199,40 @@ export default function HistoryTourPage() {
           </p>
 
           <div className="space-y-8">
-            {/* 히스토리 투어 1 */}
-            {[1, 2, 3].map((tour) => (
-              <Card
-                key={tour}
-                className="overflow-hidden hover:shadow-xl transition-shadow p-0"
-              >
-                <div className="grid md:grid-cols-2 gap-0">
-                  <div className="relative h-[300px] md:h-auto">
-                    <img
-                      src="/images/design-mode/history-tour-card.png"
-                      alt={`Historical Tour ${tour}`}
-                      className="w-full h-full object-cover"
-                    />
+            {/* 히스토리 투어 목록 */}
+            {historyTours.map((tour) => (
+              <Link key={tour.id} href={`/tours/history/${tour.id}`} className="block">
+                <Card className="overflow-hidden hover:shadow-xl transition-shadow p-0 cursor-pointer">
+                  <div className="grid md:grid-cols-2 gap-0">
+                    <div className="relative h-[300px] md:h-auto">
+                      <img
+                        src={tour.image}
+                        alt={tour.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-8 flex flex-col justify-center">
+                      <Badge className="bg-[#651d2a] text-white w-fit mb-3">
+                        {tour.badge}
+                      </Badge>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                        {tour.title}
+                      </h3>
+                      <p className="text-gray-700 mb-4">
+                        {tour.description}
+                      </p>
+                      <ul className="space-y-2 text-sm text-gray-600 mb-4">
+                        {tour.highlights.map((highlight, index) => (
+                          <li key={index}>• {highlight}</li>
+                        ))}
+                      </ul>
+                      <Button className="bg-[#651d2a] hover:bg-[#651d2a]/90 text-white w-fit">
+                        View Details & Book
+                      </Button>
+                    </div>
                   </div>
-                  <div className="p-8 flex flex-col justify-center">
-                    <Badge className="bg-[#651d2a] text-white w-fit mb-3">
-                      {tour === 2 ? "Walking in Nature" : "History & Art"}
-                    </Badge>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                      히스토리 투어 {tour}
-                    </h3>
-                    <p className="text-gray-700 mb-4">
-                      {tour === 1
-                        ? "Learn about the history of architectural styles, cultural values, and social structures that shaped the nation."
-                        : tour === 2
-                        ? "For those who prefer a slower pace, this tour combines historical sites with beautiful natural scenery and serene hiking spots."
-                        : "Traditional and modern architecture blend seamlessly in this tour, showcasing how Korea honors its past while embracing the future."}
-                    </p>
-                    <ul className="space-y-2 text-sm text-gray-600">
-                      {tour === 1 ? (
-                        <>
-                          <li>• Gyeongbokgung Palace</li>
-                          <li>• Bukchon Hanok Village</li>
-                          <li>• National Folk Museum</li>
-                          <li>• Traditional tea ceremony</li>
-                        </>
-                      ) : tour === 2 ? (
-                        <>
-                          <li>• Mountain temple trails</li>
-                          <li>• Historic stone paths</li>
-                          <li>• Meditation gardens</li>
-                          <li>• Traditional architecture</li>
-                        </>
-                      ) : (
-                        <>
-                          <li>• Royal palace architecture</li>
-                          <li>• Contemporary art museums</li>
-                          <li>• Design districts</li>
-                          <li>• Photo-worthy locations</li>
-                        </>
-                      )}
-                    </ul>
-                  </div>
-                </div>
-              </Card>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>
