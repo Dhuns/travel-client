@@ -44,6 +44,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
+    "crypto-js": "^4.2.0",
     "date-fns": "4.1.0",
     "dayjs": "^1.11.19",
     "embla-carousel-react": "8.5.1",
@@ -71,6 +72,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.16",
     "@tailwindcss/vite": "^4.0.0",
+    "@types/crypto-js": "^4.2.2",
     "@types/node": "^22",
     "@types/react": "^18",
     "@types/react-dom": "^18",

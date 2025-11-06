@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useState, useCallback } from "react";
 
 import ChatInfoPanel from "@components/Chat/ChatInfoPanel";
 import ChatInput from "@components/Chat/ChatInput";
@@ -57,78 +57,18 @@ const Container: FC = () => {
   }, [isInitialized, session, sessions.length]);
 
   // 새 채팅 시작
-  const handleNewChat = () => {
+  const handleNewChat = useCallback(() => {
     initSession();
-  };
+  }, [initSession]);
 
   // 메시지 전송 핸들러
-  const handleSendMessage = async (content: string) => {
+  const handleSendMessage = useCallback(async (content: string) => {
     if (!session) return;
 
-    // 컨텍스트 추출 (간단한 키워드 매칭 - UI 즉시 업데이트용)
-    const lowerContent = content.toLowerCase();
-
-    // 목적지 추출
-    if (lowerContent.includes("제주")) {
-      updateContext({ destination: "제주도" });
-    } else if (lowerContent.includes("부산")) {
-      updateContext({ destination: "부산" });
-    } else if (lowerContent.includes("서울")) {
-      updateContext({ destination: "서울" });
-    }
-
-    // 기간 추출
-    const dayMatch = lowerContent.match(/(\d+)박\s*(\d+)일/);
-    if (dayMatch) {
-      const days = parseInt(dayMatch[2]);
-      // 임시로 오늘부터 계산
-      const today = new Date();
-      const endDate = new Date(today);
-      endDate.setDate(today.getDate() + days - 1);
-      updateContext({
-        startDate: today.toISOString().split("T")[0],
-        endDate: endDate.toISOString().split("T")[0],
-      });
-    }
-
-    // 인원 추출
-    const adultMatch = lowerContent.match(/성인\s*(\d+)/);
-    const childMatch = lowerContent.match(/소아|아이\s*(\d+)/);
-    const infantMatch = lowerContent.match(/유아\s*(\d+)/);
-
-    if (adultMatch) updateContext({ adults: parseInt(adultMatch[1]) });
-    if (childMatch) updateContext({ children: parseInt(childMatch[1]) });
-    if (infantMatch) updateContext({ infants: parseInt(infantMatch[1]) });
-
-    // 선호도 추출
-    if (lowerContent.includes("관광")) {
-      updateContext({
-        preferences: [...(context.preferences || []), "관광형"],
-      });
-    } else if (lowerContent.includes("휴양")) {
-      updateContext({
-        preferences: [...(context.preferences || []), "휴양형"],
-      });
-    } else if (lowerContent.includes("체험")) {
-      updateContext({
-        preferences: [...(context.preferences || []), "체험형"],
-      });
-    }
-
-    // 예산 추출
-    const budgetMatch = content.match(/(\d{1,3}(?:,\d{3})*(?:\.\d+)?)\s*(?:만원|만|원)/);
-    if (budgetMatch) {
-      let budgetValue = parseFloat(budgetMatch[1].replace(/,/g, ""));
-      // "만원" 또는 "만"이 포함되어 있으면 10000을 곱함
-      if (content.includes("만")) {
-        budgetValue = budgetValue * 10000;
-      }
-      updateContext({ budget: budgetValue });
-    }
-
     // 백엔드 API로 메시지 전송 및 AI 응답 받기 (Gemini AI)
+    // 컨텍스트 추출은 백엔드에서 자동으로 수행됨
     await sendUserMessage(content);
-  };
+  }, [session, sendUserMessage]);
 
   if (!session) {
     return (
@@ -224,6 +164,7 @@ const Container: FC = () => {
             <ChatInfoPanel
               context={context}
               messageCount={session.messages.length}
+              batchId={session.batchId}
             />
           </InfoPanelContent>
         </InfoPanel>

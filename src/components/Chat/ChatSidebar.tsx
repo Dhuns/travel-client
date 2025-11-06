@@ -86,7 +86,7 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
   );
 };
 
-export default ChatSidebar;
+export default React.memo(ChatSidebar);
 
 // Styled Components
 const Container = styled.div`
