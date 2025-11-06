@@ -31,6 +31,7 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState("")
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
   const [toursDropdownOpen, setToursDropdownOpen] = useState(false) // Tours 드롭다운 메뉴 상태 추가
+  const [contactDropdownOpen, setContactDropdownOpen] = useState(false) // Contact 드롭다운 메뉴 상태 추가
   const router = useRouter()
 
   const [isLoggedIn, setIsLoggedIn] = useState(false) // 백엔드 연동 시 실제 로그인 상태로 교체
@@ -55,6 +56,7 @@ export default function Header() {
       { href: "/services", label: "Services" },
       { href: "/shop", label: "Shop" },
       { href: "/insights", label: "Travel Insights" },
+      { href: "#", label: "Contact", hasDropdown: true, isContact: true }, // Contact 드롭다운 추가
     ],
     [],
   )
@@ -98,6 +100,10 @@ export default function Header() {
     setToursDropdownOpen((prev) => !prev)
   }, [])
 
+  const toggleContactDropdown = useCallback(() => {
+    setContactDropdownOpen((prev) => !prev)
+  }, [])
+
   return (
     <nav className="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 transition-all duration-300">
       <div className="container mx-auto px-6">
@@ -123,8 +129,8 @@ export default function Header() {
                 <div
                   key={item.href}
                   className="relative group"
-                  onMouseEnter={() => setToursDropdownOpen(true)}
-                  onMouseLeave={() => setToursDropdownOpen(false)}
+                  onMouseEnter={() => item.isContact ? setContactDropdownOpen(true) : setToursDropdownOpen(true)}
+                  onMouseLeave={() => item.isContact ? setContactDropdownOpen(false) : setToursDropdownOpen(false)}
                 >
                   <Link
                     href={item.href}
@@ -136,7 +142,7 @@ export default function Header() {
                   </Link>
 
                   {/* Tours 드롭다운 메뉴 */}
-                  {toursDropdownOpen && (
+                  {!item.isContact && toursDropdownOpen && (
                     <div
                       className="absolute left-0 top-full pt-2 w-72 z-50"
                       onMouseEnter={() => setToursDropdownOpen(true)}
@@ -156,6 +162,38 @@ export default function Header() {
                             <div className="text-xs text-gray-500 mt-1">{category.description}</div>
                           </Link>
                         ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Contact 드롭다운 메뉴 */}
+                  {item.isContact && contactDropdownOpen && (
+                    <div
+                      className="absolute left-0 top-full pt-2 w-64 z-50"
+                      onMouseEnter={() => setContactDropdownOpen(true)}
+                      onMouseLeave={() => setContactDropdownOpen(false)}
+                    >
+                      <div className="bg-white rounded-lg shadow-xl border border-gray-200 py-2">
+                        <Link
+                          href="/chat"
+                          className="block px-4 py-3 hover:bg-[#eda89b]/10 transition-colors duration-200"
+                          onClick={() => setContactDropdownOpen(false)}
+                        >
+                          <div className="font-medium text-gray-900 hover:text-[#651d2a] transition-colors">
+                            AI Assistant
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">Chat with our AI for instant help</div>
+                        </Link>
+                        <Link
+                          href="/contact"
+                          className="block px-4 py-3 hover:bg-[#eda89b]/10 transition-colors duration-200"
+                          onClick={() => setContactDropdownOpen(false)}
+                        >
+                          <div className="font-medium text-gray-900 hover:text-[#651d2a] transition-colors">
+                            Email Us
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">Fill out our contact form</div>
+                        </Link>
                       </div>
                     </div>
                   )}
@@ -322,16 +360,40 @@ export default function Header() {
               </div>
 
               {/* 나머지 메뉴 항목들 */}
-              {navigationItems.slice(1).map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="hover:text-[#651d2a] transition-colors duration-300 py-2"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              ))}
+              {navigationItems.slice(1).map((item) =>
+                item.hasDropdown && item.isContact ? (
+                  <div key={item.href} className="border-b border-gray-100 pb-2">
+                    <div className="py-2 font-medium text-gray-900">
+                      {item.label}
+                    </div>
+                    <div className="pl-4 space-y-2 mt-2">
+                      <Link
+                        href="/chat"
+                        className="block py-1 text-xs text-gray-500 hover:text-[#651d2a] transition-colors"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        AI Assistant
+                      </Link>
+                      <Link
+                        href="/contact"
+                        className="block py-1 text-xs text-gray-500 hover:text-[#651d2a] transition-colors"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Email Us
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="hover:text-[#651d2a] transition-colors duration-300 py-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                )
+              )}
               <Link
                 href="/cart"
                 className="hover:text-[#651d2a] transition-colors duration-300 py-2 flex items-center justify-between"
