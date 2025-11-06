@@ -1,14 +1,21 @@
 "use client";
 
-import { ArrowRight, BookOpen, Calendar, Check, MapPin, Sparkles, Users } from "lucide-react";
+import {
+  BookOpen,
+  Calendar,
+  Check,
+  MapPin,
+  Sparkles,
+  Users,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import type React from "react";
-import { useState } from "react";
 import { historyTours } from "@/data/mockTours";
+import { useState } from "react";
 
 export default function HistoryTourPage() {
   // 폼 상태 관리
@@ -51,7 +58,7 @@ export default function HistoryTourPage() {
                 definitive experience designed to satisfy your curiosity and
                 create lifelong memories.
               </p>
-              <div className="mb-8">
+              <div className="flex gap-4 mb-8">
                 <Button
                   className="bg-[#651d2a] hover:bg-[#651d2a]/90 text-white px-6 flex items-center gap-2"
                   onClick={() => {
@@ -61,21 +68,28 @@ export default function HistoryTourPage() {
                   }}
                 >
                   Explore Tours
-                  <ArrowRight className="w-4 h-4" />
                 </Button>
+                <Link href="/chat">
+                  <Button
+                    variant="outline"
+                    className="border-[#651d2a] text-[#651d2a] hover:bg-[#651d2a] hover:text-white bg-white px-6 transition-colors"
+                  >
+                    Get Custom Quote
+                  </Button>
+                </Link>
               </div>
               <div className="flex items-center gap-6 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
-                  <span>Tumakr</span>
+                  <span>Cultural Heritage</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
-                  <span>Complete Privacy</span>
+                  <span>Historical Sites</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <BookOpen className="w-4 h-4" />
-                  <span>Dedicated Guide</span>
+                  <span>Authentic Experience</span>
                 </div>
               </div>
             </div>
@@ -204,13 +218,18 @@ export default function HistoryTourPage() {
             Historical Destinations Come Alive
           </h2>
           <p className="text-center text-gray-600 mb-16 max-w-2xl mx-auto">
-            Discover Korea's rich history and culture through our carefully curated tours
+            Discover Korea's rich history and culture through our carefully
+            curated tours
           </p>
 
           <div className="space-y-8">
             {/* 히스토리 투어 목록 */}
             {historyTours.map((tour) => (
-              <Link key={tour.id} href={`/tours/history/${tour.id}`} className="block">
+              <Link
+                key={tour.id}
+                href={`/tours/history/${tour.id}`}
+                className="block"
+              >
                 <Card className="overflow-hidden hover:shadow-xl transition-shadow p-0 cursor-pointer">
                   <div className="grid md:grid-cols-2 gap-0">
                     <div className="relative h-[300px] md:h-auto">
@@ -233,15 +252,18 @@ export default function HistoryTourPage() {
                           {tour.location}
                         </p>
                       )}
-                      <p className="text-gray-700 mb-4">
-                        {tour.description}
-                      </p>
+                      <p className="text-gray-700 mb-4">{tour.description}</p>
                       {tour.included && tour.included.length > 0 && (
                         <div className="mb-4">
-                          <h4 className="font-semibold text-gray-900 mb-2 text-sm">Included:</h4>
+                          <h4 className="font-semibold text-gray-900 mb-2 text-sm">
+                            Included:
+                          </h4>
                           <ul className="space-y-2 text-sm text-gray-600">
                             {tour.included.map((item, index) => (
-                              <li key={index} className="flex items-start gap-2">
+                              <li
+                                key={index}
+                                className="flex items-start gap-2"
+                              >
                                 <Check className="w-4 h-4 text-[#651d2a] mt-0.5 flex-shrink-0" />
                                 {item}
                               </li>
@@ -251,7 +273,9 @@ export default function HistoryTourPage() {
                       )}
                       {tour.highlights && tour.highlights.length > 0 && (
                         <div className="mb-4">
-                          <h4 className="font-semibold text-gray-900 mb-2 text-sm">Highlights:</h4>
+                          <h4 className="font-semibold text-gray-900 mb-2 text-sm">
+                            Highlights:
+                          </h4>
                           <ul className="space-y-2 text-sm text-gray-600">
                             {tour.highlights.map((highlight, index) => (
                               <li key={index}>• {highlight}</li>
@@ -321,177 +345,6 @@ export default function HistoryTourPage() {
                 emotions of our journey and the beauty of Korea."
               </span>
             </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Custom Quote Section */}
-      <section className="min-h-screen flex items-center px-6 bg-gradient-to-br from-[#eda89b]/10 to-[#6d8675]/10">
-        <div className="container mx-auto max-w-4xl py-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4">
-            Get a Custom Quote
-          </h2>
-          <p className="text-center text-gray-600 mb-12">
-            Tell us about your interests and we'll create a personalized history
-            tour just for you
-          </p>
-
-          <div className="grid md:grid-cols-2 gap-12">
-            {/* 왼쪽: 견적 요청 폼 */}
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-6">
-                📝 Request Consultation
-              </h3>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Contact Method *
-                  </label>
-                  <select
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent"
-                    value={formData.contactMethod}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        contactMethod: e.target.value,
-                      })
-                    }
-                  >
-                    <option value="">Select method</option>
-                    <option value="email">Email</option>
-                    <option value="phone">Phone</option>
-                    <option value="whatsapp">WhatsApp</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Travel Date *
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent"
-                    value={formData.travelDate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, travelDate: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Number of Travelers *
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent"
-                    value={formData.numberOfTravelers}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        numberOfTravelers: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-
-                <p className="text-xs text-gray-500">
-                  Your information is safe with us. We'll only use it to provide
-                  you with the best tour experience.
-                </p>
-
-                <Button
-                  type="submit"
-                  className="w-full bg-[#651d2a] hover:bg-[#651d2a]/90 text-white py-3"
-                >
-                  Submit Request
-                </Button>
-              </form>
-            </div>
-
-            {/* 오른쪽: 빠른 상담 */}
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-6">
-                💬 For a Faster Consultation
-              </h3>
-              <div className="space-y-6">
-                <Card className="p-6 hover:shadow-lg transition-shadow">
-                  <h4 className="font-bold text-gray-900 mb-2">
-                    Phone Consultation
-                  </h4>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Speak directly with our history tour experts
-                  </p>
-                  <p className="text-[#651d2a] font-semibold">
-                    📞 +82-2-1234-5678
-                  </p>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Mon-Fri: 9AM-6PM KST
-                  </p>
-                </Card>
-
-                <Card className="p-6 hover:shadow-lg transition-shadow">
-                  <h4 className="font-bold text-gray-900 mb-2">
-                    Email Inquiry
-                  </h4>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Get detailed information about our history tours
-                  </p>
-                  <p className="text-[#651d2a] font-semibold">
-                    ✉️ history@onedaykorea.com
-                  </p>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Response within 24 hours
-                  </p>
-                </Card>
-                {/* 
-                <div className="bg-white p-6 rounded-lg shadow-md">
-                  <h4 className="font-bold text-gray-900 mb-3">Why Choose Our History Tours?</h4>
-                  <ul className="space-y-2 text-sm text-gray-700">
-                    <li>✓ Expert historians as guides</li>
-                    <li>✓ Small group sizes (max 15 people)</li>
-                    <li>✓ Flexible itineraries</li>
-                    <li>✓ Exclusive access to special sites</li>
-                    <li>✓ Complimentary cultural souvenirs</li>
-                  </ul>
-                </div>
-                */}
-              </div>
-            </div>
           </div>
         </div>
       </section>
