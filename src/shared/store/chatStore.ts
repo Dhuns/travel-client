@@ -2,6 +2,7 @@ import { ChatContext, ChatMessage, ChatSession } from "../types/chat";
 import {
   createChatSession,
   generateAIResponse,
+  generateEstimate,
   getChatMessages,
   getChatSession,
   sendChatMessage,
@@ -20,9 +21,11 @@ interface ChatStore {
   isTyping: boolean;
   isLoading: boolean;
   isChatOpen: boolean;
+  isGeneratingEstimate: boolean;
 
   // Getters
   getCurrentSession: () => ChatSession | null;
+  canGenerateEstimate: () => boolean;
 
   // 액션
   initSession: () => Promise<boolean>;
@@ -32,6 +35,7 @@ interface ChatStore {
   updateLastMessage: (content: string) => void;
   setIsTyping: (isTyping: boolean) => void;
   updateContext: (context: Partial<ChatContext>) => Promise<void>;
+  generateEstimateForSession: (userId?: number) => Promise<boolean>;
   clearSession: () => void;
   deleteSession: (sessionId: string) => void;
   loadFromStorage: () => void;
@@ -46,11 +50,27 @@ const useChatStore = create<ChatStore>((set, get) => ({
   isTyping: false,
   isLoading: false,
   isChatOpen: false,
+  isGeneratingEstimate: false,
 
   // 현재 세션 가져오기
   getCurrentSession: () => {
     const { sessions, currentSessionId } = get();
     return sessions.find((s) => s.sessionId === currentSessionId) || null;
+  },
+
+  // 견적서 생성 가능 여부 확인
+  canGenerateEstimate: () => {
+    const session = get().getCurrentSession();
+    if (!session || session.batchId) return false; // 이미 견적서가 있으면 불가
+
+    const ctx = session.context;
+    // 필수 정보: 목적지, 출발/도착일, 성인 수 (모두 유효한 값이어야 함)
+    const hasDestination = ctx.destination && ctx.destination.trim().length > 0;
+    const hasStartDate = ctx.startDate && ctx.startDate.trim().length > 0;
+    const hasEndDate = ctx.endDate && ctx.endDate.trim().length > 0;
+    const hasAdults = ctx.adults && ctx.adults > 0;
+
+    return !!(hasDestination && hasStartDate && hasEndDate && hasAdults);
   },
 
   // 세션 초기화 (API 사용)
@@ -94,7 +114,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
       get().saveToStorage();
       return true;
     } catch (error) {
-      console.error("Failed to create session:", error);
+      // Failed to create session - silent fail
       set({ isLoading: false });
       return false;
     }
@@ -123,9 +143,9 @@ const useChatStore = create<ChatStore>((set, get) => ({
             ? new Date(session.lastMessageAt)
             : undefined,
           messages:
-            session.messages?.map((m: any) => ({
+            session.messages?.map((m) => ({
               ...m,
-              timestamp: new Date(m.sentAt),
+              timestamp: new Date(m.sentAt || m.timestamp),
             })) || [],
         };
 
@@ -146,9 +166,9 @@ const useChatStore = create<ChatStore>((set, get) => ({
                 ? new Date(session.lastMessageAt)
                 : undefined,
               messages:
-                session.messages?.map((m: any) => ({
+                session.messages?.map((m) => ({
                   ...m,
-                  timestamp: new Date(m.sentAt),
+                  timestamp: new Date(m.sentAt || m.timestamp),
                 })) || [],
             },
           ],
@@ -159,7 +179,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
 
       get().saveToStorage();
     } catch (error) {
-      console.error("Failed to load session:", error);
+      // Failed to load session - silent fail
       set({ isLoading: false });
     }
   },
@@ -245,7 +265,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
       setIsTyping(true);
       const aiMessage = await generateAIResponse(currentSessionId, content);
 
-      // 3. AI 응답 로컬 추가
+      // 3. AI 응답 로컬 추가 및 백엔드에서 업데이트된 컨텍스트 반영
       const { sessions } = get();
       const updatedSessions = sessions.map((session) => {
         if (session.sessionId === currentSessionId) {
@@ -265,6 +285,8 @@ const useChatStore = create<ChatStore>((set, get) => ({
                   : undefined,
               },
             ],
+            // 백엔드가 추출한 컨텍스트 반영
+            context: (aiMessage as any).updatedContext || session.context,
             lastMessageAt: new Date(),
           };
         }
@@ -277,8 +299,44 @@ const useChatStore = create<ChatStore>((set, get) => ({
       });
 
       get().saveToStorage();
+
+      // AI 응답 후 필수 정보가 모두 채워졌는지 체크
+      const currentSession = updatedSessions.find(
+        (s) => s.sessionId === currentSessionId
+      );
+      if (currentSession && !currentSession.hasShownEstimatePrompt && !currentSession.batchId) {
+        const ctx = currentSession.context;
+        const hasAllRequiredInfo = !!(
+          ctx.destination &&
+          ctx.startDate &&
+          ctx.endDate &&
+          ctx.adults &&
+          ctx.adults > 0
+        );
+
+        if (hasAllRequiredInfo) {
+          // 안내 메시지 표시
+          await addMessage({
+            role: "assistant",
+            type: "text",
+            content:
+              "모든 정보가 수집되었습니다! 😊\n\n오른쪽 패널의 **'견적서 생성하기'** 버튼을 눌러주시면\n맞춤 견적서를 생성해드리겠습니다.\n\n담당자가 24시간 이내에 최종 견적서를 보내드립니다.",
+          });
+
+          // 플래그 업데이트
+          const finalSessions = updatedSessions.map((s) => {
+            if (s.sessionId === currentSessionId) {
+              return { ...s, hasShownEstimatePrompt: true };
+            }
+            return s;
+          });
+
+          set({ sessions: finalSessions });
+          get().saveToStorage();
+        }
+      }
     } catch (error) {
-      console.error("Failed to send message:", error);
+      // Failed to send message - silent fail
       setIsTyping(false);
 
       // 에러 메시지 표시
@@ -286,7 +344,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
         role: "assistant",
         type: "system",
         content:
-          "죄송합니다. 메시지 전송 중 오류가 발생했습니다. 다시 시도해주세요.",
+          "Sorry, an error occurred while sending the message. Please try again.",
       });
     }
   },
@@ -322,7 +380,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
 
   // 컨텍스트 업데이트 (API 동기화)
   updateContext: async (newContext) => {
-    const { sessions, currentSessionId } = get();
+    const { sessions, currentSessionId, addMessage } = get();
     if (!currentSessionId) return;
 
     try {
@@ -384,8 +442,103 @@ const useChatStore = create<ChatStore>((set, get) => ({
       }
 
       get().saveToStorage();
+
+      // 필수 정보가 모두 채워졌는지 체크하고 안내 메시지 표시
+      if (session && !session.hasShownEstimatePrompt && !session.batchId) {
+        const ctx = session.context;
+        const hasAllRequiredInfo = !!(
+          ctx.destination &&
+          ctx.startDate &&
+          ctx.endDate &&
+          ctx.adults &&
+          ctx.adults > 0
+        );
+
+        if (hasAllRequiredInfo) {
+          // 안내 메시지 표시
+          await addMessage({
+            role: "assistant",
+            type: "text",
+            content:
+              "모든 정보가 수집되었습니다! 😊\n\n오른쪽 패널의 **'견적서 생성하기'** 버튼을 눌러주시면\n맞춤 견적서를 생성해드리겠습니다.\n\n담당자가 24시간 이내에 최종 견적서를 보내드립니다.",
+          });
+
+          // 플래그 업데이트
+          const finalSessions = updatedSessions.map((s) => {
+            if (s.sessionId === currentSessionId) {
+              return { ...s, hasShownEstimatePrompt: true };
+            }
+            return s;
+          });
+
+          set({ sessions: finalSessions });
+          get().saveToStorage();
+        }
+      }
     } catch (error) {
-      console.error("Failed to update context:", error);
+      // Failed to update context - silent fail
+    }
+  },
+
+  // 견적서 생성 (세션 기반)
+  generateEstimateForSession: async (userId) => {
+    const { currentSessionId, sessions, addMessage } = get();
+    if (!currentSessionId) return false;
+
+    try {
+      set({ isGeneratingEstimate: true });
+
+      // AI 견적서 생성 API 호출
+      const result = await generateEstimate(currentSessionId, userId);
+
+      // 세션에 batchId 업데이트
+      const updatedSessions = sessions.map((session) => {
+        if (session.sessionId === currentSessionId) {
+          return {
+            ...session,
+            batchId: result.batchId,
+          };
+        }
+        return session;
+      });
+
+      set({ sessions: updatedSessions, isGeneratingEstimate: false });
+
+      // 백엔드에 batchId 동기화
+      await updateChatSession(currentSessionId, {
+        batchId: result.batchId,
+        status: 'active',
+      });
+
+      // 견적서 생성 완료 메시지 추가
+      await addMessage({
+        role: "assistant",
+        type: "estimate",
+        content: `Your quotation has been generated!\n\nTotal Amount: $${result.totalAmount.toLocaleString()}\nNumber of Items: ${result.itemCount}\n\nOur staff will review and send you the final quotation within 24 hours.`,
+        metadata: {
+          batchId: result.batchId,
+          estimateId: result.estimateId,
+          totalAmount: result.totalAmount,
+          itemCount: result.itemCount,
+          timeline: result.timeline,
+        },
+      });
+
+      get().saveToStorage();
+      return true;
+    } catch (error) {
+      // Failed to generate estimate - show error details
+      set({ isGeneratingEstimate: false });
+
+      const errorMessage = error.response?.data?.message || error.message || "알 수 없는 오류가 발생했습니다.";
+
+      await addMessage({
+        role: "assistant",
+        type: "system",
+        content: `견적서 생성 중 오류가 발생했습니다.\n\n${errorMessage}\n\n잠시 후 다시 시도해주세요.`,
+      });
+
+      return false;
     }
   },
 
@@ -419,15 +572,15 @@ const useChatStore = create<ChatStore>((set, get) => ({
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        const parsed = JSON.parse(stored);
+        const parsed = JSON.parse(stored) as ChatSession[];
         // Date 객체 복원
-        const sessions = parsed.map((s: any) => ({
+        const sessions = parsed.map((s) => ({
           ...s,
           createdAt: new Date(s.createdAt),
           lastMessageAt: s.lastMessageAt
             ? new Date(s.lastMessageAt)
             : undefined,
-          messages: s.messages.map((m: any) => ({
+          messages: s.messages.map((m) => ({
             ...m,
             timestamp: new Date(m.timestamp),
           })),
@@ -435,7 +588,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
         set({ sessions });
       }
     } catch (error) {
-      console.error("Failed to load chat sessions:", error);
+      // Failed to load chat sessions - silent fail
     }
   },
 
@@ -445,7 +598,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
       const { sessions } = get();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
     } catch (error) {
-      console.error("Failed to save chat sessions:", error);
+      // Failed to save chat sessions - silent fail
     }
   },
 }));

@@ -33,6 +33,12 @@ export interface MessageMetadata {
   estimatePreview?: EstimatePreview;
   quickReplyOptions?: QuickReplyOption[];
   images?: string[];
+  // Estimate generation metadata
+  batchId?: number;
+  estimateId?: number;
+  totalAmount?: number;
+  itemCount?: number;
+  timeline?: string;
 }
 
 // 채팅 메시지
@@ -54,6 +60,8 @@ export interface ChatSession {
   status: 'active' | 'converted' | 'abandoned';
   messages: ChatMessage[];
   context: ChatContext;
+  batchId?: number; // 생성된 견적서 배치 ID
+  hasShownEstimatePrompt?: boolean; // 견적서 생성 안내를 보여줬는지 여부
   title?: string; // 대화 제목 (첫 메시지에서 생성)
   createdAt: Date;
   lastMessageAt?: Date;

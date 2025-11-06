@@ -1,15 +1,19 @@
 import React, { FC } from "react";
 
 import { ChatContext } from "@shared/types/chat";
+import useChatStore from "@shared/store/chatStore";
 import dayjs from "dayjs";
 import styled from "@emotion/styled";
 
 interface Props {
   context: ChatContext;
   messageCount: number;
+  batchId?: number;
 }
 
-const ChatInfoPanel: FC<Props> = ({ context, messageCount }) => {
+const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
+  const { canGenerateEstimate, generateEstimateForSession, isGeneratingEstimate } = useChatStore();
+
   const {
     destination,
     startDate,
@@ -20,6 +24,14 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount }) => {
     budget,
     preferences = [],
   } = context;
+
+  const handleGenerateEstimate = async () => {
+    if (isGeneratingEstimate) return;
+    const success = await generateEstimateForSession();
+    if (success) {
+      alert("✅ 견적서가 생성되었습니다!\n담당자가 24시간 이내에 최종 견적서를 보내드립니다.");
+    }
+  };
 
   // 총 일수 계산
   const days =
@@ -91,6 +103,34 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount }) => {
           </InfoItem>
         )}
       </Section>
+
+      {/* 견적서 생성 버튼 */}
+      {canGenerateEstimate() && !batchId && (
+        <EstimateButtonSection>
+          <GenerateButton onClick={handleGenerateEstimate} disabled={isGeneratingEstimate}>
+            {isGeneratingEstimate ? "⏳ 견적서 생성 중..." : "✨ 견적서 생성하기"}
+          </GenerateButton>
+          <EstimateHint>
+            필수 정보가 모두 수집되었습니다!<br />
+            지금 1차 견적서를 생성해드릴게요.
+          </EstimateHint>
+        </EstimateButtonSection>
+      )}
+
+      {/* 이미 생성된 견적서 표시 */}
+      {batchId && (
+        <EstimateButtonSection>
+          <ViewQuotationButton
+            onClick={() => window.open(`/quotation/${batchId}`, '_blank')}
+          >
+            📋 견적서 확인하기
+          </ViewQuotationButton>
+          <EstimateHint>
+            담당자가 24시간 이내에<br />
+            최종 견적서를 보내드립니다.
+          </EstimateHint>
+        </EstimateButtonSection>
+      )}
 
       {/* 도움말 */}
       <HelpSection>
@@ -257,4 +297,82 @@ const HelpItem = styled.li`
   &:last-child {
     margin-bottom: 0;
   }
+`;
+
+const EstimateButtonSection = styled.div`
+  padding: 16px;
+  margin: 0 4px 16px 4px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  text-align: center;
+`;
+
+const GenerateButton = styled.button`
+  width: 100%;
+  padding: 14px 20px;
+  background-color: #ffffff;
+  color: #667eea;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+`;
+
+const ViewQuotationButton = styled.button`
+  width: 100%;
+  padding: 14px 20px;
+  background-color: #ffffff;
+  color: #10b981;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    color: #059669;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const EstimateCreatedBadge = styled.div`
+  padding: 14px 20px;
+  background-color: #ffffff;
+  color: #10b981;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+`;
+
+const EstimateHint = styled.p`
+  margin: 12px 0 0 0;
+  font-size: 13px;
+  color: #ffffff;
+  line-height: 1.5;
+  opacity: 0.95;
 `;

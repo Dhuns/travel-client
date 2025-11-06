@@ -1,6 +1,7 @@
 import React, { FC } from "react";
 
 import { ChatMessage as ChatMessageType } from "@shared/types/chat";
+import { aesEncrypt } from "@shared/utils/crypto";
 import dayjs from "dayjs";
 import styled from "@emotion/styled";
 import ReactMarkdown from "react-markdown";
@@ -11,8 +12,49 @@ interface Props {
 }
 
 const ChatMessage: FC<Props> = ({ message }) => {
-  const { role, content, timestamp } = message;
+  const { role, content, timestamp, type, metadata } = message;
   const isUser = role === "user";
+
+  // Handle estimate-type messages
+  if (type === "estimate" && metadata?.batchId) {
+    // Generate encrypted hash for the quotation link
+    const hash = aesEncrypt(String(metadata.batchId));
+    const quotationLink = `/quotation/${encodeURIComponent(hash)}`;
+
+    return (
+      <MessageContainer isUser={false}>
+        <MessageBubble isUser={false}>
+          <EstimateCard>
+            <EstimateHeader>
+              <EstimateIcon>✨</EstimateIcon>
+              <EstimateTitle>Quotation Generated!</EstimateTitle>
+            </EstimateHeader>
+            <EstimateContent>
+              <EstimateInfo>
+                <InfoLabel>Total Amount</InfoLabel>
+                <InfoValue>${metadata.totalAmount?.toLocaleString()}</InfoValue>
+              </EstimateInfo>
+              <EstimateInfo>
+                <InfoLabel>Items</InfoLabel>
+                <InfoValue>{metadata.itemCount}</InfoValue>
+              </EstimateInfo>
+            </EstimateContent>
+            <EstimateMessage>{content}</EstimateMessage>
+            <EstimateActions>
+              <ViewQuotationButton
+                href={quotationLink}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View Quotation Details →
+              </ViewQuotationButton>
+            </EstimateActions>
+          </EstimateCard>
+          <MessageTime>{dayjs(timestamp).format("HH:mm")}</MessageTime>
+        </MessageBubble>
+      </MessageContainer>
+    );
+  }
 
   return (
     <MessageContainer isUser={isUser}>
@@ -32,7 +74,7 @@ const ChatMessage: FC<Props> = ({ message }) => {
   );
 };
 
-export default ChatMessage;
+export default React.memo(ChatMessage);
 
 // Styled Components
 const MessageContainer = styled.div<{ isUser: boolean }>`
@@ -167,4 +209,104 @@ const MessageTime = styled.span`
   font-size: 11px;
   color: #aaa;
   margin-top: 2px;
+`;
+
+// Estimate Card Styles
+const EstimateCard = styled.div`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  max-width: 400px;
+`;
+
+const EstimateHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+`;
+
+const EstimateIcon = styled.span`
+  font-size: 28px;
+`;
+
+const EstimateTitle = styled.h3`
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+`;
+
+const EstimateContent = styled.div`
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.95);
+`;
+
+const EstimateInfo = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const InfoLabel = styled.span`
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+`;
+
+const InfoValue = styled.span`
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+`;
+
+const EstimateMessage = styled.p`
+  margin: 0;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.6;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  white-space: pre-wrap;
+`;
+
+const EstimateActions = styled.div`
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+`;
+
+const ViewQuotationButton = styled.a`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px 20px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+
+  &:hover {
+    background: #5568d3;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
 `;
