@@ -84,7 +84,7 @@ export default function PackageTourPage() {
             <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#f5f3f0] via-[#f5f3f0]/60 to-transparent z-10" />
 
             <img
-              src="/images/design-mode/package-tour-hero.png"
+              src="/images/design-mode/castle4.png"
               alt="Cyclist on Jeju coastal road"
               className="w-full h-full object-cover"
             />
@@ -110,7 +110,7 @@ export default function PackageTourPage() {
             <Card className="overflow-hidden border-0 shadow-lg bg-white rounded-xl p-0">
               <div className="relative aspect-video">
                 <Image
-                  src="/images/design-mode/package-tour-special-1.png"
+                  src="/images/design-mode/castle1.png"
                   alt="Premium Itinerary"
                   fill
                   className="object-cover"
@@ -132,7 +132,7 @@ export default function PackageTourPage() {
             <Card className="overflow-hidden border-0 shadow-lg bg-white rounded-xl p-0">
               <div className="relative aspect-video">
                 <Image
-                  src="/images/design-mode/package-tour-special-2.png"
+                  src="/images/design-mode/castle2.png"
                   alt="Perfectly Designed Logistics"
                   fill
                   className="object-cover"
@@ -153,7 +153,7 @@ export default function PackageTourPage() {
             <Card className="overflow-hidden border-0 shadow-lg bg-white rounded-xl p-0">
               <div className="relative aspect-video">
                 <Image
-                  src="/images/design-mode/package-tour-special-3.png"
+                  src="/images/design-mode/castle3.png"
                   alt="Worry-Free Comfort"
                   fill
                   className="object-cover"
@@ -175,7 +175,7 @@ export default function PackageTourPage() {
             <Card className="overflow-hidden border-0 shadow-lg bg-white rounded-xl p-0">
               <div className="relative aspect-video">
                 <Image
-                  src="/images/design-mode/package-tour-special-4.png"
+                  src="/images/design-mode/castle4.png"
                   alt="The Value of Tumakr"
                   fill
                   className="object-cover"
@@ -203,7 +203,7 @@ export default function PackageTourPage() {
             {/* 왼쪽: 이미지 */}
             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
               <Image
-                src="/images/design-mode/v0_image.png"
+                src="/images/design-mode/castle5.png"
                 alt="Korean countryside house"
                 fill
                 className="object-cover"
@@ -236,90 +236,6 @@ export default function PackageTourPage() {
         </div>
       </section>
 
-      {/* Section 4: What's Included - 4.png */}
-      <section className="py-20 px-6 bg-[#f5f3f0]">
-        <div className="container mx-auto max-w-7xl">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              What's Included
-            </h2>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-8 mb-12">
-            {/* Inclusions */}
-            <Card className="p-8 bg-white border-0 shadow-lg">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                Inclusions
-              </h3>
-              <ul className="space-y-4">
-                {[
-                  "Premium road bike and safety gear",
-                  "6 nights of accommodation (Guesthouse, traditional house, boutique hotel)",
-                  "Daily breakfast and a welcome dinner",
-                  "Bike maintenance and support vehicle",
-                  "Travel insurance",
-                  "Airport pickup/drop-off",
-                ].map((item, index) => (
-                  <li key={index} className="flex items-start">
-                    <Check className="w-5 h-5 text-[#6d8675] mr-3 mt-1 flex-shrink-0" />
-                    <span className="text-gray-700">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-
-            {/* What to Bring */}
-            <Card className="p-8 bg-white border-0 shadow-lg">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                What to Bring
-              </h3>
-              <ul className="space-y-4">
-                {[
-                  "Comfortable cycling clothes",
-                  "Personal toiletries",
-                  "Sunscreen and sunglasses",
-                  "Camera backpack",
-                  "Camera (to capture the memories)",
-                  "An open mind and a sense of adventure",
-                ].map((item, index) => (
-                  <li key={index} className="flex items-start">
-                    <Gift className="w-5 h-5 text-[#651d2a] mr-3 mt-1 flex-shrink-0" />
-                    <span className="text-gray-700">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          </div>
-
-          {/* 통계 정보 */}
-          <div className="bg-[#e8e4df] rounded-2xl p-12">
-            <p className="text-center text-gray-600 mb-8 text-lg">
-              Good to Know
-            </p>
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="font-bold text-gray-900 mb-2 text-4xl">
-                  7 Days
-                </div>
-                <p className="text-gray-600">Complete Jeju Circuit</p>
-              </div>
-              <div className="text-center">
-                <div className="font-bold text-gray-900 mb-2 text-4xl">
-                  180km
-                </div>
-                <p className="text-gray-600">Total Riding Distance</p>
-              </div>
-              <div className="text-center">
-                <div className="font-bold text-gray-900 mb-2 text-4xl">
-                  Max 8 People
-                </div>
-                <p className="text-gray-600">Small Group</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Section 5: Products & Souvenirs - 5.png */}
       <section className="py-20 px-6 bg-white">
         <div className="container mx-auto max-w-7xl">
@@ -341,7 +257,7 @@ export default function PackageTourPage() {
             <Card className="overflow-hidden border-0 shadow-lg group cursor-pointer bg-white rounded-xl p-0">
               <div className="relative aspect-video">
                 <Image
-                  src="/images/design-mode/package-tour-souvenir-1.png"
+                  src="/images/design-mode/gift-1.png"
                   alt="Traditional Hanbok"
                   fill
                   className="object-cover"
@@ -369,7 +285,7 @@ export default function PackageTourPage() {
             <Card className="overflow-hidden border-0 shadow-lg group cursor-pointer bg-white rounded-xl p-0">
               <div className="relative aspect-video">
                 <Image
-                  src="/images/design-mode/package-tour-souvenir-2.png"
+                  src="/images/design-mode/gift-2.png"
                   alt="Korean Skincare"
                   fill
                   className="object-cover"
@@ -397,7 +313,7 @@ export default function PackageTourPage() {
             <Card className="overflow-hidden border-0 shadow-lg group cursor-pointer bg-white rounded-xl p-0">
               <div className="relative aspect-video">
                 <Image
-                  src="/images/design-mode/package-tour-souvenir-3.png"
+                  src="/images/design-mode/gift-3.png"
                   alt="Korean Tea Set"
                   fill
                   className="object-cover"
