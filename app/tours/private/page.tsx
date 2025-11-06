@@ -13,9 +13,56 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
 
 export default function PrivateTourPage() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    travelDate: "",
+    numberOfTravelers: "",
+    message: "",
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<"success" | "error" | null>(
+    null
+  );
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+
+    try {
+      // TODO: 백엔드 API 연동
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setSubmitStatus("success");
+      setFormData({
+        name: "",
+        email: "",
+        travelDate: "",
+        numberOfTravelers: "",
+        message: "",
+      });
+    } catch (error) {
+      setSubmitStatus("error");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section - 1.png */}
@@ -68,6 +115,11 @@ export default function PrivateTourPage() {
             <Button
               size="lg"
               className="bg-[#651d2a] hover:bg-[#4a1520] text-white font-semibold shadow-lg cursor-pointer transition-colors"
+              onClick={() => {
+                document
+                  .getElementById("inquiry-section")
+                  ?.scrollIntoView({ behavior: "smooth" });
+              }}
             >
               Book Your Journey Now
             </Button>
@@ -584,7 +636,10 @@ export default function PrivateTourPage() {
       </section>
 
       {/* Pricing Section - 7.png */}
-      <section className="py-16 px-6 min-h-screen flex items-center bg-gradient-to-br from-gray-50 to-white">
+      <section
+        id="inquiry-section"
+        className="py-28 px-6 min-h-screen flex items-center bg-gradient-to-br from-gray-50 to-white"
+      >
         <div className="container mx-auto max-w-7xl w-full">
           <div className="grid lg:grid-cols-2 gap-8 items-stretch">
             {/* 왼쪽: 이미지와 특징 */}
@@ -657,85 +712,153 @@ export default function PrivateTourPage() {
               </div>
             </div>
 
-            {/* 오른쪽: 가격 및 예약 정보 */}
-            <div className="bg-white rounded-3xl shadow-2xl p-8 flex flex-col">
-              {/* 가격 */}
-              <div className="text-center mb-8 pb-8 border-b border-gray-200">
-                <div className="inline-block">
-                  <div className="font-bold mb-2 text-[#651d2a] text-4xl">
-                    $899
-                  </div>
-
-                  <div className="text-gray-500 text-sm">4 days / 3 nights</div>
-                </div>
+            {/* 오른쪽: 문의하기 패널 */}
+            <div className="bg-white rounded-3xl shadow-2xl p-8">
+              {/* 제목 */}
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                  Request Your Private Tour
+                </h2>
+                <p className="text-gray-600 text-sm">
+                  Fill out the form below and we'll create a customized
+                  itinerary for you
+                </p>
               </div>
 
-              {/* 투어 정보 */}
-              <div className="grid grid-cols-3 gap-4 mb-8">
-                <div className="text-center p-4 bg-gray-50 rounded-xl">
-                  <Calendar className="text-[#651d2a] mx-auto mb-2" size={24} />
-                  <div className="font-semibold text-gray-900 text-sm">
-                    Duration
-                  </div>
-                  <div className="text-xs text-gray-600">4 Days</div>
-                </div>
-                <div className="text-center p-4 bg-gray-50 rounded-xl">
-                  <Users className="text-[#651d2a] mx-auto mb-2" size={24} />
-                  <div className="font-semibold text-gray-900 text-sm">
-                    Group Size
-                  </div>
-                  <div className="text-xs text-gray-600">Max 12</div>
-                </div>
-                <div className="text-center p-4 bg-gray-50 rounded-xl">
-                  <Clock className="text-[#651d2a] mx-auto mb-2" size={24} />
-                  <div className="font-semibold text-gray-900 text-sm">
-                    Start Time
-                  </div>
-                  <div className="text-xs text-gray-600">9:00 AM</div>
-                </div>
-              </div>
-
-              {/* What's Included */}
-              <div className="mb-8 flex-grow">
-                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <Check className="text-[#6d8675]" size={24} />
-                  What's Included
+              {/* 가이드 */}
+              <div className="bg-[#651d2a]/5 rounded-lg p-4 mb-6">
+                <h3 className="font-semibold text-gray-900 text-sm mb-2">
+                  Please include:
                 </h3>
-                <div className="space-y-3">
-                  {[
-                    "Expert English-speaking guide",
-                    "All entrance fees included",
-                    "Traditional hanbok rental",
-                    "Exclusive night palace access",
-                    "Local food tastings",
-                    "Small group (max 12 people)",
-                    "Hotel pickup & drop-off",
-                    "Professional photos included",
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-start gap-3">
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 bg-[#6d8675]">
-                        <Check className="text-white" size={14} />
-                      </div>
-                      <span className="text-gray-700 text-sm">{item}</span>
-                    </div>
-                  ))}
+                <ul className="space-y-1 text-xs text-gray-700">
+                  <li className="flex items-start gap-2">
+                    <Check className="w-3 h-3 text-[#651d2a] mt-0.5 flex-shrink-0" />
+                    <span>Your preferred travel dates</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-3 h-3 text-[#651d2a] mt-0.5 flex-shrink-0" />
+                    <span>Number of travelers in your group</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-3 h-3 text-[#651d2a] mt-0.5 flex-shrink-0" />
+                    <span>Your interests and tour preferences</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-3 h-3 text-[#651d2a] mt-0.5 flex-shrink-0" />
+                    <span>
+                      Desired tour duration (half-day, full-day, or multi-day)
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* 폼 */}
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    Name <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Your name"
+                    required
+                    className="border border-gray-300 focus-visible:border-[#651d2a] focus-visible:ring-1 focus-visible:ring-[#651d2a] bg-white text-gray-900 placeholder:text-gray-400"
+                  />
                 </div>
-              </div>
 
-              {/* CTA 버튼 */}
-              <div className="space-y-3">
-                <Button className="w-full h-14 text-black font-semibold bg-[#651d2a] hover:bg-[#651d2a]/90 text-white shadow-lg">
-                  Check Availability
-                </Button>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    Email <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="your.email@example.com"
+                    required
+                    className="border border-gray-300 focus-visible:border-[#651d2a] focus-visible:ring-1 focus-visible:ring-[#651d2a] bg-white text-gray-900 placeholder:text-gray-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    Preferred Travel Date{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    name="travelDate"
+                    value={formData.travelDate}
+                    onChange={handleChange}
+                    min={new Date().toISOString().split("T")[0]}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#651d2a] focus:border-[#651d2a] bg-white text-gray-900 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-datetime-edit-text]:text-gray-400 [&::-webkit-datetime-edit-month-field]:text-gray-400 [&::-webkit-datetime-edit-day-field]:text-gray-400 [&::-webkit-datetime-edit-year-field]:text-gray-400"
+                    style={{
+                      colorScheme: "light",
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    Number of Travelers <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="number"
+                    name="numberOfTravelers"
+                    value={formData.numberOfTravelers}
+                    onChange={handleChange}
+                    placeholder="e.g., 2"
+                    min="1"
+                    required
+                    className="border border-gray-300 focus-visible:border-[#651d2a] focus-visible:ring-1 focus-visible:ring-[#651d2a] bg-white text-gray-900 placeholder:text-gray-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    Message <span className="text-red-500">*</span>
+                  </label>
+                  <Textarea
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    placeholder="Tell us about your interests, preferences, and desired tour duration..."
+                    rows={4}
+                    required
+                    className="border border-gray-300 focus-visible:border-[#651d2a] focus-visible:ring-1 focus-visible:ring-[#651d2a] bg-white text-gray-900 placeholder:text-gray-400"
+                  />
+                </div>
+
+                {submitStatus === "success" && (
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="text-green-800 text-sm">
+                      Thank you! Your request has been sent. We'll get back to
+                      you within 24 hours.
+                    </p>
+                  </div>
+                )}
+
+                {submitStatus === "error" && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-red-800 text-sm">
+                      Something went wrong. Please try again or contact us
+                      directly.
+                    </p>
+                  </div>
+                )}
+
                 <Button
-                  variant="outline"
-                  className="w-full h-14 text-black font-semibold border-2 border-[#651d2a] text-[#651d2a] hover:bg-[#651d2a]/5 bg-transparent"
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full h-12 font-semibold bg-[#651d2a] hover:bg-[#4a1520] text-white shadow-lg"
                 >
-                  Contact Us
+                  {isSubmitting ? "Sending..." : "Send Request"}
                 </Button>
-              </div>
-
-              {/* 보안 배지 */}
+              </form>
             </div>
           </div>
         </div>
