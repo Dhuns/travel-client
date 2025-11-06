@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowRight,
   BookOpen,
   Calendar,
   Check,
@@ -60,7 +61,7 @@ export default function HistoryTourPage() {
               </p>
               <div className="flex gap-4 mb-8">
                 <Button
-                  className="bg-[#651d2a] hover:bg-[#651d2a]/90 text-white px-6 flex items-center gap-2"
+                  className="bg-[#651d2a] hover:bg-[#4a1520] text-white px-6 flex items-center gap-2 transition-colors font-semibold"
                   onClick={() => {
                     document
                       .getElementById("tour-list")
@@ -70,11 +71,9 @@ export default function HistoryTourPage() {
                   Explore Tours
                 </Button>
                 <Link href="/chat">
-                  <Button
-                    variant="outline"
-                    className="border-[#651d2a] text-[#651d2a] hover:bg-[#651d2a] hover:text-white bg-white px-6 transition-colors"
-                  >
+                  <Button className="border-1 border-[#651d2a] text-[#651d2a] hover:bg-[#651d2a]/20 hover:border-[#651d2a]/20  bg-white px-6 transition-colors font-semibold flex items-center gap-2">
                     Get Custom Quote
+                    <ArrowRight className="w-4 h-4" />
                   </Button>
                 </Link>
               </div>
