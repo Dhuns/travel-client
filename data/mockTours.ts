@@ -9,60 +9,76 @@ export interface Tour {
   highlights: string[];
   image: string;
   bokunExperienceId: string;
+  // 추가 정보
+  categories?: string[];
+  location?: string;
+  included?: string[];
+  duration?: string;
+  price?: string;
 }
 
 // mock history tour 데이터
 export const historyTours: Tour[] = [
   {
     id: "1",
-    title: "mock history tour 1",
-    subtitle: "Explore Korea's Historical Heritage",
+    title: "History Tour 1",
+    subtitle: "Day trips and excursions with Shopping",
     category: "history",
-    badge: "History & Art",
+    badge: "Day Trip",
     description:
-      "Learn about the history of architectural styles, cultural values, and social structures that shaped the nation.",
-    highlights: [
-      "Gyeongbokgung Palace",
-      "Bukchon Hanok Village",
-      "National Folk Museum",
-      "Traditional tea ceremony",
-    ],
-    image: "/images/design-mode/history-tour-card.png",
+      "Experience the perfect blend of shopping and scenic beauty with a gondola ride at Yongpyong.",
+    highlights: ["Shopping opportunities", "Bus/minivan tour"],
+    image: "/images/design-mode/castle2.png",
     bokunExperienceId: "1110358",
+    categories: ["Day trips and excursions", "Shopping", "Bus/minivan tour"],
+    location: "Paju-si, Gyeonggi-do, South Korea",
+    included: [
+      "Hotel pickup and drop-off",
+      "Round trip gondola ride at Yongpyong",
+    ],
   },
   {
     id: "2",
-    title: "mock history tour 2",
-    subtitle: "Nature Meets History",
+    title: "History Tour 2",
+    subtitle: "Cultural and theme tours",
     category: "history",
-    badge: "Walking in Nature",
+    badge: "Cultural Tour",
     description:
-      "For those who prefer a slower pace, this tour combines historical sites with beautiful natural scenery and serene hiking spots.",
-    highlights: [
-      "Mountain temple trails",
-      "Historic stone paths",
-      "Meditation gardens",
-      "Traditional architecture",
-    ],
-    image: "/images/design-mode/history-tour-card1.png",
+      "Experience Seoul's rich cultural heritage with a private guide, including a traditional Korean lunch.",
+    highlights: ["Bus/minivan tour", "Traditional Korean lunch included"],
+    image: "/images/design-mode/castle1.png",
     bokunExperienceId: "1110371",
+    categories: ["Cultural and theme tours", "Bus/minivan tour"],
+    location: "Seoul, South Korea",
+    included: [
+      "Driver/guide",
+      "Hotel pickup and drop-off",
+      "Round-trip private transfer",
+      "Korean Lunch",
+    ],
   },
   {
     id: "3",
-    title: "mock history tour 3",
-    subtitle: "Past Meets Present",
+    title: "History Tour 3",
+    subtitle: "Cultural and theme tours",
     category: "history",
-    badge: "History & Art",
+    badge: "Cultural Tour",
     description:
-      "Traditional and modern architecture blend seamlessly in this tour, showcasing how Korea honors its past while embracing the future.",
+      "Explore Seoul's historical landmarks including Deoksugung Palace and Seoul Museum of History.",
     highlights: [
-      "Royal palace architecture",
-      "Contemporary art museums",
-      "Design districts",
-      "Photo-worthy locations",
+      "Deoksugung Palace",
+      "Seoul Museum of History",
+      "Bus/minivan tour",
     ],
-    image: "/images/design-mode/history-tour-card2.png",
+    image: "/images/design-mode/castle3.png",
     bokunExperienceId: "1110386",
+    categories: ["Cultural and theme tours", "Bus/minivan tour"],
+    location: "Seoul, South Korea",
+    included: [
+      "Private transportation",
+      "English speaking driver-guide",
+      "Entry/Admission - Seoul Museum of History",
+    ],
   },
 ];
 

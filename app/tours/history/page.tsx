@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Calendar, Sparkles, Users } from "lucide-react";
+import { ArrowRight, BookOpen, Calendar, Check, MapPin, Sparkles, Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,9 @@ export default function HistoryTourPage() {
                 History Tour
               </Badge>
               <h1 className="font-bold text-gray-900 mb-6 text-5xl">
-                Tumakr Korea History Tour
+                Tumakr
+                <br />
+                Korea History Tour
               </h1>
               <p className="text-gray-700 leading-relaxed mb-6">
                 An Unparalleled Korean History Tour Awaits!
@@ -49,15 +51,17 @@ export default function HistoryTourPage() {
                 definitive experience designed to satisfy your curiosity and
                 create lifelong memories.
               </p>
-              <div className="flex gap-4 mb-8">
-                <Button className="bg-[#651d2a] hover:bg-[#651d2a]/90 text-white px-6">
-                  Explore Tours
-                </Button>
+              <div className="mb-8">
                 <Button
-                  variant="outline"
-                  className="border-[#eda89b] text-[#651d2a] hover:bg-[#eda89b]/10 bg-transparent"
+                  className="bg-[#651d2a] hover:bg-[#651d2a]/90 text-white px-6 flex items-center gap-2"
+                  onClick={() => {
+                    document
+                      .getElementById("tour-list")
+                      ?.scrollIntoView({ behavior: "smooth" });
+                  }}
                 >
-                  Browse Tours
+                  Explore Tours
+                  <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
               <div className="flex items-center gap-6 text-sm text-gray-600">
@@ -179,23 +183,28 @@ export default function HistoryTourPage() {
           <p className="text-lg mb-8 text-white/90">
             Embark on a journey through time and discover the soul of Korea
           </p>
-          <Button
-            size="lg"
-            className="bg-white text-[#651d2a] hover:bg-gray-100 font-semibold px-8"
-          >
-            Start Your Journey
-          </Button>
+          <Link href="/chat">
+            <Button
+              size="lg"
+              className="bg-white text-[#651d2a] hover:bg-gray-100 font-semibold px-8"
+            >
+              Plan with AI Assistant
+            </Button>
+          </Link>
         </div>
       </section>
 
       {/* Historical Destinations Section */}
-      <section className="min-h-screen flex items-center px-6 bg-white">
+      <section
+        id="tour-list"
+        className="min-h-screen flex items-center px-6 bg-white"
+      >
         <div className="container mx-auto max-w-6xl py-20">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4">
             Historical Destinations Come Alive
           </h2>
           <p className="text-center text-gray-600 mb-16 max-w-2xl mx-auto">
-            Explore Korea's most significant historical sites with expert guides
+            Discover Korea's rich history and culture through our carefully curated tours
           </p>
 
           <div className="space-y-8">
@@ -218,14 +227,38 @@ export default function HistoryTourPage() {
                       <h3 className="text-2xl font-bold text-gray-900 mb-4">
                         {tour.title}
                       </h3>
+                      {tour.location && (
+                        <p className="text-sm text-gray-500 mb-2 flex items-center gap-1">
+                          <MapPin className="w-4 h-4" />
+                          {tour.location}
+                        </p>
+                      )}
                       <p className="text-gray-700 mb-4">
                         {tour.description}
                       </p>
-                      <ul className="space-y-2 text-sm text-gray-600 mb-4">
-                        {tour.highlights.map((highlight, index) => (
-                          <li key={index}>• {highlight}</li>
-                        ))}
-                      </ul>
+                      {tour.included && tour.included.length > 0 && (
+                        <div className="mb-4">
+                          <h4 className="font-semibold text-gray-900 mb-2 text-sm">Included:</h4>
+                          <ul className="space-y-2 text-sm text-gray-600">
+                            {tour.included.map((item, index) => (
+                              <li key={index} className="flex items-start gap-2">
+                                <Check className="w-4 h-4 text-[#651d2a] mt-0.5 flex-shrink-0" />
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {tour.highlights && tour.highlights.length > 0 && (
+                        <div className="mb-4">
+                          <h4 className="font-semibold text-gray-900 mb-2 text-sm">Highlights:</h4>
+                          <ul className="space-y-2 text-sm text-gray-600">
+                            {tour.highlights.map((highlight, index) => (
+                              <li key={index}>• {highlight}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                       <Button className="bg-[#651d2a] hover:bg-[#651d2a]/90 text-white w-fit">
                         View Details & Book
                       </Button>
