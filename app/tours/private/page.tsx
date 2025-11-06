@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Award,
   Calendar,
@@ -11,7 +13,6 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import Link from "next/link";
 
 export default function PrivateTourPage() {
@@ -22,7 +23,7 @@ export default function PrivateTourPage() {
         {/* 배경 이미지 */}
         <div className="absolute inset-0 z-0">
           <img
-            src="/images/design-mode/multiday-tour-hero.png"
+            src="/images/design-mode/castle3.png"
             alt="Korean Palace Background"
             className="w-full h-full object-cover"
           />
@@ -62,68 +63,23 @@ export default function PrivateTourPage() {
             linger wherever your curiosity leads?
           </p>
 
-          {/* 검색 폼 */}
-          <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-8 max-w-3xl mx-auto mb-8">
-            <div className="space-y-4">
-              {/* 위치 입력 */}
-              <div className="relative">
-                <MapPin
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={20}
-                />
-                <Input
-                  placeholder="Where would you like to go?"
-                  className="pl-12 h-14 text-black border-gray-200"
-                />
-              </div>
-
-              {/* 날짜 입력 */}
-              <div className="relative">
-                <Calendar
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={20}
-                />
-                <Input
-                  type="date"
-                  placeholder="Select your date"
-                  className="pl-12 h-14 text-black border-gray-200"
-                />
-              </div>
-
-              {/* 인원수 입력 */}
-              <div className="relative">
-                <Users
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={20}
-                />
-                <Input
-                  type="number"
-                  placeholder="Number of guests"
-                  className="pl-12 h-14 text-black border-gray-200"
-                  min="1"
-                  max="12"
-                />
-              </div>
-
-              {/* 검색 버튼 */}
-              <Button className="w-full h-14 text-black font-semibold bg-[#651d2a] hover:bg-[#651d2a]/90 text-white">
-                Search
-              </Button>
-            </div>
-          </div>
-
           {/* CTA 버튼들 */}
           <div className="flex flex-wrap justify-center gap-4">
             <Button
               size="lg"
-              className="bg-[#651d2a] hover:bg-[#651d2a]/90 text-white font-semibold shadow-lg"
+              className="bg-[#651d2a] hover:bg-[#4a1520] text-white font-semibold shadow-lg cursor-pointer transition-colors"
             >
               Book Your Journey Now
             </Button>
             <Button
               size="lg"
               variant="outline"
-              className="font-semibold border-2 border-white text-white hover:bg-white/10 bg-white/5 backdrop-blur-sm shadow-lg"
+              className="font-semibold border-2 border-white text-white hover:bg-white/20 bg-white/5 backdrop-blur-sm shadow-lg cursor-pointer transition-colors"
+              onClick={() => {
+                document
+                  .getElementById("tour-list")
+                  ?.scrollIntoView({ behavior: "smooth" });
+              }}
             >
               Explore Tours
             </Button>
@@ -229,7 +185,10 @@ export default function PrivateTourPage() {
       </section>
 
       {/* Popular Tours Section - 4.png */}
-      <section className="py-16 px-6 min-h-screen flex items-center bg-gradient-to-br from-[#eda89b]/10 to-[#6d8675]/10">
+      <section
+        id="tour-list"
+        className="py-16 px-6 min-h-screen flex items-center bg-gradient-to-br from-[#eda89b]/10 to-[#6d8675]/10"
+      >
         <div className="container mx-auto max-w-6xl w-full">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
