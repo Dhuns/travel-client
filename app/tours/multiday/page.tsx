@@ -90,17 +90,6 @@ export default function MultidayTourPage() {
     <div className="min-h-screen bg-[#f5f3f0]">
       {/* Section 1: Tour Detail Hero - 1.png */}
       <section className="py-20 px-6 min-h-screen">
-        {/* Breadcrumb */}
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-2 text-sm text-black">
-            <span>Home</span>
-            <ChevronRight className="h-4 w-4" />
-            <span>Multi-day Tours</span>
-            <ChevronRight className="h-4 w-4" />
-            <span className="text-foreground">Multiday Tour Name</span>
-          </div>
-        </div>
-
         <div className="container mx-auto px-4 py-8">
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Main Content */}
@@ -139,7 +128,7 @@ export default function MultidayTourPage() {
               {/* Main Image */}
               <div className="relative aspect-video rounded-xl overflow-hidden mb-4">
                 <Image
-                  src="/images/design-mode/multiday-tour-hero.png"
+                  src="/images/design-mode/castle1.png"
                   alt="Gyeongbokgung Palace"
                   fill
                   className="object-cover"
@@ -154,7 +143,7 @@ export default function MultidayTourPage() {
               <div className="grid grid-cols-4 gap-2">
                 <div className="relative aspect-video rounded-lg overflow-hidden">
                   <Image
-                    src="/images/design-mode/multiday-tour-thumb-1.png"
+                    src="/images/design-mode/castle2.png"
                     alt="Palace gate"
                     fill
                     className="object-cover"
@@ -162,7 +151,7 @@ export default function MultidayTourPage() {
                 </div>
                 <div className="relative aspect-video rounded-lg overflow-hidden">
                   <Image
-                    src="/images/design-mode/multiday-tour-thumb-2.png"
+                    src="/images/design-mode/castle3.png"
                     alt="Palace pavilion"
                     fill
                     className="object-cover"
@@ -170,7 +159,7 @@ export default function MultidayTourPage() {
                 </div>
                 <div className="relative aspect-video rounded-lg overflow-hidden">
                   <Image
-                    src="/images/design-mode/multiday-tour-thumb-3.png"
+                    src="/images/design-mode/castle4.png"
                     alt="Hanbok experience"
                     fill
                     className="object-cover"
@@ -367,7 +356,7 @@ export default function MultidayTourPage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="order-2 md:order-1 relative h-[500px]">
               <Image
-                src="/images/design-mode/multiday-tour-overview.png"
+                src="/images/design-mode/castle1.png"
                 alt="Korean traditional celadon vase"
                 fill
                 className="rounded-2xl shadow-2xl object-cover"
@@ -452,57 +441,43 @@ export default function MultidayTourPage() {
         </div>
       </section>
 
-      {/* Section 5: What's Included - 5.png */}
-      <section className="py-20 px-6 flex items-center">
-        <div className="container mx-auto max-w-6xl">
-          <h2 className="text-4xl font-bold text-gray-900 mb-12">
-            What's Included
+      {/* Section 7: CTA Section - 7.png */}
+      <section className="py-20 px-6 flex items-center bg-[#272b38]">
+        <div className="container mx-auto max-w-4xl text-center">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Start Your Special Journey Now
           </h2>
-          <div className="grid md:grid-cols-2 gap-12">
-            {/* Included */}
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                Included
-              </h3>
-              <div className="space-y-4">
-                {[
-                  "6 nights of 4-star accommodation",
-                  "Professional English-speaking guide",
-                  "All entrance fees to palaces and museums",
-                  "Traditional Korean meals (6 breakfasts, 5 lunches, 3 dinners)",
-                  "Comfortable air-conditioned transportation",
-                  "Hanbok rental experience",
-                  "Airport transfers",
-                ].map((item, idx) => (
-                  <div key={idx} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-[#6d8675] flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <p className="text-white/80 text-lg mb-8">
+            Experience the true joy of travel
+          </p>
 
-            {/* Not Included */}
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                Not Included
+          <div className="flex flex-wrap justify-center gap-4 mb-16">
+            <Button className="bg-white text-[#272b38] hover:bg-gray-100 px-8 py-6 text-lg rounded-lg">
+              Request a Consultation
+            </Button>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <MapPin className="w-12 h-12 text-white mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">
+                Nationwide Tours Available
               </h3>
-              <div className="space-y-4">
-                {[
-                  "International airfare",
-                  "Personal expenses and shopping",
-                  "Travel insurance",
-                  "Alcoholic beverages",
-                  "Tips and gratuities",
-                  "Optional activities",
-                  "Visa fees (if applicable)",
-                ].map((item, idx) => (
-                  <div key={idx} className="flex items-start gap-3">
-                    <X className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-600">{item}</span>
-                  </div>
-                ))}
-              </div>
+              <p className="text-white/70">(Seoul, Busan, Jeju, etc.)</p>
+            </div>
+            <div className="text-center">
+              <Clock className="w-12 h-12 text-white mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">
+                24/7 Support
+              </h3>
+              <p className="text-white/70">Inquire anytime</p>
+            </div>
+            <div className="text-center">
+              <Shield className="w-12 h-12 text-white mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">
+                Safety Guaranteed
+              </h3>
+              <p className="text-white/70">Traveler's insurance included</p>
             </div>
           </div>
         </div>
@@ -573,48 +548,6 @@ export default function MultidayTourPage() {
                   }`}
                 />
               ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Section 7: CTA Section - 7.png */}
-      <section className="py-20 px-6 flex items-center bg-[#272b38]">
-        <div className="container mx-auto max-w-4xl text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Start Your Special Journey Now
-          </h2>
-          <p className="text-white/80 text-lg mb-8">
-            Experience the true joy of travel
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-4 mb-16">
-            <Button className="bg-white text-[#272b38] hover:bg-gray-100 px-8 py-6 text-lg rounded-lg">
-              Request a Consultation
-            </Button>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <MapPin className="w-12 h-12 text-white mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-white mb-2">
-                Nationwide Tours Available
-              </h3>
-              <p className="text-white/70">(Seoul, Busan, Jeju, etc.)</p>
-            </div>
-            <div className="text-center">
-              <Clock className="w-12 h-12 text-white mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-white mb-2">
-                24/7 Support
-              </h3>
-              <p className="text-white/70">Inquire anytime</p>
-            </div>
-            <div className="text-center">
-              <Shield className="w-12 h-12 text-white mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-white mb-2">
-                Safety Guaranteed
-              </h3>
-              <p className="text-white/70">Traveler's insurance included</p>
             </div>
           </div>
         </div>
