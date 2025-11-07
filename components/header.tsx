@@ -1,12 +1,21 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useCallback, useMemo } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Search, User, Menu, X, LogIn, ShoppingCart, ChevronDown } from "lucide-react"
+import {
+  ChevronDown,
+  LogIn,
+  Menu,
+  Search,
+  ShoppingCart,
+  User,
+  X,
+} from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import Link from "next/link";
+import type React from "react";
+import { useRouter } from "next/navigation";
 
 /**
  * 헤더 컴포넌트 - 웹사이트의 상단 네비게이션
@@ -26,27 +35,46 @@ import { Search, User, Menu, X, LogIn, ShoppingCart, ChevronDown } from "lucide-
  */
 export default function Header() {
   // 상태 관리
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [userDropdownOpen, setUserDropdownOpen] = useState(false)
-  const [toursDropdownOpen, setToursDropdownOpen] = useState(false) // Tours 드롭다운 메뉴 상태 추가
-  const [contactDropdownOpen, setContactDropdownOpen] = useState(false) // Contact 드롭다운 메뉴 상태 추가
-  const router = useRouter()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [toursDropdownOpen, setToursDropdownOpen] = useState(false); // Tours 드롭다운 메뉴 상태 추가
+  const [contactDropdownOpen, setContactDropdownOpen] = useState(false); // Contact 드롭다운 메뉴 상태 추가
+  const router = useRouter();
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false) // 백엔드 연동 시 실제 로그인 상태로 교체
-  const [cartItemCount, setCartItemCount] = useState(3) // 백엔드에서 장바구니 아이템 수 조회
-  const [user, setUser] = useState({ name: "김철수", email: "user@example.com" }) // 백엔드에서 사용자 정보 조회
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // 백엔드 연동 시 실제 로그인 상태로 교체
+  const [cartItemCount, setCartItemCount] = useState(3); // 백엔드에서 장바구니 아이템 수 조회
+  const [user, setUser] = useState({
+    name: "김철수",
+    email: "user@example.com",
+  }); // 백엔드에서 사용자 정보 조회
 
   const tourCategories = useMemo(
     () => [
-      { href: "/tours/history", label: "History Tour", description: "Explore Korea's rich historical heritage" },
-      { href: "/tours/private", label: "Private Tour", description: "Personalized tours for your group" },
-      { href: "/tours/multiday", label: "Multiday Tour", description: "Extended adventures across Korea" },
-      { href: "/tours/package", label: "Package Tour", description: "All-inclusive tour packages" },
+      {
+        href: "/tours/history",
+        label: "History Tour",
+        description: "Explore Korea's rich historical heritage",
+      },
+      {
+        href: "/tours/private",
+        label: "Private Tour",
+        description: "Personalized tours for your group",
+      },
+      {
+        href: "/tours/multiday",
+        label: "Multiday Tour",
+        description: "Extended adventures across Korea",
+      },
+      {
+        href: "/tours/package",
+        label: "Package Tour",
+        description: "All-inclusive tour packages",
+      },
     ],
-    [],
-  )
+    []
+  );
 
   // 네비게이션 메뉴 항목들
   const navigationItems = useMemo(
@@ -58,69 +86,71 @@ export default function Header() {
       { href: "/insights", label: "Travel Insights" },
       { href: "#", label: "Contact", hasDropdown: true, isContact: true }, // Contact 드롭다운 추가
     ],
-    [],
-  )
+    []
+  );
 
   // 검색 처리 함수
   const handleSearch = useCallback(
     (e: React.FormEvent) => {
-      e.preventDefault()
+      e.preventDefault();
       if (searchQuery.trim()) {
         // TODO: 백엔드 연동 시 검색 API 호출
-        router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
-        setSearchOpen(false)
-        setSearchQuery("")
+        router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        setSearchOpen(false);
+        setSearchQuery("");
       }
     },
-    [searchQuery, router],
-  )
+    [searchQuery, router]
+  );
 
   const handleLogout = useCallback(() => {
     // TODO: 백엔드 로그아웃 API 호출
-    setIsLoggedIn(false)
-    setUserDropdownOpen(false)
-    router.push("/")
-  }, [router])
+    setIsLoggedIn(false);
+    setUserDropdownOpen(false);
+    router.push("/");
+  }, [router]);
 
   // 모바일 메뉴 토글 함수
   const toggleMobileMenu = useCallback(() => {
-    setMobileMenuOpen((prev) => !prev)
-  }, [])
+    setMobileMenuOpen((prev) => !prev);
+  }, []);
 
   // 검색창 토글 함수
   const toggleSearch = useCallback(() => {
-    setSearchOpen((prev) => !prev)
-  }, [])
+    setSearchOpen((prev) => !prev);
+  }, []);
 
   const toggleUserDropdown = useCallback(() => {
-    setUserDropdownOpen((prev) => !prev)
-  }, [])
+    setUserDropdownOpen((prev) => !prev);
+  }, []);
 
   const toggleToursDropdown = useCallback(() => {
-    setToursDropdownOpen((prev) => !prev)
-  }, [])
+    setToursDropdownOpen((prev) => !prev);
+  }, []);
 
   const toggleContactDropdown = useCallback(() => {
-    setContactDropdownOpen((prev) => !prev)
-  }, [])
+    setContactDropdownOpen((prev) => !prev);
+  }, []);
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 transition-all duration-300">
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between py-2">
           {/* 로고 섹션 */}
-          <div className="hover:opacity-80 transition-opacity duration-300 cursor-pointer">
-            <Link href="/">
-              <Image
-                src="/tumakr-logo.png"
-                alt="Tumakr Korea History Tour"
-                width={120}
-                height={120}
-                priority
-                className="h-16 w-auto"
-              />
-            </Link>
-          </div>
+          <Link
+            href="/"
+            className="hover:opacity-80 transition-opacity duration-300 cursor-pointer flex items-center"
+          >
+            <Image
+              src="/tumakr-logo(no-text).png"
+              alt="Tumakr Korea History Tour"
+              width={120}
+              height={120}
+              priority
+              className="h-16 w-auto"
+            />
+            <span className="text-2xl font-bold text-gray-900">tumakr</span>
+          </Link>
 
           {/* 데스크톱 메뉴 */}
           <div className="hidden lg:flex items-center space-x-8 text-sm text-gray-600">
@@ -129,8 +159,16 @@ export default function Header() {
                 <div
                   key={item.href}
                   className="relative group"
-                  onMouseEnter={() => item.isContact ? setContactDropdownOpen(true) : setToursDropdownOpen(true)}
-                  onMouseLeave={() => item.isContact ? setContactDropdownOpen(false) : setToursDropdownOpen(false)}
+                  onMouseEnter={() =>
+                    item.isContact
+                      ? setContactDropdownOpen(true)
+                      : setToursDropdownOpen(true)
+                  }
+                  onMouseLeave={() =>
+                    item.isContact
+                      ? setContactDropdownOpen(false)
+                      : setToursDropdownOpen(false)
+                  }
                 >
                   <Link
                     href={item.href}
@@ -159,7 +197,9 @@ export default function Header() {
                             <div className="font-medium text-gray-900 hover:text-[#651d2a] transition-colors">
                               {category.label}
                             </div>
-                            <div className="text-xs text-gray-500 mt-1">{category.description}</div>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {category.description}
+                            </div>
                           </Link>
                         ))}
                       </div>
@@ -182,7 +222,9 @@ export default function Header() {
                           <div className="font-medium text-gray-900 hover:text-[#651d2a] transition-colors">
                             AI Assistant
                           </div>
-                          <div className="text-xs text-gray-500 mt-1">Chat with our AI for instant help</div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            Chat with our AI for instant help
+                          </div>
                         </Link>
                         <Link
                           href="/contact"
@@ -192,7 +234,9 @@ export default function Header() {
                           <div className="font-medium text-gray-900 hover:text-[#651d2a] transition-colors">
                             Email Us
                           </div>
-                          <div className="text-xs text-gray-500 mt-1">Fill out our contact form</div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            Fill out our contact form
+                          </div>
                         </Link>
                       </div>
                     </div>
@@ -207,7 +251,7 @@ export default function Header() {
                   {item.label}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#651d2a] transition-all duration-300 group-hover:w-full"></span>
                 </Link>
-              ),
+              )
             )}
           </div>
 
@@ -262,7 +306,9 @@ export default function Header() {
                 {userDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                     <div className="px-4 py-2 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {user.name}
+                      </p>
                       <p className="text-xs text-gray-500">{user.email}</p>
                     </div>
                     <Link
@@ -304,7 +350,11 @@ export default function Header() {
               onClick={toggleMobileMenu}
               aria-label="모바일 메뉴 토글"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
             </button>
           </div>
         </div>
@@ -312,7 +362,10 @@ export default function Header() {
         {/* 검색창 */}
         {searchOpen && (
           <div className="py-4 border-t border-gray-200">
-            <form onSubmit={handleSearch} className="flex items-center space-x-2">
+            <form
+              onSubmit={handleSearch}
+              className="flex items-center space-x-2"
+            >
               <input
                 type="text"
                 value={searchQuery}
@@ -362,7 +415,10 @@ export default function Header() {
               {/* 나머지 메뉴 항목들 */}
               {navigationItems.slice(1).map((item) =>
                 item.hasDropdown && item.isContact ? (
-                  <div key={item.href} className="border-b border-gray-100 pb-2">
+                  <div
+                    key={item.href}
+                    className="border-b border-gray-100 pb-2"
+                  >
                     <div className="py-2 font-medium text-gray-900">
                       {item.label}
                     </div>
@@ -432,8 +488,8 @@ export default function Header() {
                   </Link>
                   <button
                     onClick={() => {
-                      handleLogout()
-                      setMobileMenuOpen(false)
+                      handleLogout();
+                      setMobileMenuOpen(false);
                     }}
                     className="text-left hover:text-red-600 transition-colors duration-300 py-2"
                   >
@@ -446,5 +502,5 @@ export default function Header() {
         )}
       </div>
     </nav>
-  )
+  );
 }
