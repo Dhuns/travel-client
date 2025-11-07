@@ -8,6 +8,7 @@ import {
   MapPin,
   Sparkles,
   Users,
+  X,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -15,10 +16,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import type React from "react";
-import { historyTours } from "@/data/mockTours";
-import { useState } from "react";
+import { historyTours, type Tour } from "@/data/mockTours";
+import { useState, useEffect } from "react";
 
 export default function HistoryTourPage() {
+  // 투어 데이터 상태
+  const [tours, setTours] = useState<Tour[]>([]);
+  const [loading, setLoading] = useState(true);
+
   // 폼 상태 관리
   const [formData, setFormData] = useState({
     name: "",
@@ -28,10 +33,112 @@ export default function HistoryTourPage() {
     numberOfTravelers: "",
   });
 
-  // 폼 제출 핸들러 - 백엔드 API 연동 시 이 부분을 수정
+  // HTML 태그 제거 함수
+  const stripHtmlTags = (html: string): string => {
+    return html.replace(/<[^>]*>/g, '').trim();
+  };
+
+  // HTML을 배열로 파싱하는 함수
+  const parseHtmlToArray = (html: string | string[]): string[] => {
+    if (Array.isArray(html)) return html;
+    if (!html || typeof html !== 'string') return [];
+
+    // <p> 태그로 분리하여 텍스트만 추출
+    const matches = html.match(/<p[^>]*>(.*?)<\/p>/g);
+    if (!matches) return [];
+
+    return matches.map(match => {
+      const text = match.replace(/<[^>]*>/g, '').trim();
+      return text;
+    }).filter(text => text.length > 0);
+  };
+
+  // knowBeforeYouGoItems 코드를 텍스트로 변환
+  const parseKnowBeforeYouGo = (items: string[] | null): string[] => {
+    if (!Array.isArray(items)) return [];
+
+    const translations: Record<string, string> = {
+      'PUBLIC_TRANSPORTATION_NEARBY': 'Public transportation nearby',
+      'WHEELCHAIR_ACCESSIBLE': 'Wheelchair accessible',
+      'STROLLER_ACCESSIBLE': 'Stroller accessible',
+      'INFANTS_ALLOWED': 'Infants allowed',
+      'NOT_RECOMMENDED_FOR_PREGNANT': 'Not recommended for pregnant travelers',
+      'NO_HEART_PROBLEMS': 'Not recommended for travelers with heart problems',
+      'MODERATE_PHYSICAL_FITNESS': 'Moderate physical fitness required',
+    };
+
+    return items.map(item => translations[item] || item);
+  };
+
+  // Bokun API에서 투어 데이터 가져오기
+  useEffect(() => {
+    async function fetchTours() {
+      try {
+        const tourPromises = historyTours.map(async (tour) => {
+          try {
+            const response = await fetch(
+              `/api/bokun/activity/${tour.bokunExperienceId}`
+            );
+            if (response.ok) {
+              const bokunData = await response.json();
+              // Bokun 데이터를 우리 형식으로 변환
+              const rawDescription = bokunData.excerpt || bokunData.shortDescription || bokunData.description || "";
+              const description = stripHtmlTags(rawDescription);
+
+              // Duration 계산
+              let durationDisplay = "";
+              if (bokunData.durationHours && bokunData.durationMinutes) {
+                durationDisplay = `${bokunData.durationHours}h ${bokunData.durationMinutes}m`;
+              } else if (bokunData.durationHours) {
+                durationDisplay = `${bokunData.durationHours} hours`;
+              } else if (bokunData.duration) {
+                durationDisplay = `${bokunData.duration} hours`;
+              }
+
+              return {
+                ...tour,
+                title: bokunData.title || "",
+                description: description,
+                image: bokunData.photos?.[0]?.url || tour.image,
+                location: bokunData.googlePlace?.name || bokunData.meetingPoint?.title || bokunData.address?.city || "",
+                duration: durationDisplay,
+                durationText: bokunData.durationText || "",
+                price: bokunData.pricing?.from ? `$${bokunData.pricing.from}` : "",
+                included: parseHtmlToArray(bokunData.included),
+                exclusions: parseHtmlToArray(bokunData.excluded),
+                highlights: Array.isArray(bokunData.highlights) ? bokunData.highlights : [],
+                activityCategories: Array.isArray(bokunData.activityCategories) ? bokunData.activityCategories : [],
+                knowBeforeYouGo: parseKnowBeforeYouGo(bokunData.knowBeforeYouGoItems),
+                minAge: bokunData.minAge || 0,
+                cancellationPolicy: bokunData.cancellationPolicy?.title || "",
+              };
+            }
+            return null; // API 실패시 null 반환
+          } catch (error) {
+            console.error(
+              `Failed to fetch tour ${tour.bokunExperienceId}:`,
+              error
+            );
+            return null; // 에러시 null 반환
+          }
+        });
+
+        const fetchedTours = await Promise.all(tourPromises);
+        // null이 아닌 투어만 필터링
+        setTours(fetchedTours.filter((tour) => tour !== null) as Tour[]);
+      } catch (error) {
+        console.error("Failed to fetch tours:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchTours();
+  }, []);
+
+  // 폼 제출 핸들러
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
     // TODO: API 호출하여 견적 요청 전송
   };
 
@@ -223,7 +330,12 @@ export default function HistoryTourPage() {
 
           <div className="space-y-8">
             {/* 히스토리 투어 목록 */}
-            {historyTours.map((tour) => (
+            {loading ? (
+              <div className="text-center py-20">
+                <p className="text-gray-600">Loading tours...</p>
+              </div>
+            ) : (
+              tours.map((tour) => (
               <Link
                 key={tour.id}
                 href={`/tours/history/${tour.id}`}
@@ -245,31 +357,68 @@ export default function HistoryTourPage() {
                       <h3 className="text-2xl font-bold text-gray-900 mb-4">
                         {tour.title}
                       </h3>
-                      {tour.location && (
-                        <p className="text-sm text-gray-500 mb-2 flex items-center gap-1">
-                          <MapPin className="w-4 h-4" />
-                          {tour.location}
+                      <div className="flex flex-wrap gap-4 mb-3 text-sm text-gray-600">
+                        {tour.location && (
+                          <div className="flex items-center gap-1">
+                            <MapPin className="w-4 h-4" />
+                            {tour.location}
+                          </div>
+                        )}
+                        {tour.duration && (
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            {tour.duration}
+                          </div>
+                        )}
+                      </div>
+                      {tour.description && (
+                        <p className="text-gray-600 mb-4 text-sm leading-relaxed line-clamp-3">
+                          {tour.description}
                         </p>
                       )}
-                      <p className="text-gray-700 mb-4">{tour.description}</p>
-                      {tour.included && tour.included.length > 0 && (
-                        <div className="mb-4">
-                          <h4 className="font-semibold text-gray-900 mb-2 text-sm">
-                            Included:
-                          </h4>
-                          <ul className="space-y-2 text-sm text-gray-600">
-                            {tour.included.map((item, index) => (
-                              <li
-                                key={index}
-                                className="flex items-start gap-2"
-                              >
-                                <Check className="w-4 h-4 text-[#651d2a] mt-0.5 flex-shrink-0" />
-                                {item}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+                      {tour.price && (
+                        <p className="text-2xl font-bold text-[#651d2a] mb-4">
+                          {tour.price}
+                        </p>
                       )}
+                      <div className="grid md:grid-cols-2 gap-6 mb-4">
+                        {tour.included && tour.included.length > 0 && (
+                          <div>
+                            <h4 className="font-semibold text-gray-900 mb-2 text-sm">
+                              Included:
+                            </h4>
+                            <ul className="space-y-2 text-sm text-gray-600">
+                              {tour.included.map((item, index) => (
+                                <li
+                                  key={index}
+                                  className="flex items-start gap-2"
+                                >
+                                  <Check className="w-4 h-4 text-[#651d2a] mt-0.5 flex-shrink-0" />
+                                  {item}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {tour.exclusions && tour.exclusions.length > 0 && (
+                          <div>
+                            <h4 className="font-semibold text-gray-900 mb-2 text-sm">
+                              Not Included:
+                            </h4>
+                            <ul className="space-y-2 text-sm text-gray-600">
+                              {tour.exclusions.map((item, index) => (
+                                <li
+                                  key={index}
+                                  className="flex items-start gap-2"
+                                >
+                                  <X className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                  {item}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
                       {tour.highlights && tour.highlights.length > 0 && (
                         <div className="mb-4">
                           <h4 className="font-semibold text-gray-900 mb-2 text-sm">
@@ -289,7 +438,8 @@ export default function HistoryTourPage() {
                   </div>
                 </Card>
               </Link>
-            ))}
+            ))
+            )}
           </div>
         </div>
       </section>
