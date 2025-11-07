@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
+import Link from "next/link";
 
 /**
  * Multiday Tour 설명 페이지
@@ -139,7 +140,7 @@ export default function MultidayTourPage() {
       </section>
 
       {/* Tour Highlights */}
-      <section className="py-20 px-6 bg-white">
+      <section id="tour-highlights" className="py-20 px-6 bg-white scroll-mt-24">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
@@ -355,15 +356,22 @@ export default function MultidayTourPage() {
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-16">
-            <Button className="bg-white text-[#651d2a] hover:bg-white/90 px-8 py-6 text-lg rounded-full">
+            <Button
+              className="bg-white text-[#651d2a] hover:bg-white/90 px-8 py-6 text-lg rounded-full"
+              onClick={() => {
+                document.getElementById('tour-highlights')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
               View Available Tours
             </Button>
-            <Button
-              variant="outline"
-              className="border-2 border-white text-white hover:bg-white/10 px-8 py-6 text-lg rounded-full bg-transparent"
-            >
-              Request Custom Tour
-            </Button>
+            <Link href="/chat">
+              <Button
+                variant="outline"
+                className="border-2 border-white text-white hover:bg-white/10 px-8 py-6 text-lg rounded-full bg-transparent"
+              >
+                Request Custom Tour
+              </Button>
+            </Link>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 text-left">
@@ -568,10 +576,12 @@ export default function MultidayTourPage() {
                   </div>
                 </div>
 
-                <Button className="bg-gradient-to-r from-[#651d2a] to-[#4a1620] hover:from-[#4a1620] hover:to-[#651d2a] text-white px-8 py-6 text-lg rounded-full w-full md:w-auto group">
-                  <span>Chat with Travel AI</span>
-                  <Compass className="w-5 h-5 ml-2 group-hover:rotate-90 transition-transform" />
-                </Button>
+                <Link href="/chat" className="w-full">
+                  <Button className="bg-gradient-to-r from-[#651d2a] to-[#4a1620] hover:from-[#4a1620] hover:to-[#651d2a] text-white px-8 py-6 text-lg rounded-full w-full group flex items-center justify-center">
+                    <span>Chat with Travel AI</span>
+                    <Compass className="w-5 h-5 ml-2 group-hover:rotate-90 transition-transform" />
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
