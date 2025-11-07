@@ -10,15 +10,21 @@ import {
   Shield,
   Star,
   Users,
+  X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { privateTours, type Tour } from "@/data/mockTours";
 
 export default function PrivateTourPage() {
+  // 투어 데이터 상태
+  const [tours, setTours] = useState<Tour[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -31,6 +37,109 @@ export default function PrivateTourPage() {
   const [submitStatus, setSubmitStatus] = useState<"success" | "error" | null>(
     null
   );
+
+  // HTML 태그 제거 함수
+  const stripHtmlTags = (html: string): string => {
+    return html.replace(/<[^>]*>/g, '').trim();
+  };
+
+  // HTML을 배열로 파싱하는 함수
+  const parseHtmlToArray = (html: string | string[]): string[] => {
+    if (Array.isArray(html)) return html;
+    if (!html || typeof html !== 'string') return [];
+
+    // <p> 태그로 분리하여 텍스트만 추출
+    const matches = html.match(/<p[^>]*>(.*?)<\/p>/g);
+    if (!matches) return [];
+
+    return matches.map(match => {
+      const text = match.replace(/<[^>]*>/g, '').trim();
+      return text;
+    }).filter(text => text.length > 0);
+  };
+
+  // knowBeforeYouGoItems 코드를 텍스트로 변환
+  const parseKnowBeforeYouGo = (items: string[] | null): string[] => {
+    if (!Array.isArray(items)) return [];
+
+    const translations: Record<string, string> = {
+      'PUBLIC_TRANSPORTATION_NEARBY': 'Public transportation nearby',
+      'WHEELCHAIR_ACCESSIBLE': 'Wheelchair accessible',
+      'STROLLER_ACCESSIBLE': 'Stroller accessible',
+      'INFANTS_ALLOWED': 'Infants allowed',
+      'NOT_RECOMMENDED_FOR_PREGNANT': 'Not recommended for pregnant travelers',
+      'NO_HEART_PROBLEMS': 'Not recommended for travelers with heart problems',
+      'MODERATE_PHYSICAL_FITNESS': 'Moderate physical fitness required',
+    };
+
+    return items.map(item => translations[item] || item);
+  };
+
+  // Bokun API에서 투어 데이터 가져오기
+  useEffect(() => {
+    async function fetchTours() {
+      try {
+        const tourPromises = privateTours.map(async (tour) => {
+          try {
+            const response = await fetch(
+              `/api/bokun/activity/${tour.bokunExperienceId}`
+            );
+            if (response.ok) {
+              const bokunData = await response.json();
+              // Bokun 데이터를 우리 형식으로 변환
+              const rawDescription = bokunData.excerpt || bokunData.shortDescription || bokunData.description || "";
+              const description = stripHtmlTags(rawDescription);
+
+              // Duration 계산
+              let durationDisplay = "";
+              if (bokunData.durationHours && bokunData.durationMinutes) {
+                durationDisplay = `${bokunData.durationHours}h ${bokunData.durationMinutes}m`;
+              } else if (bokunData.durationHours) {
+                durationDisplay = `${bokunData.durationHours} hours`;
+              } else if (bokunData.duration) {
+                durationDisplay = `${bokunData.duration} hours`;
+              }
+
+              return {
+                ...tour,
+                title: bokunData.title || "",
+                description: stripHtmlTags(description),
+                image: bokunData.photos?.[0]?.url || tour.image,
+                location: bokunData.googlePlace?.name || bokunData.meetingPoint?.title || bokunData.address?.city || "",
+                duration: durationDisplay,
+                durationText: bokunData.durationText || "",
+                price: bokunData.pricing?.from ? `$${bokunData.pricing.from}` : "",
+                included: parseHtmlToArray(bokunData.included),
+                exclusions: parseHtmlToArray(bokunData.excluded),
+                highlights: Array.isArray(bokunData.highlights) ? bokunData.highlights : [],
+                activityCategories: Array.isArray(bokunData.activityCategories) ? bokunData.activityCategories : [],
+                knowBeforeYouGo: parseKnowBeforeYouGo(bokunData.knowBeforeYouGoItems),
+                minAge: bokunData.minAge || 0,
+                cancellationPolicy: bokunData.cancellationPolicy?.title || "",
+              };
+            }
+            return null; // API 실패시 null 반환
+          } catch (error) {
+            console.error(
+              `Failed to fetch tour ${tour.bokunExperienceId}:`,
+              error
+            );
+            return null; // 에러시 null 반환
+          }
+        });
+
+        const fetchedTours = await Promise.all(tourPromises);
+        // null이 아닌 투어만 필터링
+        setTours(fetchedTours.filter((tour) => tour !== null) as Tour[]);
+      } catch (error) {
+        console.error("Failed to fetch tours:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchTours();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -253,164 +362,118 @@ export default function PrivateTourPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Tour 1 */}
-            <Link href="/tours/private/1">
-              <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow cursor-pointer">
-                <div className="relative h-64">
-                  <img
-                    src="/seoul-royal-palace-gyeongbokgung.jpg"
-                    alt="Seoul Royal Palace"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#651d2a]">
-                    Dedicated Guide
-                  </div>
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                    <div className="flex items-center gap-1">
-                      <MapPin size={16} />
-                      <span>Seoul</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock size={16} />
-                      <span>6 hours</span>
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">
-                    Seoul Royal Palace Private Tour
-                  </h3>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                      Gyeongbokgung
-                    </span>
-                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                      Changdeokgung
-                    </span>
-                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                      Hanbok Experience
-                    </span>
-                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                      Traditional Tea
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-[#651d2a]">
-                      $280
-                    </span>
-                    <Button className="bg-[#651d2a] hover:bg-[#651d2a]/90 text-white">
-                      Book Now
-                    </Button>
-                  </div>
-                </div>
+            {loading ? (
+              <div className="col-span-3 text-center py-20">
+                <p className="text-gray-600">Loading tours...</p>
               </div>
-            </Link>
+            ) : (
+              tours.map((tour, index) => {
+                // 투어별 색상 테마
+                const colorThemes = [
+                  { badge: "bg-[#651d2a]", text: "text-[#651d2a]", button: "bg-[#651d2a] hover:bg-[#651d2a]/90" },
+                  { badge: "bg-[#c4982a]", text: "text-[#c4982a]", button: "bg-[#c4982a] hover:bg-[#c4982a]/90" },
+                  { badge: "bg-[#6d8675]", text: "text-[#6d8675]", button: "bg-[#6d8675] hover:bg-[#6d8675]/90" },
+                ];
+                const theme = colorThemes[index % 3];
 
-            {/* Tour 2 */}
-            <Link href="/tours/private/2">
-              <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow cursor-pointer">
-                <div className="relative h-64">
-                  <img
-                    src="/jeju-island-traditional-architecture.jpg"
-                    alt="Jeju Island"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#c4982a]">
-                    Dedicated Guide
-                  </div>
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                    <div className="flex items-center gap-1">
-                      <MapPin size={16} />
-                      <span>Jeju Island</span>
+                return (
+                  <Link key={tour.id} href={`/tours/private/${tour.id}`}>
+                    <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow cursor-pointer">
+                      <div className="relative h-64">
+                        <img
+                          src={tour.image}
+                          alt={tour.title}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white ${theme.badge}`}>
+                          {tour.badge}
+                        </div>
+                      </div>
+                      <div className="p-6">
+                        <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                          {tour.location && (
+                            <div className="flex items-center gap-1">
+                              <MapPin size={16} />
+                              <span>{tour.location}</span>
+                            </div>
+                          )}
+                          {tour.duration && (
+                            <div className="flex items-center gap-1">
+                              <Clock size={16} />
+                              <span>{tour.duration}</span>
+                            </div>
+                          )}
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-4">
+                          {tour.title}
+                        </h3>
+                        {tour.description && (
+                          <p className="text-gray-600 mb-4 text-sm leading-relaxed line-clamp-3">
+                            {tour.description}
+                          </p>
+                        )}
+                        {tour.price && (
+                          <div className="mb-4">
+                            <span className={`text-2xl font-bold ${theme.text}`}>
+                              {tour.price}
+                            </span>
+                          </div>
+                        )}
+                        <div className="grid md:grid-cols-2 gap-6 mb-4">
+                          {tour.included && tour.included.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-2 text-sm">
+                                Included:
+                              </h4>
+                              <ul className="space-y-2 text-sm text-gray-600">
+                                {tour.included.map((item, index) => (
+                                  <li key={index} className="flex items-start gap-2">
+                                    <Check className="w-4 h-4 text-[#651d2a] mt-0.5 flex-shrink-0" />
+                                    {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {tour.exclusions && tour.exclusions.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-2 text-sm">
+                                Not Included:
+                              </h4>
+                              <ul className="space-y-2 text-sm text-gray-600">
+                                {tour.exclusions.map((item, index) => (
+                                  <li key={index} className="flex items-start gap-2">
+                                    <X className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                    {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                        {tour.highlights && tour.highlights.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {tour.highlights.map((highlight, i) => (
+                              <span
+                                key={i}
+                                className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
+                              >
+                                {highlight}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between">
+                          <Button className={`${theme.button} text-white w-full`}>
+                            Book Now
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Clock size={16} />
-                      <span>8 hours</span>
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">
-                    Jeju Hidden Gems Tour
-                  </h3>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                      Secret Beaches
-                    </span>
-                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                      Local Cuisine
-                    </span>
-                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                      Oreum Hiking
-                    </span>
-                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                      Tangerine Farm
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-[#c4982a]">
-                      $335
-                    </span>
-                    <Button className="bg-[#c4982a] hover:bg-[#c4982a]/90 text-white">
-                      Book Now
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </Link>
-
-            {/* Tour 3 */}
-            <Link href="/tours/private/3">
-              <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow cursor-pointer">
-                <div className="relative h-64">
-                  <img
-                    src="/busan-coastal-scenery-haeundae.jpg"
-                    alt="Busan Coast"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#6d8675]">
-                    Dedicated Guide
-                  </div>
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                    <div className="flex items-center gap-1">
-                      <MapPin size={16} />
-                      <span>Busan</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock size={16} />
-                      <span>7 hours</span>
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">
-                    Busan Coastal Private Tour
-                  </h3>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                      Haeundae Port
-                    </span>
-                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                      Gamcheon Village
-                    </span>
-                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                      Jagalchi Market
-                    </span>
-                    <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-                      Haeundae Beach
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-[#6d8675]">
-                      $305
-                    </span>
-                    <Button className="bg-[#6d8675] hover:bg-[#6d8675]/90 text-white">
-                      Book Now
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </Link>
+                  </Link>
+                );
+              })
+            )}
           </div>
         </div>
       </section>
