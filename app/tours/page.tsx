@@ -20,7 +20,7 @@ export default function ToursPage() {
           price: "$280",
           rating: 4.9,
           participants: "1-6 people",
-          image: "/images/design-mode/private-tour-card.png",
+          image: "/images/design-mode/castle2.png",
           highlights: [
             "Perfectly Customized Itinerary",
             "Personal Expert Storyteller",
@@ -73,7 +73,7 @@ export default function ToursPage() {
           price: "$1,500",
           rating: 4.9,
           participants: "8-12 people",
-          image: "/images/design-mode/package-tour-hero.png",
+          image: "/images/design-mode/castle3.png",
           highlights: [
             "Premium Itinerary",
             "Perfectly Designed Logistics",
@@ -95,7 +95,7 @@ export default function ToursPage() {
           price: "$1,500",
           rating: 4.9,
           participants: "2-15 people",
-          image: "/images/design-mode/multiday-tour-hero.png",
+          image: "/images/design-mode/castle4.png",
           highlights: [
             "Complete Historical Narrative",
             "Relaxed Itinerary",
@@ -118,7 +118,7 @@ export default function ToursPage() {
           price: "Custom Quote",
           rating: 4.9,
           participants: "Small Groups",
-          image: "/images/design-mode/history-tour-card.png",
+          image: "/images/design-mode/castle5.png",
           highlights: [
             "Cinematic Storytelling",
             "Interactive Dialogue",

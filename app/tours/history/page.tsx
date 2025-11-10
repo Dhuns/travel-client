@@ -1,14 +1,31 @@
 "use client";
 
-import { BookOpen, Calendar, Sparkles, Users } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  Calendar,
+  Check,
+  Gift,
+  MapPin,
+  Sparkles,
+  Star,
+  Users,
+  X,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import Link from "next/link";
 import type React from "react";
-import { useState } from "react";
+import { historyTours, type Tour } from "@/data/mockTours";
+import { useState, useEffect } from "react";
 
 export default function HistoryTourPage() {
+  // 투어 데이터 상태
+  const [tours, setTours] = useState<Tour[]>([]);
+  const [loading, setLoading] = useState(true);
+
   // 폼 상태 관리
   const [formData, setFormData] = useState({
     name: "",
@@ -18,10 +35,130 @@ export default function HistoryTourPage() {
     numberOfTravelers: "",
   });
 
-  // 폼 제출 핸들러 - 백엔드 API 연동 시 이 부분을 수정
+  // HTML 태그 제거 함수
+  const stripHtmlTags = (html: string): string => {
+    return html.replace(/<[^>]*>/g, "").trim();
+  };
+
+  // HTML을 배열로 파싱하는 함수
+  const parseHtmlToArray = (html: string | string[]): string[] => {
+    if (Array.isArray(html)) return html;
+    if (!html || typeof html !== "string") return [];
+
+    // <p> 태그로 분리하여 텍스트만 추출
+    const matches = html.match(/<p[^>]*>(.*?)<\/p>/g);
+    if (!matches) return [];
+
+    return matches
+      .map((match) => {
+        const text = match.replace(/<[^>]*>/g, "").trim();
+        return text;
+      })
+      .filter((text) => text.length > 0);
+  };
+
+  // knowBeforeYouGoItems 코드를 텍스트로 변환
+  const parseKnowBeforeYouGo = (items: string[] | null): string[] => {
+    if (!Array.isArray(items)) return [];
+
+    const translations: Record<string, string> = {
+      PUBLIC_TRANSPORTATION_NEARBY: "Public transportation nearby",
+      WHEELCHAIR_ACCESSIBLE: "Wheelchair accessible",
+      STROLLER_ACCESSIBLE: "Stroller accessible",
+      INFANTS_ALLOWED: "Infants allowed",
+      NOT_RECOMMENDED_FOR_PREGNANT: "Not recommended for pregnant travelers",
+      NO_HEART_PROBLEMS: "Not recommended for travelers with heart problems",
+      MODERATE_PHYSICAL_FITNESS: "Moderate physical fitness required",
+    };
+
+    return items.map((item) => translations[item] || item);
+  };
+
+  // Bokun API에서 투어 데이터 가져오기
+  useEffect(() => {
+    async function fetchTours() {
+      try {
+        const tourPromises = historyTours.map(async (tour) => {
+          try {
+            const response = await fetch(
+              `/api/bokun/activity/${tour.bokunExperienceId}`
+            );
+            if (response.ok) {
+              const bokunData = await response.json();
+              // Bokun 데이터를 우리 형식으로 변환
+              const rawDescription =
+                bokunData.excerpt ||
+                bokunData.shortDescription ||
+                bokunData.description ||
+                "";
+              const description = stripHtmlTags(rawDescription);
+
+              // Duration 계산
+              let durationDisplay = "";
+              if (bokunData.durationHours && bokunData.durationMinutes) {
+                durationDisplay = `${bokunData.durationHours}h ${bokunData.durationMinutes}m`;
+              } else if (bokunData.durationHours) {
+                durationDisplay = `${bokunData.durationHours} hours`;
+              } else if (bokunData.duration) {
+                durationDisplay = `${bokunData.duration} hours`;
+              }
+
+              return {
+                ...tour,
+                title: bokunData.title || "",
+                description: description,
+                image: bokunData.photos?.[0]?.url || tour.image,
+                location:
+                  bokunData.googlePlace?.name ||
+                  bokunData.meetingPoint?.title ||
+                  bokunData.address?.city ||
+                  "",
+                duration: durationDisplay,
+                durationText: bokunData.durationText || "",
+                price: bokunData.pricing?.from
+                  ? `$${bokunData.pricing.from}`
+                  : "",
+                included: parseHtmlToArray(bokunData.included),
+                exclusions: parseHtmlToArray(bokunData.excluded),
+                highlights: Array.isArray(bokunData.highlights)
+                  ? bokunData.highlights
+                  : [],
+                activityCategories: Array.isArray(bokunData.activityCategories)
+                  ? bokunData.activityCategories
+                  : [],
+                knowBeforeYouGo: parseKnowBeforeYouGo(
+                  bokunData.knowBeforeYouGoItems
+                ),
+                minAge: bokunData.minAge || 0,
+                cancellationPolicy: bokunData.cancellationPolicy?.title || "",
+              };
+            }
+            return null; // API 실패시 null 반환
+          } catch (error) {
+            console.error(
+              `Failed to fetch tour ${tour.bokunExperienceId}:`,
+              error
+            );
+            return null; // 에러시 null 반환
+          }
+        });
+
+        const fetchedTours = await Promise.all(tourPromises);
+        // null이 아닌 투어만 필터링
+        setTours(fetchedTours.filter((tour) => tour !== null) as Tour[]);
+      } catch (error) {
+        console.error("Failed to fetch tours:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchTours();
+  }, []);
+
+  // 폼 제출 핸들러
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
     // TODO: API 호출하여 견적 요청 전송
   };
 
@@ -37,7 +174,9 @@ export default function HistoryTourPage() {
                 History Tour
               </Badge>
               <h1 className="font-bold text-gray-900 mb-6 text-5xl">
-                Tumakr Korea History Tour
+                Tumakr
+                <br />
+                Korea History Tour
               </h1>
               <p className="text-gray-700 leading-relaxed mb-6">
                 An Unparalleled Korean History Tour Awaits!
@@ -48,28 +187,35 @@ export default function HistoryTourPage() {
                 create lifelong memories.
               </p>
               <div className="flex gap-4 mb-8">
-                <Button className="bg-[#651d2a] hover:bg-[#651d2a]/90 text-white px-6">
+                <Button
+                  className="bg-[#651d2a] hover:bg-[#4a1520] text-white px-6 flex items-center gap-2 transition-colors font-semibold"
+                  onClick={() => {
+                    document
+                      .getElementById("tour-list")
+                      ?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                >
                   Explore Tours
                 </Button>
-                <Button
-                  variant="outline"
-                  className="border-[#eda89b] text-[#651d2a] hover:bg-[#eda89b]/10 bg-transparent"
-                >
-                  Browse Tours
-                </Button>
+                <Link href="/chat">
+                  <Button className="border-1 border-[#651d2a] text-[#651d2a] hover:bg-[#651d2a]/20 hover:border-[#651d2a]/20  bg-white px-6 transition-colors font-semibold flex items-center gap-2">
+                    Get Custom Quote
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </Link>
               </div>
               <div className="flex items-center gap-6 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
-                  <span>Tumakr</span>
+                  <span>Cultural Heritage</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
-                  <span>Complete Privacy</span>
+                  <span>Historical Sites</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <BookOpen className="w-4 h-4" />
-                  <span>Dedicated Guide</span>
+                  <span>Authentic Experience</span>
                 </div>
               </div>
             </div>
@@ -177,89 +323,238 @@ export default function HistoryTourPage() {
           <p className="text-lg mb-8 text-white/90">
             Embark on a journey through time and discover the soul of Korea
           </p>
-          <Button
-            size="lg"
-            className="bg-white text-[#651d2a] hover:bg-gray-100 font-semibold px-8"
-          >
-            Start Your Journey
-          </Button>
+          <Link href="/chat">
+            <Button
+              size="lg"
+              className="bg-white text-[#651d2a] hover:bg-gray-100 font-semibold px-8"
+            >
+              Plan with AI Assistant
+            </Button>
+          </Link>
         </div>
       </section>
 
       {/* Historical Destinations Section */}
-      <section className="min-h-screen flex items-center px-6 bg-white">
+      <section
+        id="tour-list"
+        className="min-h-screen flex items-center px-6 bg-white"
+      >
         <div className="container mx-auto max-w-6xl py-20">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4">
             Historical Destinations Come Alive
           </h2>
           <p className="text-center text-gray-600 mb-16 max-w-2xl mx-auto">
-            Explore Korea's most significant historical sites with expert guides
+            Discover Korea's rich history and culture through our carefully
+            curated tours
           </p>
 
           <div className="space-y-8">
-            {/* 히스토리 투어 1 */}
-            {[1, 2, 3].map((tour) => (
-              <Card
-                key={tour}
-                className="overflow-hidden hover:shadow-xl transition-shadow p-0"
-              >
-                <div className="grid md:grid-cols-2 gap-0">
-                  <div className="relative h-[300px] md:h-auto">
-                    <img
-                      src="/images/design-mode/history-tour-card.png"
-                      alt={`Historical Tour ${tour}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="p-8 flex flex-col justify-center">
-                    <Badge className="bg-[#651d2a] text-white w-fit mb-3">
-                      {tour === 2 ? "Walking in Nature" : "History & Art"}
-                    </Badge>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                      히스토리 투어 {tour}
-                    </h3>
-                    <p className="text-gray-700 mb-4">
-                      {tour === 1
-                        ? "Learn about the history of architectural styles, cultural values, and social structures that shaped the nation."
-                        : tour === 2
-                        ? "For those who prefer a slower pace, this tour combines historical sites with beautiful natural scenery and serene hiking spots."
-                        : "Traditional and modern architecture blend seamlessly in this tour, showcasing how Korea honors its past while embracing the future."}
-                    </p>
-                    <ul className="space-y-2 text-sm text-gray-600">
-                      {tour === 1 ? (
-                        <>
-                          <li>• Gyeongbokgung Palace</li>
-                          <li>• Bukchon Hanok Village</li>
-                          <li>• National Folk Museum</li>
-                          <li>• Traditional tea ceremony</li>
-                        </>
-                      ) : tour === 2 ? (
-                        <>
-                          <li>• Mountain temple trails</li>
-                          <li>• Historic stone paths</li>
-                          <li>• Meditation gardens</li>
-                          <li>• Traditional architecture</li>
-                        </>
-                      ) : (
-                        <>
-                          <li>• Royal palace architecture</li>
-                          <li>• Contemporary art museums</li>
-                          <li>• Design districts</li>
-                          <li>• Photo-worthy locations</li>
-                        </>
-                      )}
-                    </ul>
-                  </div>
-                </div>
-              </Card>
-            ))}
+            {/* 히스토리 투어 목록 */}
+            {loading ? (
+              <div className="text-center py-20">
+                <p className="text-gray-600">Loading tours...</p>
+              </div>
+            ) : (
+              tours.map((tour) => (
+                <Link
+                  key={tour.id}
+                  href={`/tours/history/${tour.id}`}
+                  className="block"
+                >
+                  <Card className="overflow-hidden hover:shadow-xl transition-shadow p-0 cursor-pointer">
+                    <div className="grid md:grid-cols-2 gap-0">
+                      <div className="relative h-[300px] md:h-auto">
+                        <img
+                          src={tour.image}
+                          alt={tour.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="p-8 flex flex-col justify-center">
+                        <Badge className="bg-[#651d2a] text-white w-fit mb-3">
+                          {tour.badge}
+                        </Badge>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                          {tour.title}
+                        </h3>
+                        <div className="flex flex-wrap gap-4 mb-3 text-sm text-gray-600">
+                          {tour.location && (
+                            <div className="flex items-center gap-1">
+                              <MapPin className="w-4 h-4" />
+                              {tour.location}
+                            </div>
+                          )}
+                          {tour.duration && (
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-4 h-4" />
+                              {tour.duration}
+                            </div>
+                          )}
+                        </div>
+                        {tour.description && (
+                          <p className="text-gray-600 mb-4 text-sm leading-relaxed line-clamp-3">
+                            {tour.description}
+                          </p>
+                        )}
+                        {tour.price && (
+                          <p className="text-2xl font-bold text-[#651d2a] mb-4">
+                            {tour.price}
+                          </p>
+                        )}
+                        <div className="grid md:grid-cols-2 gap-6 mb-4">
+                          {tour.included && tour.included.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-2 text-sm">
+                                Included:
+                              </h4>
+                              <ul className="space-y-2 text-sm text-gray-600">
+                                {tour.included.map((item, index) => (
+                                  <li
+                                    key={index}
+                                    className="flex items-start gap-2"
+                                  >
+                                    <Check className="w-4 h-4 text-[#651d2a] mt-0.5 flex-shrink-0" />
+                                    {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {tour.exclusions && tour.exclusions.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-2 text-sm">
+                                Not Included:
+                              </h4>
+                              <ul className="space-y-2 text-sm text-gray-600">
+                                {tour.exclusions.map((item, index) => (
+                                  <li
+                                    key={index}
+                                    className="flex items-start gap-2"
+                                  >
+                                    <X className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                    {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                        {tour.highlights && tour.highlights.length > 0 && (
+                          <div className="mb-4">
+                            <h4 className="font-semibold text-gray-900 mb-2 text-sm">
+                              Highlights:
+                            </h4>
+                            <ul className="space-y-2 text-sm text-gray-600">
+                              {tour.highlights.map((highlight, index) => (
+                                <li key={index}>• {highlight}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        <Button className="bg-[#651d2a] hover:bg-[#651d2a]/90 text-white w-fit">
+                          View Details & Book
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                </Link>
+              ))
+            )}
           </div>
         </div>
       </section>
 
+      {/* Products & Souvenirs Section */}
+      <section className="py-16 px-6 flex items-center bg-gradient-to-br from-[#eda89b]/10 to-[#6d8675]/10">
+        <div className="container mx-auto max-w-6xl w-full">
+          <div className="text-center mb-12">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Gift className="text-[#c4982a]" size={32} />
+              <h2 className="text-4xl font-bold text-gray-900">
+                Products & Souvenirs
+              </h2>
+            </div>
+            <p className="text-gray-600 text-lg">
+              Take home beautiful memories of Korea with our curated selection
+              of traditional products and special souvenirs
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Product 1 */}
+            <div className="bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-shadow">
+              <div className="relative h-64">
+                <img
+                  src="/korean-traditional-hanbok-dress-pink.jpg"
+                  alt="Traditional Hanbok"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#651d2a]">
+                  Traditional
+                </div>
+                <div className="absolute top-4 right-4 flex items-center gap-1 bg-white px-2 py-1 rounded-full">
+                  <Star className="text-yellow-400 fill-yellow-400" size={14} />
+                  <span className="text-xs font-semibold">4.9</span>
+                </div>
+              </div>
+              <div className="p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                  Traditional Hanbok Set
+                </h3>
+              </div>
+            </div>
+
+            {/* Product 2 */}
+            <div className="bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-shadow">
+              <div className="relative h-64">
+                <img
+                  src="/korean-beauty-skincare-products.jpg"
+                  alt="K-Beauty Skincare"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#eda89b]">
+                  Beauty
+                </div>
+                <div className="absolute top-4 right-4 flex items-center gap-1 bg-white px-2 py-1 rounded-full">
+                  <Star className="text-yellow-400 fill-yellow-400" size={14} />
+                  <span className="text-xs font-semibold">4.8</span>
+                </div>
+              </div>
+              <div className="p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                  K-Beauty Skincare Kit
+                </h3>
+              </div>
+            </div>
+
+            {/* Product 3 */}
+            <div className="bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-shadow">
+              <div className="relative h-64">
+                <img
+                  src="/korean-traditional-tea-set-ceramic.jpg"
+                  alt="Korean Tea Collection"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#6d8675]">
+                  Food
+                </div>
+                <div className="absolute top-4 right-4 flex items-center gap-1 bg-white px-2 py-1 rounded-full">
+                  <Star className="text-yellow-400 fill-yellow-400" size={14} />
+                  <span className="text-xs font-semibold">4.7</span>
+                </div>
+              </div>
+              <div className="p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                  Korean Tea Collection
+                </h3>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       {/* Feel the Breath of History Section */}
-      <section className=" flex items-center px-6 bg-gradient-to-br from-[#6d8675]/10 to-[#eda89b]/10">
-        <div className="container mx-auto max-w-6xl py-20">
+      <section className="flex items-center px-6 bg-gray-50">
+        <div className="container mx-auto max-w-6xl py-32">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4">
             Feel the Breath of History
           </h2>
@@ -276,7 +571,7 @@ export default function HistoryTourPage() {
             ].map((feature, i) => (
               <Card
                 key={i}
-                className="text-center p-8 hover:shadow-xl transition-shadow bg-white"
+                className="text-center p-8 shadow-lg hover:shadow-xl transition-shadow bg-white border border-gray-200"
               >
                 <div className="w-16 h-16 bg-[#651d2a] rounded-full flex items-center justify-center mx-auto mb-4">
                   <feature.icon className="w-8 h-8 text-white" />
@@ -298,7 +593,7 @@ export default function HistoryTourPage() {
             ))}
           </div>
 
-          <div className="mt-12 p-6 bg-white rounded-lg text-center shadow-md">
+          <div className="mt-12 p-6 bg-white rounded-lg text-center shadow-lg border border-gray-200">
             <p className="text-gray-700 italic">
               <span>"This is not a common, mass-produced souvenir.</span>
               <br />
@@ -307,177 +602,6 @@ export default function HistoryTourPage() {
                 emotions of our journey and the beauty of Korea."
               </span>
             </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Custom Quote Section */}
-      <section className="min-h-screen flex items-center px-6 bg-gradient-to-br from-[#eda89b]/10 to-[#6d8675]/10">
-        <div className="container mx-auto max-w-4xl py-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4">
-            Get a Custom Quote
-          </h2>
-          <p className="text-center text-gray-600 mb-12">
-            Tell us about your interests and we'll create a personalized history
-            tour just for you
-          </p>
-
-          <div className="grid md:grid-cols-2 gap-12">
-            {/* 왼쪽: 견적 요청 폼 */}
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-6">
-                📝 Request Consultation
-              </h3>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Contact Method *
-                  </label>
-                  <select
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent"
-                    value={formData.contactMethod}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        contactMethod: e.target.value,
-                      })
-                    }
-                  >
-                    <option value="">Select method</option>
-                    <option value="email">Email</option>
-                    <option value="phone">Phone</option>
-                    <option value="whatsapp">WhatsApp</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Travel Date *
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent"
-                    value={formData.travelDate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, travelDate: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Number of Travelers *
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent"
-                    value={formData.numberOfTravelers}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        numberOfTravelers: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-
-                <p className="text-xs text-gray-500">
-                  Your information is safe with us. We'll only use it to provide
-                  you with the best tour experience.
-                </p>
-
-                <Button
-                  type="submit"
-                  className="w-full bg-[#651d2a] hover:bg-[#651d2a]/90 text-white py-3"
-                >
-                  Submit Request
-                </Button>
-              </form>
-            </div>
-
-            {/* 오른쪽: 빠른 상담 */}
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-6">
-                💬 For a Faster Consultation
-              </h3>
-              <div className="space-y-6">
-                <Card className="p-6 hover:shadow-lg transition-shadow">
-                  <h4 className="font-bold text-gray-900 mb-2">
-                    Phone Consultation
-                  </h4>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Speak directly with our history tour experts
-                  </p>
-                  <p className="text-[#651d2a] font-semibold">
-                    📞 +82-2-1234-5678
-                  </p>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Mon-Fri: 9AM-6PM KST
-                  </p>
-                </Card>
-
-                <Card className="p-6 hover:shadow-lg transition-shadow">
-                  <h4 className="font-bold text-gray-900 mb-2">
-                    Email Inquiry
-                  </h4>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Get detailed information about our history tours
-                  </p>
-                  <p className="text-[#651d2a] font-semibold">
-                    ✉️ history@onedaykorea.com
-                  </p>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Response within 24 hours
-                  </p>
-                </Card>
-                {/* 
-                <div className="bg-white p-6 rounded-lg shadow-md">
-                  <h4 className="font-bold text-gray-900 mb-3">Why Choose Our History Tours?</h4>
-                  <ul className="space-y-2 text-sm text-gray-700">
-                    <li>✓ Expert historians as guides</li>
-                    <li>✓ Small group sizes (max 15 people)</li>
-                    <li>✓ Flexible itineraries</li>
-                    <li>✓ Exclusive access to special sites</li>
-                    <li>✓ Complimentary cultural souvenirs</li>
-                  </ul>
-                </div>
-                */}
-              </div>
-            </div>
           </div>
         </div>
       </section>
