@@ -61,7 +61,10 @@ const ChatMessageList: FC<Props> = ({
           ) {
             return (
               <EstimateCardWrapper key={message.id}>
-                <EstimateCard estimate={message.metadata.estimatePreview} />
+                <EstimateCard
+                  estimate={message.metadata.estimatePreview}
+                  batchId={message.metadata?.batchId}
+                />
               </EstimateCardWrapper>
             );
           }
