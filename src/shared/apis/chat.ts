@@ -67,3 +67,22 @@ export const generateAIResponse = async (
   });
   return response.data;
 };
+
+// AI Estimate Generation API
+export const generateEstimate = async (
+  sessionId: string,
+  userId?: number
+): Promise<{
+  batchId: number;
+  estimateId: number;
+  totalAmount: number;
+  itemCount: number;
+  timeline: string;
+  message: string;
+}> => {
+  const response = await axios.post(`${API_URL}/chat/ai/estimate/generate`, {
+    sessionId,
+    userId,
+  });
+  return response.data;
+};
