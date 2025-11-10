@@ -1,11 +1,11 @@
 import React, { FC, useEffect, useRef } from "react";
-
+import styled from "@emotion/styled";
 import ChatInput from "./ChatInput";
 import ChatMessage from "./ChatMessage";
 import { ChatMessage as ChatMessageType } from "@shared/types/chat";
 import EstimateCard from "./EstimateCard";
 import TypingIndicator from "./TypingIndicator";
-import styled from "@emotion/styled";
+import { AUTO_SCROLL_DELAY, UI_TEXT } from "@shared/constants/chat";
 
 interface Props {
   messages: ChatMessageType[];
@@ -30,30 +30,24 @@ const ChatMessageList: FC<Props> = ({
           behavior: "smooth",
           block: "end",
         });
-      }, 100);
+      }, AUTO_SCROLL_DELAY);
     }
   }, [messages.length, isTyping]);
 
   return (
     <Container hasMessages={hasMessages}>
       <MessagesList hasMessages={hasMessages}>
-        {/* 메시지가 없을 때 안내 멘트와 입력창 표시 */}
+        {/* Welcome message and input when no messages */}
         {messages.length === 0 && !isTyping && (
           <WelcomeMessageContainer>
             <WelcomeMessage>
               <WelcomeIcon>✈️</WelcomeIcon>
-              <WelcomeText>어떤 여행 계획을 원하시나요?</WelcomeText>
-              <WelcomeSubtext>
-                여행지, 날짜, 인원 등을 자유롭게 말씀해주세요
-              </WelcomeSubtext>
+              <WelcomeText>{UI_TEXT.WELCOME_TITLE}</WelcomeText>
+              <WelcomeSubtext>{UI_TEXT.WELCOME_SUBTITLE}</WelcomeSubtext>
             </WelcomeMessage>
             {onSend && (
               <WelcomeInputWrapper>
-                <ChatInput
-                  onSend={onSend}
-                  disabled={isTyping}
-                  placeholder="메시지를 입력하세요..."
-                />
+                <ChatInput onSend={onSend} disabled={isTyping} />
               </WelcomeInputWrapper>
             )}
           </WelcomeMessageContainer>

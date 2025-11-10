@@ -16,7 +16,6 @@ const Container: FC = () => {
     initSession,
     loadSession,
     sendUserMessage,
-    updateContext,
     clearSession,
     loadFromStorage,
   } = useChatStore();
@@ -44,7 +43,7 @@ const Container: FC = () => {
         initSession();
       } else {
         // 저장된 세션이 있으면 가장 최근 세션 로드
-        const latestSession = sessions.sort(
+        const latestSession = [...sessions].sort(
           (a, b) =>
             new Date(b.lastMessageAt || b.createdAt).getTime() -
             new Date(a.lastMessageAt || a.createdAt).getTime()
@@ -73,7 +72,7 @@ const Container: FC = () => {
   if (!session) {
     return (
       <LoadingContainer>
-        <LoadingText>채팅을 시작하는 중...</LoadingText>
+        <LoadingText>✈️ Preparing your AI travel planner...</LoadingText>
       </LoadingContainer>
     );
   }
@@ -86,19 +85,20 @@ const Container: FC = () => {
     return (
       <EmptyStateContainer>
         <EmptyStateContent>
-          <EmptyStateTitle>✈️ AI 여행 플래너</EmptyStateTitle>
-          <EmptyStateSubtitle>어떤 여행을 계획중이세요?</EmptyStateSubtitle>
+          <EmptyStateTitle>✈️ AI Travel Planner for Korea</EmptyStateTitle>
+          <EmptyStateSubtitle>Let's plan your perfect Korean adventure!</EmptyStateSubtitle>
           <EmptyStateInputWrapper>
             <ChatInput
               onSend={handleSendMessage}
               disabled={isTyping}
-              placeholder="예: 제주도 2박 3일 여행 계획 부탁해"
+              placeholder="e.g., I want to visit Seoul for 3 days in December (2 adults)"
             />
           </EmptyStateInputWrapper>
           <EmptyStateHints>
-            <HintItem>💬 자연어로 편하게 말씀해주세요</HintItem>
-            <HintItem>📅 날짜와 인원을 알려주시면 더 정확해요</HintItem>
-            <HintItem>💰 예산이 있다면 함께 말씀해주세요</HintItem>
+            <HintItem>💬 Just chat naturally - tell us your travel dreams</HintItem>
+            <HintItem>📅 Rough dates and number of travelers are enough to start</HintItem>
+            <HintItem>💰 Share your budget range for better recommendations</HintItem>
+            <HintItem>🗣️ We speak Korean too! (한국어도 가능합니다)</HintItem>
           </EmptyStateHints>
         </EmptyStateContent>
       </EmptyStateContainer>
@@ -115,15 +115,15 @@ const Container: FC = () => {
         {/* 중앙 채팅 영역 */}
         <ChatWrapper>
           <ChatSection hasMessages={hasMessages}>
-            {/* 상단 툴바 */}
+            {/* Top Bar */}
             <TopBar>
               <TopBarLeft>
-                <ModelBadge>🤖 AI 여행 플래너</ModelBadge>
+                <ModelBadge>🤖 AI Travel Planner</ModelBadge>
               </TopBarLeft>
               <TopBarRight>
                 <IconButton
                   onClick={() => setShowInfoPanel(!showInfoPanel)}
-                  title="정보 패널 토글"
+                  title="Toggle info panel"
                 >
                   {showInfoPanel ? "›" : "‹"}
                 </IconButton>
@@ -138,14 +138,14 @@ const Container: FC = () => {
               onSend={handleSendMessage}
             />
 
-            {/* 입력창 - 메시지가 있을 때만 하단에 표시 */}
+            {/* Input Area - shown at bottom when messages exist */}
             {hasMessages && (
               <InputArea>
                 <ChatInput
                   onSend={handleSendMessage}
                   disabled={isTyping}
                   placeholder={
-                    isTyping ? "AI가 답변 중입니다..." : "메시지를 입력하세요..."
+                    isTyping ? "AI is typing..." : "Type your message..."
                   }
                 />
               </InputArea>
@@ -153,12 +153,12 @@ const Container: FC = () => {
           </ChatSection>
         </ChatWrapper>
 
-        {/* 우측 정보 패널 (토글 가능) */}
+        {/* Right Info Panel (toggleable) */}
         {showInfoPanel && <InfoPanelBackdrop onClick={() => setShowInfoPanel(false)} />}
         <InfoPanel isVisible={showInfoPanel}>
           <InfoPanelContent isVisible={showInfoPanel}>
             <InfoPanelHeader>
-              <InfoPanelTitle>여행 정보</InfoPanelTitle>
+              <InfoPanelTitle>Trip Details</InfoPanelTitle>
               <CloseButton onClick={() => setShowInfoPanel(false)}>✕</CloseButton>
             </InfoPanelHeader>
             <ChatInfoPanel
