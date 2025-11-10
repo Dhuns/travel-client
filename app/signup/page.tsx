@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import type React from "react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { signup, checkUsername, getGoogleAuthUrl, getAppleAuthUrl } from "@/src/shared/apis/user";
 
 /**
  * 회원가입 페이지 컴포넌트
@@ -42,7 +43,6 @@ export default function SignupPage() {
     confirmPassword: "",
     phone: "",
     birthdate: "",
-    gender: "",
   });
 
   // UI 상태 관리
@@ -81,16 +81,17 @@ export default function SignupPage() {
       return;
     }
 
-    // 백엔드 이메일 중복확인 API 호출
+    // 백엔드 이메일(username) 중복확인 API 호출
     try {
-      const response = await fetch(
-        `/api/auth/check-email?email=${formData.email}`
-      );
-      const data = await response.json();
+      await checkUsername(formData.email);
       setEmailChecked(true);
-      setEmailAvailable(data.available);
-    } catch (error) {
+      setEmailAvailable(true);
+      alert("This email is available!");
+    } catch (error: any) {
       console.error("Email check failed:", error);
+      setEmailChecked(true);
+      setEmailAvailable(false);
+      alert(error.response?.data?.message || "This email is already in use");
     }
   };
 
@@ -128,6 +129,11 @@ export default function SignupPage() {
       return;
     }
 
+    if (formData.password.length < 8) {
+      alert("Password must be at least 8 characters long");
+      return;
+    }
+
     if (!agreements.terms || !agreements.privacy) {
       alert("Please agree to the required terms");
       return;
@@ -135,28 +141,33 @@ export default function SignupPage() {
 
     // 백엔드 회원가입 API 호출
     try {
-      const response = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+      await signup({
+        username: formData.email, // email을 username으로 사용
+        password: formData.password,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || undefined,
+        birthDate: formData.birthdate || undefined,
+        termsAgreed: agreements.terms,
+        privacyAgreed: agreements.privacy,
       });
-      const data = await response.json();
-      if (data.success) {
-        router.push("/login"); // 회원가입 성공 시 로그인 페이지로 이동
-      }
-    } catch (error) {
+
+      alert("Registration successful! Please check your email for verification.");
+      router.push("/login"); // 회원가입 성공 시 로그인 페이지로 이동
+    } catch (error: any) {
       console.error("Signup failed:", error);
+      alert(error.response?.data?.message || "Signup failed. Please try again.");
     }
   };
 
   // 구글 회원가입 핸들러
   const handleGoogleSignup = () => {
-    window.location.href = "/api/auth/google/signup";
+    window.location.href = getGoogleAuthUrl();
   };
 
   // 애플 회원가입 핸들러
   const handleAppleSignup = () => {
-    window.location.href = "/api/auth/apple/signup";
+    window.location.href = getAppleAuthUrl();
   };
 
   return (
@@ -339,26 +350,6 @@ export default function SignupPage() {
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent transition-all duration-300"
                   />
                 </div>
-              </div>
-
-              {/* 성별 선택 (선택) */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Gender{" "}
-                  <span className="text-gray-400 text-xs">(Optional)</span>
-                </label>
-                <select
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent transition-all duration-300"
-                >
-                  <option value="">Select your gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                  <option value="prefer-not-to-say">Prefer not to say</option>
-                </select>
               </div>
 
               {/* 약관 동의 섹션 */}

@@ -2,23 +2,81 @@
 
 import { cn } from "@/lib/utils";
 import useChatStore from "@shared/store/chatStore";
+import { useAuthStore } from "@/src/shared/store/authStore";
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { LogIn } from "lucide-react";
 
 export function ChatbotContainer() {
   const { isChatOpen, initSession, getCurrentSession } = useChatStore();
+  const { isAuthenticated } = useAuthStore();
   const session = getCurrentSession();
+  const router = useRouter();
+
+  // 비로그인 상태에서 localStorage만 초기화 (서버 데이터는 유지)
+  useEffect(() => {
+    if (!isAuthenticated) {
+      const CHAT_STORAGE_KEY = 'chat-sessions-storage';
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(CHAT_STORAGE_KEY);
+      }
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
-    // 채팅창이 처음 열릴 때 세션을 초기화합니다.
-    if (isChatOpen && !session) {
+    // 로그인한 사용자만 세션 초기화
+    if (isChatOpen && !session && isAuthenticated) {
       initSession().catch((err) => {
         console.error("Failed to initialize chat session:", err);
       });
     }
-  }, [isChatOpen, session, initSession]);
+  }, [isChatOpen, session, isAuthenticated, initSession]);
 
   if (!isChatOpen) {
     return null;
+  }
+
+  // 비로그인 사용자에게 로그인 유도
+  if (!isAuthenticated) {
+    return (
+      <div
+        className={cn(
+          "fixed bottom-28 right-8 z-40 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200",
+          "flex flex-col transition-all duration-300 ease-in-out",
+          "h-[400px]",
+          isChatOpen
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-10 pointer-events-none"
+        )}
+      >
+        {/* 챗봇 헤더 */}
+        <div className="p-4 bg-sky-600 text-white rounded-t-2xl flex-shrink-0">
+          <h2 className="text-lg font-semibold">Travel Assistant</h2>
+          <p className="text-sm text-sky-100">
+            Sign in to start planning your trip
+          </p>
+        </div>
+
+        {/* 로그인 유도 메시지 */}
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+          <div className="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center mb-4">
+            <LogIn className="w-8 h-8 text-sky-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Sign in Required
+          </h3>
+          <p className="text-sm text-gray-600 mb-6">
+            Please sign in to use our AI travel assistant and save your conversation history.
+          </p>
+          <button
+            onClick={() => router.push("/login")}
+            className="bg-sky-600 hover:bg-sky-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+          >
+            Sign In
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (

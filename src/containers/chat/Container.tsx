@@ -6,6 +6,8 @@ import ChatMessageList from "@components/Chat/ChatMessageList";
 import ChatSidebar from "@components/Chat/ChatSidebar";
 import styled from "@emotion/styled";
 import useChatStore from "@shared/store/chatStore";
+import { useAuthStore } from "@shared/store/authStore";
+import { useRouter } from "next/navigation";
 
 const Container: FC = () => {
   const {
@@ -15,10 +17,15 @@ const Container: FC = () => {
     isLoading,
     initSession,
     loadSession,
+    loadUserSessions,
     sendUserMessage,
     clearSession,
     loadFromStorage,
+    clearAllSessions,
   } = useChatStore();
+
+  const { isAuthenticated, user } = useAuthStore();
+  const router = useRouter();
 
   const [showInfoPanel, setShowInfoPanel] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -26,17 +33,29 @@ const Container: FC = () => {
   const session = getCurrentSession();
   const context = session?.context || {};
 
-  // localStorage에서 세션 로드 (최초 1회만)
+  // 비로그인 사용자 체크 (데이터는 유지, localStorage만 초기화)
   useEffect(() => {
-    if (!isInitialized) {
-      loadFromStorage();
-      setIsInitialized(true);
+    if (!isAuthenticated) {
+      // localStorage 캐시만 초기화 (서버 데이터는 유지)
+      const CHAT_STORAGE_KEY = 'chat-sessions-storage';
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(CHAT_STORAGE_KEY);
+      }
     }
-  }, [isInitialized, loadFromStorage]);
+  }, [isAuthenticated]);
 
-  // 세션이 없으면 자동으로 새 세션 생성 또는 기존 세션 로드
+  // 로그인 시 서버에서 사용자 세션 불러오기 (최초 1회만)
   useEffect(() => {
-    if (isInitialized && !session) {
+    if (!isInitialized && isAuthenticated && user?.id) {
+      loadUserSessions(user.id).then(() => {
+        setIsInitialized(true);
+      });
+    }
+  }, [isInitialized, isAuthenticated, user, loadUserSessions]);
+
+  // 세션이 없으면 자동으로 새 세션 생성 또는 기존 세션 로드 (로그인한 사용자만)
+  useEffect(() => {
+    if (isInitialized && !session && isAuthenticated) {
       // 세션이 없는 경우
       if (sessions.length === 0) {
         // 저장된 세션이 없으면 새로 생성
@@ -53,7 +72,7 @@ const Container: FC = () => {
         }
       }
     }
-  }, [isInitialized, session, sessions.length]);
+  }, [isInitialized, session, sessions.length, isAuthenticated]);
 
   // 새 채팅 시작
   const handleNewChat = useCallback(() => {
@@ -68,6 +87,32 @@ const Container: FC = () => {
     // 컨텍스트 추출은 백엔드에서 자동으로 수행됨
     await sendUserMessage(content);
   }, [session, sendUserMessage]);
+
+  // 비로그인 사용자 로그인 유도
+  if (!isAuthenticated) {
+    return (
+      <PageContainer>
+        <LoginPromptContainer>
+          <LoginPromptContent>
+            <LoginPromptIcon>🔐</LoginPromptIcon>
+            <LoginPromptTitle>Sign In Required</LoginPromptTitle>
+            <LoginPromptSubtitle>
+              Please sign in to access our AI travel assistant and save your conversation history.
+            </LoginPromptSubtitle>
+            <LoginButton onClick={() => router.push("/login")}>
+              Sign In
+            </LoginButton>
+            <SignUpPrompt>
+              Don't have an account?{" "}
+              <SignUpLink onClick={() => router.push("/signup")}>
+                Sign Up
+              </SignUpLink>
+            </SignUpPrompt>
+          </LoginPromptContent>
+        </LoginPromptContainer>
+      </PageContainer>
+    );
+  }
 
   if (!session) {
     return (
@@ -438,5 +483,91 @@ const HintItem = styled.div`
 
   @media (max-width: 768px) {
     font-size: 13px;
+  }
+`;
+
+const LoginPromptContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
+  background-color: #ffffff;
+  padding: 24px;
+`;
+
+const LoginPromptContent = styled.div`
+  max-width: 500px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+`;
+
+const LoginPromptIcon = styled.div`
+  font-size: 64px;
+  margin-bottom: 8px;
+`;
+
+const LoginPromptTitle = styled.h2`
+  font-size: 32px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+
+  @media (max-width: 768px) {
+    font-size: 24px;
+  }
+`;
+
+const LoginPromptSubtitle = styled.p`
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+  line-height: 1.6;
+
+  @media (max-width: 768px) {
+    font-size: 14px;
+  }
+`;
+
+const LoginButton = styled.button`
+  padding: 14px 40px;
+  background-color: #0ea5e9;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+
+  &:hover {
+    background-color: #0284c7;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const SignUpPrompt = styled.p`
+  font-size: 14px;
+  color: #888;
+  margin: 0;
+`;
+
+const SignUpLink = styled.span`
+  color: #0ea5e9;
+  cursor: pointer;
+  font-weight: 500;
+  
+  &:hover {
+    text-decoration: underline;
   }
 `;

@@ -1,21 +1,13 @@
 "use client";
 
-import {
-  ChevronDown,
-  LogIn,
-  Menu,
-  Search,
-  ShoppingCart,
-  User,
-  X,
-} from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
-
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import Link from "next/link";
-import type React from "react";
-import { useRouter } from "next/navigation";
+import type React from "react"
+import { useState, useCallback, useMemo, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import { Search, User, Menu, X, LogIn, ShoppingCart, ChevronDown } from "lucide-react"
+import { useAuthStore } from "@/src/shared/store/authStore"
 
 /**
  * 헤더 컴포넌트 - 웹사이트의 상단 네비게이션
@@ -43,12 +35,16 @@ export default function Header() {
   const [contactDropdownOpen, setContactDropdownOpen] = useState(false); // Contact 드롭다운 메뉴 상태 추가
   const router = useRouter();
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // 백엔드 연동 시 실제 로그인 상태로 교체
-  const [cartItemCount, setCartItemCount] = useState(3); // 백엔드에서 장바구니 아이템 수 조회
-  const [user, setUser] = useState({
-    name: "김철수",
-    email: "user@example.com",
-  }); // 백엔드에서 사용자 정보 조회
+  // Auth Store 연동
+  const { isAuthenticated, user: authUser, logout: authLogout, fetchUser } = useAuthStore()
+  const [cartItemCount, setCartItemCount] = useState(0) // 백엔드에서 장바구니 아이템 수 조회
+
+  // 로그인 시 사용자 정보 가져오기
+  useEffect(() => {
+    if (isAuthenticated && !authUser) {
+      fetchUser()
+    }
+  }, [isAuthenticated, authUser, fetchUser])
 
   const tourCategories = useMemo(
     () => [
@@ -103,12 +99,15 @@ export default function Header() {
     [searchQuery, router]
   );
 
-  const handleLogout = useCallback(() => {
-    // TODO: 백엔드 로그아웃 API 호출
-    setIsLoggedIn(false);
-    setUserDropdownOpen(false);
-    router.push("/");
-  }, [router]);
+  const handleLogout = useCallback(async () => {
+    try {
+      await authLogout()
+      setUserDropdownOpen(false)
+      router.push("/")
+    } catch (error) {
+      console.error("Logout failed:", error)
+    }
+  }, [authLogout, router])
 
   // 모바일 메뉴 토글 함수
   const toggleMobileMenu = useCallback(() => {
@@ -280,7 +279,7 @@ export default function Header() {
               )}
             </Link>
 
-            {!isLoggedIn ? (
+            {!isAuthenticated ? (
               // 로그인 전: 로그인 버튼만 표시
               <Link
                 href="/login"
@@ -299,17 +298,15 @@ export default function Header() {
                   title="사용자 메뉴"
                 >
                   <User className="w-5 h-5 stroke-2" />
-                  <span className="hidden md:inline text-xs">{user.name}</span>
+                  <span className="hidden md:inline text-xs">{authUser?.name || "User"}</span>
                   <ChevronDown className="w-3 h-3 stroke-2" />
                 </button>
 
                 {userDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                     <div className="px-4 py-2 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-900">
-                        {user.name}
-                      </p>
-                      <p className="text-xs text-gray-500">{user.email}</p>
+                      <p className="text-sm font-medium text-gray-900">{authUser?.name || "User"}</p>
+                      <p className="text-xs text-gray-500">{authUser?.email || authUser?.username}</p>
                     </div>
                     <Link
                       href="/mypage"
@@ -462,7 +459,7 @@ export default function Header() {
                   </span>
                 )}
               </Link>
-              {!isLoggedIn ? (
+              {!isAuthenticated ? (
                 <Link
                   href="/login"
                   className="hover:text-[#651d2a] transition-colors duration-300 py-2"
