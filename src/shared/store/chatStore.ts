@@ -1,4 +1,5 @@
 import { ChatContext, ChatMessage, ChatSession } from "../types/chat";
+import { useAuthStore } from "./authStore";
 import {
   createChatSession,
   generateAIResponse,
@@ -7,6 +8,7 @@ import {
   getChatSession,
   sendChatMessage,
   updateChatSession,
+  getAllChatSessions,
 } from "../apis/chat";
 import {
   MAX_CHAT_SESSIONS,
@@ -33,6 +35,7 @@ interface ChatStore {
   // 액션
   initSession: () => Promise<boolean>;
   loadSession: (sessionId: string) => Promise<void>;
+  loadUserSessions: (userId: number) => Promise<void>;
   addMessage: (message: Omit<ChatMessage, "id" | "timestamp">) => Promise<void>;
   sendUserMessage: (content: string) => Promise<void>;
   updateLastMessage: (content: string) => void;
@@ -40,6 +43,7 @@ interface ChatStore {
   updateContext: (context: Partial<ChatContext>) => Promise<void>;
   generateEstimateForSession: (userId?: number) => Promise<boolean>;
   clearSession: () => void;
+  clearAllSessions: () => void;
   deleteSession: (sessionId: string) => void;
   loadFromStorage: () => void;
   toggleChat: () => void;
@@ -92,6 +96,13 @@ const useChatStore = create<ChatStore>((set, get) => ({
   initSession: async () => {
     const { sessions } = get();
 
+    // 로그인 여부 확인
+    const authState = useAuthStore.getState();
+    if (!authState.isAuthenticated) {
+      console.warn("User must be logged in to start a chat session");
+      return false;
+    }
+
     // 최대 세션 수 확인
     if (sessions.length >= MAX_CHAT_SESSIONS) {
       alert(MESSAGES.SESSION_LIMIT_EXCEEDED);
@@ -101,10 +112,14 @@ const useChatStore = create<ChatStore>((set, get) => ({
     try {
       set({ isLoading: true });
 
+      // 로그인한 사용자 정보 가져오기
+      const userId = authState.user?.id;
+
       // 백엔드에 세션 생성
       const newSession = await createChatSession({
         title: "New Chat",
         context: {},
+        userId, // 로그인한 사용자 ID 전달
       });
 
       // 로컬 상태 업데이트
@@ -191,6 +206,40 @@ const useChatStore = create<ChatStore>((set, get) => ({
       get().saveToStorage();
     } catch (error) {
       // Failed to load session - silent fail
+      set({ isLoading: false });
+    }
+  },
+
+  // 사용자의 모든 세션 불러오기 (서버에서)
+  loadUserSessions: async (userId: number) => {
+    try {
+      set({ isLoading: true });
+
+      // 서버에서 사용자의 세션 목록 가져오기
+      const { sessions: serverSessions } = await getAllChatSessions({
+        userId,
+        page: 1,
+        countPerPage: 50, // 최근 50개 세션
+      });
+
+      // 세션 데이터 변환
+      const formattedSessions: ChatSession[] = serverSessions.map((session: any) => ({
+        ...session,
+        createdAt: new Date(session.createdAt),
+        lastMessageAt: session.lastActivityAt
+          ? new Date(session.lastActivityAt)
+          : undefined,
+        messages: [], // 메시지는 세션 선택 시 로드
+      }));
+
+      set({
+        sessions: formattedSessions,
+        isLoading: false,
+      });
+
+      get().saveToStorage();
+    } catch (error) {
+      console.error("Failed to load user sessions:", error);
       set({ isLoading: false });
     }
   },
@@ -561,6 +610,22 @@ const useChatStore = create<ChatStore>((set, get) => ({
       currentSessionId: null,
       isTyping: false,
     });
+  },
+
+  // 모든 세션 초기화 (로그아웃 시 사용)
+  clearAllSessions: () => {
+    set({
+      sessions: [],
+      currentSessionId: null,
+      isTyping: false,
+      isLoading: false,
+      isGeneratingEstimate: false,
+    });
+    
+    // localStorage에서도 삭제
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(CHAT_STORAGE_KEY);
+    }
   },
 
   // 세션 삭제 (로컬만, DB 삭제는 나중에 추가 가능)
