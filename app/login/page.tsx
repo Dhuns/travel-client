@@ -5,6 +5,9 @@ import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type React from "react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/src/shared/store/authStore";
+import { getGoogleAuthUrl, getAppleAuthUrl } from "@/src/shared/apis/user";
 
 /**
  * 로그인 페이지 컴포넌트
@@ -24,10 +27,14 @@ import { useState } from "react";
  * - 비밀번호 찾기: GET /forgot-password
  */
 export default function LoginPage() {
+  const router = useRouter();
+  const { login, isLoading } = useAuthStore();
+
   // 상태 관리
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
-    email: "",
+    username: "",
     password: "",
   });
 
@@ -42,37 +49,25 @@ export default function LoginPage() {
   // 로그인 폼 제출 핸들러
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: 백엔드 로그인 API 호출
-    console.log("[v0] Login attempt:", formData);
+    setError("");
 
-    // 예시: API 호출
-    // try {
-    //   const response = await fetch('/api/auth/login', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(formData)
-    //   })
-    //   const data = await response.json()
-    //   if (data.success) {
-    //     router.push('/') // 로그인 성공 시 메인 페이지로 이동
-    //   }
-    // } catch (error) {
-    //   console.error('Login failed:', error)
-    // }
+    try {
+      await login(formData.username, formData.password);
+      router.push("/"); // 로그인 성공 시 메인 페이지로 이동
+    } catch (error: any) {
+      console.error('Login failed:', error);
+      setError(error.response?.data?.message || "Login failed. Please check your credentials.");
+    }
   };
 
   // 구글 로그인 핸들러
   const handleGoogleLogin = () => {
-    // TODO: 구글 OAuth 연동
-    console.log("[v0] Google login initiated");
-    // window.location.href = '/api/auth/google'
+    window.location.href = getGoogleAuthUrl();
   };
 
   // 애플 로그인 핸들러
   const handleAppleLogin = () => {
-    // TODO: 애플 OAuth 연동
-    console.log("[v0] Apple login initiated");
-    // window.location.href = '/api/auth/apple'
+    window.location.href = getAppleAuthUrl();
   };
 
   return (
@@ -92,21 +87,28 @@ export default function LoginPage() {
             {/* 로그인 폼 */}
             <div className="p-8">
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* 이메일 입력 */}
+                {/* 에러 메시지 */}
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                    {error}
+                  </div>
+                )}
+
+                {/* 사용자명 입력 */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
+                    Username or Email
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
+                      type="text"
+                      name="username"
+                      value={formData.username}
                       onChange={handleInputChange}
                       className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent transition-all duration-300"
-                      autoComplete="email"
-                      placeholder="Enter your email"
+                      autoComplete="username"
+                      placeholder="Enter your username or email"
                       required
                     />
                   </div>
@@ -160,9 +162,10 @@ export default function LoginPage() {
                 {/* 로그인 버튼 */}
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-[#651d2a] to-[#7a2433] hover:from-[#7a2433] hover:to-[#8b2a3d] text-white py-3 rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg"
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-[#651d2a] to-[#7a2433] hover:from-[#7a2433] hover:to-[#8b2a3d] text-white py-3 rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Sign In
+                  {isLoading ? "Signing in..." : "Sign In"}
                 </Button>
               </form>
 
