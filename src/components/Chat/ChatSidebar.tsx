@@ -1,9 +1,9 @@
 import React, { FC } from "react";
-
 import dayjs from "dayjs";
 import styled from "@emotion/styled";
 import useChatStore from "@shared/store/chatStore";
 import { useRouter } from "next/navigation";
+import { MAX_CHAT_SESSIONS, MESSAGES, UI_TEXT } from "@shared/constants/chat";
 
 interface Props {
   onNewChat: () => void;
@@ -17,70 +17,76 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
 
   const handleDeleteSession = (e: React.MouseEvent, sessionId: string) => {
     e.stopPropagation();
-    if (confirm("이 채팅을 삭제하시겠어요?")) {
+    if (confirm(MESSAGES.DELETE_SESSION_CONFIRM)) {
       deleteSession(sessionId);
     }
   };
 
   return (
     <Container>
-      {/* 로고 */}
+      {/* Logo */}
       <LogoSection>
-        <Logo>✈️ DIY Travel</Logo>
+        <Logo>✈️ Tumakr AI</Logo>
       </LogoSection>
 
-      {/* 새 채팅 버튼 */}
+      {/* New Chat Button */}
       <NewChatButton onClick={onNewChat}>
-        <PlusIcon>+</PlusIcon>새 채팅 시작
-        <SessionCount>({sessions.length}/3)</SessionCount>
+        <PlusIcon>+</PlusIcon>{UI_TEXT.NEW_CHAT}
+        <SessionCount>({sessions.length}/{MAX_CHAT_SESSIONS})</SessionCount>
       </NewChatButton>
 
-      {/* 대화 목록 */}
+      {/* Chat List */}
       <ChatListSection>
-        <SectionTitle>채팅</SectionTitle>
+        <SectionTitle>{UI_TEXT.CHATS}</SectionTitle>
         <ChatList>
           {sessions.length === 0 ? (
-            <EmptyState>아직 대화가 없습니다</EmptyState>
+            <EmptyState>{UI_TEXT.NO_CHATS}</EmptyState>
           ) : (
-            sessions.map((session) => (
-              <ChatItem
-                key={session.sessionId}
-                active={currentSession?.sessionId === session.sessionId}
-                onClick={() => loadSession(session.sessionId)}
-              >
-                <ChatItemLeft>
-                  <ChatItemIcon>💬</ChatItemIcon>
-                  <ChatItemTextWrapper>
-                    <ChatItemText>{session.title || "새 대화"}</ChatItemText>
-                    <ChatItemDate>
-                      {dayjs(session.createdAt).format("MM/DD HH:mm")}
-                    </ChatItemDate>
-                  </ChatItemTextWrapper>
-                </ChatItemLeft>
-                <DeleteButton
-                  onClick={(e) => handleDeleteSession(e, session.sessionId)}
-                  title="삭제"
+            [...sessions]
+              .sort((a, b) => {
+                const aTime = a.lastMessageAt || a.createdAt;
+                const bTime = b.lastMessageAt || b.createdAt;
+                return new Date(bTime).getTime() - new Date(aTime).getTime();
+              })
+              .map((session) => (
+                <ChatItem
+                  key={session.sessionId}
+                  active={currentSession?.sessionId === session.sessionId}
+                  onClick={() => loadSession(session.sessionId)}
                 >
-                  ×
-                </DeleteButton>
-              </ChatItem>
-            ))
+                  <ChatItemLeft>
+                    <ChatItemIcon>💬</ChatItemIcon>
+                    <ChatItemTextWrapper>
+                      <ChatItemText>{session.title || "새 대화"}</ChatItemText>
+                      <ChatItemDate>
+                        {dayjs(session.lastMessageAt || session.createdAt).format("MM/DD HH:mm")}
+                      </ChatItemDate>
+                    </ChatItemTextWrapper>
+                  </ChatItemLeft>
+                  <DeleteButton
+                    onClick={(e) => handleDeleteSession(e, session.sessionId)}
+                    title="삭제"
+                  >
+                    ×
+                  </DeleteButton>
+                </ChatItem>
+              ))
           )}
         </ChatList>
       </ChatListSection>
 
-      {/* 하단 메뉴 */}
+      {/* Bottom Menu */}
       <BottomMenu>
-        <MenuItem onClick={() => router.push("/")}>🏠 홈으로</MenuItem>
+        <MenuItem onClick={() => router.push("/")}>🏠 Home</MenuItem>
         <MenuItem onClick={() => router.push("/my-estimates")}>
-          📋 내 견적서
+          📋 My Quotes
         </MenuItem>
       </BottomMenu>
     </Container>
   );
 };
 
-export default ChatSidebar;
+export default React.memo(ChatSidebar);
 
 // Styled Components
 const Container = styled.div`

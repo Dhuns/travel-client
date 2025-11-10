@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useState, useCallback } from "react";
 
 import ChatInfoPanel from "@components/Chat/ChatInfoPanel";
 import ChatInput from "@components/Chat/ChatInput";
@@ -16,7 +16,6 @@ const Container: FC = () => {
     initSession,
     loadSession,
     sendUserMessage,
-    updateContext,
     clearSession,
     loadFromStorage,
   } = useChatStore();
@@ -44,7 +43,7 @@ const Container: FC = () => {
         initSession();
       } else {
         // 저장된 세션이 있으면 가장 최근 세션 로드
-        const latestSession = sessions.sort(
+        const latestSession = [...sessions].sort(
           (a, b) =>
             new Date(b.lastMessageAt || b.createdAt).getTime() -
             new Date(a.lastMessageAt || a.createdAt).getTime()
@@ -57,72 +56,23 @@ const Container: FC = () => {
   }, [isInitialized, session, sessions.length]);
 
   // 새 채팅 시작
-  const handleNewChat = () => {
+  const handleNewChat = useCallback(() => {
     initSession();
-  };
+  }, [initSession]);
 
   // 메시지 전송 핸들러
-  const handleSendMessage = async (content: string) => {
+  const handleSendMessage = useCallback(async (content: string) => {
     if (!session) return;
 
-    // 컨텍스트 추출 (간단한 키워드 매칭 - UI 즉시 업데이트용)
-    const lowerContent = content.toLowerCase();
-
-    // 목적지 추출
-    if (lowerContent.includes("제주")) {
-      updateContext({ destination: "제주도" });
-    } else if (lowerContent.includes("부산")) {
-      updateContext({ destination: "부산" });
-    } else if (lowerContent.includes("서울")) {
-      updateContext({ destination: "서울" });
-    }
-
-    // 기간 추출
-    const dayMatch = lowerContent.match(/(\d+)박\s*(\d+)일/);
-    if (dayMatch) {
-      const days = parseInt(dayMatch[2]);
-      // 임시로 오늘부터 계산
-      const today = new Date();
-      const endDate = new Date(today);
-      endDate.setDate(today.getDate() + days - 1);
-      updateContext({
-        startDate: today.toISOString().split("T")[0],
-        endDate: endDate.toISOString().split("T")[0],
-      });
-    }
-
-    // 인원 추출
-    const adultMatch = lowerContent.match(/성인\s*(\d+)/);
-    const childMatch = lowerContent.match(/소아|아이\s*(\d+)/);
-    const infantMatch = lowerContent.match(/유아\s*(\d+)/);
-
-    if (adultMatch) updateContext({ adults: parseInt(adultMatch[1]) });
-    if (childMatch) updateContext({ children: parseInt(childMatch[1]) });
-    if (infantMatch) updateContext({ infants: parseInt(infantMatch[1]) });
-
-    // 선호도 추출
-    if (lowerContent.includes("관광")) {
-      updateContext({
-        preferences: [...(context.preferences || []), "관광형"],
-      });
-    } else if (lowerContent.includes("휴양")) {
-      updateContext({
-        preferences: [...(context.preferences || []), "휴양형"],
-      });
-    } else if (lowerContent.includes("체험")) {
-      updateContext({
-        preferences: [...(context.preferences || []), "체험형"],
-      });
-    }
-
     // 백엔드 API로 메시지 전송 및 AI 응답 받기 (Gemini AI)
+    // 컨텍스트 추출은 백엔드에서 자동으로 수행됨
     await sendUserMessage(content);
-  };
+  }, [session, sendUserMessage]);
 
   if (!session) {
     return (
       <LoadingContainer>
-        <LoadingText>채팅을 시작하는 중...</LoadingText>
+        <LoadingText>✈️ Preparing your AI travel planner...</LoadingText>
       </LoadingContainer>
     );
   }
@@ -135,19 +85,20 @@ const Container: FC = () => {
     return (
       <EmptyStateContainer>
         <EmptyStateContent>
-          <EmptyStateTitle>✈️ AI 여행 플래너</EmptyStateTitle>
-          <EmptyStateSubtitle>어떤 여행을 계획중이세요?</EmptyStateSubtitle>
+          <EmptyStateTitle>✈️ AI Travel Planner for Korea</EmptyStateTitle>
+          <EmptyStateSubtitle>Let's plan your perfect Korean adventure!</EmptyStateSubtitle>
           <EmptyStateInputWrapper>
             <ChatInput
               onSend={handleSendMessage}
               disabled={isTyping}
-              placeholder="예: 제주도 2박 3일 여행 계획 부탁해"
+              placeholder="e.g., I want to visit Seoul for 3 days in December (2 adults)"
             />
           </EmptyStateInputWrapper>
           <EmptyStateHints>
-            <HintItem>💬 자연어로 편하게 말씀해주세요</HintItem>
-            <HintItem>📅 날짜와 인원을 알려주시면 더 정확해요</HintItem>
-            <HintItem>💰 예산이 있다면 함께 말씀해주세요</HintItem>
+            <HintItem>💬 Just chat naturally - tell us your travel dreams</HintItem>
+            <HintItem>📅 Rough dates and number of travelers are enough to start</HintItem>
+            <HintItem>💰 Share your budget range for better recommendations</HintItem>
+            <HintItem>🗣️ We speak Korean too! (한국어도 가능합니다)</HintItem>
           </EmptyStateHints>
         </EmptyStateContent>
       </EmptyStateContainer>
@@ -164,15 +115,15 @@ const Container: FC = () => {
         {/* 중앙 채팅 영역 */}
         <ChatWrapper>
           <ChatSection hasMessages={hasMessages}>
-            {/* 상단 툴바 */}
+            {/* Top Bar */}
             <TopBar>
               <TopBarLeft>
-                <ModelBadge>🤖 AI 여행 플래너</ModelBadge>
+                <ModelBadge>🤖 AI Travel Planner</ModelBadge>
               </TopBarLeft>
               <TopBarRight>
                 <IconButton
                   onClick={() => setShowInfoPanel(!showInfoPanel)}
-                  title="정보 패널 토글"
+                  title="Toggle info panel"
                 >
                   {showInfoPanel ? "›" : "‹"}
                 </IconButton>
@@ -187,14 +138,14 @@ const Container: FC = () => {
               onSend={handleSendMessage}
             />
 
-            {/* 입력창 - 메시지가 있을 때만 하단에 표시 */}
+            {/* Input Area - shown at bottom when messages exist */}
             {hasMessages && (
               <InputArea>
                 <ChatInput
                   onSend={handleSendMessage}
                   disabled={isTyping}
                   placeholder={
-                    isTyping ? "AI가 답변 중입니다..." : "메시지를 입력하세요..."
+                    isTyping ? "AI is typing..." : "Type your message..."
                   }
                 />
               </InputArea>
@@ -202,17 +153,18 @@ const Container: FC = () => {
           </ChatSection>
         </ChatWrapper>
 
-        {/* 우측 정보 패널 (토글 가능) */}
+        {/* Right Info Panel (toggleable) */}
         {showInfoPanel && <InfoPanelBackdrop onClick={() => setShowInfoPanel(false)} />}
         <InfoPanel isVisible={showInfoPanel}>
           <InfoPanelContent isVisible={showInfoPanel}>
             <InfoPanelHeader>
-              <InfoPanelTitle>여행 정보</InfoPanelTitle>
+              <InfoPanelTitle>Trip Details</InfoPanelTitle>
               <CloseButton onClick={() => setShowInfoPanel(false)}>✕</CloseButton>
             </InfoPanelHeader>
             <ChatInfoPanel
               context={context}
               messageCount={session.messages.length}
+              batchId={session.batchId}
             />
           </InfoPanelContent>
         </InfoPanel>
