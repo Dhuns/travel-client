@@ -86,3 +86,21 @@ export const generateEstimate = async (
   });
   return response.data;
 };
+
+// Get All Sessions API (with filters)
+export const getAllChatSessions = async (params?: {
+  page?: number;
+  countPerPage?: number;
+  status?: 'active' | 'converted' | 'abandoned' | 'all';
+  keyword?: string;
+  userId?: number;
+}): Promise<{
+  sessions: ChatSession[];
+  total: number;
+}> => {
+  const response = await axios.get(`${API_URL}/chat/admin/sessions`, {
+    params,
+  });
+  const [sessions, total] = response.data;
+  return { sessions, total };
+};
