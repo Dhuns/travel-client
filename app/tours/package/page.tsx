@@ -34,60 +34,65 @@ export default function PackageTourPage() {
   return (
     <div className="min-h-screen bg-[#f5f3f0]">
       {/* Section 1: Hero - 1.png */}
-      <section className="bg-background px-4 md:px-8 py-32">
-        <div className="max-w-4xl mx-auto text-center space-y-6">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-black text-balance">
-            Tumakr Korea Package Tour
-          </h1>
-          <p className="text-lg text-black leading-relaxed text-pretty md:text-lg">
-            Flights, accommodation, transportation, and tours. The one-and-only
-            solution for a perfect trip to Korea.
-          </p>
-        </div>
-      </section>
-      <section className="relative bg-background overflow-hidden">
-        <div className="grid lg:grid-cols-2 gap-40 items-center">
-          {/* Left Content - constrained width with padding */}
-          <div className="px-6 lg:pl-24 py-16 lg:py-24 space-y-6 max-w-3xl">
-            <h1 className="font-bold text-black leading-tight text-5xl">
-              So that every moment of the journey is truly yours
+      <section className="min-h-screen lg:h-screen flex flex-col bg-background">
+        {/* 상단 타이틀 영역 */}
+        <div className="px-4 md:px-8 pt-24 md:pt-28 lg:pt-32 pb-8 md:pb-12 lg:pb-16 flex-shrink-0">
+          <div className="max-w-4xl mx-auto text-center space-y-4 md:space-y-6">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-black text-balance">
+              Tumakr Korea Package Tour
             </h1>
-
-            <p className="text-black leading-relaxed">
-              <span className="tracking-normal text-lg">
-                Are you tired of comparing countless hotels and worrying about
-                transportation in an unfamiliar place? <br />
-                Do you want to fully enjoy a top-tier experience, carefully
-                selected by Tumakr, without any worries?
-                <br />
-              </span>
-              <br />
-              <span>
-                The Tumakr Package Tour is a premium, all-in-one solution that
-                prepares everything so you can focus solely on the true joy of
-                traveling in Korea.
-              </span>
+            <p className="text-base md:text-lg text-black leading-relaxed text-pretty">
+              Flights, accommodation, transportation, and tours. The
+              one-and-only solution for a perfect trip to Korea.
             </p>
-
-            <div className="flex flex-wrap gap-3">
-              <Badge className="bg-[#651d2a] hover:bg-[#4a1620] px-4 py-2 text-sm text-[#f5f3f1] rounded-md">
-                # AllInclusive
-              </Badge>
-              <Badge className="bg-[#651d2a] hover:bg-[#4a1620] px-4 py-2 text-sm text-[#f5f3f1] rounded-md">
-                # PremiumAllInOne
-              </Badge>
-            </div>
           </div>
+        </div>
 
-          {/* Right Image - extends to viewport edge */}
-          <div className="relative h-[500px] lg:h-[600px]">
-            <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#f5f3f0] via-[#f5f3f0]/60 to-transparent z-10" />
+        {/* 하단 콘텐츠 영역 */}
+        <div className="relative flex-1 overflow-hidden pb-8 lg:pb-0">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center h-full">
+            {/* Left Content - constrained width with padding */}
+            <div className="px-6 lg:pl-24 py-6 lg:py-16 space-y-4 lg:space-y-6 max-w-3xl">
+              <h1 className="font-bold text-black leading-tight text-3xl md:text-4xl lg:text-5xl">
+                So that every moment of the journey is truly yours
+              </h1>
 
-            <img
-              src="/images/design-mode/castle4.png"
-              alt="Cyclist on Jeju coastal road"
-              className="w-full h-full object-cover"
-            />
+              <p className="text-black leading-relaxed text-sm md:text-base">
+                <span className="tracking-normal">
+                  Are you tired of comparing countless hotels and worrying about
+                  transportation in an unfamiliar place? <br />
+                  Do you want to fully enjoy a top-tier experience, carefully
+                  selected by Tumakr, without any worries?
+                  <br />
+                </span>
+                <br />
+                <span>
+                  The Tumakr Package Tour is a premium, all-in-one solution that
+                  prepares everything so you can focus solely on the true joy of
+                  traveling in Korea.
+                </span>
+              </p>
+
+              <div className="flex flex-wrap gap-3">
+                <Badge className="bg-[#651d2a] hover:bg-[#4a1620] px-4 py-2 text-sm text-[#f5f3f1] rounded-md">
+                  # AllInclusive
+                </Badge>
+                <Badge className="bg-[#651d2a] hover:bg-[#4a1620] px-4 py-2 text-sm text-[#f5f3f1] rounded-md">
+                  # PremiumAllInOne
+                </Badge>
+              </div>
+            </div>
+
+            {/* Right Image - extends to viewport edge */}
+            <div className="relative aspect-[16/10] lg:h-[500px] lg:aspect-auto">
+              <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#f5f3f0] via-[#f5f3f0]/60 to-transparent z-10 hidden lg:block" />
+
+              <img
+                src="/images/design-mode/castle4.png"
+                alt="Cyclist on Jeju coastal road"
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
         </div>
       </section>
