@@ -1,15 +1,19 @@
 "use client";
 
 import {
+  Award,
   Calendar,
   Camera,
   Check,
   Clock,
+  Compass,
   Gift,
   Heart,
   Instagram,
   MapPin,
+  Package,
   Shield,
+  Sparkles,
   Users,
 } from "lucide-react";
 
@@ -17,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
+import Link from "next/link";
 
 /**
  * Package Tour 페이지
@@ -97,112 +102,8 @@ export default function PackageTourPage() {
         </div>
       </section>
 
-      {/* Section 2: What Makes Special - 2.png */}
-      <section className="py-16 px-6 bg-[#f5f3f0]">
-        <div className="container mx-auto max-w-7xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              What makes the Tumakr Package Tour special
-            </h2>
-            <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto">
-              Beyond simple convenience, experience Tumakr's proven quality and
-              trust in every aspect of your trip.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Premium Itinerary */}
-            <Card className="overflow-hidden border-0 shadow-lg bg-white rounded-xl p-0">
-              <div className="relative aspect-video">
-                <Image
-                  src="/images/design-mode/castle1.png"
-                  alt="Premium Itinerary"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  Premium Itinerary
-                </h3>
-                <p className="text-gray-600 leading-relaxed text-sm">
-                  Our travel experts personally vet and select only the best
-                  destinations, restaurants, and accommodations from countless
-                  options to guarantee a high-class travel experience.
-                </p>
-              </div>
-            </Card>
-
-            {/* Perfectly Designed Logistics */}
-            <Card className="overflow-hidden border-0 shadow-lg bg-white rounded-xl p-0">
-              <div className="relative aspect-video">
-                <Image
-                  src="/images/design-mode/castle2.png"
-                  alt="Perfectly Designed Logistics"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  Perfectly Designed Logistics
-                </h3>
-                <p className="text-gray-600 leading-relaxed text-sm">
-                  We provide an optimal route that minimizes unnecessary travel
-                  time and maximizes your immersion in the experience.
-                </p>
-              </div>
-            </Card>
-
-            {/* Worry-Free Comfort */}
-            <Card className="overflow-hidden border-0 shadow-lg bg-white rounded-xl p-0">
-              <div className="relative aspect-video">
-                <Image
-                  src="/images/design-mode/castle3.png"
-                  alt="Worry-Free Comfort"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  Worry-Free Comfort
-                </h3>
-                <p className="text-gray-600 leading-relaxed text-sm">
-                  We take care of all reservations, transportation, and entrance
-                  procedures. All you have to do is relax and enjoy every
-                  moment.
-                </p>
-              </div>
-            </Card>
-
-            {/* The Value of Tumakr Adds Depth */}
-            <Card className="overflow-hidden border-0 shadow-lg bg-white rounded-xl p-0">
-              <div className="relative aspect-video">
-                <Image
-                  src="/images/design-mode/castle4.png"
-                  alt="The Value of Tumakr"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  The Value of Tumakr Adds Depth
-                </h3>
-                <p className="text-gray-600 leading-relaxed text-sm">
-                  Unlike typical packages that only pursue convenience, we add
-                  unforgettable experiences with our acclaimed in-depth history
-                  tours and cultural activities.
-                </p>
-              </div>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Section 3: Focus on Journey - 3.png */}
-      <section className="py-20 px-6 bg-white">
+      {/* Section 2: Focus on Journey - 3.png */}
+      <section className="py-20 px-6 bg-[#f5f3f0]">
         <div className="container mx-auto max-w-7xl">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* 왼쪽: 이미지 */}
@@ -241,8 +142,242 @@ export default function PackageTourPage() {
         </div>
       </section>
 
-      {/* Section 5: Products & Souvenirs - 5.png */}
+      {/* Section 2: Package Tour Products - 2.png */}
       <section className="py-20 px-6 bg-white">
+        <div className="container mx-auto max-w-7xl">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Our Package Tours
+            </h2>
+            <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto">
+              Carefully curated all-inclusive packages designed for an
+              unforgettable Korean experience
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+            {/* Package 1: Seoul Cultural Experience */}
+            <Card className="overflow-hidden border-0 shadow-lg bg-white rounded-xl p-0 hover:shadow-2xl transition-shadow">
+              <div className="relative aspect-[4/3]">
+                <Image
+                  src="/images/design-mode/castle1.png"
+                  alt="Seoul Cultural Experience Package"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute top-4 right-4">
+                  <Badge className="bg-[#651d2a] text-white px-3 py-1">
+                    5 Days / 4 Nights
+                  </Badge>
+                </div>
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">
+                  Seoul Cultural Experience
+                </h3>
+                <p className="text-gray-600 leading-relaxed text-sm mb-4">
+                  Immerse yourself in Seoul's vibrant culture with palace tours,
+                  traditional hanbok experience, and authentic Korean cuisine.
+                  Includes flights, accommodation, and guided tours.
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-bold text-[#651d2a]">
+                    From $1,299
+                  </span>
+                  <Button className="bg-[#651d2a] hover:bg-[#4a1620] text-white">
+                    View Details
+                  </Button>
+                </div>
+              </div>
+            </Card>
+
+            {/* Package 2: Jeju Island Paradise */}
+            <Card className="overflow-hidden border-0 shadow-lg bg-white rounded-xl p-0 hover:shadow-2xl transition-shadow">
+              <div className="relative aspect-[4/3]">
+                <Image
+                  src="/images/design-mode/castle2.png"
+                  alt="Jeju Island Paradise Package"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute top-4 right-4">
+                  <Badge className="bg-[#6d8675] text-white px-3 py-1">
+                    4 Days / 3 Nights
+                  </Badge>
+                </div>
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">
+                  Jeju Island Paradise
+                </h3>
+                <p className="text-gray-600 leading-relaxed text-sm mb-4">
+                  Discover the natural beauty of Jeju Island with volcanic
+                  landscapes, pristine beaches, and unique local culture.
+                  All-inclusive package with flights and accommodations.
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-bold text-[#6d8675]">
+                    From $999
+                  </span>
+                  <Button className="bg-[#6d8675] hover:bg-[#5a6d60] text-white">
+                    View Details
+                  </Button>
+                </div>
+              </div>
+            </Card>
+
+            {/* Package 3: Complete Korea Tour */}
+            <Card className="overflow-hidden border-0 shadow-lg bg-white rounded-xl p-0 hover:shadow-2xl transition-shadow">
+              <div className="relative aspect-[4/3]">
+                <Image
+                  src="/images/design-mode/castle3.png"
+                  alt="Complete Korea Tour Package"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute top-4 right-4">
+                  <Badge className="bg-[#c4982a] text-white px-3 py-1">
+                    7 Days / 6 Nights
+                  </Badge>
+                </div>
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">
+                  Complete Korea Tour
+                </h3>
+                <p className="text-gray-600 leading-relaxed text-sm mb-4">
+                  Experience the best of Korea from Seoul to Busan and Jeju. A
+                  comprehensive journey through history, culture, and natural
+                  wonders with expert guides throughout.
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-bold text-[#c4982a]">
+                    From $1,899
+                  </span>
+                  <Button className="bg-[#c4982a] hover:bg-[#a67d22] text-white">
+                    View Details
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* NEW Section: Why Choose Tumakr Package Tour */}
+      <section className="py-20 px-6 bg-white">
+        <div className="container mx-auto max-w-7xl">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Why Choose Tumakr Package Tour?
+            </h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Experience the difference that sets us apart from ordinary travel
+              packages
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {/* 1. 완벽한 올인원 솔루션 */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <div className="w-14 h-14 bg-[#651d2a]/10 rounded-full flex items-center justify-center">
+                    <Package className="w-7 h-7 text-[#651d2a]" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">
+                    Complete All-in-One Solution
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    Flights, accommodation, transportation, and tours integrated
+                    into one seamless package. No need to waste time comparing
+                    dozens of websites or worrying about missing connections.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. 계획의 부담 제로 */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <div className="w-14 h-14 bg-[#6d8675]/10 rounded-full flex items-center justify-center">
+                    <Shield className="w-7 h-7 text-[#6d8675]" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">
+                    Zero Planning Stress
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    Say goodbye to transportation anxiety and booking mistakes
+                    in an unfamiliar country. Tumakr handles all reservations
+                    and entry procedures perfectly.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. 전문가 검증 프리미엄 */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <div className="w-14 h-14 bg-[#c4982a]/10 rounded-full flex items-center justify-center">
+                    <Award className="w-7 h-7 text-[#c4982a]" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">
+                    Expert-Verified Premium Quality
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    Only the finest experiences personally tested and vetted by
+                    our travel experts. Not just sightseeing, but Tumakr's
+                    signature deep cultural immersion.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 4. 현지 전문가의 진짜 한국 */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <div className="w-14 h-14 bg-[#651d2a]/10 rounded-full flex items-center justify-center">
+                    <Compass className="w-7 h-7 text-[#651d2a]" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">
+                    Authentic Korea with Local Experts
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    Discover the real Korea that tourists never see through
+                    local insights. Gain deep understanding of history and
+                    culture with our expert guides.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom CTA */}
+          <div className="text-center mt-12">
+            <div className="inline-flex items-center gap-2 bg-white px-6 py-3 rounded-full shadow-md">
+              <Sparkles className="w-5 h-5 text-[#c4982a]" />
+              <span className="font-semibold text-gray-900">
+                The Tumakr Difference: Quality, Trust, and Unforgettable
+                Memories
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 5: Products & Souvenirs - 5.png */}
+      <section className="py-20 px-6 bg-gradient-to-br from-[#651d2a]/5 to-[#6d8675]/5">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <div className="flex items-center justify-center mb-4">
@@ -356,61 +491,6 @@ export default function PackageTourPage() {
         </div>
       </section>
 
-      {/* Section 6: The Path We Take Together - 6.png */}
-      <section className="py-20 px-6 bg-[#f5f3f0]">
-        <div className="container mx-auto max-w-7xl">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              The Path We Take Together
-            </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Now that you've heard their stories, here's the journey that
-              brought them together.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-4 gap-6">
-            {/* 5 Days */}
-            <Card className="p-8 bg-white border-0 shadow-lg text-center">
-              <div className="w-16 h-16 bg-[#651d2a]/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Calendar className="w-8 h-8 text-[#651d2a]" />
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">5 Days</h3>
-              <p className="text-gray-600">4 Nights</p>
-            </Card>
-
-            {/* 8-12 */}
-            <Card className="p-8 bg-white border-0 shadow-lg text-center">
-              <div className="w-16 h-16 bg-[#c4982a]/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Users className="w-8 h-8 text-[#c4982a]" />
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">8-12</h3>
-              <p className="text-gray-600">Small Group</p>
-            </Card>
-
-            {/* Flexible */}
-            <Card className="p-8 bg-white border-0 shadow-lg text-center">
-              <div className="w-16 h-16 bg-[#6d8675]/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Clock className="w-8 h-8 text-[#6d8675]" />
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                Flexible
-              </h3>
-              <p className="text-gray-600">Relaxed Pace</p>
-            </Card>
-
-            {/* Jeju */}
-            <Card className="p-8 bg-white border-0 shadow-lg text-center">
-              <div className="w-16 h-16 bg-[#272b38]/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <MapPin className="w-8 h-8 text-[#272b38]" />
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Jeju</h3>
-              <p className="text-gray-600">Island Tour</p>
-            </Card>
-          </div>
-        </div>
-      </section>
-
       {/* Section 7: CTA - 7.png */}
       <section className="py-20 px-6 bg-white">
         <div className="container mx-auto max-w-4xl text-center">
@@ -423,15 +503,19 @@ export default function PackageTourPage() {
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-16">
-            <Button className="bg-[#651d2a] hover:bg-[#651d2a]/90 text-white px-8 py-6 text-lg rounded-full">
-              Request a Free Consultation
-            </Button>
-            <Button
-              variant="outline"
-              className="border-2 border-[#651d2a] text-[#651d2a] hover:bg-[#651d2a]/10 px-8 py-6 text-lg rounded-full bg-transparent"
-            >
-              Contact Us
-            </Button>
+            <Link href="/chat">
+              <Button className="bg-[#651d2a] hover:bg-[#651d2a]/90 text-white px-8 py-6 text-lg rounded-full">
+                Request a Free Consultation
+              </Button>
+            </Link>
+            <Link href="/contact">
+              <Button
+                variant="outline"
+                className="border-2 border-[#651d2a] text-[#651d2a] hover:bg-[#651d2a]/10 px-8 py-6 text-lg rounded-full bg-transparent"
+              >
+                Contact Us
+              </Button>
+            </Link>
           </div>
 
           {/* 하단 정보 */}
