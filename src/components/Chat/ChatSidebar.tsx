@@ -1,9 +1,9 @@
 import React, { FC } from "react";
-
 import dayjs from "dayjs";
 import styled from "@emotion/styled";
 import useChatStore from "@shared/store/chatStore";
 import { useRouter } from "next/navigation";
+import { MAX_CHAT_SESSIONS, MESSAGES, UI_TEXT } from "@shared/constants/chat";
 
 interface Props {
   onNewChat: () => void;
@@ -17,30 +17,30 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
 
   const handleDeleteSession = (e: React.MouseEvent, sessionId: string) => {
     e.stopPropagation();
-    if (confirm("이 채팅을 삭제하시겠어요?")) {
+    if (confirm(MESSAGES.DELETE_SESSION_CONFIRM)) {
       deleteSession(sessionId);
     }
   };
 
   return (
     <Container>
-      {/* 로고 */}
+      {/* Logo */}
       <LogoSection>
-        <Logo>✈️ DIY Travel</Logo>
+        <Logo>✈️ Tumakr AI</Logo>
       </LogoSection>
 
-      {/* 새 채팅 버튼 */}
+      {/* New Chat Button */}
       <NewChatButton onClick={onNewChat}>
-        <PlusIcon>+</PlusIcon>새 채팅 시작
-        <SessionCount>({sessions.length}/3)</SessionCount>
+        <PlusIcon>+</PlusIcon>{UI_TEXT.NEW_CHAT}
+        <SessionCount>({sessions.length}/{MAX_CHAT_SESSIONS})</SessionCount>
       </NewChatButton>
 
-      {/* 대화 목록 */}
+      {/* Chat List */}
       <ChatListSection>
-        <SectionTitle>채팅</SectionTitle>
+        <SectionTitle>{UI_TEXT.CHATS}</SectionTitle>
         <ChatList>
           {sessions.length === 0 ? (
-            <EmptyState>아직 대화가 없습니다</EmptyState>
+            <EmptyState>{UI_TEXT.NO_CHATS}</EmptyState>
           ) : (
             [...sessions]
               .sort((a, b) => {
@@ -75,11 +75,11 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
         </ChatList>
       </ChatListSection>
 
-      {/* 하단 메뉴 */}
+      {/* Bottom Menu */}
       <BottomMenu>
-        <MenuItem onClick={() => router.push("/")}>🏠 홈으로</MenuItem>
+        <MenuItem onClick={() => router.push("/")}>🏠 Home</MenuItem>
         <MenuItem onClick={() => router.push("/my-estimates")}>
-          📋 내 견적서
+          📋 My Quotes
         </MenuItem>
       </BottomMenu>
     </Container>

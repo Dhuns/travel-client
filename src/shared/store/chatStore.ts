@@ -8,11 +8,14 @@ import {
   sendChatMessage,
   updateChatSession,
 } from "../apis/chat";
+import {
+  MAX_CHAT_SESSIONS,
+  CHAT_STORAGE_KEY,
+  MIN_MESSAGES_FOR_ESTIMATE,
+  MESSAGES,
+} from "../constants/chat";
 
 import { create } from "zustand";
-
-const MAX_SESSIONS = 3;
-const STORAGE_KEY = "diy-chat-sessions";
 
 interface ChatStore {
   // 상태
@@ -58,32 +61,40 @@ const useChatStore = create<ChatStore>((set, get) => ({
     return sessions.find((s) => s.sessionId === currentSessionId) || null;
   },
 
-  // 견적서 생성 가능 여부 확인
+  /**
+   * 견적서 생성 가능 여부 확인
+   * @returns {boolean} 견적서 생성 가능 여부
+   */
   canGenerateEstimate: () => {
     const session = get().getCurrentSession();
-    if (!session || session.batchId) return false; // 이미 견적서가 있으면 불가
+
+    // 세션이 없거나 이미 견적서가 생성된 경우
+    if (!session || session.batchId) {
+      return false;
+    }
 
     const ctx = session.context;
-    // 필수 정보: 목적지, 출발/도착일, 성인 수 (모두 유효한 값이어야 함)
-    const hasDestination = ctx.destination && ctx.destination.trim().length > 0;
-    const hasStartDate = ctx.startDate && ctx.startDate.trim().length > 0;
-    const hasEndDate = ctx.endDate && ctx.endDate.trim().length > 0;
-    const hasAdults = ctx.adults && ctx.adults > 0;
 
-    return !!(hasDestination && hasStartDate && hasEndDate && hasAdults);
+    // 필수 정보 확인
+    const hasDestination = Boolean(ctx.destination?.trim());
+    const hasStartDate = Boolean(ctx.startDate?.trim());
+    const hasEndDate = Boolean(ctx.endDate?.trim());
+    const hasAdults = Boolean(ctx.adults && ctx.adults > 0);
+    const hasEnoughMessages = session.messages.length >= MIN_MESSAGES_FOR_ESTIMATE;
+
+    return hasDestination && hasStartDate && hasEndDate && hasAdults && hasEnoughMessages;
   },
 
-  // 세션 초기화 (API 사용)
+  /**
+   * 새 세션 초기화
+   * @returns {Promise<boolean>} 초기화 성공 여부
+   */
   initSession: async () => {
     const { sessions } = get();
 
-    // 최대 개수 체크
-    if (sessions.length >= MAX_SESSIONS) {
-      alert(
-        `최대 ${MAX_SESSIONS}개의 채팅만 생성할 수 있습니다.\n\n` +
-          `💡 좌측 사이드바에서 기존 채팅을 선택하거나\n` +
-          `불필요한 채팅을 삭제한 후 새 채팅을 시작해주세요.`
-      );
+    // 최대 세션 수 확인
+    if (sessions.length >= MAX_CHAT_SESSIONS) {
+      alert(MESSAGES.SESSION_LIMIT_EXCEEDED);
       return false;
     }
 
@@ -300,27 +311,24 @@ const useChatStore = create<ChatStore>((set, get) => ({
 
       get().saveToStorage();
 
-      // AI 응답 후 필수 정보가 모두 채워졌는지 체크
+      // AI 응답 후 견적서 생성이 가능한지 체크 (enhanced conditions)
       const currentSession = updatedSessions.find(
         (s) => s.sessionId === currentSessionId
       );
       if (currentSession && !currentSession.hasShownEstimatePrompt && !currentSession.batchId) {
-        const ctx = currentSession.context;
-        const hasAllRequiredInfo = !!(
-          ctx.destination &&
-          ctx.startDate &&
-          ctx.endDate &&
-          ctx.adults &&
-          ctx.adults > 0
-        );
+        // Update current session temporarily to check canGenerateEstimate
+        set({ sessions: updatedSessions });
 
-        if (hasAllRequiredInfo) {
-          // 안내 메시지 표시
+        // Use the enhanced canGenerateEstimate function
+        const canGenerate = get().canGenerateEstimate();
+
+        if (canGenerate) {
+          // Show notification that quote generation is now available
           await addMessage({
             role: "assistant",
             type: "text",
             content:
-              "모든 정보가 수집되었습니다! 😊\n\n오른쪽 패널의 **'견적서 생성하기'** 버튼을 눌러주시면\n맞춤 견적서를 생성해드리겠습니다.\n\n담당자가 24시간 이내에 최종 견적서를 보내드립니다.",
+              "Great! I have all the information needed to create your personalized travel quote.\n\nYou can now click the **'Generate My Quote'** button on the right panel to get started. Our AI will create a detailed itinerary based on our conversation, and our travel experts will review and send you the final quote within 24 hours.",
           });
 
           // 플래그 업데이트
@@ -339,12 +347,12 @@ const useChatStore = create<ChatStore>((set, get) => ({
       // Failed to send message - silent fail
       setIsTyping(false);
 
-      // 에러 메시지 표시
+      // Show error message
       await addMessage({
         role: "assistant",
         type: "system",
         content:
-          "Sorry, an error occurred while sending the message. Please try again.",
+          "Sorry, a temporary error occurred 😥\nPlease try again in a moment.\n\nIf the problem persists, try refreshing the page!",
       });
     }
   },
@@ -455,12 +463,12 @@ const useChatStore = create<ChatStore>((set, get) => ({
         );
 
         if (hasAllRequiredInfo) {
-          // 안내 메시지 표시
+          // Show guidance message
           await addMessage({
             role: "assistant",
             type: "text",
             content:
-              "모든 정보가 수집되었습니다! 😊\n\n오른쪽 패널의 **'견적서 생성하기'** 버튼을 눌러주시면\n맞춤 견적서를 생성해드리겠습니다.\n\n담당자가 24시간 이내에 최종 견적서를 보내드립니다.",
+              "Perfect! ✨ All required information is ready.\n\nYou can now **generate your customized quote**!\nClick the purple button on the right panel 👉\n\n📋 Our AI will create a draft first,\nthen our travel experts will review and send\nyou the final quote within 24 hours.",
           });
 
           // 플래그 업데이트
@@ -504,17 +512,22 @@ const useChatStore = create<ChatStore>((set, get) => ({
 
       set({ sessions: updatedSessions, isGeneratingEstimate: false });
 
-      // 백엔드에 batchId 동기화
-      await updateChatSession(currentSessionId, {
-        batchId: result.batchId,
-        status: 'active',
-      });
+      // 백엔드에 batchId 동기화 (실패해도 로컬에는 유지)
+      try {
+        await updateChatSession(currentSessionId, {
+          batchId: result.batchId,
+          status: 'active',
+        });
+      } catch (syncError) {
+        // 백엔드 동기화 실패는 로그만 출력 (사용자 경험에 영향 없음)
+        console.error('Failed to sync batchId to backend:', syncError);
+      }
 
-      // 견적서 생성 완료 메시지 추가
+      // Add quote generation success message
       await addMessage({
         role: "assistant",
         type: "estimate",
-        content: `Your quotation has been generated!\n\nTotal Amount: $${result.totalAmount.toLocaleString()}\nNumber of Items: ${result.itemCount}\n\nOur staff will review and send you the final quotation within 24 hours.`,
+        content: `🎉 Your quote has been generated!\n\n💰 Estimated Cost: ₩${result.totalAmount.toLocaleString()}\n📦 Included Items: ${result.itemCount}\n\nYou can now click the **'View My Quote'** button\nin the right panel to see the detailed itinerary!\n\n✨ Our travel experts will review and send\nyou the final quote within 24 hours.`,
         metadata: {
           batchId: result.batchId,
           estimateId: result.estimateId,
@@ -526,16 +539,16 @@ const useChatStore = create<ChatStore>((set, get) => ({
 
       get().saveToStorage();
       return true;
-    } catch (error) {
+    } catch (error: any) {
       // Failed to generate estimate - show error details
       set({ isGeneratingEstimate: false });
 
-      const errorMessage = error.response?.data?.message || error.message || "알 수 없는 오류가 발생했습니다.";
+      const errorMessage = error?.response?.data?.message || error?.message || "An unknown error occurred.";
 
       await addMessage({
         role: "assistant",
         type: "system",
-        content: `견적서 생성 중 오류가 발생했습니다.\n\n${errorMessage}\n\n잠시 후 다시 시도해주세요.`,
+        content: `😥 A problem occurred while generating your quote.\n\nError details: ${errorMessage}\n\n💡 How to resolve:\n• Please try again in a moment\n• Try refreshing the page\n• If the issue persists, start a new chat`,
       });
 
       return false;
@@ -567,38 +580,46 @@ const useChatStore = create<ChatStore>((set, get) => ({
   // 채팅창 토글
   toggleChat: () => set((state) => ({ isChatOpen: !state.isChatOpen })),
 
-  // localStorage에서 로드
+  /**
+   * localStorage에서 세션 데이터 로드
+   */
   loadFromStorage: () => {
+    if (typeof window === "undefined") return;
+
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored) as ChatSession[];
-        // Date 객체 복원
-        const sessions = parsed.map((s) => ({
-          ...s,
-          createdAt: new Date(s.createdAt),
-          lastMessageAt: s.lastMessageAt
-            ? new Date(s.lastMessageAt)
-            : undefined,
-          messages: s.messages.map((m) => ({
-            ...m,
-            timestamp: new Date(m.timestamp),
-          })),
-        }));
-        set({ sessions });
-      }
+      const stored = localStorage.getItem(CHAT_STORAGE_KEY);
+      if (!stored) return;
+
+      const parsed = JSON.parse(stored) as ChatSession[];
+
+      // Date 객체 복원
+      const sessions = parsed.map((s) => ({
+        ...s,
+        createdAt: new Date(s.createdAt),
+        lastMessageAt: s.lastMessageAt ? new Date(s.lastMessageAt) : undefined,
+        messages: s.messages.map((m) => ({
+          ...m,
+          timestamp: new Date(m.timestamp),
+        })),
+      }));
+
+      set({ sessions });
     } catch (error) {
-      // Failed to load chat sessions - silent fail
+      console.error("Failed to load chat sessions from storage:", error);
     }
   },
 
-  // localStorage에 저장
+  /**
+   * 세션 데이터를 localStorage에 저장
+   */
   saveToStorage: () => {
+    if (typeof window === "undefined") return;
+
     try {
       const { sessions } = get();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+      localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(sessions));
     } catch (error) {
-      // Failed to save chat sessions - silent fail
+      console.error("Failed to save chat sessions to storage:", error);
     }
   },
 }));

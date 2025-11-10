@@ -29,72 +29,72 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
     if (isGeneratingEstimate) return;
     const success = await generateEstimateForSession();
     if (success) {
-      alert("✅ 견적서가 생성되었습니다!\n담당자가 24시간 이내에 최종 견적서를 보내드립니다.");
+      // Success message is now shown in chat, no need for alert
     }
   };
 
-  // 총 일수 계산
+  // Calculate total days
   const days =
     startDate && endDate
       ? dayjs(endDate).diff(dayjs(startDate), "day") + 1
       : null;
 
-  // 인원 합계
+  // Total travelers
   const totalPeople = adults + children + infants;
 
   return (
     <Container>
-      {/* 헤더 - 데스크톱에서만 표시 */}
+      {/* Header - Desktop only */}
       <Header>
-        <Title>여행 정보</Title>
-        <Badge>{messageCount}개 메시지</Badge>
+        <Title>Trip Details</Title>
+        <Badge>{messageCount} messages</Badge>
       </Header>
 
-      {/* 추출된 정보 */}
+      {/* Collected Information */}
       <Section>
-        <SectionTitle>📍 추출된 정보</SectionTitle>
+        <SectionTitle>📍 Collected Info</SectionTitle>
 
         {destination ? (
           <InfoItem>
-            <Label>목적지</Label>
+            <Label>Destination</Label>
             <Value>{destination}</Value>
           </InfoItem>
         ) : (
-          <EmptyState>아직 목적지가 입력되지 않았습니다</EmptyState>
+          <EmptyState>Where would you like to go? 😊</EmptyState>
         )}
 
         {startDate && endDate && (
           <InfoItem>
-            <Label>여행 기간</Label>
+            <Label>Travel Period</Label>
             <Value>
               {dayjs(startDate).format("YYYY.MM.DD")} ~{" "}
               {dayjs(endDate).format("MM.DD")}
-              {days && ` (${days}일)`}
+              {days && ` (${days} days)`}
             </Value>
           </InfoItem>
         )}
 
         {totalPeople > 0 && (
           <InfoItem>
-            <Label>인원</Label>
+            <Label>Travelers</Label>
             <ValueList>
-              {adults > 0 && <ValueItem>성인 {adults}명</ValueItem>}
-              {children > 0 && <ValueItem>소아 {children}명</ValueItem>}
-              {infants > 0 && <ValueItem>유아 {infants}명</ValueItem>}
+              {adults > 0 && <ValueItem>{adults} Adult{adults > 1 ? 's' : ''}</ValueItem>}
+              {children > 0 && <ValueItem>{children} Child{children > 1 ? 'ren' : ''}</ValueItem>}
+              {infants > 0 && <ValueItem>{infants} Infant{infants > 1 ? 's' : ''}</ValueItem>}
             </ValueList>
           </InfoItem>
         )}
 
         {budget && (
           <InfoItem>
-            <Label>예산</Label>
-            <Value>{budget.toLocaleString()}원</Value>
+            <Label>Budget</Label>
+            <Value>₩{budget.toLocaleString()}</Value>
           </InfoItem>
         )}
 
         {preferences.length > 0 && (
           <InfoItem>
-            <Label>선호도</Label>
+            <Label>Preferences</Label>
             <TagList>
               {preferences.map((pref, index) => (
                 <Tag key={index}>{pref}</Tag>
@@ -104,42 +104,42 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
         )}
       </Section>
 
-      {/* 견적서 생성 버튼 */}
+      {/* Generate Quote Button */}
       {canGenerateEstimate() && !batchId && (
         <EstimateButtonSection>
           <GenerateButton onClick={handleGenerateEstimate} disabled={isGeneratingEstimate}>
-            {isGeneratingEstimate ? "⏳ 견적서 생성 중..." : "✨ 견적서 생성하기"}
+            {isGeneratingEstimate ? "Creating your quote..." : "Generate My Quote"}
           </GenerateButton>
           <EstimateHint>
-            필수 정보가 모두 수집되었습니다!<br />
-            지금 1차 견적서를 생성해드릴게요.
+            All set! Click to create your personalized travel plan
           </EstimateHint>
         </EstimateButtonSection>
       )}
 
-      {/* 이미 생성된 견적서 표시 */}
+      {/* View Generated Quote */}
       {batchId && (
         <EstimateButtonSection>
           <ViewQuotationButton
             onClick={() => window.open(`/quotation/${batchId}`, '_blank')}
           >
-            📋 견적서 확인하기
+            📋 View My Quote
           </ViewQuotationButton>
           <EstimateHint>
-            담당자가 24시간 이내에<br />
-            최종 견적서를 보내드립니다.
+            Our travel experts are reviewing ✨<br />
+            Final quote will be sent within 24 hours
           </EstimateHint>
         </EstimateButtonSection>
       )}
 
-      {/* 도움말 */}
+      {/* Help Section */}
       <HelpSection>
-        <HelpTitle>💡 도움말</HelpTitle>
+        <HelpTitle>💡 How It Works</HelpTitle>
         <HelpList>
-          <HelpItem>여행지, 날짜, 인원을 알려주세요</HelpItem>
-          <HelpItem>원하는 여행 스타일을 설명해주세요</HelpItem>
-          <HelpItem>예산이 있다면 함께 알려주세요</HelpItem>
-          <HelpItem>언제든 견적을 수정할 수 있습니다</HelpItem>
+          <HelpItem>📍 Tell us where, when, and how many travelers</HelpItem>
+          <HelpItem>🎨 Share what kind of experience you're looking for</HelpItem>
+          <HelpItem>💰 Let us know your budget range (optional)</HelpItem>
+          <HelpItem>✏️ You can update or add info anytime during chat</HelpItem>
+          <HelpItem>🗣️ We support both English and Korean</HelpItem>
         </HelpList>
       </HelpSection>
     </Container>
@@ -302,7 +302,8 @@ const HelpItem = styled.li`
 const EstimateButtonSection = styled.div`
   padding: 16px;
   margin: 0 4px 16px 4px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
   border-radius: 12px;
   text-align: center;
 `;
@@ -310,19 +311,20 @@ const EstimateButtonSection = styled.div`
 const GenerateButton = styled.button`
   width: 100%;
   padding: 14px 20px;
-  background-color: #ffffff;
-  color: #667eea;
+  background-color: #007aff;
+  color: #ffffff;
   border: none;
   border-radius: 10px;
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 6px rgba(0, 122, 255, 0.2);
 
   &:hover:not(:disabled) {
+    background-color: #0051d5;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
   }
 
   &:active:not(:disabled) {
@@ -330,8 +332,10 @@ const GenerateButton = styled.button`
   }
 
   &:disabled {
-    opacity: 0.7;
+    background-color: #ccc;
+    opacity: 0.6;
     cursor: not-allowed;
+    box-shadow: none;
   }
 `;
 
@@ -372,7 +376,6 @@ const EstimateCreatedBadge = styled.div`
 const EstimateHint = styled.p`
   margin: 12px 0 0 0;
   font-size: 13px;
-  color: #ffffff;
+  color: #6b7280;
   line-height: 1.5;
-  opacity: 0.95;
 `;
