@@ -89,7 +89,7 @@ const Card = styled.div`
 
 const Header = styled.div`
   padding: 16px 20px;
-  background-color: #007aff;
+  background-color: #651d2a;
   color: white;
   display: flex;
   justify-content: space-between;
@@ -159,7 +159,7 @@ const Footer = styled.div`
 `;
 
 const DetailsButton = styled.button`
-  background-color: #007aff;
+  background-color: #651d2a;
   color: white;
   border: none;
   padding: 10px 24px;
@@ -171,6 +171,6 @@ const DetailsButton = styled.button`
   width: 100%;
 
   &:hover {
-    background-color: #005bb5;
+    background-color: #4a1520;
   }
 `;

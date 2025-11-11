@@ -67,7 +67,7 @@ const LocationNumber = styled.span`
 	width: 22px;
 	height: 22px;
 	border-radius: 50%;
-	background-color: #007aff;
+	background-color: #651d2a;
 	color: white;
 	font-size: 11px;
 	font-weight: 600;

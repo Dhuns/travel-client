@@ -448,7 +448,7 @@ const TimelineContent = styled.p`
 `;
 
 const TotalSection = styled.div`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
   padding: 24px 32px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
