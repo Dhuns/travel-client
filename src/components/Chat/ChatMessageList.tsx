@@ -1,10 +1,11 @@
-import React, { FC, useEffect, useRef } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 import styled from "@emotion/styled";
 import ChatInput from "./ChatInput";
 import ChatMessage from "./ChatMessage";
 import { ChatMessage as ChatMessageType } from "@shared/types/chat";
 import EstimateCard from "./EstimateCard";
 import TypingIndicator from "./TypingIndicator";
+import QuotationModal from "./QuotationModal";
 import { AUTO_SCROLL_DELAY, UI_TEXT } from "@shared/constants/chat";
 
 interface Props {
@@ -21,6 +22,18 @@ const ChatMessageList: FC<Props> = ({
   onSend,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [quotationHash, setQuotationHash] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleViewQuote = (hash: string) => {
+    setQuotationHash(hash);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setQuotationHash(null);
+  };
 
   // 새 메시지가 추가되면 자동 스크롤 (더 부드럽게)
   useEffect(() => {
@@ -64,6 +77,7 @@ const ChatMessageList: FC<Props> = ({
                 <EstimateCard
                   estimate={message.metadata.estimatePreview}
                   batchId={message.metadata?.batchId}
+                  onViewQuote={handleViewQuote}
                 />
               </EstimateCardWrapper>
             );
@@ -79,6 +93,15 @@ const ChatMessageList: FC<Props> = ({
         {/* 자동 스크롤용 더미 엘리먼트 */}
         <div ref={messagesEndRef} />
       </MessagesList>
+
+      {/* Quotation Modal */}
+      {quotationHash && (
+        <QuotationModal
+          hash={quotationHash}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
+      )}
     </Container>
   );
 };

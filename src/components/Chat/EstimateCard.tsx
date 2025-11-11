@@ -1,5 +1,4 @@
 import React, { FC } from "react";
-import { useRouter } from "next/navigation";
 import { EstimatePreview } from "@shared/types/chat";
 import styled from "@emotion/styled";
 import CryptoJS from 'crypto-js';
@@ -7,12 +6,12 @@ import CryptoJS from 'crypto-js';
 interface Props {
   estimate: EstimatePreview;
   batchId?: number;
+  onViewQuote?: (hash: string) => void;
 }
 
-const EstimateCard: FC<Props> = ({ estimate, batchId }) => {
+const EstimateCard: FC<Props> = ({ estimate, batchId, onViewQuote }) => {
   const { title, totalAmount, adults, children, infants, items } = estimate;
   const totalPeople = adults + children + infants;
-  const router = useRouter();
 
   const handleViewDetails = () => {
     if (!batchId) {
@@ -31,14 +30,16 @@ const EstimateCard: FC<Props> = ({ estimate, batchId }) => {
     const hash = cipher.toString();
     const encodedHash = encodeURIComponent(hash);
 
-    console.log('[EstimateCard] Navigating to quotation:', {
+    console.log('[EstimateCard] Opening quotation modal:', {
       batchId,
       hash,
-      encodedHash,
-      url: `/quotation/${encodedHash}`
+      encodedHash
     });
 
-    router.push(`/quotation/${encodedHash}`);
+    // Open modal instead of navigating
+    if (onViewQuote) {
+      onViewQuote(encodedHash);
+    }
   };
 
   return (
