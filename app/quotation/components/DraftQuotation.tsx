@@ -40,6 +40,22 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
     return acc;
   }, {} as Record<number, EstimateDetail[]>);
 
+  // Initialize all days as collapsed
+  const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>(() => {
+    return Object.keys(itemsByDay).reduce((acc, day) => {
+      acc[day] = false;
+      return acc;
+    }, {} as Record<string, boolean>);
+  });
+
+  // Toggle day expansion
+  const toggleDay = (day: string) => {
+    setExpandedDays(prev => ({
+      ...prev,
+      [day]: !prev[day]
+    }));
+  };
+
   // Fetch map data
   useEffect(() => {
     const fetchMapData = async () => {
@@ -105,68 +121,96 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
             const items = itemsByDay[dayNumber];
             const dayDate = dayjs(batchInfo.startDate).add(dayNumber - 1, 'day');
 
+            const isExpanded = expandedDays[day];
+
             return (
               <DaySection key={day}>
-                <DayHeader>
-                  <DayTitle>Day {day}</DayTitle>
+                <DayHeader onClick={() => toggleDay(day)}>
+                  <DayHeaderLeft>
+                    <ToggleIcon isExpanded={isExpanded}>
+                      {isExpanded ? '▼' : '▶'}
+                    </ToggleIcon>
+                    <DayTitle>Day {day}</DayTitle>
+                  </DayHeaderLeft>
                   <DayDate>{dayDate.format('YYYY-MM-DD (ddd)')}</DayDate>
                 </DayHeader>
-                <ItemList>
-                  {items.map((detail) => {
-                    const thumbnail = detail.item.files?.find((f) => f.type === '썸네일');
-                    const showPrice = !batchInfo.hidePrice;
 
-                    return (
-                      <ItemCard key={detail.id}>
-                        {thumbnail && (
-                          <ItemImage src={getItemImg(thumbnail.itemSrc)} alt={detail.item.nameEng} />
-                        )}
-                        <ItemContent>
-                          <ItemHeader>
-                            <ItemType>{typeMapping[detail.item.type] || detail.item.type}</ItemType>
-                            <ItemName>{detail.item.nameEng}</ItemName>
-                          </ItemHeader>
-                          {detail.item.description && (
-                            <ItemDescription>{detail.item.description}</ItemDescription>
-                          )}
-                          <ItemFooter>
-                            <ItemQuantity>
-                              Quantity: {detail.quantity}
-                              {showPrice && detail.originPrice && (
-                                <span style={{ marginLeft: '8px', color: '#666' }}>
-                                  @ ${Number(detail.originPrice).toLocaleString()}
-                                </span>
-                              )}
-                            </ItemQuantity>
-                            {showPrice && (
-                              <ItemPrice>${Number(detail.price).toLocaleString()}</ItemPrice>
-                            )}
-                          </ItemFooter>
-                        </ItemContent>
-                      </ItemCard>
-                    );
-                  })}
-                </ItemList>
-
-                {estimateInfo.timeline?.[day] && (
-                  <TimelineSection>
-                    <TimelineContent>{estimateInfo.timeline[day]}</TimelineContent>
-                  </TimelineSection>
-                )}
-
-                {/* Map Section */}
-                {!loadingMap && mapData && mapData.mapData && (
+                {isExpanded && (
                   <>
-                    {mapData.mapData
-                      .filter((dayData: any) => dayData.day === dayNumber)
-                      .map((dayData: any) => (
-                        <DayMap
-                          key={dayData.day}
-                          day={dayData.day}
-                          locations={dayData.locations}
-                          center={dayData.center}
-                        />
-                      ))}
+                    <ItemList>
+                      {items.map((detail) => {
+                        const thumbnail = detail.item.files?.find((f) => f.type === '썸네일');
+                        const showPrice = !batchInfo.hidePrice;
+
+                        // Fallback image based on item type
+                        const getFallbackImage = () => {
+                          const type = detail.item.type;
+                          if (type === '여행지' || type === 'Place') return '/beautiful-korean-traditional-palace-with-tourists-.jpg';
+                          if (type === '숙박' || type === 'Accommodation') return '/beautiful-korean-traditional-hanbok-dress.jpg';
+                          if (type === '이동수단' || type === 'Transportation') return '/busan-coastal-temple.jpg';
+                          if (type === '컨텐츠' || type === 'Activity') return '/korean-skincare-beauty-products-set.jpg';
+                          return '/beautiful-korean-traditional-palace-with-tourists-.jpg';
+                        };
+
+                        const imageSrc = thumbnail ? getItemImg(thumbnail.itemSrc) : getFallbackImage();
+
+                        return (
+                          <ItemCard key={detail.id}>
+                            <ItemImage
+                              src={imageSrc}
+                              alt={detail.item.nameEng}
+                              onError={(e) => {
+                                e.currentTarget.src = getFallbackImage();
+                              }}
+                            />
+                            <ItemContent>
+                              <ItemHeader>
+                                <ItemType>{typeMapping[detail.item.type] || detail.item.type}</ItemType>
+                                <ItemName>{detail.item.nameEng}</ItemName>
+                              </ItemHeader>
+                              {detail.item.description && (
+                                <ItemDescription>{detail.item.description}</ItemDescription>
+                              )}
+                              <ItemFooter>
+                                <ItemQuantity>
+                                  Quantity: {detail.quantity}
+                                  {showPrice && detail.originPrice && (
+                                    <span style={{ marginLeft: '8px', color: '#666' }}>
+                                      @ ${Number(detail.originPrice).toLocaleString()}
+                                    </span>
+                                  )}
+                                </ItemQuantity>
+                                {showPrice && (
+                                  <ItemPrice>${Number(detail.price).toLocaleString()}</ItemPrice>
+                                )}
+                              </ItemFooter>
+                            </ItemContent>
+                          </ItemCard>
+                        );
+                      })}
+                    </ItemList>
+
+                    {estimateInfo.timeline?.[day] && (
+                      <TimelineSection>
+                        <TimelineContent>{estimateInfo.timeline[day]}</TimelineContent>
+                      </TimelineSection>
+                    )}
+
+                    {/* Map Section */}
+                    {!loadingMap && mapData && mapData.mapData && (
+                      <>
+                        {mapData.mapData
+                          .filter((dayData: any) => dayData.day === dayNumber)
+                          .map((dayData: any) => (
+                            <DayMap
+                              key={dayData.day}
+                              day={dayData.day}
+                              locations={dayData.locations}
+                              center={dayData.center}
+                            />
+                          ))}
+                      </>
+                    )}
                   </>
                 )}
               </DaySection>
@@ -331,8 +375,28 @@ const DayHeader = styled.div`
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
-  padding-bottom: 8px;
+  padding: 12px;
   border-bottom: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+
+  &:hover {
+    background-color: #f9fafb;
+  }
+`;
+
+const DayHeaderLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+
+const ToggleIcon = styled.span<{ isExpanded: boolean }>`
+  font-size: 14px;
+  color: #651d2a;
+  transition: transform 0.2s ease;
+  user-select: none;
 `;
 
 const DayTitle = styled.h3`
@@ -340,6 +404,7 @@ const DayTitle = styled.h3`
   font-weight: 600;
   color: #1a1a1a;
   margin: 0;
+  user-select: none;
 `;
 
 const DayDate = styled.span`
