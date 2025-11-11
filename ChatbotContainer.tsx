@@ -50,17 +50,17 @@ export function ChatbotContainer() {
         )}
       >
         {/* 챗봇 헤더 */}
-        <div className="p-4 bg-sky-600 text-white rounded-t-2xl flex-shrink-0">
+        <div className="p-4 bg-gradient-to-r from-[#651d2a] to-[#7a2433] text-white rounded-t-2xl flex-shrink-0">
           <h2 className="text-lg font-semibold">Travel Assistant</h2>
-          <p className="text-sm text-sky-100">
+          <p className="text-sm text-[#f5f3f0]">
             Sign in to start planning your trip
           </p>
         </div>
 
         {/* 로그인 유도 메시지 */}
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-          <div className="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center mb-4">
-            <LogIn className="w-8 h-8 text-sky-600" />
+          <div className="w-16 h-16 bg-[#f5f3f0] rounded-full flex items-center justify-center mb-4">
+            <LogIn className="w-8 h-8 text-[#651d2a]" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
             Sign in Required
@@ -70,7 +70,7 @@ export function ChatbotContainer() {
           </p>
           <button
             onClick={() => router.push("/login")}
-            className="bg-sky-600 hover:bg-sky-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+            className="bg-[#651d2a] hover:bg-[#4a1520] text-white px-6 py-2 rounded-lg font-medium transition-colors"
           >
             Sign In
           </button>
@@ -91,9 +91,9 @@ export function ChatbotContainer() {
       )}
     >
       {/* 챗봇 헤더 */}
-      <div className="p-4 bg-sky-600 text-white rounded-t-2xl flex-shrink-0">
+      <div className="p-4 bg-gradient-to-r from-[#651d2a] to-[#7a2433] text-white rounded-t-2xl flex-shrink-0">
         <h2 className="text-lg font-semibold">Travel Assistant</h2>
-        <p className="text-sm text-sky-100">
+        <p className="text-sm text-[#f5f3f0]">
           How can I help you plan your trip?
         </p>
       </div>
