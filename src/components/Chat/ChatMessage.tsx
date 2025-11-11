@@ -213,7 +213,7 @@ const MessageTime = styled.span`
 
 // Estimate Card Styles
 const EstimateCard = styled.div`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
@@ -289,7 +289,7 @@ const ViewQuotationButton = styled.a`
   justify-content: center;
   width: 100%;
   padding: 12px 20px;
-  background: #667eea;
+  background: #651d2a;
   color: white;
   border: none;
   border-radius: 10px;
@@ -298,12 +298,12 @@ const ViewQuotationButton = styled.a`
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 8px rgba(101, 29, 42, 0.3);
 
   &:hover {
-    background: #5568d3;
+    background: #4a1520;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(101, 29, 42, 0.4);
   }
 
   &:active {

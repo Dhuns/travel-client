@@ -111,7 +111,7 @@ const Logo = styled.div`
   transition: color 0.2s;
 
   &:hover {
-    color: #007aff;
+    color: #651d2a;
   }
 `;
 
@@ -133,7 +133,7 @@ const NewChatButton = styled.button`
 
   &:hover {
     background-color: #f0f0f0;
-    border-color: #007aff;
+    border-color: #651d2a;
   }
 `;
 

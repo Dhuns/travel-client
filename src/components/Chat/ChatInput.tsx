@@ -147,9 +147,9 @@ const InputWrapper = styled.div<{ hasError?: boolean }>`
   transition: all 0.2s;
 
   &:focus-within {
-    border-color: ${({ hasError }) => (hasError ? "#ff3b30" : "#007aff")};
+    border-color: ${({ hasError }) => (hasError ? "#ff3b30" : "#651d2a")};
     box-shadow: 0 0 0 3px ${({ hasError }) =>
-      hasError ? "rgba(255, 59, 48, 0.1)" : "rgba(0, 122, 255, 0.1)"};
+      hasError ? "rgba(255, 59, 48, 0.1)" : "rgba(101, 29, 42, 0.1)"};
   }
 `;
 
@@ -200,13 +200,13 @@ const SendButton = styled.button`
   height: 32px;
   border: none;
   border-radius: 6px;
-  background-color: ${({ disabled }) => (disabled ? "#e0e0e0" : "#007AFF")};
+  background-color: ${({ disabled }) => (disabled ? "#e0e0e0" : "#651d2a")};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
   transition: all 0.15s;
   flex-shrink: 0;
 
   &:hover:not(:disabled) {
-    background-color: #0051d5;
+    background-color: #4a1520;
     transform: scale(1.05);
   }
 
