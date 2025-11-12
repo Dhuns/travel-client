@@ -1,11 +1,14 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
-import styled from '@emotion/styled';
-import { getQuotationByHash, type QuotationResponse } from '@/src/shared/apis/estimate';
-import { FinalQuotation, DraftQuotation } from '@/app/quotation/components';
-import { X } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import styled from "@emotion/styled";
+import {
+  getQuotationByHash,
+  type QuotationResponse,
+} from "@/src/shared/apis/estimate";
+import { FinalQuotation, DraftQuotation } from "@/app/quotation/components";
+import { X } from "lucide-react";
 
 interface Props {
   hash: string;
@@ -34,7 +37,10 @@ const QuotationModal: React.FC<Props> = ({ hash, isOpen, onClose }) => {
         const data = await getQuotationByHash(hash);
         setQuotation(data);
       } catch (err: any) {
-        setError(err?.response?.data?.message || 'Failed to load quotation. The link may be invalid or expired.');
+        setError(
+          err?.response?.data?.message ||
+            "Failed to load quotation. The link may be invalid or expired."
+        );
       } finally {
         setIsLoading(false);
       }
@@ -76,7 +82,7 @@ const QuotationModal: React.FC<Props> = ({ hash, isOpen, onClose }) => {
 
           {!isLoading && !error && quotation && (
             <>
-              {quotation.batchInfo.source === 'manual' ? (
+              {quotation.batchInfo.source === "manual" ? (
                 <FinalQuotation quotation={quotation} />
               ) : (
                 <DraftQuotation quotation={quotation} />
