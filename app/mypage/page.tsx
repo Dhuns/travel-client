@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { User, Mail, Phone, MapPin, Calendar, Heart, ShoppingBag, Settings, LogOut } from "lucide-react"
+import { User, Mail, Phone, MapPin, Settings, LogOut } from "lucide-react"
 
 export default function MyPage() {
   const [activeTab, setActiveTab] = useState("profile")
@@ -42,9 +42,6 @@ export default function MyPage() {
               <nav className="flex space-x-8 px-8">
                 {[
                   { id: "profile", label: "Profile", icon: User },
-                  { id: "bookings", label: "My Bookings", icon: Calendar },
-                  { id: "favorites", label: "Favorites", icon: Heart },
-                  { id: "orders", label: "Orders", icon: ShoppingBag },
                   { id: "settings", label: "Settings", icon: Settings },
                 ].map((tab) => {
                   const Icon = tab.icon
@@ -80,7 +77,7 @@ export default function MyPage() {
                       <input
                         type="text"
                         value={userData.name}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a]"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] text-gray-900"
                         readOnly
                       />
                     </div>
@@ -93,7 +90,7 @@ export default function MyPage() {
                       <input
                         type="email"
                         value={userData.email}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a]"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] text-gray-900"
                         readOnly
                       />
                     </div>
@@ -106,7 +103,7 @@ export default function MyPage() {
                       <input
                         type="tel"
                         value={userData.phone}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a]"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] text-gray-900"
                         readOnly
                       />
                     </div>
@@ -119,7 +116,7 @@ export default function MyPage() {
                       <input
                         type="text"
                         value={userData.address}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a]"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] text-gray-900"
                         readOnly
                       />
                     </div>
@@ -130,45 +127,6 @@ export default function MyPage() {
                   <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white">Edit Profile</Button>
                   <Button variant="outline" className="border-[#651d2a] text-[#651d2a] hover:bg-[#f5f3f0] bg-transparent">
                     Change Password
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "bookings" && (
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">My Bookings</h2>
-                <div className="text-center py-12">
-                  <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500">No bookings yet</p>
-                  <p className="text-sm text-gray-400 mt-2">Start exploring our amazing tours!</p>
-                  <Button className="mt-4 bg-[#651d2a] hover:bg-[#4a1520] text-white">
-                    <a href="/tours">Browse Tours</a>
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "favorites" && (
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Favorite Tours</h2>
-                <div className="text-center py-12">
-                  <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500">No favorites yet</p>
-                  <p className="text-sm text-gray-400 mt-2">Save tours you love for later!</p>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "orders" && (
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Order History</h2>
-                <div className="text-center py-12">
-                  <ShoppingBag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500">No orders yet</p>
-                  <p className="text-sm text-gray-400 mt-2">Check out our Korean goods!</p>
-                  <Button className="mt-4 bg-[#651d2a] hover:bg-[#4a1520] text-white">
-                    <a href="/shop">Visit Shop</a>
                   </Button>
                 </div>
               </div>
