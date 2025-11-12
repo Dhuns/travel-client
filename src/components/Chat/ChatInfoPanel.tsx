@@ -137,21 +137,6 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
         </EstimateButtonSection>
       )}
 
-      {/* View Generated Quote */}
-      {batchId && (
-        <EstimateButtonSection>
-          <ViewQuotationButton
-            onClick={() => window.open(`/quotation/${batchId}`, "_blank")}
-          >
-            📋 View My Quote
-          </ViewQuotationButton>
-          <EstimateHint>
-            Our travel experts are reviewing ✨<br />
-            Final quote will be sent within 24 hours
-          </EstimateHint>
-        </EstimateButtonSection>
-      )}
-
       {/* Help Section */}
       <HelpSection>
         <HelpTitle>💡 How It Works</HelpTitle>
@@ -360,40 +345,6 @@ const GenerateButton = styled.button`
     cursor: not-allowed;
     box-shadow: none;
   }
-`;
-
-const ViewQuotationButton = styled.button`
-  width: 100%;
-  padding: 14px 20px;
-  background-color: #ffffff;
-  color: #9ca3af;
-  border: none;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    color: #6b7280;
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-`;
-
-const EstimateCreatedBadge = styled.div`
-  padding: 14px 20px;
-  background-color: #ffffff;
-  color: #9ca3af;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 700;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 `;
 
 const EstimateHint = styled.p`
