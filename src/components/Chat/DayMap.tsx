@@ -109,9 +109,8 @@ const DayMap: React.FC<DayMapProps> = ({ day, locations, center }) => {
 			<MapContainer>
 				<APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
 					<Map
-						defaultCenter={center}
-						defaultZoom={12}
 						center={center}
+						zoom={13}
 						mapId={`day-${day}-map`}
 						gestureHandling="greedy"
 						disableDefaultUI={false}
