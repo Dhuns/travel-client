@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { User, Mail, Phone, MapPin, Calendar, Heart, ShoppingBag, Settings, LogOut } from "lucide-react"
+import { User, Mail, Phone, MapPin, Settings, LogOut } from "lucide-react"
 
 export default function MyPage() {
   const [activeTab, setActiveTab] = useState("profile")
@@ -17,20 +17,20 @@ export default function MyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 to-sky-100 pt-32 pb-16">
+    <div className="min-h-screen bg-gradient-to-br from-[#f5f3f0] to-[#faf8f5] pt-32 pb-16">
       <div className="container mx-auto px-6">
         <div className="max-w-4xl mx-auto">
           {/* Profile Header */}
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-            <div className="bg-sky-600 text-white p-8">
+            <div className="bg-gradient-to-r from-[#651d2a] to-[#7a2433] text-white p-8">
               <div className="flex items-center space-x-6">
-                <div className="w-20 h-20 bg-sky-500 rounded-full flex items-center justify-center">
+                <div className="w-20 h-20 bg-[#8b3a47] rounded-full flex items-center justify-center">
                   <User className="w-10 h-10" />
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold">{userData.name}</h1>
-                  <p className="text-sky-100 mt-1">OneDay Korea Member</p>
-                  <p className="text-sky-200 text-sm mt-2">
+                  <p className="text-[#f5f3f0] mt-1">OneDay Korea Member</p>
+                  <p className="text-[#faf8f5] text-sm mt-2">
                     Member since {new Date(userData.joinDate).toLocaleDateString()}
                   </p>
                 </div>
@@ -42,9 +42,6 @@ export default function MyPage() {
               <nav className="flex space-x-8 px-8">
                 {[
                   { id: "profile", label: "Profile", icon: User },
-                  { id: "bookings", label: "My Bookings", icon: Calendar },
-                  { id: "favorites", label: "Favorites", icon: Heart },
-                  { id: "orders", label: "Orders", icon: ShoppingBag },
                   { id: "settings", label: "Settings", icon: Settings },
                 ].map((tab) => {
                   const Icon = tab.icon
@@ -54,7 +51,7 @@ export default function MyPage() {
                       onClick={() => setActiveTab(tab.id)}
                       className={`py-4 px-2 border-b-2 font-medium text-sm flex items-center space-x-2 ${
                         activeTab === tab.id
-                          ? "border-sky-500 text-sky-600"
+                          ? "border-[#651d2a] text-[#651d2a]"
                           : "border-transparent text-gray-500 hover:text-gray-700"
                       }`}
                     >
@@ -80,7 +77,7 @@ export default function MyPage() {
                       <input
                         type="text"
                         value={userData.name}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] text-gray-900"
                         readOnly
                       />
                     </div>
@@ -93,7 +90,7 @@ export default function MyPage() {
                       <input
                         type="email"
                         value={userData.email}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] text-gray-900"
                         readOnly
                       />
                     </div>
@@ -106,7 +103,7 @@ export default function MyPage() {
                       <input
                         type="tel"
                         value={userData.phone}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] text-gray-900"
                         readOnly
                       />
                     </div>
@@ -119,7 +116,7 @@ export default function MyPage() {
                       <input
                         type="text"
                         value={userData.address}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] text-gray-900"
                         readOnly
                       />
                     </div>
@@ -127,48 +124,9 @@ export default function MyPage() {
                 </div>
 
                 <div className="mt-8 flex space-x-4">
-                  <Button className="bg-sky-600 hover:bg-sky-700 text-white">Edit Profile</Button>
-                  <Button variant="outline" className="border-sky-600 text-sky-600 hover:bg-sky-50 bg-transparent">
+                  <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white">Edit Profile</Button>
+                  <Button variant="outline" className="border-[#651d2a] text-[#651d2a] hover:bg-[#f5f3f0] bg-transparent">
                     Change Password
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "bookings" && (
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">My Bookings</h2>
-                <div className="text-center py-12">
-                  <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500">No bookings yet</p>
-                  <p className="text-sm text-gray-400 mt-2">Start exploring our amazing tours!</p>
-                  <Button className="mt-4 bg-sky-600 hover:bg-sky-700 text-white">
-                    <a href="/tours">Browse Tours</a>
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "favorites" && (
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Favorite Tours</h2>
-                <div className="text-center py-12">
-                  <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500">No favorites yet</p>
-                  <p className="text-sm text-gray-400 mt-2">Save tours you love for later!</p>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "orders" && (
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Order History</h2>
-                <div className="text-center py-12">
-                  <ShoppingBag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500">No orders yet</p>
-                  <p className="text-sm text-gray-400 mt-2">Check out our Korean goods!</p>
-                  <Button className="mt-4 bg-sky-600 hover:bg-sky-700 text-white">
-                    <a href="/shop">Visit Shop</a>
                   </Button>
                 </div>
               </div>

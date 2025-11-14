@@ -535,7 +535,7 @@ const LoginPromptSubtitle = styled.p`
 
 const LoginButton = styled.button`
   padding: 14px 40px;
-  background-color: #0ea5e9;
+  background-color: #651d2a;
   color: white;
   border: none;
   border-radius: 8px;
@@ -546,9 +546,9 @@ const LoginButton = styled.button`
   margin-top: 8px;
 
   &:hover {
-    background-color: #0284c7;
+    background-color: #4a1520;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+    box-shadow: 0 4px 12px rgba(101, 29, 42, 0.3);
   }
 
   &:active {
@@ -563,10 +563,10 @@ const SignUpPrompt = styled.p`
 `;
 
 const SignUpLink = styled.span`
-  color: #0ea5e9;
+  color: #651d2a;
   cursor: pointer;
   font-weight: 500;
-  
+
   &:hover {
     text-decoration: underline;
   }

@@ -256,7 +256,7 @@ export default FinalQuotation;
 // Styled Components
 const FinalContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
   padding: 0;
 `;
 
@@ -275,7 +275,7 @@ const FinalHeader = styled.header`
 const FinalLogo = styled.div`
   font-size: 1.5rem;
   font-weight: bold;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -283,7 +283,7 @@ const FinalLogo = styled.div`
 
 const QuotationBadge = styled.div`
   padding: 0.5rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
   color: white;
   border-radius: 20px;
   font-weight: 700;
@@ -309,7 +309,7 @@ const FinalTitle = styled.h1`
   font-weight: 700;
   color: #1a1a1a;
   margin: 0 0 0.5rem 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -334,10 +334,10 @@ const FinalSection = styled.section`
 const FinalSectionTitle = styled.h2`
   font-size: 1.5rem;
   font-weight: 700;
-  color: #667eea;
+  color: #651d2a;
   margin: 0 0 1.5rem 0;
   padding-bottom: 0.75rem;
-  border-bottom: 2px solid #667eea;
+  border-bottom: 2px solid #651d2a;
 `;
 
 const FinalInfoGrid = styled.div`
@@ -389,7 +389,7 @@ const FinalDayHeader = styled.div`
 const FinalDayTitle = styled.h3`
   font-size: 1.4rem;
   font-weight: 700;
-  color: #667eea;
+  color: #651d2a;
   margin: 0;
 `;
 
@@ -416,7 +416,7 @@ const FinalItemCard = styled.div`
   transition: all 0.3s ease;
 
   &:hover {
-    border-color: #667eea;
+    border-color: #651d2a;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
   }
 `;
@@ -428,7 +428,7 @@ const FinalItemNumber = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
   color: white;
   border-radius: 50%;
   font-weight: 700;
@@ -460,7 +460,7 @@ const FinalItemType = styled.span`
   font-size: 0.75rem;
   font-weight: 700;
   color: white;
-  background: #667eea;
+  background: #651d2a;
   padding: 4px 10px;
   border-radius: 12px;
   text-transform: uppercase;
@@ -497,7 +497,7 @@ const FinalItemQuantity = styled.span`
 const FinalItemPrice = styled.span`
   font-size: 1.4rem;
   font-weight: 700;
-  color: #667eea;
+  color: #651d2a;
 `;
 
 const FinalTimelineSection = styled.div`
@@ -505,7 +505,7 @@ const FinalTimelineSection = styled.div`
   padding: 1.25rem;
   background: white;
   border-radius: 8px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid #651d2a;
 `;
 
 const FinalTimelineContent = styled.p`
@@ -517,7 +517,7 @@ const FinalTimelineContent = styled.p`
 `;
 
 const FinalTotalSection = styled.div`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
   padding: 2rem;
   border-radius: 16px;
   box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
