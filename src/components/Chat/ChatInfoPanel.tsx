@@ -1,9 +1,9 @@
 import React, { FC } from "react";
 
 import { ChatContext } from "@shared/types/chat";
-import useChatStore from "@shared/store/chatStore";
 import dayjs from "dayjs";
 import styled from "@emotion/styled";
+import useChatStore from "@shared/store/chatStore";
 
 interface Props {
   context: ChatContext;
@@ -12,7 +12,11 @@ interface Props {
 }
 
 const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
-  const { canGenerateEstimate, generateEstimateForSession, isGeneratingEstimate } = useChatStore();
+  const {
+    canGenerateEstimate,
+    generateEstimateForSession,
+    isGeneratingEstimate,
+  } = useChatStore();
 
   const {
     destination,
@@ -78,9 +82,21 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
           <InfoItem>
             <Label>Travelers</Label>
             <ValueList>
-              {adults > 0 && <ValueItem>{adults} Adult{adults > 1 ? 's' : ''}</ValueItem>}
-              {children > 0 && <ValueItem>{children} Child{children > 1 ? 'ren' : ''}</ValueItem>}
-              {infants > 0 && <ValueItem>{infants} Infant{infants > 1 ? 's' : ''}</ValueItem>}
+              {adults > 0 && (
+                <ValueItem>
+                  {adults} Adult{adults > 1 ? "s" : ""}
+                </ValueItem>
+              )}
+              {children > 0 && (
+                <ValueItem>
+                  {children} Child{children > 1 ? "ren" : ""}
+                </ValueItem>
+              )}
+              {infants > 0 && (
+                <ValueItem>
+                  {infants} Infant{infants > 1 ? "s" : ""}
+                </ValueItem>
+              )}
             </ValueList>
           </InfoItem>
         )}
@@ -107,26 +123,16 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
       {/* Generate Quote Button */}
       {canGenerateEstimate() && !batchId && (
         <EstimateButtonSection>
-          <GenerateButton onClick={handleGenerateEstimate} disabled={isGeneratingEstimate}>
-            {isGeneratingEstimate ? "Creating your quote..." : "Generate My Quote"}
+          <GenerateButton
+            onClick={handleGenerateEstimate}
+            disabled={isGeneratingEstimate}
+          >
+            {isGeneratingEstimate
+              ? "Creating your quote..."
+              : "Generate My Quote"}
           </GenerateButton>
           <EstimateHint>
             All set! Click to create your personalized travel plan
-          </EstimateHint>
-        </EstimateButtonSection>
-      )}
-
-      {/* View Generated Quote */}
-      {batchId && (
-        <EstimateButtonSection>
-          <ViewQuotationButton
-            onClick={() => window.open(`/quotation/${batchId}`, '_blank')}
-          >
-            📋 View My Quote
-          </ViewQuotationButton>
-          <EstimateHint>
-            Our travel experts are reviewing ✨<br />
-            Final quote will be sent within 24 hours
           </EstimateHint>
         </EstimateButtonSection>
       )}
@@ -136,7 +142,9 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
         <HelpTitle>💡 How It Works</HelpTitle>
         <HelpList>
           <HelpItem>📍 Tell us where, when, and how many travelers</HelpItem>
-          <HelpItem>🎨 Share what kind of experience you're looking for</HelpItem>
+          <HelpItem>
+            🎨 Share what kind of experience you're looking for
+          </HelpItem>
           <HelpItem>💰 Let us know your budget range (optional)</HelpItem>
           <HelpItem>✏️ You can update or add info anytime during chat</HelpItem>
           <HelpItem>🗣️ We support both English and Korean</HelpItem>
@@ -180,7 +188,7 @@ const Title = styled.h2`
 
 const Badge = styled.span`
   padding: 4px 10px;
-  background-color: #007aff;
+  background-color: #651d2a;
   color: #ffffff;
   border-radius: 10px;
   font-size: 11px;
@@ -245,7 +253,7 @@ const TagList = styled.div`
 
 const Tag = styled.span`
   padding: 4px 10px;
-  background-color: #007aff;
+  background-color: #651d2a;
   color: #ffffff;
   border-radius: 12px;
   font-size: 12px;
@@ -311,7 +319,7 @@ const EstimateButtonSection = styled.div`
 const GenerateButton = styled.button`
   width: 100%;
   padding: 14px 20px;
-  background-color: #007aff;
+  background-color: #651d2a;
   color: #ffffff;
   border: none;
   border-radius: 10px;
@@ -319,12 +327,12 @@ const GenerateButton = styled.button`
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(0, 122, 255, 0.2);
+  box-shadow: 0 2px 6px rgba(101, 29, 42, 0.2);
 
   &:hover:not(:disabled) {
-    background-color: #0051d5;
+    background-color: #4a1520;
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
+    box-shadow: 0 4px 10px rgba(101, 29, 42, 0.3);
   }
 
   &:active:not(:disabled) {
@@ -337,40 +345,6 @@ const GenerateButton = styled.button`
     cursor: not-allowed;
     box-shadow: none;
   }
-`;
-
-const ViewQuotationButton = styled.button`
-  width: 100%;
-  padding: 14px 20px;
-  background-color: #ffffff;
-  color: #10b981;
-  border: none;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    color: #059669;
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-`;
-
-const EstimateCreatedBadge = styled.div`
-  padding: 14px 20px;
-  background-color: #ffffff;
-  color: #10b981;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 700;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 `;
 
 const EstimateHint = styled.p`

@@ -1,13 +1,13 @@
 "use client";
 
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { getAppleAuthUrl, getGoogleAuthUrl } from "@/src/shared/apis/user";
 
 import { Button } from "@/components/ui/button";
 import type React from "react";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/src/shared/store/authStore";
-import { getGoogleAuthUrl, getAppleAuthUrl } from "@/src/shared/apis/user";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 /**
  * 로그인 페이지 컴포넌트
@@ -55,8 +55,11 @@ export default function LoginPage() {
       await login(formData.username, formData.password);
       router.push("/"); // 로그인 성공 시 메인 페이지로 이동
     } catch (error: any) {
-      console.error('Login failed:', error);
-      setError(error.response?.data?.message || "Login failed. Please check your credentials.");
+      console.error("Login failed:", error);
+      setError(
+        error.response?.data?.message ||
+          "Login failed. Please check your credentials."
+      );
     }
   };
 
@@ -106,7 +109,11 @@ export default function LoginPage() {
                       name="username"
                       value={formData.username}
                       onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent transition-all duration-300"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] transition-all duration-300 text-gray-900 bg-white autofill:bg-white autofill:text-gray-900 [&::placeholder]:text-gray-400 [&::placeholder]:opacity-40"
+                      style={{
+                        WebkitBoxShadow: "0 0 0 1000px white inset",
+                        WebkitTextFillColor: "#111827",
+                      }}
                       autoComplete="username"
                       placeholder="Enter your username or email"
                       required
@@ -126,7 +133,11 @@ export default function LoginPage() {
                       name="password"
                       value={formData.password}
                       onChange={handleInputChange}
-                      className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent transition-all duration-300"
+                      className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] transition-all duration-300 text-gray-900 bg-white autofill:bg-white autofill:text-gray-900 [&::placeholder]:text-gray-400 [&::placeholder]:opacity-40"
+                      style={{
+                        WebkitBoxShadow: "0 0 0 1000px white inset",
+                        WebkitTextFillColor: "#111827",
+                      }}
                       autoComplete="current-password"
                       placeholder="Enter your password"
                       required

@@ -85,12 +85,12 @@ export default function CartPage() {
             <p className="text-gray-600 mb-8">Explore a variety of Korea tours and products, and add them to your cart.</p>
             <div className="space-y-4">
               <Link href="/tours">
-                <Button className="bg-sky-600 hover:bg-sky-700 text-white px-8 py-3 rounded-full">Explore Tours</Button>
+                <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white px-8 py-3 rounded-full">Explore Tours</Button>
               </Link>
               <Link href="/shop">
                 <Button
                   variant="outline"
-                  className="border-sky-600 text-sky-600 hover:bg-sky-50 px-8 py-3 rounded-full bg-transparent">
+                  className="border-[#651d2a] text-[#651d2a] hover:bg-[#f5f3f0] px-8 py-3 rounded-full bg-transparent">
                   Explore Products
                 </Button>
               </Link>
@@ -107,11 +107,11 @@ export default function CartPage() {
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
-            <Link href="/" className="text-sky-600 hover:text-sky-700">
+            <Link href="/" className="text-[#651d2a] hover:text-[#4a1520]">
               <ArrowLeft className="w-6 h-6" />
             </Link>
             <h1 className="text-3xl font-bold text-gray-900">Cart</h1>
-            <span className="bg-sky-100 text-sky-800 px-3 py-1 rounded-full text-sm font-medium">
+            <span className="bg-[#f5f3f0] text-[#651d2a] px-3 py-1 rounded-full text-sm font-medium">
               {totalItems} items
             </span>
           </div>
@@ -136,11 +136,11 @@ export default function CartPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between">
                       <div>
-                        <span className="inline-block bg-sky-100 text-sky-800 text-xs px-2 py-1 rounded-full mb-2">
+                        <span className="inline-block bg-[#f5f3f0] text-[#651d2a] text-xs px-2 py-1 rounded-full mb-2">
                           {item.category}
                         </span>
                         <h3 className="text-lg font-semibold text-gray-900 mb-1">{item.name}</h3>
-                        <p className="text-xl font-bold text-sky-600">${item.price.toLocaleString()}</p>
+                        <p className="text-xl font-bold text-[#651d2a]">${item.price.toLocaleString()}</p>
                       </div>
 
                       {/* 삭제 버튼 */}
@@ -199,27 +199,27 @@ export default function CartPage() {
                 <hr className="border-gray-200" />
                 <div className="flex justify-between text-xl font-bold text-gray-900">
                   <span>Total</span>
-                  <span className="text-sky-600">${totalAmount.toLocaleString()}</span>
+                  <span className="text-[#651d2a]">${totalAmount.toLocaleString()}</span>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <Button className="w-full bg-sky-600 hover:bg-sky-700 text-white py-3 rounded-full text-lg font-semibold">
+                <Button className="w-full bg-[#651d2a] hover:bg-[#4a1520] text-white py-3 rounded-full text-lg font-semibold">
                   Proceed to Checkout
                 </Button>
                 <Link href="/tours">
                   <Button
                     variant="outline"
-                    className="w-full border-sky-600 text-sky-600 hover:bg-sky-50 py-3 rounded-full bg-transparent">
+                    className="w-full border-[#651d2a] text-[#651d2a] hover:bg-[#f5f3f0] py-3 rounded-full bg-transparent">
                     Continue Shopping
                   </Button>
                 </Link>
               </div>
 
               {/* 혜택 정보 */}
-              <div className="mt-6 p-4 bg-sky-50 rounded-lg">
-                <h3 className="font-semibold text-sky-900 mb-2">🎁 Special Offers</h3>
-                  <ul className="text-sm text-sky-800 space-y-1">
+              <div className="mt-6 p-4 bg-[#f5f3f0] rounded-lg">
+                <h3 className="font-semibold text-[#651d2a] mb-2">🎁 Special Offers</h3>
+                  <ul className="text-sm text-[#7a2433] space-y-1">
                     <li>• 5% discount on purchases over 100,000 KRW</li>
                     <li>• Free shipping for first-time customers</li>
                     <li>• Earn reward points when you leave a review</li>
