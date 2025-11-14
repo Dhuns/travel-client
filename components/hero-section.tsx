@@ -77,6 +77,7 @@ interface HeroSectionProps {
   height?: "screen" | "large" | "medium" | "small"
   overlay?: "light" | "medium" | "dark" | "none"
   textColor?: "white" | "dark"
+  className?: string
 
   // 추가 정보 (투어 페이지용)
   rating?: number
@@ -116,6 +117,7 @@ export function HeroSection({
   height = "large",
   overlay = "medium",
   textColor = "white",
+  className = "",
   rating,
   reviews,
   duration,
@@ -304,7 +306,7 @@ export function HeroSection({
 
   return (
     <div
-      className={`relative ${heightClasses[height]} overflow-hidden ${type === "background" ? "pt-28 pb-16" : ""}`}
+      className={`relative ${heightClasses[height]} overflow-hidden ${type === "background" ? "pt-28 pb-16" : ""} ${className}`}
       style={
         backgroundImage
           ? {
