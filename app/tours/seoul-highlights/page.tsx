@@ -72,12 +72,11 @@ export default function SeoulHighlightsTourPage() {
           text: "Best Seller",
           className: "bg-sky-500 text-white px-3 py-1",
         }}
-        meta={[
-          { icon: Star, text: `${tourDetails.rating} (${tourDetails.reviews} reviews)`, className: "text-yellow-400" },
-          { icon: Clock, text: tourDetails.duration },
-          { icon: Users, text: tourDetails.participants },
-          { icon: MapPin, text: "Seoul, South Korea" },
-        ]}
+        rating={tourDetails.rating}
+        reviews={tourDetails.reviews}
+        duration={tourDetails.duration}
+        participants={tourDetails.participants}
+        location="Seoul, South Korea"
         className="h-96"
       />
 

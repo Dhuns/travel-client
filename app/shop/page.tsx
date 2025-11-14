@@ -149,10 +149,10 @@ export default function ShopPage() {
                   key={productIndex}
                   className="overflow-hidden hover:shadow-lg transition-shadow duration-300 relative"
                 >
-                  {product.bestseller && (
+                  {'bestseller' in product && product.bestseller && (
                     <Badge className="absolute top-4 left-4 bg-red-500 text-white z-10">Bestseller</Badge>
                   )}
-                  {product.popular && (
+                  {'popular' in product && product.popular && (
                     <Badge className="absolute top-4 left-4 bg-green-500 text-white z-10">Popular</Badge>
                   )}
 
@@ -185,7 +185,7 @@ export default function ShopPage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <span className="text-xl font-bold text-sky-600">{product.price}</span>
-                          {product.originalPrice && (
+                          {'originalPrice' in product && product.originalPrice && (
                             <span className="text-sm text-gray-500 line-through">{product.originalPrice}</span>
                           )}
                         </div>

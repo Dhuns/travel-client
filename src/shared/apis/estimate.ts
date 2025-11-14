@@ -69,3 +69,9 @@ export const getQuotationByHash = async (hash: string): Promise<QuotationRespons
   const response = await axios.get(`${API_URL}/estimate/client/detail/${hash}`);
   return response.data;
 };
+
+// Get quotation by batchId (requires auth)
+export const getQuotationByBatchId = async (batchId: number): Promise<QuotationResponse> => {
+  const response = await axios.get(`${API_URL}/estimate/batch/${batchId}`);
+  return response.data;
+};

@@ -5,18 +5,20 @@ import { createPortal } from "react-dom";
 import styled from "@emotion/styled";
 import {
   getQuotationByHash,
+  getQuotationByBatchId,
   type QuotationResponse,
 } from "@/src/shared/apis/estimate";
 import { FinalQuotation, DraftQuotation } from "@/app/quotation/components";
 import { X } from "lucide-react";
 
 interface Props {
-  hash: string;
+  hash?: string;
+  batchId?: number;
   isOpen: boolean;
   onClose: () => void;
 }
 
-const QuotationModal: React.FC<Props> = ({ hash, isOpen, onClose }) => {
+const QuotationModal: React.FC<Props> = ({ hash, batchId, isOpen, onClose }) => {
   const [quotation, setQuotation] = useState<QuotationResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,12 +31,14 @@ const QuotationModal: React.FC<Props> = ({ hash, isOpen, onClose }) => {
 
   useEffect(() => {
     const fetchQuotation = async () => {
-      if (!isOpen || !hash) return;
+      if (!isOpen || (!hash && !batchId)) return;
 
       try {
         setIsLoading(true);
         setError(null);
-        const data = await getQuotationByHash(hash);
+        const data = batchId
+          ? await getQuotationByBatchId(batchId)
+          : await getQuotationByHash(hash!);
         setQuotation(data);
       } catch (err: any) {
         setError(
@@ -47,7 +51,7 @@ const QuotationModal: React.FC<Props> = ({ hash, isOpen, onClose }) => {
     };
 
     fetchQuotation();
-  }, [hash, isOpen]);
+  }, [hash, batchId, isOpen]);
 
   if (!isOpen || !mounted) return null;
 

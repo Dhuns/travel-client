@@ -36,7 +36,7 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
 
     // If string, parse it (format: "day1#@#day2#@#day3...")
     if (typeof estimateInfo.timeline === 'string') {
-      const days = estimateInfo.timeline.split('#@#');
+      const days = (estimateInfo.timeline as string).split('#@#');
       const result: Record<string, string> = {};
       days.forEach((content, index) => {
         if (content.trim()) {
