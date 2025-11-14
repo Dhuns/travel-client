@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react"
-import { useState, useCallback, useMemo, useEffect } from "react"
+import { useState, useCallback, useMemo, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -35,6 +35,9 @@ export default function Header() {
   const [contactDropdownOpen, setContactDropdownOpen] = useState(false); // Contact 드롭다운 메뉴 상태 추가
   const router = useRouter();
 
+  // 사용자 드롭다운 ref
+  const userDropdownRef = useRef<HTMLDivElement>(null);
+
   // Auth Store 연동
   const { isAuthenticated, user: authUser, logout: authLogout, fetchUser } = useAuthStore()
   const [cartItemCount, setCartItemCount] = useState(0) // 백엔드에서 장바구니 아이템 수 조회
@@ -45,6 +48,23 @@ export default function Header() {
       fetchUser()
     }
   }, [isAuthenticated, authUser, fetchUser])
+
+  // 사용자 드롭다운 외부 클릭 감지
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+        setUserDropdownOpen(false);
+      }
+    };
+
+    if (userDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [userDropdownOpen]);
 
   const tourCategories = useMemo(
     () => [
@@ -291,7 +311,7 @@ export default function Header() {
               </Link>
             ) : (
               // 로그인 후: 사용자 드롭다운 메뉴
-              <div className="relative">
+              <div className="relative" ref={userDropdownRef}>
                 <button
                   onClick={toggleUserDropdown}
                   className="hover:text-[#651d2a] transition-colors duration-300 p-2 flex items-center space-x-1 rounded-full hover:bg-[#eda89b]/10"

@@ -10,12 +10,17 @@ import {
   Phone,
   User,
 } from "lucide-react";
+import {
+  checkUsername,
+  getAppleAuthUrl,
+  getGoogleAuthUrl,
+  signup,
+} from "@/src/shared/apis/user";
 
 import { Button } from "@/components/ui/button";
 import type React from "react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { signup, checkUsername, getGoogleAuthUrl, getAppleAuthUrl } from "@/src/shared/apis/user";
 
 /**
  * 회원가입 페이지 컴포넌트
@@ -152,11 +157,15 @@ export default function SignupPage() {
         privacyAgreed: agreements.privacy,
       });
 
-      alert("Registration successful! Please check your email for verification.");
+      alert(
+        "Registration successful! Please check your email for verification."
+      );
       router.push("/login"); // 회원가입 성공 시 로그인 페이지로 이동
     } catch (error: any) {
       console.error("Signup failed:", error);
-      alert(error.response?.data?.message || "Signup failed. Please try again.");
+      alert(
+        error.response?.data?.message || "Signup failed. Please try again."
+      );
     }
   };
 
@@ -197,7 +206,11 @@ export default function SignupPage() {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent transition-all duration-300"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] [&::placeholder]:text-gray-400 [&::placeholder]:opacity-40 transition-all duration-300 text-gray-900 bg-white"
+                    style={{
+                      WebkitBoxShadow: "0 0 0 1000px white inset",
+                      WebkitTextFillColor: "#111827",
+                    }}
                     autoComplete="name"
                     placeholder="Enter your full name"
                     required
@@ -218,7 +231,11 @@ export default function SignupPage() {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent transition-all duration-300"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] [&::placeholder]:text-gray-400 [&::placeholder]:opacity-40 transition-all duration-300 text-gray-900 bg-white"
+                      style={{
+                        WebkitBoxShadow: "0 0 0 1000px white inset",
+                        WebkitTextFillColor: "#111827",
+                      }}
                       autoComplete="email"
                       placeholder="Enter your email"
                       required
@@ -227,7 +244,7 @@ export default function SignupPage() {
                   <Button
                     type="button"
                     onClick={handleCheckEmail}
-                    className="px-6 bg-gray-600 hover:bg-gray-700 text-white whitespace-nowrap"
+                    className="px-6 bg-slate-600 hover:bg-slate-700 text-white whitespace-nowrap"
                   >
                     Check
                   </Button>
@@ -258,7 +275,11 @@ export default function SignupPage() {
                     name="password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent transition-all duration-300"
+                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] [&::placeholder]:text-gray-400 [&::placeholder]:opacity-40 transition-all duration-300 text-gray-900 bg-white"
+                    style={{
+                      WebkitBoxShadow: "0 0 0 1000px white inset",
+                      WebkitTextFillColor: "#111827",
+                    }}
                     autoComplete="new-password"
                     placeholder="Enter your password"
                     required
@@ -289,7 +310,11 @@ export default function SignupPage() {
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent transition-all duration-300"
+                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] [&::placeholder]:text-gray-400 [&::placeholder]:opacity-40 transition-all duration-300 text-gray-900 bg-white"
+                    style={{
+                      WebkitBoxShadow: "0 0 0 1000px white inset",
+                      WebkitTextFillColor: "#111827",
+                    }}
                     autoComplete="new-password"
                     placeholder="Confirm your password"
                     required
@@ -327,7 +352,11 @@ export default function SignupPage() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent transition-all duration-300"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] [&::placeholder]:text-gray-400 [&::placeholder]:opacity-40 transition-all duration-300 text-gray-900 bg-white"
+                    style={{
+                      WebkitBoxShadow: "0 0 0 1000px white inset",
+                      WebkitTextFillColor: "#111827",
+                    }}
                     autoComplete="tel"
                     placeholder="Enter your phone number"
                   />
@@ -347,7 +376,11 @@ export default function SignupPage() {
                     name="birthdate"
                     value={formData.birthdate}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#651d2a] focus:border-transparent transition-all duration-300"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] [&::placeholder]:text-gray-400 [&::placeholder]:opacity-40 transition-all duration-300 text-gray-900 bg-white"
+                    style={{
+                      WebkitBoxShadow: "0 0 0 1000px white inset",
+                      WebkitTextFillColor: "#111827",
+                    }}
                   />
                 </div>
               </div>
@@ -360,11 +393,11 @@ export default function SignupPage() {
                     id="allAgree"
                     checked={agreements.allAgree}
                     onChange={() => handleAgreementChange("allAgree")}
-                    className="w-5 h-5 text-[#651d2a] border-gray-300 rounded focus:ring-[#651d2a]"
+                    className="appearance-none w-5 h-5 border-2 border-gray-300 rounded bg-white focus:ring-2 focus:ring-[#651d2a] focus:ring-offset-0 cursor-pointer flex items-center justify-center checked:bg-[#651d2a] checked:border-[#651d2a] checked:after:content-['✓'] checked:after:text-white checked:after:text-sm"
                   />
                   <label
                     htmlFor="allAgree"
-                    className="ml-3 text-sm font-medium text-gray-900"
+                    className="ml-3 text-sm font-medium text-gray-900 cursor-pointer"
                   >
                     Agree to all terms
                   </label>
@@ -378,11 +411,11 @@ export default function SignupPage() {
                         id="terms"
                         checked={agreements.terms}
                         onChange={() => handleAgreementChange("terms")}
-                        className="w-4 h-4 text-[#651d2a] border-gray-300 rounded focus:ring-[#651d2a]"
+                        className="appearance-none w-4 h-4 border-2 border-gray-300 rounded bg-white focus:ring-2 focus:ring-[#651d2a] focus:ring-offset-0 cursor-pointer flex items-center justify-center checked:bg-[#651d2a] checked:border-[#651d2a] checked:after:content-['✓'] checked:after:text-white checked:after:text-xs"
                       />
                       <label
                         htmlFor="terms"
-                        className="ml-2 text-sm text-gray-700"
+                        className="ml-2 text-sm text-gray-700 cursor-pointer"
                       >
                         Terms of Service <span className="text-red-500">*</span>
                       </label>
@@ -402,11 +435,11 @@ export default function SignupPage() {
                         id="privacy"
                         checked={agreements.privacy}
                         onChange={() => handleAgreementChange("privacy")}
-                        className="w-4 h-4 text-[#651d2a] border-gray-300 rounded focus:ring-[#651d2a]"
+                        className="appearance-none w-4 h-4 border-2 border-gray-300 rounded bg-white focus:ring-2 focus:ring-[#651d2a] focus:ring-offset-0 cursor-pointer flex items-center justify-center checked:bg-[#651d2a] checked:border-[#651d2a] checked:after:content-['✓'] checked:after:text-white checked:after:text-xs"
                       />
                       <label
                         htmlFor="privacy"
-                        className="ml-2 text-sm text-gray-700"
+                        className="ml-2 text-sm text-gray-700 cursor-pointer"
                       >
                         Privacy Policy <span className="text-red-500">*</span>
                       </label>
