@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useCallback, useMemo, useEffect, useRef } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -26,6 +26,13 @@ import { useAuthStore } from "@/src/shared/store/authStore"
  * - 사용자 정보 API: /api/user/profile로 사용자 정보 조회
  */
 export default function Header() {
+  const pathname = usePathname();
+
+  // Hide header on quotation pages
+  if (pathname?.startsWith("/quotation")) {
+    return null;
+  }
+
   // 상태 관리
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);

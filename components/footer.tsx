@@ -1,5 +1,8 @@
+"use client";
+
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 /**
  * 푸터 컴포넌트 - 웹사이트 하단 정보 및 링크 섹션
@@ -17,6 +20,12 @@ import Link from "next/link"
  * - 리뷰 데이터: TripAdvisor API 연동으로 실시간 리뷰 표시
  */
 export default function Footer() {
+  const pathname = usePathname();
+
+  // Hide footer on quotation pages
+  if (pathname?.startsWith("/quotation")) {
+    return null;
+  }
   return (
     <footer className="bg-[#272b38] text-white py-12">
       <div className="container mx-auto px-6">
