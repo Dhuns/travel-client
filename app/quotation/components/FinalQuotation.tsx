@@ -134,7 +134,9 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
                                 <FinalItemName>{detail.item.nameEng}</FinalItemName>
                               </FinalItemHeader>
                               {detail.item.description && (
-                                <FinalItemDescription>{detail.item.description}</FinalItemDescription>
+                                <FinalItemDescription
+                                  dangerouslySetInnerHTML={{ __html: draftToHtml(detail.item.description) }}
+                                />
                               )}
                               <FinalItemFooter>
                                 <FinalItemQuantity>
@@ -475,11 +477,90 @@ const FinalItemName = styled.h4`
   margin: 0;
 `;
 
-const FinalItemDescription = styled.p`
+const FinalItemDescription = styled.div`
   font-size: 0.95rem;
   color: #666;
   margin: 0;
   line-height: 1.6;
+
+  /* HTML tags styling */
+  h1, h2, h3, h4, h5, h6 {
+    margin: 0.5em 0;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  h1 { font-size: 1.5em; }
+  h2 { font-size: 1.3em; }
+  h3 { font-size: 1.1em; }
+
+  p {
+    margin: 0.5em 0;
+  }
+
+  strong {
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  u {
+    text-decoration: underline;
+  }
+
+  ul, ol {
+    margin: 0.5em 0;
+    padding-left: 1.5em;
+  }
+
+  li {
+    margin: 0.25em 0;
+  }
+
+  blockquote {
+    margin: 0.5em 0;
+    padding-left: 1em;
+    border-left: 3px solid #ddd;
+    color: #666;
+  }
+
+  code {
+    background-color: #f5f5f5;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 0.9em;
+  }
+
+  pre {
+    background-color: #f5f5f5;
+    padding: 1em;
+    border-radius: 5px;
+    overflow-x: auto;
+
+    code {
+      background-color: transparent;
+      padding: 0;
+    }
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 1em 0;
+  }
+
+  a {
+    color: #3b82f6;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 `;
 
 const FinalItemFooter = styled.div`
