@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import DayMap from "@/src/components/Chat/DayMap";
 import dayjs from "dayjs";
 import { getItemImg } from "@/src/shared/utils/base";
+import { draftToHtml } from "@/src/shared/utils/draftjs";
 import styled from "@emotion/styled";
 
 // Korean to English type mapping
@@ -287,7 +288,7 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
         <Section>
           <SectionTitle>Additional Information</SectionTitle>
           <CommentBox
-            dangerouslySetInnerHTML={{ __html: estimateInfo.comment }}
+            dangerouslySetInnerHTML={{ __html: draftToHtml(estimateInfo.comment) }}
           />
         </Section>
       )}
@@ -675,7 +676,9 @@ const CommentBox = styled.div`
   font-size: 14px;
   color: #4b5563;
   line-height: 1.6;
+  word-wrap: break-word;
 
+  /* Paragraphs */
   p {
     margin: 0 0 12px 0;
 
@@ -684,6 +687,7 @@ const CommentBox = styled.div`
     }
   }
 
+  /* Lists */
   ul,
   ol {
     margin: 0 0 12px 0;
@@ -691,6 +695,114 @@ const CommentBox = styled.div`
 
     &:last-child {
       margin: 0;
+    }
+
+    li {
+      margin-bottom: 8px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  /* Text formatting */
+  strong, b {
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  em, i {
+    font-style: italic;
+  }
+
+  u {
+    text-decoration: underline;
+  }
+
+  /* Headings */
+  h1, h2, h3, h4, h5, h6 {
+    margin: 20px 0 12px 0;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.3;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.3rem; }
+  h3 { font-size: 1.15rem; }
+  h4 { font-size: 1.05rem; }
+  h5 { font-size: 1rem; }
+  h6 { font-size: 0.95rem; }
+
+  /* Blockquotes */
+  blockquote {
+    margin: 12px 0;
+    padding-left: 12px;
+    border-left: 4px solid #667eea;
+    color: #6b7280;
+    font-style: italic;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  /* Links */
+  a {
+    color: #667eea;
+    text-decoration: underline;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #5568d3;
+    }
+  }
+
+  /* Code */
+  code {
+    padding: 2px 6px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+  }
+
+  pre {
+    margin: 12px 0;
+    padding: 12px;
+    background: #1f2937;
+    color: #f3f4f6;
+    border-radius: 6px;
+    overflow-x: auto;
+
+    code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  /* Horizontal rule */
+  hr {
+    margin: 20px 0;
+    border: none;
+    border-top: 2px solid #e5e7eb;
+
+    &:last-child {
+      margin-bottom: 0;
     }
   }
 `;
