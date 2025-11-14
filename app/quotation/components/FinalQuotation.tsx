@@ -25,14 +25,49 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
   const [mapData, setMapData] = useState<any>(null);
   const [loadingMap, setLoadingMap] = useState(false);
 
+  // Parse timeline string to object if needed
+  const timelineByDay: Record<string, string> = React.useMemo(() => {
+    if (!estimateInfo.timeline) return {};
+
+    // If already an object, return as-is
+    if (typeof estimateInfo.timeline === 'object') {
+      return estimateInfo.timeline;
+    }
+
+    // If string, parse it (format: "day1#@#day2#@#day3...")
+    if (typeof estimateInfo.timeline === 'string') {
+      const days = estimateInfo.timeline.split('#@#');
+      const result: Record<string, string> = {};
+      days.forEach((content, index) => {
+        if (content.trim()) {
+          result[(index + 1).toString()] = content.trim();
+        }
+      });
+      return result;
+    }
+
+    return {};
+  }, [estimateInfo.timeline]);
+
   // Calculate totals
   const totalPrice = estimateDetails.reduce((sum, detail) => sum + (Number(detail.price) || 0), 0);
   const totalTravelers = batchInfo.adultsCount + batchInfo.childrenCount + batchInfo.infantsCount;
   const pricePerPerson = totalTravelers > 0 ? totalPrice / totalTravelers : 0;
   const tripDays = dayjs(batchInfo.endDate).diff(dayjs(batchInfo.startDate), 'day') + 1;
 
-  // Group items by day
-  const itemsByDay = estimateDetails.reduce((acc, detail) => {
+  // Separate common services (transportation and contents) from day-specific items
+  const commonServiceTypes = ['이동수단', '컨텐츠'];
+
+  const daySpecificDetails = estimateDetails.filter(
+    detail => !commonServiceTypes.includes(detail.item.type) && detail.days !== 0
+  );
+
+  const commonServices = estimateDetails.filter(
+    detail => commonServiceTypes.includes(detail.item.type) && detail.days !== 0
+  );
+
+  // Group day-specific items by day
+  const itemsByDay = daySpecificDetails.reduce((acc, detail) => {
     const day = detail.days;
     if (!acc[day]) {
       acc[day] = [];
@@ -40,6 +75,25 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
     acc[day].push(detail);
     return acc;
   }, {} as Record<number, EstimateDetail[]>);
+
+  // Group common services by item (combine same items used on different days)
+  const groupedCommonServices = commonServices.reduce((acc, detail) => {
+    const key = detail.itemId;
+    if (!acc[key]) {
+      acc[key] = {
+        item: detail.item,
+        days: [],
+        quantity: 0,
+        price: Number(detail.price) || 0,
+        originPrice: Number(detail.originPrice) || 0,
+      };
+    }
+    acc[key].days.push(detail.days);
+    acc[key].quantity += detail.quantity;
+    return acc;
+  }, {} as Record<number, any>);
+
+  const commonServicesArray = Object.values(groupedCommonServices);
 
   // Fetch map data
   useEffect(() => {
@@ -102,6 +156,48 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
             </FinalInfoGrid>
           </FinalSection>
 
+          {/* Common Services Section */}
+          {commonServicesArray.length > 0 && (
+            <FinalSection>
+              <FinalSectionTitle>Common Services</FinalSectionTitle>
+              <CommonServicesGrid>
+                {commonServicesArray.map((service, index) => (
+                  <CommonServiceCard key={index}>
+                    <CommonServiceHeader>
+                      <CommonServiceName>{service.item.nameEng}</CommonServiceName>
+                    </CommonServiceHeader>
+                    <CommonServiceDetails>
+                      <CommonServiceRow style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <CommonServiceLabel style={{ width: '100%', marginBottom: '0.25rem' }}>Used on:</CommonServiceLabel>
+                        <DayBadgesContainer>
+                          {service.days.sort((a: number, b: number) => a - b).map((d: number) => (
+                            <DayBadge key={d}>Day {d}</DayBadge>
+                          ))}
+                        </DayBadgesContainer>
+                      </CommonServiceRow>
+                      <CommonServiceRow>
+                        <CommonServiceLabel>Quantity:</CommonServiceLabel>
+                        <CommonServiceValue>{service.quantity}</CommonServiceValue>
+                      </CommonServiceRow>
+                      {!batchInfo.hidePrice && service.originPrice > 0 && (
+                        <CommonServiceRow>
+                          <CommonServiceLabel>Unit Price:</CommonServiceLabel>
+                          <CommonServiceValue>${Number(service.originPrice).toLocaleString()}</CommonServiceValue>
+                        </CommonServiceRow>
+                      )}
+                      {!batchInfo.hidePrice && (
+                        <CommonServiceRow>
+                          <CommonServiceLabel>Total:</CommonServiceLabel>
+                          <CommonServiceTotal>${Number(service.price).toLocaleString()}</CommonServiceTotal>
+                        </CommonServiceRow>
+                      )}
+                    </CommonServiceDetails>
+                  </CommonServiceCard>
+                ))}
+              </CommonServicesGrid>
+            </FinalSection>
+          )}
+
           <FinalSection>
             <FinalSectionTitle>Itinerary Details</FinalSectionTitle>
             {Object.keys(itemsByDay)
@@ -157,9 +253,9 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
                       })}
                     </FinalItemList>
 
-                    {estimateInfo.timeline?.[day] && (
+                    {timelineByDay[day] && (
                       <FinalTimelineSection>
-                        <FinalTimelineContent>{estimateInfo.timeline[day]}</FinalTimelineContent>
+                        <FinalTimelineContent>{timelineByDay[day]}</FinalTimelineContent>
                       </FinalTimelineSection>
                     )}
 
@@ -781,4 +877,84 @@ const FinalCommentBox = styled.div`
       margin-bottom: 0;
     }
   }
+`;
+
+const CommonServicesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+`;
+
+const CommonServiceCard = styled.div`
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+`;
+
+const CommonServiceHeader = styled.div`
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f3f4f6;
+`;
+
+const CommonServiceName = styled.h4`
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+`;
+
+const DayBadgesContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+`;
+
+const DayBadge = styled.span`
+  display: inline-block;
+  background: #f3f4f6;
+  color: #374151;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.25rem 0.75rem;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+`;
+
+const CommonServiceDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+
+const CommonServiceRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const CommonServiceLabel = styled.span`
+  font-size: 0.9rem;
+  color: #6b7280;
+  font-weight: 500;
+`;
+
+const CommonServiceValue = styled.span`
+  font-size: 0.95rem;
+  color: #1f2937;
+  font-weight: 600;
+`;
+
+const CommonServiceTotal = styled.span`
+  font-size: 1.1rem;
+  color: #651d2a;
+  font-weight: 700;
 `;

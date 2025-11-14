@@ -38,43 +38,120 @@ export const draftToHtml = (rawContent: string | any): string => {
 
       // Apply inline styles
       if (block.inlineStyleRanges && block.inlineStyleRanges.length > 0) {
-        const ranges = [...block.inlineStyleRanges].sort((a, b) => a.offset - b.offset);
-        let styledText = '';
-        let lastIndex = 0;
+        // Create array of characters with their styles
+        interface CharStyle {
+          char: string;
+          bold: boolean;
+          italic: boolean;
+          underline: boolean;
+          code: boolean;
+          color?: string;
+          bgcolor?: string;
+          fontSize?: string;
+          fontFamily?: string;
+        }
 
-        ranges.forEach((range) => {
-          // Add text before this range
-          styledText += text.substring(lastIndex, range.offset);
+        const chars: CharStyle[] = [];
+        for (let i = 0; i < text.length; i++) {
+          chars.push({
+            char: text[i],
+            bold: false,
+            italic: false,
+            underline: false,
+            code: false
+          });
+        }
 
-          // Add styled text
-          const rangeText = text.substring(range.offset, range.offset + range.length);
-          let wrappedText = rangeText;
+        // Apply all styles to each character
+        block.inlineStyleRanges.forEach((range: any) => {
+          for (let i = range.offset; i < range.offset + range.length && i < chars.length; i++) {
+            const style = range.style;
 
-          switch (range.style) {
-            case 'BOLD':
-              wrappedText = `<strong>${rangeText}</strong>`;
-              break;
-            case 'ITALIC':
-              wrappedText = `<em>${rangeText}</em>`;
-              break;
-            case 'UNDERLINE':
-              wrappedText = `<u>${rangeText}</u>`;
-              break;
-            case 'CODE':
-              wrappedText = `<code>${rangeText}</code>`;
-              break;
-            default:
-              wrappedText = rangeText;
+            if (style === 'BOLD') {
+              chars[i].bold = true;
+            } else if (style === 'ITALIC') {
+              chars[i].italic = true;
+            } else if (style === 'UNDERLINE') {
+              chars[i].underline = true;
+            } else if (style === 'CODE') {
+              chars[i].code = true;
+            } else if (style.startsWith('color-')) {
+              chars[i].color = style.replace('color-', '');
+            } else if (style.startsWith('bgcolor-')) {
+              chars[i].bgcolor = style.replace('bgcolor-', '');
+            } else if (style.startsWith('fontsize-')) {
+              const size = style.replace('fontsize-', '');
+              // Convert Draft.js font sizes to CSS
+              if (size === 'small') chars[i].fontSize = '12px';
+              else if (size === 'medium') chars[i].fontSize = '16px';
+              else if (size === 'large') chars[i].fontSize = '18px';
+              else if (size.endsWith('pt')) chars[i].fontSize = size.replace('pt', 'px');
+              else chars[i].fontSize = size;
+            } else if (style.startsWith('fontfamily-')) {
+              chars[i].fontFamily = style.replace('fontfamily-', '');
+            }
           }
-
-          styledText += wrappedText;
-          lastIndex = range.offset + range.length;
         });
 
-        // Add remaining text
-        styledText += text.substring(lastIndex);
+        // Build styled text by grouping consecutive characters with same styles
+        let styledText = '';
+        let i = 0;
+
+        while (i < chars.length) {
+          const currentChar = chars[i];
+
+          // Find consecutive characters with same styles
+          let j = i + 1;
+          while (j < chars.length &&
+                 chars[j].bold === currentChar.bold &&
+                 chars[j].italic === currentChar.italic &&
+                 chars[j].underline === currentChar.underline &&
+                 chars[j].code === currentChar.code &&
+                 chars[j].color === currentChar.color &&
+                 chars[j].bgcolor === currentChar.bgcolor &&
+                 chars[j].fontSize === currentChar.fontSize &&
+                 chars[j].fontFamily === currentChar.fontFamily) {
+            j++;
+          }
+
+          // Extract text segment
+          let segment = chars.slice(i, j).map(c => c.char).join('');
+
+          // Build inline style
+          const inlineStyles: string[] = [];
+          if (currentChar.color) {
+            inlineStyles.push(`color: ${currentChar.color}`);
+          }
+          if (currentChar.bgcolor) {
+            inlineStyles.push(`background-color: ${currentChar.bgcolor}`);
+          }
+          if (currentChar.fontSize) {
+            inlineStyles.push(`font-size: ${currentChar.fontSize}`);
+          }
+          if (currentChar.fontFamily) {
+            inlineStyles.push(`font-family: ${currentChar.fontFamily}`);
+          }
+
+          // Apply semantic tags
+          if (currentChar.bold) segment = `<strong>${segment}</strong>`;
+          if (currentChar.italic) segment = `<em>${segment}</em>`;
+          if (currentChar.underline) segment = `<u>${segment}</u>`;
+          if (currentChar.code) segment = `<code>${segment}</code>`;
+
+          // Wrap with span if inline styles exist
+          if (inlineStyles.length > 0) {
+            segment = `<span style="${inlineStyles.join('; ')}">${segment}</span>`;
+          }
+
+          styledText += segment;
+          i = j;
+        }
+
         text = styledText;
       }
+
+      // Convert newlines to <br> tags
+      text = text.replace(/\n/g, '<br>');
 
       // Wrap in appropriate HTML tag based on block type
       switch (block.type) {

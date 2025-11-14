@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { APIProvider, Map, Marker, InfoWindow } from '@vis.gl/react-google-maps';
+import React, { useState, useEffect } from 'react';
+import { APIProvider, Map, Marker, InfoWindow, useMap } from '@vis.gl/react-google-maps';
 import styled from '@emotion/styled';
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
@@ -97,10 +97,37 @@ const InfoWindowText = styled.p`
 	color: #6b7280;
 `;
 
+// Helper component to fit bounds after map loads
+const MapBoundsFitter: React.FC<{ locations: Location[] }> = ({ locations }) => {
+	const map = useMap();
+
+	useEffect(() => {
+		if (!map || !locations || locations.length === 0 || typeof window === 'undefined') return;
+
+		try {
+			// @ts-ignore - google.maps is loaded via APIProvider
+			const bounds = new window.google.maps.LatLngBounds();
+			locations.forEach((location) => {
+				bounds.extend({ lat: location.lat, lng: location.lng });
+			});
+
+			map.fitBounds(bounds);
+
+			// Add some padding to the bounds
+			const padding = { top: 50, right: 50, bottom: 50, left: 50 };
+			setTimeout(() => {
+				map.fitBounds(bounds, padding);
+			}, 100);
+		} catch (error) {
+			console.error('[MapBoundsFitter] Error fitting bounds:', error);
+		}
+	}, [map, locations]);
+
+	return null;
+};
+
 const DayMap: React.FC<DayMapProps> = ({ day, locations, center }) => {
 	const [selectedMarker, setSelectedMarker] = useState<Location | null>(null);
-
-	console.log(`[DayMap] Day ${day} - Center:`, center, 'Locations:', locations);
 
 	if (!locations || locations.length === 0) {
 		return null;
@@ -108,24 +135,17 @@ const DayMap: React.FC<DayMapProps> = ({ day, locations, center }) => {
 
 	return (
 		<div>
-			<div style={{ padding: '10px', background: '#fff3cd', border: '1px solid #ffc107', borderRadius: '4px', marginBottom: '10px', fontSize: '12px' }}>
-				<strong>DEBUG - Day {day} Map Center:</strong> lat={center.lat}, lng={center.lng}<br/>
-				<strong>Location Count:</strong> {locations.length}<br/>
-				{locations.map((loc, idx) => (
-					<div key={idx}>
-						#{idx + 1}: {loc.name} (lat={loc.lat}, lng={loc.lng})
-					</div>
-				))}
-			</div>
-			<MapContainer>
-				<APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
+			<MapContainer key={`map-container-${day}`}>
+				<APIProvider apiKey={GOOGLE_MAPS_API_KEY} key={`api-provider-${day}`}>
 					<Map
-						center={center}
-						zoom={13}
+						key={`map-${day}-${center.lat}-${center.lng}`}
+						defaultCenter={center}
+						defaultZoom={13}
 						mapId={`day-${day}-map`}
 						gestureHandling="greedy"
 						disableDefaultUI={false}
 					>
+						<MapBoundsFitter locations={locations} />
 						{locations.map((location, index) => (
 							<Marker
 								key={`${location.itemId}-${index}`}
