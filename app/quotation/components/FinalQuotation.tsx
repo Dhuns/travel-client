@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import styled from '@emotion/styled';
 import { QuotationResponse, EstimateDetail } from '@/src/shared/apis/estimate';
 import { getItemImg } from '@/src/shared/utils/base';
+import { draftToHtml } from '@/src/shared/utils/draftjs';
 import dayjs from 'dayjs';
 import DayMap from '@/src/components/Chat/DayMap';
 
@@ -198,7 +199,7 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
           {estimateInfo.comment && (
             <FinalSection>
               <FinalSectionTitle>Additional Information</FinalSectionTitle>
-              <FinalCommentBox dangerouslySetInnerHTML={{ __html: estimateInfo.comment }} />
+              <FinalCommentBox dangerouslySetInnerHTML={{ __html: draftToHtml(estimateInfo.comment) }} />
             </FinalSection>
           )}
 
@@ -571,7 +572,9 @@ const FinalCommentBox = styled.div`
   font-size: 0.95rem;
   color: #4b5563;
   line-height: 1.7;
+  word-wrap: break-word;
 
+  /* Paragraphs */
   p {
     margin: 0 0 1rem 0;
 
@@ -580,12 +583,121 @@ const FinalCommentBox = styled.div`
     }
   }
 
+  /* Lists */
   ul, ol {
     margin: 0 0 1rem 0;
     padding-left: 1.5rem;
 
     &:last-child {
       margin: 0;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  /* Text formatting */
+  strong, b {
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  em, i {
+    font-style: italic;
+  }
+
+  u {
+    text-decoration: underline;
+  }
+
+  /* Headings */
+  h1, h2, h3, h4, h5, h6 {
+    margin: 1.5rem 0 1rem 0;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.3;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.3rem; }
+  h3 { font-size: 1.15rem; }
+  h4 { font-size: 1.05rem; }
+  h5 { font-size: 1rem; }
+  h6 { font-size: 0.95rem; }
+
+  /* Blockquotes */
+  blockquote {
+    margin: 1rem 0;
+    padding-left: 1rem;
+    border-left: 4px solid #651d2a;
+    color: #6b7280;
+    font-style: italic;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  /* Links */
+  a {
+    color: #651d2a;
+    text-decoration: underline;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #8b3a47;
+    }
+  }
+
+  /* Code */
+  code {
+    padding: 0.2rem 0.4rem;
+    background: #e5e7eb;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+  }
+
+  pre {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #1f2937;
+    color: #f3f4f6;
+    border-radius: 8px;
+    overflow-x: auto;
+
+    code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  /* Horizontal rule */
+  hr {
+    margin: 1.5rem 0;
+    border: none;
+    border-top: 2px solid #e5e7eb;
+
+    &:last-child {
+      margin-bottom: 0;
     }
   }
 `;
