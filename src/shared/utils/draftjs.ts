@@ -5,11 +5,32 @@
  */
 export const draftToHtml = (rawContent: string | any): string => {
   try {
-    // Parse if it's a string
-    const content = typeof rawContent === 'string' ? JSON.parse(rawContent) : rawContent;
-
-    if (!content || !content.blocks) {
+    // If rawContent is empty or null, return empty string
+    if (!rawContent) {
       return '';
+    }
+
+    // If it's a string, check if it's JSON before parsing
+    let content = rawContent;
+    if (typeof rawContent === 'string') {
+      const trimmed = rawContent.trim();
+      // If it looks like JSON (starts with { or [), try to parse it
+      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+        try {
+          content = JSON.parse(trimmed);
+        } catch (parseError) {
+          // If parsing fails, treat as plain text
+          return `<p>${rawContent}</p>`;
+        }
+      } else {
+        // Plain text, return as-is wrapped in paragraph
+        return `<p>${rawContent}</p>`;
+      }
+    }
+
+    // Check if it's valid Draft.js content
+    if (!content || !content.blocks) {
+      return typeof rawContent === 'string' ? `<p>${rawContent}</p>` : '';
     }
 
     const htmlBlocks = content.blocks.map((block: any) => {

@@ -73,8 +73,10 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
       setLoadingMap(true);
       try {
         const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/batch/${batchInfo.id}/map-data`;
+        console.log('[DraftQuotation] Fetching map data from:', apiUrl);
         const response = await fetch(apiUrl);
         const data = await response.json();
+        console.log('[DraftQuotation] Map data received:', JSON.stringify(data, null, 2));
         setMapData(data);
       } catch (err) {
         console.error("[DraftQuotation] Failed to load map data:", err);
@@ -245,6 +247,14 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
                         ))}
                       </RouteSummaryList>
                     </RouteSummary>
+
+                    {/* Timeline Section */}
+                    {estimateInfo.timeline?.[day] && (
+                      <TimelineSection>
+                        <TimelineContent>{estimateInfo.timeline[day]}</TimelineContent>
+                      </TimelineSection>
+                    )}
+
                     {/* Map Section */}
                     {!loadingMap && mapData && mapData.mapData && (
                       <>

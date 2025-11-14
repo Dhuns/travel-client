@@ -100,12 +100,23 @@ const InfoWindowText = styled.p`
 const DayMap: React.FC<DayMapProps> = ({ day, locations, center }) => {
 	const [selectedMarker, setSelectedMarker] = useState<Location | null>(null);
 
+	console.log(`[DayMap] Day ${day} - Center:`, center, 'Locations:', locations);
+
 	if (!locations || locations.length === 0) {
 		return null;
 	}
 
 	return (
 		<div>
+			<div style={{ padding: '10px', background: '#fff3cd', border: '1px solid #ffc107', borderRadius: '4px', marginBottom: '10px', fontSize: '12px' }}>
+				<strong>DEBUG - Day {day} Map Center:</strong> lat={center.lat}, lng={center.lng}<br/>
+				<strong>Location Count:</strong> {locations.length}<br/>
+				{locations.map((loc, idx) => (
+					<div key={idx}>
+						#{idx + 1}: {loc.name} (lat={loc.lat}, lng={loc.lng})
+					</div>
+				))}
+			</div>
 			<MapContainer>
 				<APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
 					<Map
