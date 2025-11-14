@@ -5,6 +5,10 @@
  */
 export const getItemImg = (imgName?: string): string => {
   if (!imgName) return '';
+  // If already a full URL, return as-is
+  if (imgName.startsWith('http://') || imgName.startsWith('https://')) {
+    return imgName;
+  }
   return `${process.env.NEXT_PUBLIC_ASSET_URL}/items/${imgName}`;
 };
 
@@ -15,6 +19,10 @@ export const getItemImg = (imgName?: string): string => {
  */
 export const getPackageImg = (imgName?: string): string => {
   if (!imgName) return '';
+  // If already a full URL, return as-is
+  if (imgName.startsWith('http://') || imgName.startsWith('https://')) {
+    return imgName;
+  }
   return `${process.env.NEXT_PUBLIC_ASSET_URL}/packages/${imgName}`;
 };
 
