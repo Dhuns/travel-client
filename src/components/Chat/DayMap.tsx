@@ -67,7 +67,7 @@ const LocationNumber = styled.span`
 	width: 22px;
 	height: 22px;
 	border-radius: 50%;
-	background-color: #007aff;
+	background-color: #651d2a;
 	color: white;
 	font-size: 11px;
 	font-weight: 600;
@@ -106,20 +106,6 @@ const DayMap: React.FC<DayMapProps> = ({ day, locations, center }) => {
 
 	return (
 		<div>
-			<DayTitle>
-				Day {day} Route
-				<LocationCount>({locations.length} location{locations.length > 1 ? 's' : ''})</LocationCount>
-			</DayTitle>
-
-			<LocationList>
-				{locations.map((location, index) => (
-					<LocationItem key={`${location.itemId}-${index}`}>
-						<LocationNumber>{index + 1}</LocationNumber>
-						<LocationName>{location.name}</LocationName>
-					</LocationItem>
-				))}
-			</LocationList>
-
 			<MapContainer>
 				<APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
 					<Map

@@ -1,5 +1,4 @@
 import React, { FC } from "react";
-import { useRouter } from "next/navigation";
 import { EstimatePreview } from "@shared/types/chat";
 import styled from "@emotion/styled";
 import CryptoJS from 'crypto-js';
@@ -7,12 +6,12 @@ import CryptoJS from 'crypto-js';
 interface Props {
   estimate: EstimatePreview;
   batchId?: number;
+  onViewQuote?: (hash: string) => void;
 }
 
-const EstimateCard: FC<Props> = ({ estimate, batchId }) => {
+const EstimateCard: FC<Props> = ({ estimate, batchId, onViewQuote }) => {
   const { title, totalAmount, adults, children, infants, items } = estimate;
   const totalPeople = adults + children + infants;
-  const router = useRouter();
 
   const handleViewDetails = () => {
     if (!batchId) {
@@ -31,14 +30,16 @@ const EstimateCard: FC<Props> = ({ estimate, batchId }) => {
     const hash = cipher.toString();
     const encodedHash = encodeURIComponent(hash);
 
-    console.log('[EstimateCard] Navigating to quotation:', {
+    console.log('[EstimateCard] Opening quotation modal:', {
       batchId,
       hash,
-      encodedHash,
-      url: `/quotation/${encodedHash}`
+      encodedHash
     });
 
-    router.push(`/quotation/${encodedHash}`);
+    // Open modal instead of navigating
+    if (onViewQuote) {
+      onViewQuote(encodedHash);
+    }
   };
 
   return (
@@ -88,7 +89,7 @@ const Card = styled.div`
 
 const Header = styled.div`
   padding: 16px 20px;
-  background-color: #007aff;
+  background-color: #651d2a;
   color: white;
   display: flex;
   justify-content: space-between;
@@ -158,7 +159,7 @@ const Footer = styled.div`
 `;
 
 const DetailsButton = styled.button`
-  background-color: #007aff;
+  background-color: #651d2a;
   color: white;
   border: none;
   padding: 10px 24px;
@@ -170,6 +171,6 @@ const DetailsButton = styled.button`
   width: 100%;
 
   &:hover {
-    background-color: #005bb5;
+    background-color: #4a1520;
   }
 `;

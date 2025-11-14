@@ -1,18 +1,19 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import styled from '@emotion/styled';
-import { QuotationResponse, EstimateDetail } from '@/src/shared/apis/estimate';
-import { getItemImg } from '@/src/shared/utils/base';
-import dayjs from 'dayjs';
-import DayMap from '@/src/components/Chat/DayMap';
+import { EstimateDetail, QuotationResponse } from "@/src/shared/apis/estimate";
+import React, { useEffect, useState } from "react";
+
+import DayMap from "@/src/components/Chat/DayMap";
+import dayjs from "dayjs";
+import { getItemImg } from "@/src/shared/utils/base";
+import styled from "@emotion/styled";
 
 // Korean to English type mapping
 const typeMapping: Record<string, string> = {
-  '여행지': 'Place',
-  '이동수단': 'Transportation',
-  '컨텐츠': 'Activity',
-  '숙박': 'Accommodation',
+  여행지: "Place",
+  이동수단: "Transportation",
+  컨텐츠: "Activity",
+  숙박: "Accommodation",
 };
 
 interface DraftQuotationProps {
@@ -25,10 +26,15 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
   const [loadingMap, setLoadingMap] = useState(false);
 
   // Calculate totals
-  const totalPrice = estimateDetails.reduce((sum, detail) => sum + (Number(detail.price) || 0), 0);
-  const totalTravelers = batchInfo.adultsCount + batchInfo.childrenCount + batchInfo.infantsCount;
+  const totalPrice = estimateDetails.reduce(
+    (sum, detail) => sum + (Number(detail.price) || 0),
+    0
+  );
+  const totalTravelers =
+    batchInfo.adultsCount + batchInfo.childrenCount + batchInfo.infantsCount;
   const pricePerPerson = totalTravelers > 0 ? totalPrice / totalTravelers : 0;
-  const tripDays = dayjs(batchInfo.endDate).diff(dayjs(batchInfo.startDate), 'day') + 1;
+  const tripDays =
+    dayjs(batchInfo.endDate).diff(dayjs(batchInfo.startDate), "day") + 1;
 
   // Group items by day
   const itemsByDay = estimateDetails.reduce((acc, detail) => {
@@ -39,6 +45,24 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
     acc[day].push(detail);
     return acc;
   }, {} as Record<number, EstimateDetail[]>);
+
+  // Initialize all days as collapsed
+  const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>(
+    () => {
+      return Object.keys(itemsByDay).reduce((acc, day) => {
+        acc[day] = false;
+        return acc;
+      }, {} as Record<string, boolean>);
+    }
+  );
+
+  // Toggle day expansion
+  const toggleDay = (day: string) => {
+    setExpandedDays((prev) => ({
+      ...prev,
+      [day]: !prev[day],
+    }));
+  };
 
   // Fetch map data
   useEffect(() => {
@@ -52,7 +76,7 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
         const data = await response.json();
         setMapData(data);
       } catch (err) {
-        console.error('[DraftQuotation] Failed to load map data:', err);
+        console.error("[DraftQuotation] Failed to load map data:", err);
       } finally {
         setLoadingMap(false);
       }
@@ -64,8 +88,10 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
   return (
     <Container>
       <Header>
-        <Title>Draft Quotation - {batchInfo.title || 'Travel Plan'}</Title>
-        <ValidUntil>Valid until: {dayjs(batchInfo.validDate).format('YYYY-MM-DD')}</ValidUntil>
+        <Title>Draft Quotation - {batchInfo.title || "Travel Plan"}</Title>
+        <ValidUntil>
+          Valid until: {dayjs(batchInfo.validDate).format("YYYY-MM-DD")}
+        </ValidUntil>
       </Header>
 
       <Section>
@@ -74,17 +100,19 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
           <InfoItem>
             <Label>Travel Period</Label>
             <Value>
-              {dayjs(batchInfo.startDate).format('YYYY-MM-DD')} ~ {dayjs(batchInfo.endDate).format('YYYY-MM-DD')}
-              {' '}({tripDays} days)
+              {dayjs(batchInfo.startDate).format("YYYY-MM-DD")} ~{" "}
+              {dayjs(batchInfo.endDate).format("YYYY-MM-DD")} ({tripDays} days)
             </Value>
           </InfoItem>
           <InfoItem>
             <Label>Travelers</Label>
             <Value>
               {batchInfo.adultsCount > 0 && `Adults: ${batchInfo.adultsCount}`}
-              {batchInfo.childrenCount > 0 && `, Children: ${batchInfo.childrenCount}`}
-              {batchInfo.infantsCount > 0 && `, Infants: ${batchInfo.infantsCount}`}
-              {' '}(Total: {totalTravelers})
+              {batchInfo.childrenCount > 0 &&
+                `, Children: ${batchInfo.childrenCount}`}
+              {batchInfo.infantsCount > 0 &&
+                `, Infants: ${batchInfo.infantsCount}`}{" "}
+              (Total: {totalTravelers})
             </Value>
           </InfoItem>
           {batchInfo.recipient && (
@@ -103,70 +131,134 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
           .map((day) => {
             const dayNumber = Number(day);
             const items = itemsByDay[dayNumber];
-            const dayDate = dayjs(batchInfo.startDate).add(dayNumber - 1, 'day');
+            const dayDate = dayjs(batchInfo.startDate).add(
+              dayNumber - 1,
+              "day"
+            );
+
+            const isExpanded = expandedDays[day];
 
             return (
               <DaySection key={day}>
-                <DayHeader>
-                  <DayTitle>Day {day}</DayTitle>
-                  <DayDate>{dayDate.format('YYYY-MM-DD (ddd)')}</DayDate>
+                <DayHeader onClick={() => toggleDay(day)}>
+                  <DayHeaderLeft>
+                    <ToggleIcon isExpanded={isExpanded}>
+                      {isExpanded ? "▼" : "▶"}
+                    </ToggleIcon>
+                    <DayTitle>Day {day}</DayTitle>
+                  </DayHeaderLeft>
+                  <DayDate>{dayDate.format("YYYY-MM-DD (ddd)")}</DayDate>
                 </DayHeader>
-                <ItemList>
-                  {items.map((detail) => {
-                    const thumbnail = detail.item.files?.find((f) => f.type === '썸네일');
-                    const showPrice = !batchInfo.hidePrice;
 
-                    return (
-                      <ItemCard key={detail.id}>
-                        {thumbnail && (
-                          <ItemImage src={getItemImg(thumbnail.itemSrc)} alt={detail.item.nameEng} />
-                        )}
-                        <ItemContent>
-                          <ItemHeader>
-                            <ItemType>{typeMapping[detail.item.type] || detail.item.type}</ItemType>
-                            <ItemName>{detail.item.nameEng}</ItemName>
-                          </ItemHeader>
-                          {detail.item.description && (
-                            <ItemDescription>{detail.item.description}</ItemDescription>
-                          )}
-                          <ItemFooter>
-                            <ItemQuantity>
-                              Quantity: {detail.quantity}
-                              {showPrice && detail.originPrice && (
-                                <span style={{ marginLeft: '8px', color: '#666' }}>
-                                  @ ${Number(detail.originPrice).toLocaleString()}
-                                </span>
-                              )}
-                            </ItemQuantity>
-                            {showPrice && (
-                              <ItemPrice>${Number(detail.price).toLocaleString()}</ItemPrice>
-                            )}
-                          </ItemFooter>
-                        </ItemContent>
-                      </ItemCard>
-                    );
-                  })}
-                </ItemList>
-
-                {estimateInfo.timeline?.[day] && (
-                  <TimelineSection>
-                    <TimelineContent>{estimateInfo.timeline[day]}</TimelineContent>
-                  </TimelineSection>
-                )}
-
-                {/* Map Section */}
-                {!loadingMap && mapData && mapData.mapData && (
+                {isExpanded && (
                   <>
-                    {mapData.mapData
-                      .filter((dayData: any) => dayData.day === dayNumber)
-                      .map((dayData: any) => (
-                        <DayMap
-                          key={dayData.day}
-                          day={dayData.day}
-                          locations={dayData.locations}
-                          center={dayData.center}
-                        />
-                      ))}
+                    <ItemList>
+                      {items.map((detail) => {
+                        const thumbnail = detail.item.files?.find(
+                          (f) => f.type === "썸네일"
+                        );
+                        const showPrice = !batchInfo.hidePrice;
+
+                        // Fallback image based on item type
+                        const getFallbackImage = () => {
+                          const type = detail.item.type;
+                          if (type === "여행지" || type === "Place")
+                            return "/beautiful-korean-traditional-palace-with-tourists-.jpg";
+                          if (type === "숙박" || type === "Accommodation")
+                            return "/beautiful-korean-traditional-hanbok-dress.jpg";
+                          if (type === "이동수단" || type === "Transportation")
+                            return "/busan-coastal-temple.jpg";
+                          if (type === "컨텐츠" || type === "Activity")
+                            return "/korean-skincare-beauty-products-set.jpg";
+                          return "/beautiful-korean-traditional-palace-with-tourists-.jpg";
+                        };
+
+                        const imageSrc = thumbnail
+                          ? getItemImg(thumbnail.itemSrc)
+                          : getFallbackImage();
+
+                        return (
+                          <ItemCard key={detail.id}>
+                            <ItemImage
+                              src={imageSrc}
+                              alt={detail.item.nameEng}
+                              onError={(e) => {
+                                e.currentTarget.src = getFallbackImage();
+                              }}
+                            />
+                            <ItemContent>
+                              <ItemHeader>
+                                <ItemType>
+                                  {typeMapping[detail.item.type] ||
+                                    detail.item.type}
+                                </ItemType>
+                                <ItemName>{detail.item.nameEng}</ItemName>
+                              </ItemHeader>
+                              {detail.item.description && (
+                                <ItemDescription>
+                                  {detail.item.description}
+                                </ItemDescription>
+                              )}
+                              <ItemFooter>
+                                <ItemQuantity>
+                                  Quantity: {detail.quantity}
+                                  {showPrice && detail.originPrice && (
+                                    <span
+                                      style={{
+                                        marginLeft: "8px",
+                                        color: "#666",
+                                      }}
+                                    >
+                                      @ $
+                                      {Number(
+                                        detail.originPrice
+                                      ).toLocaleString()}
+                                    </span>
+                                  )}
+                                </ItemQuantity>
+                                {showPrice && (
+                                  <ItemPrice>
+                                    ${Number(detail.price).toLocaleString()}
+                                  </ItemPrice>
+                                )}
+                              </ItemFooter>
+                            </ItemContent>
+                          </ItemCard>
+                        );
+                      })}
+                    </ItemList>
+
+                    {/* Route Summary */}
+                    <RouteSummary>
+                      <RouteSummaryTitle>
+                        Day {day} Route Summary ({items.length} locations)
+                      </RouteSummaryTitle>
+                      <RouteSummaryList>
+                        {items.map((detail, index) => (
+                          <RouteSummaryItem key={detail.id}>
+                            <RouteSummaryNumber>{index + 1}</RouteSummaryNumber>
+                            <RouteSummaryName>
+                              {detail.item.nameEng}
+                            </RouteSummaryName>
+                          </RouteSummaryItem>
+                        ))}
+                      </RouteSummaryList>
+                    </RouteSummary>
+                    {/* Map Section */}
+                    {!loadingMap && mapData && mapData.mapData && (
+                      <>
+                        {mapData.mapData
+                          .filter((dayData: any) => dayData.day === dayNumber)
+                          .map((dayData: any) => (
+                            <DayMap
+                              key={dayData.day}
+                              day={dayData.day}
+                              locations={dayData.locations}
+                              center={dayData.center}
+                            />
+                          ))}
+                      </>
+                    )}
                   </>
                 )}
               </DaySection>
@@ -183,7 +275,9 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
           {totalTravelers > 0 && (
             <PerPersonRow>
               <PerPersonLabel>Per Person</PerPersonLabel>
-              <PerPersonAmount>${Math.round(pricePerPerson).toLocaleString()}</PerPersonAmount>
+              <PerPersonAmount>
+                ${Math.round(pricePerPerson).toLocaleString()}
+              </PerPersonAmount>
             </PerPersonRow>
           )}
         </TotalSection>
@@ -192,11 +286,15 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
       {estimateInfo.comment && (
         <Section>
           <SectionTitle>Additional Information</SectionTitle>
-          <CommentBox dangerouslySetInnerHTML={{ __html: estimateInfo.comment }} />
+          <CommentBox
+            dangerouslySetInnerHTML={{ __html: estimateInfo.comment }}
+          />
         </Section>
       )}
 
-      {(batchInfo.email || batchInfo.officeNumber || batchInfo.emergencyNumber) && (
+      {(batchInfo.email ||
+        batchInfo.officeNumber ||
+        batchInfo.emergencyNumber) && (
         <Section>
           <SectionTitle>Contact Information</SectionTitle>
           <InfoGrid>
@@ -331,8 +429,28 @@ const DayHeader = styled.div`
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
-  padding-bottom: 8px;
+  padding: 12px;
   border-bottom: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+
+  &:hover {
+    background-color: #f9fafb;
+  }
+`;
+
+const DayHeaderLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+
+const ToggleIcon = styled.span<{ isExpanded: boolean }>`
+  font-size: 14px;
+  color: #651d2a;
+  transition: transform 0.2s ease;
+  user-select: none;
 `;
 
 const DayTitle = styled.h3`
@@ -340,6 +458,7 @@ const DayTitle = styled.h3`
   font-weight: 600;
   color: #1a1a1a;
   margin: 0;
+  user-select: none;
 `;
 
 const DayDate = styled.span`
@@ -355,23 +474,27 @@ const ItemList = styled.div`
 
 const ItemCard = styled.div`
   display: flex;
-  gap: 16px;
-  padding: 16px;
-  background: #f9fafb;
+  gap: 0;
+  padding: 0;
+  background: white;
   border-radius: 8px;
   border: 1px solid #e5e7eb;
-  transition: all 0.2s ease;
+  overflow: hidden;
+  transition: all 0.3s ease;
 
   &:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+    h4 {
+      color: #651d2a;
+    }
   }
 `;
 
 const ItemImage = styled.img`
-  width: 120px;
-  height: 120px;
+  width: 280px;
+  height: 200px;
   object-fit: cover;
-  border-radius: 6px;
   flex-shrink: 0;
 `;
 
@@ -380,6 +503,7 @@ const ItemContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding: 20px 24px;
 `;
 
 const ItemHeader = styled.div`
@@ -447,8 +571,58 @@ const TimelineContent = styled.p`
   line-height: 1.6;
 `;
 
+const RouteSummary = styled.div`
+  margin-top: 24px;
+  padding: 20px;
+  background: rgba(101, 29, 42, 0.05);
+  border: 1px solid rgba(101, 29, 42, 0.2);
+  border-radius: 8px;
+`;
+
+const RouteSummaryTitle = styled.h3`
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const RouteSummaryList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const RouteSummaryItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+`;
+
+const RouteSummaryNumber = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #651d2a;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+`;
+
+const RouteSummaryName = styled.span`
+  color: #1a1a1a;
+  font-weight: 500;
+`;
+
 const TotalSection = styled.div`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
   padding: 24px 32px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -510,7 +684,8 @@ const CommentBox = styled.div`
     }
   }
 
-  ul, ol {
+  ul,
+  ol {
     margin: 0 0 12px 0;
     padding-left: 24px;
 
