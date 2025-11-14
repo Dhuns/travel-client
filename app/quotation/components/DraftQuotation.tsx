@@ -64,11 +64,16 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
   // Separate common services (transportation and contents) from day-specific items
   const commonServiceTypes = ['이동수단', '컨텐츠'];
 
-  const daySpecificDetails = estimateDetails.filter(
+  // Apply onlyPlace filter if enabled
+  const filteredDetails = batchInfo.onlyPlace
+    ? estimateDetails.filter(detail => detail.item.type === '여행지')
+    : estimateDetails;
+
+  const daySpecificDetails = filteredDetails.filter(
     detail => !commonServiceTypes.includes(detail.item.type) && detail.days !== 0
   );
 
-  const commonServices = estimateDetails.filter(
+  const commonServices = filteredDetails.filter(
     detail => commonServiceTypes.includes(detail.item.type) && detail.days !== 0
   );
 
