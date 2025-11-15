@@ -38,9 +38,9 @@ export default function Footer() {
             </div>
             <ul className="space-y-2">
               <li>
-                <Link href="/about" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
+                <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
                   About us
-                </Link>
+                </a>
               </li>
               <li>
                 <Link href="/tours" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
@@ -48,12 +48,12 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/insights"
+                <a
+                  href="#"
                   className="text-gray-300 hover:text-white transition-colors duration-300 text-sm"
                 >
                   Travel Insight
-                </Link>
+                </a>
               </li>
               <li>
                 <Link href="/tours" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
@@ -61,9 +61,9 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
+                <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
                   How it Works
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
@@ -76,35 +76,35 @@ export default function Footer() {
             </div>
             <ul className="space-y-2">
               <li>
-                <Link
-                  href="/contact"
+                <a
+                  href="#"
                   className="text-gray-300 hover:text-white transition-colors duration-300 text-sm"
                 >
                   Contact us
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="/faq" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
+                <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
                   FAQ
-                </Link>
+                </a>
               </li>
               <li>
-                <Link
-                  href="/privacy"
+                <a
+                  href="#"
                   className="text-gray-300 hover:text-white transition-colors duration-300 text-sm"
                 >
                   Privacy Policy
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="/terms" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
+                <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
                   Terms & Conditions
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="/guide" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
+                <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
                   Seoul Travel Guide
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
