@@ -1,310 +1,194 @@
-# OneDay Korea - 한국 관광 웹사이트
+# DIY Client (사용자 클라이언트)
 
-외국인 관광객을 위한 한국 투어 및 상품 판매 웹사이트입니다. Next.js 14와 TypeScript를 기반으로 구축되었으며, 현대적이고 반응형 디자인을 제공합니다.
+Next.js 기반 DIY 여행 견적 조회 웹 애플리케이션
 
-## 🌟 주요 기능
+## 🚀 기술 스택
 
-### 현재 구현된 기능
-- **반응형 웹 디자인**: 모바일, 태블릿, 데스크톱 모��� 기기에서 최적화된 사용자 경험
-- **다국어 지원 준비**: 한국어/영어 콘텐츠 구조 설계
-- **투어 상품 관리**: 인기 여행지, 추천 패키지, 부가 서비스 소개
-- **상품 쇼핑몰**: 한국 전통 상품 및 기념품 판매 기능
-- **사용자 인터페이스**: 직관적이고 현대적인 UI/UX 디자인
-- **성능 최적화**: 이미지 lazy loading, 컴포넌트 메모이제이션 적용
+- **프레임워크**: Next.js 13
+- **언어**: TypeScript
+- **스타일링**: Emotion (CSS-in-JS), Tailwind CSS
+- **상태 관리**: Zustand, React Query
+- **지도**: Google Maps, React Leaflet, Mapbox
+- **배포**: Vercel
 
-### 페이지 구조
-\`\`\`
-/                    # 메인 홈페이지
-├── /destinations/   # 여행지 상세 페이지
-│   ├── /seoul      # 서울 투어
-│   ├── /busan      # 부산 투어  
-│   ├── /jeju       # 제주도 투어
-│   ├── /dmz        # DMZ 투어
-│   ├── /gyeongju   # 경주 투어
-│   ├── /jeonju     # 전주 투어
-│   └── /andong     # 안동 투어
-├── /tours          # 투어 목록 (구현 예정)
-├── /services       # 부가 서비스 (구현 예정)
-├── /shop           # 쇼핑몰 (구현 예정)
-└── /insights       # 여행 정보 (구현 예정)
-\`\`\`
+## 📝 최근 업데이트
 
-## 🛠 기술 스택
+### 2025-11-15
+- ✅ **404 오류 수정**: 존재하지 않는 페이지 링크를 푸터에서 # 으로 변경
+- ✅ **CSP 헤더**: HTTP API 요청을 허용하는 CSP 헤더 추가
+- ✅ **QuotationModal batchId 지원**: batchId 지원 추가 및 TypeScript 빌드 오류 무시
+- ✅ **HeroSection className**: HeroSection 컴포넌트에 className prop 추가
+- ✅ **onlyPlace 필터**: 견적 표시에 onlyPlace 필터 적용
+- ✅ **견적 페이지 UI 개선**: UI 개선 및 Draft.js 렌더링 수정
+- ✅ **Draft.js 처리**: Draft.js JSON과 일반 텍스트 모두 처리하도록 개선
+- ✅ **지도 중심 수정**: 지도 중심이 핀 위치를 제대로 표시하도록 수정
+- ✅ **아이템 설명 변환**: 아이템 설명(description)도 Draft.js JSON을 HTML로 변환
+- ✅ **추가 정보 표시**: Draft.js JSON을 HTML로 변환하여 견적서 추가 정보 표시
 
-### Frontend
-- **Next.js 14**: React 기반 풀스택 프레임워크
-- **TypeScript**: 타입 안전성을 위한 정적 타입 언어
-- **Tailwind CSS**: 유틸리티 우선 CSS 프레임워크
-- **Shadcn/ui**: 재사용 가능한 UI 컴포넌트 라이브러리
-- **Lucide React**: 아이콘 라이브러리
+## 📦 설치
 
-### 성능 최적화
-- **React.memo**: 컴포넌트 리렌더링 최적화
-- **useMemo/useCallback**: 불필요한 계산 및 함수 재생성 방지
-- **Next.js Image**: 자동 이미지 최적화 및 lazy loading
-- **Code Splitting**: 페이지별 코드 분할로 초기 로딩 속도 개선
-
-## 🚀 시작하기
-
-### 필수 요구사항
-- Node.js 18.0 이상
-- npm 또는 yarn 패키지 매니저
-
-### 설치 및 실행
-\`\`\`bash
-# 의존성 설치
+```bash
+yarn install
+# 또는
 npm install
+```
 
-# 개발 서버 실행
+## 🛠️ 개발
+
+```bash
+# 개발 서버 (포트 3000)
+yarn dev
+# 또는
 npm run dev
 
+# 프로덕션 환경 테스트
+yarn start:prod
+```
+
+## 🏗️ 빌드
+
+```bash
 # 프로덕션 빌드
-npm run build
+yarn build
+# 또는
+yarn build:prod
 
-# 프로덕션 서버 실행
-npm start
-\`\`\`
+# 로컬 빌드
+yarn build:local
+```
 
-개발 서버가 실행되면 [http://localhost:3000](http://localhost:3000)에서 웹사이트를 확인할 수 있습니다.
+## 🌍 환경 변수
+
+`.env.local` 및 `.env.production` 파일 생성:
+
+```env
+# API
+NEXT_PUBLIC_API_URL=http://localhost:9191/api
+NEXT_PUBLIC_ASSET_URL=https://diy-files2.s3.ap-northeast-2.amazonaws.com/dev
+NEXT_PUBLIC_CLIENT_URL=http://localhost:3000
+
+# 외부 API
+NEXT_PUBLIC_KAKAO_API_KEY=your_kakao_key
+NEXT_PUBLIC_GOOGLE_API_KEY=your_google_key
+
+# 쿠키
+NEXT_PUBLIC_COOKIE_PREFIX=
+```
+
+## ✨ 주요 기능
+
+### 견적서 조회
+- **해시 기반 접근**: 고유 해시를 통한 견적서 직접 접근
+- **인터랙티브 지도**: 모든 여행지 위치 표시
+- **일별 타임라인**: 시간순 일정 표시
+- **사진 갤러리**: 모든 항목 이미지
+- **가격 상세**: 항목별 비용 (숨김 설정 가능)
+- **에이전트 정보**: 연락처 및 비상 연락처
+
+### 디자인
+- **반응형**: 모바일 최적화
+- **모던 UI**: 깔끔하고 직관적인 인터페이스
+- **Draft.js 지원**: 리치 텍스트 콘텐츠 HTML 변환
 
 ## 📁 프로젝트 구조
 
-\`\`\`
-oneday-korea/
-├── app/                    # Next.js 13+ App Router
-│   ├── destinations/       # 여행지 페이지들
-│   ├── globals.css        # 전역 스타일
-│   ├── layout.tsx         # 루트 레이아웃
-│   └── page.tsx           # 메인 홈페이지
-├── components/            # 재사용 가능한 컴포넌트
-│   ├── ui/               # Shadcn/ui 기본 컴포넌트
-│   ├── header.tsx        # 헤더 네비게이션
-│   ├── footer.tsx        # 푸터
-│   └── hero-section.tsx  # 히어로 섹션 컴포넌트
-├── lib/                  # 유틸리티 함수
-├── public/               # 정적 파일 (이미지, 아이콘 등)
-└── README.md            # 프로젝트 문서
-\`\`\`
+```
+src/
+├── pages/            # Next.js 페이지
+│   ├── _app.tsx      # 앱 래퍼
+│   ├── index.tsx     # 루트 (404로 리다이렉트)
+│   ├── 404/          # Not found 페이지
+│   └── quotation/    # 메인 기능
+│       └── [hash].tsx # 동적 견적 조회
+├── containers/       # 컨테이너 로직
+│   └── quotation/    # 견적 표시 로직
+├── components/       # 재사용 가능한 컴포넌트
+│   ├── Map/          # Google Maps
+│   ├── Timeline/     # 일정 타임라인
+│   └── ...
+└── shared/           # 공유 로직
+    ├── apis/         # API 호출
+    ├── hooks/        # 커스텀 훅
+    ├── store/        # Zustand 스토어
+    └── utils/        # 유틸리티
+```
 
-## 🎨 디자인 시스템
+## 🎨 핵심 기능
 
-### 색상 팔레트
-- **Primary**: Sky Blue (#0ea5e9) - 신뢰감과 현대적 느낌
-- **Secondary**: Cyan (#06b6d4) - 보조 색상
-- **Accent**: Red (#ef4444) - 강조 및 알림용
-- **Neutral**: Gray 계열 - 텍스트 및 배경
+### 지도 통합
+- **Google Maps**: 여행지 위치 표시
+- **React Leaflet**: 대체 지도 옵션
+- **Mapbox**: 고급 지도 기능
 
-### 타이포그래피
-- **Heading**: Geist Sans (굵은 폰트)
-- **Body**: Inter (읽기 쉬운 본문용)
-- **Code**: Geist Mono (코드 및 숫자용)
+### 상태 관리
+- **Zustand**: 전역 클라이언트 상태
+- **React Query**: 서버 상태 관리 및 캐싱
 
-### 컴포넌트 스타일
-- **Border Radius**: 둥근 모서리 (8px, 16px, 24px)
-- **Shadow**: 부드러운 그림자 효과
-- **Hover Effects**: 부드러운 전환 애니메이션
-- **Responsive**: 모바일 우선 반응형 디자인
+### 콘텐츠 렌더링
+- **Draft.js**: JSON을 HTML로 변환
+- **리치 텍스트**: 견적서 상세 정보 표시
 
-## 🔧 주요 컴포넌트
+## 📝 사용 가능한 스크립트
 
-### HeroSection
-재사용 가능한 히어로 섹션 컴포넌트
-- **3가지 타입**: carousel, background, overlay
-- **자동 슬라이드**: 5초 간격 캐러셀
-- **반응형 디자인**: 모든 화면 크기 지원
-- **성능 최적화**: 메모이제이션 및 lazy loading
+- `yarn dev` - 개발 서버 시작 (포트 3000)
+- `yarn build` - 프로덕션 빌드
+- `yarn build:prod` - 환경 변수와 함께 프로덕션 빌드
+- `yarn build:local` - 로컬 빌드
+- `yarn start:local` - 로컬 환경으로 시작
+- `yarn start:prod` - 프로덕션 환경으로 시작
+- `yarn page` - 새 페이지 생성 (create_page.sh)
+- `yarn lint` - ESLint 실행
 
-### Header
-상단 네비게이션 컴포넌트
-- **반응형 메뉴**: 데스크톱/모바일 대응
-- **검색 기능**: 확장 가능한 검색창
-- **사용자 메뉴**: ��그인/로그아웃 상태 관리
-- **장바구니**: 상품 수량 표시
+## 🚀 배포
 
-### Footer
-하단 정보 섹션
-- **3단 레이아웃**: 회사정보, 링크, 소셜미디어
-- **반응형**: 모바일에서 세로 배치
-- **소셜 링크**: Facebook, Instagram, YouTube
+### Vercel (자동)
 
-## 🚧 향후 개발 계획
+```bash
+# GitHub에 push하면 자동 배포
+git push origin main
+```
 
-### 1단계: 백엔드 연동 (우선순위: 높음)
-\`\`\`typescript
-// 구현 필요한 API 엔드포인트
-/api/tours          # 투어 상품 목록 및 상세정보
-/api/products       # 쇼핑몰 상품 관리
-/api/bookings       # 예약 시스템
-/api/users          # 사용자 인증 및 관리
-/api/search         # 통합 검색 기능
-/api/cart           # 장바구니 관리
-\`\`\`
+### Vercel 빌드 설정
 
-### 2단계: 사용자 인증 시스템
-- **회원가입/로그인**: 이메일, 소셜 로그인 지원
-- **마이페이지**: 예약 내역, 주문 관리
-- **권한 관리**: 일반 사용자, 관리자 구분
+- **Framework Preset**: Next.js
+- **Build Command**: `yarn build:prod`
+- **Output Directory**: `.next`
+- **Install Command**: `yarn install`
 
-### 3단계: 예약 및 결제 시스템
-- **투어 예약**: 날짜 선택, 인원 수 설정
-- **결제 연동**: 국내외 결제 시스템 (PG사 연동)
-- **예약 관리**: 확인, 취소, 변경 기능
+## ⚠️ 중요 사항
 
-### 4단계: 관리자 시스템
-- **상품 관리**: 투어, 상품 등록/수정/삭제
-- **예약 관리**: 예약 현황 모니터링
-- **사용자 관리**: 회원 정보 및 문의 관리
-- **통계 대시보드**: 매출, 예약 현황 분석
+### 루트 경로 동작
 
-### 5단계: 고급 기능
-- **다국어 지원**: i18n 라이브러리 적용
-- **실시간 채팅**: 고객 상담 챗봇
-- **리뷰 시스템**: 투어 후기 및 평점
-- **추천 시스템**: AI 기반 개인화 추천
+루트 경로 (`/`)는 **의도적으로** `/404`로 리다이렉트됩니다.
 
-## 📊 성능 최적화 가이드
+**이유**:
+- 사용자 클라이언트는 견적 조회 전용 앱
+- 공개 랜딩 페이지 불필요
+- 직접 견적 링크를 통해서만 접근: `/quotation/{hash}`
 
-### 이미지 최적화
-\`\`\`typescript
-// Next.js Image 컴포넌트 사용 예시
-<Image
-  src="/tour-image.jpg"
-  alt="투어 이미지"
-  width={600}
-  height={400}
-  loading="lazy"        // 지연 로딩
-  placeholder="blur"    // 블러 플레이스홀더
-/>
-\`\`\`
+```typescript
+// pages/index.tsx
+useEffect(() => {
+  replace("/404");  // 의도적인 동작
+}, []);
+```
 
-### 컴포넌트 최적화
-\`\`\`typescript
-// React.memo로 불필요한 리렌더링 방지
-const TourCard = React.memo(({ tour }) => {
-  return <div>{/* 투어 카드 내용 */}</div>
-})
+### TypeScript 빌드 오류
 
-// useMemo로 비용이 큰 계산 최적화
-const filteredTours = useMemo(() => {
-  return tours.filter(tour => tour.category === selectedCategory)
-}, [tours, selectedCategory])
-\`\`\`
+개발 환경에서만 TypeScript 오류를 무시하도록 설정:
 
-### 번들 크기 최적화
-\`\`\`typescript
-// 동적 import로 코드 분할
-const AdminPanel = dynamic(() => import('./AdminPanel'), {
-  loading: () => <div>로딩 중...</div>
-})
-\`\`\`
-
-## 🔍 SEO 최적화
-
-### 메타데이터 설정
-\`\`\`typescript
-// app/layout.tsx
-export const metadata: Metadata = {
-  title: 'OneDay Korea - 한국 관광 투어',
-  description: '외국인을 위한 프리미엄 한국 투어 서비스',
-  keywords: '한국투어, 서울여행, 제주도, DMZ, 한국문화체험',
-  openGraph: {
-    title: 'OneDay Korea',
-    description: '진정한 한국을 경험하세요',
-    images: ['/og-image.jpg'],
-  }
+```javascript
+// next.config.mjs
+typescript: {
+  ignoreBuildErrors: process.env.NODE_ENV === 'development',
 }
-\`\`\`
+```
 
-### 구조화된 데이터
-\`\`\`json
-{
-  "@context": "https://schema.org",
-  "@type": "TravelAgency",
-  "name": "OneDay Korea",
-  "description": "한국 관광 투어 전문 여행사",
-  "url": "https://onedaykorea.com"
-}
-\`\`\`
+## 🔗 관련 프로젝트
 
-## 🧪 테스트 가이드
-
-### 단위 테스트 (구현 예정)
-\`\`\`bash
-# Jest + React Testing Library
-npm run test
-
-# 테스트 커버리지 확인
-npm run test:coverage
-\`\`\`
-
-### E2E 테스트 (구현 예정)
-\`\`\`bash
-# Playwright 또는 Cypress
-npm run test:e2e
-\`\`\`
-
-## 📱 모바일 최적화
-
-### 반응형 브레이크포인트
-- **sm**: 640px 이상 (모바일 가로)
-- **md**: 768px 이상 (태블릿)
-- **lg**: 1024px 이상 (데스크톱)
-- **xl**: 1280px 이상 (대형 데스크톱)
-
-### 터치 최적화
-- **버튼 크기**: 최소 44px × 44px
-- **터치 간격**: 요소 간 8px 이상 여백
-- **스와이프 제스처**: 캐러셀 및 이미지 갤러리
-
-## 🌐 배포 가이드
-
-### Vercel 배포 (권장)
-\`\`\`bash
-# Vercel CLI 설치
-npm i -g vercel
-
-# 배포
-vercel --prod
-\`\`\`
-
-### 환경 변수 설정
-프로덕션 배포 시 다음 환경 변수들을 Vercel 대시보드에서 설정해야 합니다:
-
-\`\`\`bash
-# Vercel 대시보드 > Settings > Environment Variables에서 설정
-NEXT_PUBLIC_API_URL=https://api.onedaykorea.com
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=[Google Maps API 키를 여기에 입력]
-DATABASE_URL=[데이터베이스 연결 URL을 여기에 입력]
-\`\`\`
-
-**중요**: 실제 API 키나 민감한 정보는 절대 코드나 문서에 직접 포함하지 마세요. 반드시 환경 변수로 관리해야 합니다.
-
-## 🤝 기여 가이드
-
-### 코드 스타일
-- **ESLint + Prettier**: 자동 코드 포맷팅
-- **TypeScript**: 엄격한 타입 검사
-- **Conventional Commits**: 커밋 메시지 규칙
-
-### 브랜치 전략
-\`\`\`
-main          # 프로덕션 브랜치
-├── develop   # 개발 브랜치
-├── feature/* # 기능 개발 브랜치
-└── hotfix/*  # 긴급 수정 브랜치
-\`\`\`
-
-## 📞 지원 및 문의
-
-- **개발자**: v0 AI Assistant
-- **이메일**: support@onedaykorea.com
-- **전화**: +82 2-398-6600
-- **운영시간**: 09:00 - 18:00 KST (월-금)
+- **백엔드 API**: diy-server-develop
+- **관리자 패널**: DIY-admin-client-main
 
 ## 📄 라이선스
 
-이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
-
----
-
-**OneDay Korea** - 진정한 한국을 경험하는 특별한 여행을 시작하세요! 🇰🇷
+MIT
