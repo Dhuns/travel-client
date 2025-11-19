@@ -49,8 +49,21 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
     return {};
   }, [estimateInfo.timeline]);
 
+  // Parse adjustment items
+  const adjustmentItems = React.useMemo(() => {
+    if (!batchInfo.adjustmentReason) return [];
+    try {
+      return JSON.parse(batchInfo.adjustmentReason);
+    } catch (e) {
+      console.error('Failed to parse adjustment reason:', e);
+      return [];
+    }
+  }, [batchInfo.adjustmentReason]);
+
   // Calculate totals
-  const totalPrice = estimateDetails.reduce((sum, detail) => sum + (Number(detail.price) || 0), 0);
+  const itemsSubtotal = estimateDetails.reduce((sum, detail) => sum + (Number(detail.price) || 0), 0);
+  const manualAdjustment = Number(batchInfo.manualAdjustment) || 0;
+  const totalPrice = itemsSubtotal + manualAdjustment;
   const totalTravelers = batchInfo.adultsCount + batchInfo.childrenCount + batchInfo.infantsCount;
   const pricePerPerson = totalTravelers > 0 ? totalPrice / totalTravelers : 0;
   const tripDays = dayjs(batchInfo.endDate).diff(dayjs(batchInfo.startDate), 'day') + 1;
@@ -285,18 +298,47 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
           </FinalSection>
 
           {!batchInfo.hidePrice && (
-            <FinalTotalSection>
-              <FinalTotalRow>
-                <FinalTotalLabel>Total Amount</FinalTotalLabel>
-                <FinalTotalAmount>${totalPrice.toLocaleString()}</FinalTotalAmount>
-              </FinalTotalRow>
-              {totalTravelers > 0 && (
-                <FinalPerPersonRow>
-                  <FinalPerPersonLabel>Per Person</FinalPerPersonLabel>
-                  <FinalPerPersonAmount>${Math.round(pricePerPerson).toLocaleString()}</FinalPerPersonAmount>
-                </FinalPerPersonRow>
-              )}
-            </FinalTotalSection>
+            <>
+              {/* Price Breakdown Section */}
+              <FinalSection>
+                <FinalSectionTitle>Price Summary</FinalSectionTitle>
+                <PriceBreakdownBox>
+                  <PriceBreakdownRow>
+                    <PriceBreakdownLabel>Items Subtotal</PriceBreakdownLabel>
+                    <PriceBreakdownValue>${itemsSubtotal.toLocaleString()}</PriceBreakdownValue>
+                  </PriceBreakdownRow>
+
+                  {adjustmentItems.length > 0 && (
+                    <>
+                      <AdjustmentsDivider />
+                      <AdjustmentsHeader>Adjustments</AdjustmentsHeader>
+                      {adjustmentItems.map((item: any, index: number) => (
+                        <AdjustmentRow key={index}>
+                          <AdjustmentDescription>{item.description || 'Adjustment'}</AdjustmentDescription>
+                          <AdjustmentAmount isPositive={item.amount >= 0}>
+                            {item.amount >= 0 ? '+' : ''}${item.amount.toLocaleString()}
+                          </AdjustmentAmount>
+                        </AdjustmentRow>
+                      ))}
+                    </>
+                  )}
+                </PriceBreakdownBox>
+              </FinalSection>
+
+              {/* Total Section */}
+              <FinalTotalSection>
+                <FinalTotalRow>
+                  <FinalTotalLabel>Total Amount</FinalTotalLabel>
+                  <FinalTotalAmount>${totalPrice.toLocaleString()}</FinalTotalAmount>
+                </FinalTotalRow>
+                {totalTravelers > 0 && (
+                  <FinalPerPersonRow>
+                    <FinalPerPersonLabel>Per Person</FinalPerPersonLabel>
+                    <FinalPerPersonAmount>${Math.round(pricePerPerson).toLocaleString()}</FinalPerPersonAmount>
+                  </FinalPerPersonRow>
+                )}
+              </FinalTotalSection>
+            </>
           )}
 
           {estimateInfo.comment && (
@@ -962,4 +1004,67 @@ const CommonServiceTotal = styled.span`
   font-size: 1.1rem;
   color: #651d2a;
   font-weight: 700;
+`;
+
+const PriceBreakdownBox = styled.div`
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+`;
+
+const PriceBreakdownRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+`;
+
+const PriceBreakdownLabel = styled.span`
+  font-size: 0.95rem;
+  color: #6b7280;
+  font-weight: 500;
+`;
+
+const PriceBreakdownValue = styled.span`
+  font-size: 1.1rem;
+  color: #1f2937;
+  font-weight: 700;
+`;
+
+const AdjustmentsDivider = styled.div`
+  border-top: 1px solid #e5e7eb;
+  margin: 12px 0;
+`;
+
+const AdjustmentsHeader = styled.div`
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const AdjustmentRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const AdjustmentDescription = styled.span`
+  font-size: 0.9rem;
+  color: #4b5563;
+`;
+
+const AdjustmentAmount = styled.span<{ isPositive: boolean }>`
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: ${props => props.isPositive ? '#059669' : '#dc2626'};
 `;
