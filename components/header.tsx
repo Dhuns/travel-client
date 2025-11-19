@@ -107,11 +107,6 @@ export default function Header() {
         label: "Multiday Tour",
         description: "Extended adventures across Korea",
       },
-      {
-        href: "/tours/package",
-        label: "Package Tour",
-        description: "All-inclusive tour packages",
-      },
     ],
     []
   );
