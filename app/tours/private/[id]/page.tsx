@@ -3,18 +3,19 @@
 import BokunWidget from "@/components/BokunWidget";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { privateTours, BOKUN_CONFIG } from "@/data/mockTours";
+import { privateToursConfig, BOKUN_CONFIG } from "@/config/tours";
 
 export default function PrivateTourDetailPage() {
   const params = useParams();
-  const tourId = params.id as string;
+  const experienceId = params.id as string; // URL의 id가 이제 bokunExperienceId
 
-  // 투어 데이터 찾기
-  const tour = privateTours.find((t) => t.id === tourId);
-  const experienceId = tour?.bokunExperienceId;
+  // 설정에 해당 experienceId가 있는지 확인
+  const tourExists = privateToursConfig.some(
+    (t) => t.bokunExperienceId === experienceId
+  );
 
-  // Experience ID가 없는 경우 에러 처리
-  if (!experienceId) {
+  // Experience ID가 설정에 없는 경우 에러 처리
+  if (!tourExists) {
     return (
       <div className="min-h-screen bg-white pt-20 flex items-center justify-center">
         <div className="text-center">

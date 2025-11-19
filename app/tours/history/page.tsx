@@ -1,5 +1,3 @@
-"use client";
-
 import {
   ArrowRight,
   BookOpen,
@@ -17,150 +15,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
-import type React from "react";
-import { historyTours, type Tour } from "@/data/mockTours";
-import { useState, useEffect } from "react";
+import { getToursFromConfig } from "@/lib/bokun";
+import { historyToursConfig } from "@/config/tours";
 
-export default function HistoryTourPage() {
-  // 투어 데이터 상태
-  const [tours, setTours] = useState<Tour[]>([]);
-  const [loading, setLoading] = useState(true);
+export const revalidate = 3600; // 1시간마다 재생성
 
-  // 폼 상태 관리
-  const [formData, setFormData] = useState({
-    name: "",
-    contactMethod: "",
-    email: "",
-    travelDate: "",
-    numberOfTravelers: "",
-  });
-
-  // HTML 태그 제거 함수
-  const stripHtmlTags = (html: string): string => {
-    return html.replace(/<[^>]*>/g, "").trim();
-  };
-
-  // HTML을 배열로 파싱하는 함수
-  const parseHtmlToArray = (html: string | string[]): string[] => {
-    if (Array.isArray(html)) return html;
-    if (!html || typeof html !== "string") return [];
-
-    // <p> 태그로 분리하여 텍스트만 추출
-    const matches = html.match(/<p[^>]*>(.*?)<\/p>/g);
-    if (!matches) return [];
-
-    return matches
-      .map((match) => {
-        const text = match.replace(/<[^>]*>/g, "").trim();
-        return text;
-      })
-      .filter((text) => text.length > 0);
-  };
-
-  // knowBeforeYouGoItems 코드를 텍스트로 변환
-  const parseKnowBeforeYouGo = (items: string[] | null): string[] => {
-    if (!Array.isArray(items)) return [];
-
-    const translations: Record<string, string> = {
-      PUBLIC_TRANSPORTATION_NEARBY: "Public transportation nearby",
-      WHEELCHAIR_ACCESSIBLE: "Wheelchair accessible",
-      STROLLER_ACCESSIBLE: "Stroller accessible",
-      INFANTS_ALLOWED: "Infants allowed",
-      NOT_RECOMMENDED_FOR_PREGNANT: "Not recommended for pregnant travelers",
-      NO_HEART_PROBLEMS: "Not recommended for travelers with heart problems",
-      MODERATE_PHYSICAL_FITNESS: "Moderate physical fitness required",
-    };
-
-    return items.map((item) => translations[item] || item);
-  };
-
-  // Bokun API에서 투어 데이터 가져오기
-  useEffect(() => {
-    async function fetchTours() {
-      try {
-        const tourPromises = historyTours.map(async (tour) => {
-          try {
-            const response = await fetch(
-              `/api/bokun/activity/${tour.bokunExperienceId}`
-            );
-            if (response.ok) {
-              const bokunData = await response.json();
-              // Bokun 데이터를 우리 형식으로 변환
-              const rawDescription =
-                bokunData.excerpt ||
-                bokunData.shortDescription ||
-                bokunData.description ||
-                "";
-              const description = stripHtmlTags(rawDescription);
-
-              // Duration 계산
-              let durationDisplay = "";
-              if (bokunData.durationHours && bokunData.durationMinutes) {
-                durationDisplay = `${bokunData.durationHours}h ${bokunData.durationMinutes}m`;
-              } else if (bokunData.durationHours) {
-                durationDisplay = `${bokunData.durationHours} hours`;
-              } else if (bokunData.duration) {
-                durationDisplay = `${bokunData.duration} hours`;
-              }
-
-              return {
-                ...tour,
-                title: bokunData.title || "",
-                description: description,
-                image: bokunData.photos?.[0]?.url || tour.image,
-                location:
-                  bokunData.googlePlace?.name ||
-                  bokunData.meetingPoint?.title ||
-                  bokunData.address?.city ||
-                  "",
-                duration: durationDisplay,
-                durationText: bokunData.durationText || "",
-                price: bokunData.pricing?.from
-                  ? `$${bokunData.pricing.from}`
-                  : "",
-                included: parseHtmlToArray(bokunData.included),
-                exclusions: parseHtmlToArray(bokunData.excluded),
-                highlights: Array.isArray(bokunData.highlights)
-                  ? bokunData.highlights
-                  : [],
-                activityCategories: Array.isArray(bokunData.activityCategories)
-                  ? bokunData.activityCategories
-                  : [],
-                knowBeforeYouGo: parseKnowBeforeYouGo(
-                  bokunData.knowBeforeYouGoItems
-                ),
-                minAge: bokunData.minAge || 0,
-                cancellationPolicy: bokunData.cancellationPolicy?.title || "",
-              };
-            }
-            return null; // API 실패시 null 반환
-          } catch (error) {
-            console.error(
-              `Failed to fetch tour ${tour.bokunExperienceId}:`,
-              error
-            );
-            return null; // 에러시 null 반환
-          }
-        });
-
-        const fetchedTours = await Promise.all(tourPromises);
-        // null이 아닌 투어만 필터링
-        setTours(fetchedTours.filter((tour) => tour !== null) as Tour[]);
-      } catch (error) {
-        console.error("Failed to fetch tours:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchTours();
-  }, []);
-
-  // 폼 제출 핸들러
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: API 호출하여 견적 요청 전송
-  };
+export default async function HistoryTourPage() {
+  // 서버 사이드에서 투어 데이터 가져오기
+  const tours = await getToursFromConfig(historyToursConfig);
 
   return (
     <div className="min-h-screen bg-white">
@@ -187,16 +49,11 @@ export default function HistoryTourPage() {
                 create lifelong memories.
               </p>
               <div className="flex gap-4 mb-8">
-                <Button
-                  className="bg-[#651d2a] hover:bg-[#4a1520] text-white px-6 flex items-center gap-2 transition-colors font-semibold"
-                  onClick={() => {
-                    document
-                      .getElementById("tour-list")
-                      ?.scrollIntoView({ behavior: "smooth" });
-                  }}
-                >
-                  Explore Tours
-                </Button>
+                <a href="#tour-list">
+                  <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white px-6 flex items-center gap-2 transition-colors font-semibold">
+                    Explore Tours
+                  </Button>
+                </a>
                 <Link href="/chat">
                   <Button className="border-1 border-[#651d2a] text-[#651d2a] hover:bg-[#651d2a]/20 hover:border-[#651d2a]/20  bg-white px-6 transition-colors font-semibold flex items-center gap-2">
                     Get Custom Quote
@@ -350,15 +207,17 @@ export default function HistoryTourPage() {
 
           <div className="space-y-8">
             {/* 히스토리 투어 목록 */}
-            {loading ? (
+            {tours.length === 0 ? (
               <div className="text-center py-20">
-                <p className="text-gray-600">Loading tours...</p>
+                <p className="text-gray-600">
+                  No tours available at the moment.
+                </p>
               </div>
             ) : (
               tours.map((tour) => (
                 <Link
-                  key={tour.id}
-                  href={`/tours/history/${tour.id}`}
+                  key={tour.bokunExperienceId}
+                  href={`/tours/history/${tour.bokunExperienceId}`}
                   className="block"
                 >
                   <Card className="overflow-hidden hover:shadow-xl transition-shadow p-0 cursor-pointer">
@@ -445,7 +304,7 @@ export default function HistoryTourPage() {
                               Highlights:
                             </h4>
                             <ul className="space-y-2 text-sm text-gray-600">
-                              {tour.highlights.map((highlight, index) => (
+                              {tour.highlights.map((highlight: string, index: number) => (
                                 <li key={index}>• {highlight}</li>
                               ))}
                             </ul>
@@ -552,6 +411,7 @@ export default function HistoryTourPage() {
           </div>
         </div>
       </section>
+
       {/* Feel the Breath of History Section */}
       <section className="flex items-center px-6 bg-gray-50">
         <div className="container mx-auto max-w-6xl py-32">

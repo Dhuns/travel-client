@@ -18,7 +18,8 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
-import { privateTours, type Tour } from "@/data/mockTours";
+import { privateToursConfig } from "@/config/tours";
+import { type Tour } from "@/data/mockTours";
 
 export default function PrivateTourPage() {
   // 투어 데이터 상태
@@ -79,10 +80,10 @@ export default function PrivateTourPage() {
   useEffect(() => {
     async function fetchTours() {
       try {
-        const tourPromises = privateTours.map(async (tour) => {
+        const tourPromises = privateToursConfig.map(async (config) => {
           try {
             const response = await fetch(
-              `/api/bokun/activity/${tour.bokunExperienceId}`
+              `/api/bokun/activity/${config.bokunExperienceId}`
             );
             if (response.ok) {
               const bokunData = await response.json();
@@ -101,10 +102,13 @@ export default function PrivateTourPage() {
               }
 
               return {
-                ...tour,
+                id: config.bokunExperienceId,
+                bokunExperienceId: config.bokunExperienceId,
+                category: config.category,
+                badge: config.badge,
                 title: bokunData.title || "",
                 description: stripHtmlTags(description),
-                image: bokunData.photos?.[0]?.url || tour.image,
+                image: bokunData.photos?.[0]?.originalUrl || "/images/placeholder-tour.jpg",
                 location: bokunData.googlePlace?.name || bokunData.meetingPoint?.title || bokunData.address?.city || "",
                 duration: durationDisplay,
                 durationText: bokunData.durationText || "",
@@ -121,7 +125,7 @@ export default function PrivateTourPage() {
             return null; // API 실패시 null 반환
           } catch (error) {
             console.error(
-              `Failed to fetch tour ${tour.bokunExperienceId}:`,
+              `Failed to fetch tour ${config.bokunExperienceId}:`,
               error
             );
             return null; // 에러시 null 반환
@@ -377,7 +381,7 @@ export default function PrivateTourPage() {
                 const theme = colorThemes[index % 3];
 
                 return (
-                  <Link key={tour.id} href={`/tours/private/${tour.id}`}>
+                  <Link key={tour.bokunExperienceId} href={`/tours/private/${tour.bokunExperienceId}`}>
                     <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow cursor-pointer">
                       <div className="relative h-64">
                         <img
