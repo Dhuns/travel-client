@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Calendar,
   Check,
@@ -18,6 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
+
+export const revalidate = 3600; // 1시간마다 재생성
 
 /**
  * Multiday Tour 설명 페이지
@@ -356,14 +356,11 @@ export default function MultidayTourPage() {
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-16">
-            <Button
-              className="bg-white text-[#651d2a] hover:bg-white/90 px-8 py-6 text-lg rounded-full"
-              onClick={() => {
-                document.getElementById('tour-highlights')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              View Available Tours
-            </Button>
+            <a href="#tour-highlights">
+              <Button className="bg-white text-[#651d2a] hover:bg-white/90 px-8 py-6 text-lg rounded-full">
+                View Available Tours
+              </Button>
+            </a>
             <Link href="/chat">
               <Button
                 variant="outline"
