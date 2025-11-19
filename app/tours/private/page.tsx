@@ -1,181 +1,26 @@
-"use client";
-
 import {
-  Award,
   Calendar,
   Check,
   Clock,
   Gift,
   MapPin,
-  Shield,
   Star,
   Users,
   X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { Textarea } from "@/components/ui/textarea";
-import { useState, useEffect } from "react";
 import { privateToursConfig } from "@/config/tours";
-import { type Tour } from "@/data/mockTours";
+import { getToursFromConfig } from "@/lib/bokun";
+import PrivateTourInquiryForm from "@/components/PrivateTourInquiryForm";
 
-export default function PrivateTourPage() {
-  // 투어 데이터 상태
-  const [tours, setTours] = useState<Tour[]>([]);
-  const [loading, setLoading] = useState(true);
+export const revalidate = 3600; // 1시간마다 재생성
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    travelDate: "",
-    numberOfTravelers: "",
-    message: "",
-  });
+export default async function PrivateTourPage() {
+  // 서버 사이드에서 투어 데이터 가져오기
+  const tours = await getToursFromConfig(privateToursConfig);
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<"success" | "error" | null>(
-    null
-  );
-
-  // HTML 태그 제거 함수
-  const stripHtmlTags = (html: string): string => {
-    return html.replace(/<[^>]*>/g, '').trim();
-  };
-
-  // HTML을 배열로 파싱하는 함수
-  const parseHtmlToArray = (html: string | string[]): string[] => {
-    if (Array.isArray(html)) return html;
-    if (!html || typeof html !== 'string') return [];
-
-    // <p> 태그로 분리하여 텍스트만 추출
-    const matches = html.match(/<p[^>]*>(.*?)<\/p>/g);
-    if (!matches) return [];
-
-    return matches.map(match => {
-      const text = match.replace(/<[^>]*>/g, '').trim();
-      return text;
-    }).filter(text => text.length > 0);
-  };
-
-  // knowBeforeYouGoItems 코드를 텍스트로 변환
-  const parseKnowBeforeYouGo = (items: string[] | null): string[] => {
-    if (!Array.isArray(items)) return [];
-
-    const translations: Record<string, string> = {
-      'PUBLIC_TRANSPORTATION_NEARBY': 'Public transportation nearby',
-      'WHEELCHAIR_ACCESSIBLE': 'Wheelchair accessible',
-      'STROLLER_ACCESSIBLE': 'Stroller accessible',
-      'INFANTS_ALLOWED': 'Infants allowed',
-      'NOT_RECOMMENDED_FOR_PREGNANT': 'Not recommended for pregnant travelers',
-      'NO_HEART_PROBLEMS': 'Not recommended for travelers with heart problems',
-      'MODERATE_PHYSICAL_FITNESS': 'Moderate physical fitness required',
-    };
-
-    return items.map(item => translations[item] || item);
-  };
-
-  // Bokun API에서 투어 데이터 가져오기
-  useEffect(() => {
-    async function fetchTours() {
-      try {
-        const tourPromises = privateToursConfig.map(async (config) => {
-          try {
-            const response = await fetch(
-              `/api/bokun/activity/${config.bokunExperienceId}`
-            );
-            if (response.ok) {
-              const bokunData = await response.json();
-              // Bokun 데이터를 우리 형식으로 변환
-              const rawDescription = bokunData.excerpt || bokunData.shortDescription || bokunData.description || "";
-              const description = stripHtmlTags(rawDescription);
-
-              // Duration 계산
-              let durationDisplay = "";
-              if (bokunData.durationHours && bokunData.durationMinutes) {
-                durationDisplay = `${bokunData.durationHours}h ${bokunData.durationMinutes}m`;
-              } else if (bokunData.durationHours) {
-                durationDisplay = `${bokunData.durationHours} hours`;
-              } else if (bokunData.duration) {
-                durationDisplay = `${bokunData.duration} hours`;
-              }
-
-              return {
-                id: config.bokunExperienceId,
-                bokunExperienceId: config.bokunExperienceId,
-                category: config.category,
-                badge: config.badge,
-                title: bokunData.title || "",
-                description: stripHtmlTags(description),
-                image: bokunData.photos?.[0]?.originalUrl || "/images/placeholder-tour.jpg",
-                location: bokunData.googlePlace?.name || bokunData.meetingPoint?.title || bokunData.address?.city || "",
-                duration: durationDisplay,
-                durationText: bokunData.durationText || "",
-                price: bokunData.pricing?.from ? `$${bokunData.pricing.from}` : "",
-                included: parseHtmlToArray(bokunData.included),
-                exclusions: parseHtmlToArray(bokunData.excluded),
-                highlights: Array.isArray(bokunData.highlights) ? bokunData.highlights : [],
-                activityCategories: Array.isArray(bokunData.activityCategories) ? bokunData.activityCategories : [],
-                knowBeforeYouGo: parseKnowBeforeYouGo(bokunData.knowBeforeYouGoItems),
-                minAge: bokunData.minAge || 0,
-                cancellationPolicy: bokunData.cancellationPolicy?.title || "",
-              };
-            }
-            return null; // API 실패시 null 반환
-          } catch (error) {
-            console.error(
-              `Failed to fetch tour ${config.bokunExperienceId}:`,
-              error
-            );
-            return null; // 에러시 null 반환
-          }
-        });
-
-        const fetchedTours = await Promise.all(tourPromises);
-        // null이 아닌 투어만 필터링
-        setTours(fetchedTours.filter((tour) => tour !== null) as Tour[]);
-      } catch (error) {
-        console.error("Failed to fetch tours:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchTours();
-  }, []);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setSubmitStatus(null);
-
-    try {
-      // TODO: 백엔드 API 연동
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setSubmitStatus("success");
-      setFormData({
-        name: "",
-        email: "",
-        travelDate: "",
-        numberOfTravelers: "",
-        message: "",
-      });
-    } catch (error) {
-      setSubmitStatus("error");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section - 1.png */}
@@ -225,29 +70,23 @@ export default function PrivateTourPage() {
 
           {/* CTA 버튼들 */}
           <div className="flex flex-wrap justify-center gap-4">
-            <Button
-              size="lg"
-              className="bg-[#651d2a] hover:bg-[#4a1520] text-white font-semibold shadow-lg cursor-pointer transition-colors"
-              onClick={() => {
-                document
-                  .getElementById("inquiry-section")
-                  ?.scrollIntoView({ behavior: "smooth" });
-              }}
-            >
-              Book Your Journey Now
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="font-semibold border-2 border-white text-white hover:bg-white/20 bg-white/5 backdrop-blur-sm shadow-lg cursor-pointer transition-colors"
-              onClick={() => {
-                document
-                  .getElementById("tour-list")
-                  ?.scrollIntoView({ behavior: "smooth" });
-              }}
-            >
-              Explore Tours
-            </Button>
+            <a href="#inquiry-section">
+              <Button
+                size="lg"
+                className="bg-[#651d2a] hover:bg-[#4a1520] text-white font-semibold shadow-lg cursor-pointer transition-colors"
+              >
+                Book Your Journey Now
+              </Button>
+            </a>
+            <a href="#tour-list">
+              <Button
+                size="lg"
+                variant="outline"
+                className="font-semibold border-2 border-white text-white hover:bg-white/20 bg-white/5 backdrop-blur-sm shadow-lg cursor-pointer transition-colors"
+              >
+                Explore Tours
+              </Button>
+            </a>
           </div>
         </div>
       </section>
@@ -366,9 +205,9 @@ export default function PrivateTourPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {loading ? (
+            {tours.length === 0 ? (
               <div className="col-span-3 text-center py-20">
-                <p className="text-gray-600">Loading tours...</p>
+                <p className="text-gray-600">No tours available at the moment.</p>
               </div>
             ) : (
               tours.map((tour, index) => {
@@ -457,7 +296,7 @@ export default function PrivateTourPage() {
                         </div>
                         {tour.highlights && tour.highlights.length > 0 && (
                           <div className="flex flex-wrap gap-2 mb-4">
-                            {tour.highlights.map((highlight, i) => (
+                            {tour.highlights.map((highlight: string, i: number) => (
                               <span
                                 key={i}
                                 className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
@@ -703,233 +542,7 @@ export default function PrivateTourPage() {
       </section>
 
       {/* Pricing Section - 7.png */}
-      <section
-        id="inquiry-section"
-        className="py-28 px-6 min-h-screen flex items-center bg-gradient-to-br from-gray-50 to-white"
-      >
-        <div className="container mx-auto max-w-7xl w-full">
-          <div className="grid lg:grid-cols-2 gap-8 items-stretch">
-            {/* 왼쪽: 이미지와 특징 */}
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl">
-              {/* 배경 이미지 */}
-              <div className="absolute inset-0">
-                <img
-                  src="/korean-traditional-palace-with-pond-reflection.jpg"
-                  alt="Seoul Adventure"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#651d2a]/95 via-[#651d2a]/70 to-transparent"></div>
-              </div>
-
-              {/* 콘텐츠 */}
-              <div className="relative z-10 p-8 h-full flex flex-col justify-end">
-                <div className="mb-6">
-                  <div className="inline-block px-4 py-2 rounded-full text-sm font-semibold text-white mb-4 bg-white/20 backdrop-blur-sm">
-                    Premium Experience
-                  </div>
-                  <h2 className="text-4xl font-bold text-white mb-4">
-                    Ready for Your Seoul Adventure?
-                  </h2>
-                  <p className="text-white/90 text-lg mb-8">
-                    Limited spots available for an intimate, unforgettable
-                    experience
-                  </p>
-                </div>
-
-                {/* 특징 하이라이트 */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Star
-                        className="text-yellow-400 fill-yellow-400"
-                        size={20}
-                      />
-                      <span className="text-white font-semibold">
-                        4.9/5 Rating
-                      </span>
-                    </div>
-                    <p className="text-white/80 text-sm">500+ Reviews</p>
-                  </div>
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Award className="text-[#c4982a]" size={20} />
-                      <span className="text-white font-semibold">
-                        Award Winning
-                      </span>
-                    </div>
-                    <p className="text-white/80 text-sm">Best Tour 2024</p>
-                  </div>
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Users className="text-[#eda89b]" size={20} />
-                      <span className="text-white font-semibold">
-                        Small Groups
-                      </span>
-                    </div>
-                    <p className="text-white/80 text-sm">Max 12 People</p>
-                  </div>
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Shield className="text-[#6d8675]" size={20} />
-                      <span className="text-white font-semibold">Secure</span>
-                    </div>
-                    <p className="text-white/80 text-sm">Safe Booking</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 오른쪽: 문의하기 패널 */}
-            <div className="bg-white rounded-3xl shadow-2xl p-8">
-              {/* 제목 */}
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-3">
-                  Request Your Private Tour
-                </h2>
-                <p className="text-gray-600 text-sm">
-                  Fill out the form below and we'll create a customized
-                  itinerary for you
-                </p>
-              </div>
-
-              {/* 가이드 */}
-              <div className="bg-[#651d2a]/5 rounded-lg p-4 mb-6">
-                <h3 className="font-semibold text-gray-900 text-sm mb-2">
-                  Please include:
-                </h3>
-                <ul className="space-y-1 text-xs text-gray-700">
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3 h-3 text-[#651d2a] mt-0.5 flex-shrink-0" />
-                    <span>Your preferred travel dates</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3 h-3 text-[#651d2a] mt-0.5 flex-shrink-0" />
-                    <span>Number of travelers in your group</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3 h-3 text-[#651d2a] mt-0.5 flex-shrink-0" />
-                    <span>Your interests and tour preferences</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3 h-3 text-[#651d2a] mt-0.5 flex-shrink-0" />
-                    <span>
-                      Desired tour duration (half-day, full-day, or multi-day)
-                    </span>
-                  </li>
-                </ul>
-              </div>
-
-              {/* 폼 */}
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Name <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="Your name"
-                    required
-                    className="border border-gray-300 focus-visible:border-[#651d2a] focus-visible:ring-1 focus-visible:ring-[#651d2a] bg-white text-gray-900 placeholder:text-gray-400"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Email <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="your.email@example.com"
-                    required
-                    className="border border-gray-300 focus-visible:border-[#651d2a] focus-visible:ring-1 focus-visible:ring-[#651d2a] bg-white text-gray-900 placeholder:text-gray-400"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Preferred Travel Date{" "}
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    name="travelDate"
-                    value={formData.travelDate}
-                    onChange={handleChange}
-                    min={new Date().toISOString().split("T")[0]}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#651d2a] focus:border-[#651d2a] bg-white text-gray-900 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-datetime-edit-text]:text-gray-400 [&::-webkit-datetime-edit-month-field]:text-gray-400 [&::-webkit-datetime-edit-day-field]:text-gray-400 [&::-webkit-datetime-edit-year-field]:text-gray-400"
-                    style={{
-                      colorScheme: "light",
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Number of Travelers <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    type="number"
-                    name="numberOfTravelers"
-                    value={formData.numberOfTravelers}
-                    onChange={handleChange}
-                    placeholder="e.g., 2"
-                    min="1"
-                    required
-                    className="border border-gray-300 focus-visible:border-[#651d2a] focus-visible:ring-1 focus-visible:ring-[#651d2a] bg-white text-gray-900 placeholder:text-gray-400"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Message <span className="text-red-500">*</span>
-                  </label>
-                  <Textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    placeholder="Tell us about your interests, preferences, and desired tour duration..."
-                    rows={4}
-                    required
-                    className="border border-gray-300 focus-visible:border-[#651d2a] focus-visible:ring-1 focus-visible:ring-[#651d2a] bg-white text-gray-900 placeholder:text-gray-400"
-                  />
-                </div>
-
-                {submitStatus === "success" && (
-                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="text-green-800 text-sm">
-                      Thank you! Your request has been sent. We'll get back to
-                      you within 24 hours.
-                    </p>
-                  </div>
-                )}
-
-                {submitStatus === "error" && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-red-800 text-sm">
-                      Something went wrong. Please try again or contact us
-                      directly.
-                    </p>
-                  </div>
-                )}
-
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full h-12 font-semibold bg-[#651d2a] hover:bg-[#4a1520] text-white shadow-lg"
-                >
-                  {isSubmitting ? "Sending..." : "Send Request"}
-                </Button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </section>
+      <PrivateTourInquiryForm />
     </div>
   );
 }
