@@ -8,6 +8,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { FavoriteButton } from "@/components/favorite-button";
 import Link from "next/link";
 import { getToursFromConfig } from "@/lib/bokun";
 
@@ -110,6 +111,9 @@ export default async function ToursPage() {
                     {tour.price}
                   </Badge>
                 )}
+                <div className="absolute bottom-3 right-3">
+                  <FavoriteButton tourId={tour.bokunExperienceId} />
+                </div>
               </div>
 
               <CardHeader className="pb-2 px-6">

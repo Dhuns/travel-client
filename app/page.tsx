@@ -18,6 +18,7 @@ import {
 } from "@/config/tours";
 
 import { Button } from "@/components/ui/button";
+import { FavoriteButton } from "@/components/favorite-button";
 import { HeroSection } from "@/components/hero-section";
 import Image from "next/image";
 import Link from "next/link";
@@ -250,6 +251,9 @@ export default async function HomePage() {
                       {tour.price}
                     </span>
                   </div>
+                  <div className="absolute bottom-3 right-3">
+                    <FavoriteButton tourId={tour.bokunExperienceId} />
+                  </div>
                 </div>
                 <div className="p-6 flex flex-col flex-1">
                   <h3 className="text-xl font-bold text-gray-900 mb-2">
@@ -329,6 +333,9 @@ export default async function HomePage() {
                           </span>
                         </div>
                       )}
+                      <div className="absolute bottom-3 right-3">
+                        <FavoriteButton tourId={tour.bokunExperienceId} />
+                      </div>
                     </div>
                     <div className="p-6 flex flex-col flex-1">
                       <div className="flex items-center mb-4">

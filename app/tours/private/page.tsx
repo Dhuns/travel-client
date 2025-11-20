@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { FavoriteButton } from "@/components/favorite-button";
 import Link from "next/link";
 import { privateToursConfig } from "@/config/tours";
 import { getToursFromConfig } from "@/lib/bokun";
@@ -230,6 +231,9 @@ export default async function PrivateTourPage() {
                         />
                         <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white ${theme.badge}`}>
                           {tour.badge}
+                        </div>
+                        <div className="absolute bottom-3 right-3">
+                          <FavoriteButton tourId={tour.bokunExperienceId} />
                         </div>
                       </div>
                       <div className="p-6">
