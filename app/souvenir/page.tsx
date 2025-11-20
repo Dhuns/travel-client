@@ -48,28 +48,27 @@ export default function ShopPage() {
             <div className="relative h-[500px] rounded-3xl overflow-hidden shadow-2xl group">
               <Image
                 src="/images/hero-products.jpg"
-                alt="Historical Journey Gift Set"
+                alt="Gift"
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute top-6 left-6 bg-[#c4982a] text-white px-4 py-2 rounded-full font-bold shadow-lg">
-                PREMIUM SET
+                PREMIUM APPAREL
               </div>
             </div>
             <div className="space-y-8 lg:pl-10">
               <div className="space-y-4">
                 <h2 className="text-4xl font-bold text-gray-900">
-                  Historical Journey Gift Set
+                  Signature Hoodie
                 </h2>
                 <p className="text-xl text-[#651d2a] font-medium">
-                  A curated collection of Korea's heritage
+                  Comfort meets Tradition
                 </p>
                 <p className="text-lg text-gray-600 leading-relaxed">
-                  This premium gift set is designed to capture the essence of
-                  your journey. It includes traditional crafts, a replica of a
-                  Silla Dynasty artifact, and premium Korean tea. Each item is
-                  carefully selected to represent a different era of Korean
-                  history.
+                  Stay warm and stylish with our exclusive signature hoodie.
+                  Made from high-quality, soft cotton blend, it features subtle
+                  embroidery inspired by traditional Korean patterns. Perfect
+                  for your travels or as a cozy reminder of your journey.
                 </p>
               </div>
 
@@ -79,21 +78,7 @@ export default function ShopPage() {
                     <Check className="w-5 h-5" />
                   </div>
                   <span className="font-medium text-gray-800">
-                    Traditional Crafts
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
-                  <div className="w-10 h-10 bg-[#651d2a]/10 rounded-full flex items-center justify-center text-[#651d2a]">
-                    <Check className="w-5 h-5" />
-                  </div>
-                  <span className="font-medium text-gray-800">Premium Tea</span>
-                </div>
-                <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
-                  <div className="w-10 h-10 bg-[#651d2a]/10 rounded-full flex items-center justify-center text-[#651d2a]">
-                    <Check className="w-5 h-5" />
-                  </div>
-                  <span className="font-medium text-gray-800">
-                    Historical Replica
+                    Premium Cotton Blend
                   </span>
                 </div>
                 <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
@@ -101,7 +86,21 @@ export default function ShopPage() {
                     <Check className="w-5 h-5" />
                   </div>
                   <span className="font-medium text-gray-800">
-                    Gift Box Packaging
+                    Embroidered Details
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
+                  <div className="w-10 h-10 bg-[#651d2a]/10 rounded-full flex items-center justify-center text-[#651d2a]">
+                    <Check className="w-5 h-5" />
+                  </div>
+                  <span className="font-medium text-gray-800">Unisex Fit</span>
+                </div>
+                <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
+                  <div className="w-10 h-10 bg-[#651d2a]/10 rounded-full flex items-center justify-center text-[#651d2a]">
+                    <Check className="w-5 h-5" />
+                  </div>
+                  <span className="font-medium text-gray-800">
+                    Durable Fabric
                   </span>
                 </div>
               </div>
@@ -113,17 +112,16 @@ export default function ShopPage() {
             <div className="space-y-8 lg:pr-10 order-2 lg:order-1">
               <div className="space-y-4">
                 <h2 className="text-4xl font-bold text-gray-900">
-                  Traditional Accessories Collection
+                  Eco-Friendly Tote Bag
                 </h2>
                 <p className="text-xl text-[#6d8675] font-medium">
-                  Wearable history inspired by the Joseon Dynasty
+                  Sustainable Style for Every Day
                 </p>
                 <p className="text-lg text-gray-600 leading-relaxed">
-                  Beautiful handcrafted accessories that blend traditional
-                  Korean aesthetics with modern usability. The collection
-                  features a Norigae (traditional ornament) key ring and a silk
-                  pouch, perfect for adding a touch of Korean elegance to your
-                  daily life.
+                  Carry your memories responsibly with our durable eco-bag.
+                  Featuring unique artwork that captures the beauty of Korean
+                  landscapes, this spacious tote is perfect for shopping, daily
+                  commutes, or carrying your travel essentials.
                 </p>
               </div>
 
@@ -132,14 +130,8 @@ export default function ShopPage() {
                   <div className="w-10 h-10 bg-[#6d8675]/10 rounded-full flex items-center justify-center text-[#6d8675]">
                     <Check className="w-5 h-5" />
                   </div>
-                  <span className="font-medium text-gray-800">Handcrafted</span>
-                </div>
-                <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
-                  <div className="w-10 h-10 bg-[#6d8675]/10 rounded-full flex items-center justify-center text-[#6d8675]">
-                    <Check className="w-5 h-5" />
-                  </div>
                   <span className="font-medium text-gray-800">
-                    Silk Materials
+                    100% Organic Cotton
                   </span>
                 </div>
                 <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
@@ -147,7 +139,7 @@ export default function ShopPage() {
                     <Check className="w-5 h-5" />
                   </div>
                   <span className="font-medium text-gray-800">
-                    Norigae Keyring
+                    Spacious Design
                   </span>
                 </div>
                 <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
@@ -155,7 +147,15 @@ export default function ShopPage() {
                     <Check className="w-5 h-5" />
                   </div>
                   <span className="font-medium text-gray-800">
-                    Authentic Design
+                    Unique Art Print
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
+                  <div className="w-10 h-10 bg-[#6d8675]/10 rounded-full flex items-center justify-center text-[#6d8675]">
+                    <Check className="w-5 h-5" />
+                  </div>
+                  <span className="font-medium text-gray-800">
+                    Reinforced Handles
                   </span>
                 </div>
               </div>
@@ -163,12 +163,12 @@ export default function ShopPage() {
             <div className="relative h-[500px] rounded-3xl overflow-hidden shadow-2xl group order-1 lg:order-2">
               <Image
                 src="/images/luxury-collection.jpg"
-                alt="Traditional Accessories Collection"
+                alt="Eco-Friendly Tote Bag"
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute top-6 right-6 bg-[#6d8675] text-white px-4 py-2 rounded-full font-bold shadow-lg">
-                HANDCRAFTED
+                SUSTAINABLE
               </div>
             </div>
           </div>
@@ -178,28 +178,27 @@ export default function ShopPage() {
             <div className="relative h-[500px] rounded-3xl overflow-hidden shadow-2xl group">
               <Image
                 src="/images/modern-skincare.jpg"
-                alt="Illustrated History Journal"
+                alt="Premium Tumbler"
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute top-6 left-6 bg-[#651d2a] text-white px-4 py-2 rounded-full font-bold shadow-lg">
-                EXCLUSIVE EDITION
+                DAILY ESSENTIAL
               </div>
             </div>
             <div className="space-y-8 lg:pl-10">
               <div className="space-y-4">
                 <h2 className="text-4xl font-bold text-gray-900">
-                  Illustrated History Journal
+                  Premium Tumbler
                 </h2>
                 <p className="text-xl text-[#651d2a] font-medium">
-                  Your personal chronicle of the journey
+                  Hydration with Elegance
                 </p>
                 <p className="text-lg text-gray-600 leading-relaxed">
-                  More than just a notebook, this beautifully illustrated
-                  journal contains historical insights, maps, and space for your
-                  own reflections. It serves as a permanent record of the
-                  knowledge and memories you've gathered during your time in
-                  Korea.
+                  Keep your beverages at the perfect temperature with our sleek,
+                  double-walled tumbler. Designed for both functionality and
+                  style, it features a minimalist aesthetic with the Tumakr
+                  logo, making it an ideal companion for your daily adventures.
                 </p>
               </div>
 
@@ -209,7 +208,7 @@ export default function ShopPage() {
                     <Check className="w-5 h-5" />
                   </div>
                   <span className="font-medium text-gray-800">
-                    Custom Illustrations
+                    Double-Wall Insulation
                   </span>
                 </div>
                 <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
@@ -217,23 +216,21 @@ export default function ShopPage() {
                     <Check className="w-5 h-5" />
                   </div>
                   <span className="font-medium text-gray-800">
-                    Historical Maps
+                    Leak-Proof Lid
                   </span>
                 </div>
                 <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
                   <div className="w-10 h-10 bg-[#651d2a]/10 rounded-full flex items-center justify-center text-[#651d2a]">
                     <Check className="w-5 h-5" />
                   </div>
-                  <span className="font-medium text-gray-800">
-                    High Quality Paper
-                  </span>
+                  <span className="font-medium text-gray-800">BPA Free</span>
                 </div>
                 <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
                   <div className="w-10 h-10 bg-[#651d2a]/10 rounded-full flex items-center justify-center text-[#651d2a]">
                     <Check className="w-5 h-5" />
                   </div>
                   <span className="font-medium text-gray-800">
-                    Hardcover Binding
+                    Sleek Design
                   </span>
                 </div>
               </div>
