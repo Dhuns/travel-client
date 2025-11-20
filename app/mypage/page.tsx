@@ -1,19 +1,53 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { User, Mail, Phone, MapPin, Settings, LogOut } from "lucide-react"
+import { User, Mail, Phone, MapPin, Settings, LogOut, Calendar } from "lucide-react"
+import { useAuthStore } from "@/src/shared/store/authStore"
+import { useRouter } from "next/navigation"
 
 export default function MyPage() {
+  const router = useRouter()
+  const { user, isAuthenticated, logout, fetchUser } = useAuthStore()
   const [activeTab, setActiveTab] = useState("profile")
+  const [isLoading, setIsLoading] = useState(true)
 
-  // 임시 사용자 데이터
-  const userData = {
-    name: "김한국",
-    email: "korea@example.com",
-    phone: "+82 10-1234-5678",
-    address: "Seoul, South Korea",
-    joinDate: "2024-01-15",
+  useEffect(() => {
+    // 로그인 체크
+    if (!isAuthenticated) {
+      router.push("/login")
+      return
+    }
+
+    // 사용자 정보 로드
+    const loadUser = async () => {
+      try {
+        await fetchUser()
+      } catch (error) {
+        console.error("Failed to load user:", error)
+        router.push("/login")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadUser()
+  }, [isAuthenticated, fetchUser, router])
+
+  const handleLogout = async () => {
+    await logout()
+    router.push("/")
+  }
+
+  if (isLoading || !user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#f5f3f0] to-[#faf8f5] pt-32 pb-16 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#651d2a] mx-auto" />
+          <p className="mt-4 text-gray-600">Loading your profile...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -24,14 +58,27 @@ export default function MyPage() {
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
             <div className="bg-gradient-to-r from-[#651d2a] to-[#7a2433] text-white p-8">
               <div className="flex items-center space-x-6">
-                <div className="w-20 h-20 bg-[#8b3a47] rounded-full flex items-center justify-center">
-                  <User className="w-10 h-10" />
-                </div>
+                {user.profileImage ? (
+                  <img
+                    src={user.profileImage}
+                    alt={user.name}
+                    className="w-20 h-20 rounded-full object-cover border-4 border-[#8b3a47]"
+                  />
+                ) : (
+                  <div className="w-20 h-20 bg-[#8b3a47] rounded-full flex items-center justify-center">
+                    <User className="w-10 h-10" />
+                  </div>
+                )}
                 <div>
-                  <h1 className="text-3xl font-bold">{userData.name}</h1>
-                  <p className="text-[#f5f3f0] mt-1">OneDay Korea Member</p>
-                  <p className="text-[#faf8f5] text-sm mt-2">
-                    Member since {new Date(userData.joinDate).toLocaleDateString()}
+                  <h1 className="text-3xl font-bold">{user.name}</h1>
+                  <p className="text-[#f5f3f0] mt-1">
+                    {user.provider === 'google' && '🔵 Google Account'}
+                    {user.provider === 'apple' && '🍎 Apple Account'}
+                    {user.provider === 'local' && 'OneDay Korea Member'}
+                  </p>
+                  <p className="text-[#faf8f5] text-sm mt-2 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Member since {new Date(user.createdAt).toLocaleDateString()}
                   </p>
                 </div>
               </div>
@@ -76,7 +123,20 @@ export default function MyPage() {
                       <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                       <input
                         type="text"
-                        value={userData.name}
+                        value={user.name}
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] text-gray-900"
+                        readOnly
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        value={user.username}
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] text-gray-900"
                         readOnly
                       />
@@ -89,7 +149,7 @@ export default function MyPage() {
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                       <input
                         type="email"
-                        value={userData.email}
+                        value={user.email || 'Not provided'}
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] text-gray-900"
                         readOnly
                       />
@@ -102,32 +162,89 @@ export default function MyPage() {
                       <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                       <input
                         type="tel"
-                        value={userData.phone}
+                        value={user.phone || 'Not provided'}
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] text-gray-900"
                         readOnly
                       />
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                      <input
-                        type="text"
-                        value={userData.address}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] text-gray-900"
-                        readOnly
-                      />
+                  {user.birthDate && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Birth Date</label>
+                      <div className="relative">
+                        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        <input
+                          type="text"
+                          value={new Date(user.birthDate).toLocaleDateString()}
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] text-gray-900"
+                          readOnly
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {user.gender && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        <input
+                          type="text"
+                          value={user.gender}
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] text-gray-900"
+                          readOnly
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Account Status */}
+                <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <h3 className="font-medium text-gray-900 mb-3">Account Status</h3>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-gray-500">Status</p>
+                      <p className="font-medium text-gray-900">{user.status}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Grade</p>
+                      <p className="font-medium text-gray-900">{user.userGrade || 'General'}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Email Verified</p>
+                      <p className="font-medium text-gray-900">
+                        {user.emailVerified ? '✅ Verified' : '❌ Not Verified'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Account Type</p>
+                      <p className="font-medium text-gray-900">
+                        {user.provider === 'google' && '🔵 Google'}
+                        {user.provider === 'apple' && '🍎 Apple'}
+                        {user.provider === 'local' && '📧 Email'}
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-8 flex space-x-4">
-                  <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white">Edit Profile</Button>
-                  <Button variant="outline" className="border-[#651d2a] text-[#651d2a] hover:bg-[#f5f3f0] bg-transparent">
-                    Change Password
+                  <Button
+                    className="bg-[#651d2a] hover:bg-[#4a1520] text-white"
+                    onClick={() => router.push('/mypage/edit')}
+                  >
+                    Edit Profile
                   </Button>
+                  {user.provider === 'local' && (
+                    <Button
+                      variant="outline"
+                      className="border-[#651d2a] text-[#651d2a] hover:bg-[#f5f3f0] bg-transparent"
+                      onClick={() => router.push('/mypage/change-password')}
+                    >
+                      Change Password
+                    </Button>
+                  )}
                 </div>
               </div>
             )}
@@ -153,7 +270,10 @@ export default function MyPage() {
                   </div>
 
                   <div className="pt-6 border-t border-gray-200">
-                    <Button className="bg-red-600 hover:bg-red-700 text-white flex items-center space-x-2">
+                    <Button
+                      onClick={handleLogout}
+                      className="bg-red-600 hover:bg-red-700 text-white flex items-center space-x-2"
+                    >
                       <LogOut className="w-4 h-4" />
                       <span>Sign Out</span>
                     </Button>
