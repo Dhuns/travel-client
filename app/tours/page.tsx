@@ -309,7 +309,7 @@ export default function ToursPage() {
                     </div>
 
                     <CardHeader className="pb-2 px-6">
-                      <CardTitle className="text-lg group-hover:text-[#651d2a] transition-colors">
+                      <CardTitle className="text-lg text-gray-900 group-hover:text-[#651d2a] transition-colors">
                         {tour.name}
                       </CardTitle>
                       <div className="flex flex-wrap gap-2 text-sm">
