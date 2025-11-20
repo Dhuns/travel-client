@@ -56,6 +56,8 @@ export interface Batch {
   officeHours?: string;
   officeNumber?: string;
   emergencyNumber?: string;
+  manualAdjustment?: number;
+  adjustmentReason?: string;
 }
 
 export interface QuotationResponse {

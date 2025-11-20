@@ -5,11 +5,13 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "build:local": "cross-env NODE_ENV=development next build",
+    "build:local": "next build",
+    "build:dev": "cross-env NODE_ENV=development next build",
     "build:prod": "cross-env NODE_ENV=production next build",
     "dev": "next dev",
     "start": "next start",
-    "start:local": "cross-env NODE_ENV=development next dev",
+    "start:local": "next dev",
+    "start:dev": "cross-env NODE_ENV=development next dev",
     "start:prod": "cross-env NODE_ENV=production next dev",
     "lint": "next lint",
     "page": "bash create_page.sh"
