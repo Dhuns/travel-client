@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Award,
   ChevronRight,
@@ -13,301 +11,170 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  historyToursConfig,
+  multidayToursConfig,
+  privateToursConfig,
+} from "@/config/tours";
 
 import { Button } from "@/components/ui/button";
 import { HeroSection } from "@/components/hero-section";
 import Image from "next/image";
 import Link from "next/link";
+import { getToursFromConfig } from "@/lib/bokun";
+
+export const revalidate = 3600; // 1시간마다 재생성
+
+const categoryDisplayNames: Record<string, string> = {
+  history: "History Tours",
+  private: "Private Tours",
+  multiday: "Multiday Tours",
+};
 
 /**
  * OneDay Korea 메인 페이지 컴포넌트
- *
- * 주요 기능:
- * - 히어로 섹션 (캐러셀 형태)
- * - 인기 여행지 소개
- * - 추천 투어 패키지
- * - 기념품 상품 진열
- * - 부가 서비스 안내
- * - How It Works 섹션
- * - CTA 섹션
- * - 공지사항 & 고객센터 섹션
- *
- * 성능 최적화:
- * - useMemo로 정적 데이터 메모이제이션
- * - useCallback으로 이벤트 핸들러 최적화
- * - 이미지 lazy loading 적용
+ * 서버 컴포넌트로 Bokun API 데이터를 실시간으로 가져와 표시
  */
-export default function HomePage() {
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+export default async function HomePage() {
+  // Bokun API에서 모든 투어 데이터 가져오기
+  const allConfigs = [
+    ...historyToursConfig,
+    ...privateToursConfig,
+    ...multidayToursConfig,
+  ];
+  const allTours = await getToursFromConfig(allConfigs);
 
-  const heroImages = useMemo(
-    () => [
-      {
-        src: "/beautiful-korean-traditional-palace-with-tourists-.jpg",
-        title: "Discover Traditional Korea",
-        subtitle:
-          "Experience the grandeur of ancient palaces and royal heritage",
-      },
-      {
-        src: "/beautiful-korean-traditional-hanbok-dress.jpg",
-        title: "Embrace Korean Culture",
-        subtitle: "Immerse yourself in authentic traditions and customs",
-      },
-      {
-        src: "/beautiful-korean-traditional-palace-with-tourists-.jpg",
-        title: "Modern Seoul Adventures",
-        subtitle: "Explore vibrant K-pop culture and urban life",
-      },
-    ],
-    []
-  );
+  // 인기 여행지 (상위 4개)
+  const popularDestinations = allTours.slice(0, 4);
 
-  const popularDestinations = useMemo(
-    () => [
-      {
-        name: "Seoul City Tour",
-        image: "/beautiful-korean-traditional-palace-with-tourists-.jpg",
-        description:
-          "Explore the heart of Korea with palaces, markets, and modern districts",
-        rating: 4.9,
-        reviews: 2847,
-        price: "From $65",
-        duration: "8 hours",
-        highlights: [
-          "Gyeongbokgung Palace",
-          "Bukchon Hanok Village",
-          "Myeongdong",
-        ],
-      },
-      {
-        name: "Jeju Island Paradise",
-        image: "/beautiful-jeju-island-hallasan-mountain-and-nature.jpg",
-        description:
-          "Discover Korea's tropical paradise with stunning nature and unique culture",
-        rating: 4.8,
-        reviews: 1923,
-        price: "From $220",
-        duration: "2 days",
-        highlights: [
-          "Hallasan Mountain",
-          "Seongsan Ilchulbong",
-          "Manjanggul Cave",
-        ],
-      },
-      {
-        name: "Busan Coastal Experience",
-        image: "/beautiful-busan-haeundae-beach-and-coastal-city-vi.jpg",
-        description:
-          "Experience Korea's coastal beauty with beaches, temples, and seafood",
-        rating: 4.7,
-        reviews: 1456,
-        price: "From $115",
-        duration: "Full day",
-        highlights: [
-          "Haeundae Beach",
-          "Gamcheon Culture Village",
-          "Jagalchi Market",
-        ],
-      },
-      {
-        name: "DMZ Historical Tour",
-        image: "/korean-dmz-border-historical-site-and-observation-.jpg",
-        description:
-          "Journey through Korea's divided history at the DMZ border",
-        rating: 4.9,
-        reviews: 3241,
-        price: "From $58",
-        duration: "6 hours",
-        highlights: ["JSA Tour", "3rd Tunnel", "Dora Observatory"],
-      },
-    ],
-    []
-  );
+  // 추천 투어 패키지 (3개 - 카테고리별로 선택)
+  const recommendedTours = [
+    allTours.find((t) => t.category === "history"),
+    allTours.find((t) => t.category === "private"),
+    allTours.find((t) => t.category === "multiday"),
+  ].filter(Boolean);
 
-  const recommendedTours = useMemo(
-    () => [
-      {
-        title: "Complete K-Culture Experience",
-        duration: "3 days",
-        price: "$220",
-        originalPrice: "$295",
-        image: "/beautiful-korean-traditional-hanbok-dress.jpg",
-        rating: 4.9,
-        reviews: 1847,
-        category: "Bestseller",
-        features: [
-          "Hanbok Experience",
-          "K-Pop Studio Visit",
-          "Traditional Cooking",
-          "Palace Tours",
-        ],
-      },
-      {
-        title: "Seoul Highlights Premium",
-        duration: "2 days",
-        price: "$145",
-        originalPrice: "$190",
-        image: "/beautiful-korean-traditional-palace-with-tourists-.jpg",
-        rating: 4.8,
-        reviews: 2156,
-        category: "Popular",
-        features: [
-          "Private Guide",
-          "5-Star Hotel",
-          "Fine Dining",
-          "VIP Access",
-        ],
-      },
-      {
-        title: "Nature & Wellness Retreat",
-        duration: "4 days",
-        price: "$330",
-        originalPrice: "$440",
-        image: "/korean-temple-stay-mountain-nature-wellness-retrea.jpg",
-        rating: 4.7,
-        reviews: 892,
-        category: "New",
-        features: [
-          "Temple Stay",
-          "Hiking Tours",
-          "Spa Experience",
-          "Meditation",
-        ],
-      },
-    ],
-    []
-  );
+  const heroImages = [
+    {
+      src: "/beautiful-korean-traditional-palace-with-tourists-.jpg",
+      title: "Discover Traditional Korea",
+      subtitle: "Experience the grandeur of ancient palaces and royal heritage",
+    },
+    {
+      src: "/beautiful-korean-traditional-hanbok-dress.jpg",
+      title: "Embrace Korean Culture",
+      subtitle: "Immerse yourself in authentic traditions and customs",
+    },
+    {
+      src: "/beautiful-korean-traditional-palace-with-tourists-.jpg",
+      title: "Modern Seoul Adventures",
+      subtitle: "Explore vibrant K-pop culture and urban life",
+    },
+  ];
 
-  const souvenirs = useMemo(
-    () => [
-      {
-        name: "Traditional Hanbok Set",
-        image: "/beautiful-korean-traditional-hanbok-dress.jpg",
-        rating: 4.9,
-        reviews: 234,
-        category: "Traditional",
-      },
-      {
-        name: "K-Beauty Skincare Kit",
-        image: "/korean-skincare-beauty-products-set.jpg",
-        rating: 4.8,
-        reviews: 456,
-        category: "Beauty",
-      },
-      {
-        name: "Korean Tea Collection",
-        image: "/elegant-korean-traditional-tea-set.jpg",
-        rating: 4.7,
-        reviews: 189,
-        category: "Food",
-      },
-      {
-        name: "K-Pop Merchandise",
-        image: "/korean-kpop-merchandise-albums-and-accessories.jpg",
-        rating: 4.9,
-        reviews: 678,
-        category: "Entertainment",
-      },
-    ],
-    []
-  );
+  const souvenirs = [
+    {
+      name: "Traditional Hanbok Set",
+      image: "/beautiful-korean-traditional-hanbok-dress.jpg",
+      rating: 4.9,
+      reviews: 234,
+      category: "Traditional",
+    },
+    {
+      name: "K-Beauty Skincare Kit",
+      image: "/korean-skincare-beauty-products-set.jpg",
+      rating: 4.8,
+      reviews: 456,
+      category: "Beauty",
+    },
+    {
+      name: "Korean Tea Collection",
+      image: "/elegant-korean-traditional-tea-set.jpg",
+      rating: 4.7,
+      reviews: 189,
+      category: "Food",
+    },
+  ];
 
-  const additionalServices = useMemo(
-    () => [
-      {
-        title: "Private Car & Driver",
-        description:
-          "Comfortable private transportation with professional Korean-speaking driver",
-        icon: Award,
-        price: "From $58/day",
-        features: [
-          "Professional Driver",
-          "Flexible Schedule",
-          "Airport Pickup",
-          "Multiple Destinations",
-        ],
-      },
-      {
-        title: "Incheon Airport Transfer",
-        description:
-          "Convenient airport transportation to Seoul city center and major hotels",
-        icon: MapPin,
-        price: "From $18 one-way",
-        features: [
-          "24/7 Available",
-          "Meet & Greet",
-          "Luggage Assistance",
-          "Multilingual Support",
-        ],
-      },
-      {
-        title: "Tickets / WiFi / SIM Cards",
-        description: "Essential travel items for your Korean adventure",
-        icon: Globe,
-        price: "From $11 each",
-        features: [
-          "Attraction Tickets",
-          "Unlimited WiFi",
-          "Local SIM Cards",
-          "T-money Cards",
-        ],
-      },
-      {
-        title: "Layover Tours",
-        description:
-          "Make the most of your layover time with Seoul highlights tour",
-        icon: Clock,
-        price: "From $33 per person",
-        features: [
-          "4-6 Hour Tours",
-          "Airport Pickup",
-          "Major Attractions",
-          "Luggage Storage",
-        ],
-      },
-      {
-        title: "Group Tour Packages",
-        description:
-          "Special rates and customized itineraries for groups of 6 or more",
-        icon: Users,
-        price: "Custom pricing",
-        features: [
-          "Group Discounts",
-          "Custom Itinerary",
-          "Dedicated Guide",
-          "Group Transportation",
-        ],
-      },
-      {
-        title: "Shuttle Bus Packages",
-        description:
-          "Convenient shuttle service to popular destinations outside Seoul",
-        icon: Shield,
-        price: "From $26 per person",
-        features: [
-          "Multiple Routes",
-          "Comfortable Buses",
-          "English Guide",
-          "On-time Departure",
-        ],
-      },
-    ],
-    []
-  );
-
-  const scrollToTours = useCallback(() => {
-    const section = document.getElementById("tours");
-    section?.scrollIntoView({ behavior: "smooth" });
-  }, []);
-
-  useEffect(() => {
-    const slideInterval = setInterval(() => {
-      setCurrentSlideIndex((prev) => (prev + 1) % heroImages.length);
-    }, 5000);
-
-    return () => clearInterval(slideInterval);
-  }, [heroImages.length]);
+  const additionalServices = [
+    {
+      title: "Private Car & Driver",
+      description:
+        "Comfortable private transportation with professional Korean-speaking driver",
+      icon: Award,
+      price: "From $58/day",
+      features: [
+        "Professional Driver",
+        "Flexible Schedule",
+        "Airport Pickup",
+        "Multiple Destinations",
+      ],
+    },
+    {
+      title: "Incheon Airport Transfer",
+      description:
+        "Convenient airport transportation to Seoul city center and major hotels",
+      icon: MapPin,
+      price: "From $18 one-way",
+      features: [
+        "24/7 Available",
+        "Meet & Greet",
+        "Luggage Assistance",
+        "Multilingual Support",
+      ],
+    },
+    {
+      title: "Tickets / WiFi / SIM Cards",
+      description: "Essential travel items for your Korean adventure",
+      icon: Globe,
+      price: "From $11 each",
+      features: [
+        "Attraction Tickets",
+        "Unlimited WiFi",
+        "Local SIM Cards",
+        "T-money Cards",
+      ],
+    },
+    {
+      title: "Layover Tours",
+      description:
+        "Make the most of your layover time with Seoul highlights tour",
+      icon: Clock,
+      price: "From $33 per person",
+      features: [
+        "4-6 Hour Tours",
+        "Airport Pickup",
+        "Major Attractions",
+        "Luggage Storage",
+      ],
+    },
+    {
+      title: "Group Tour Packages",
+      description:
+        "Special rates and customized itineraries for groups of 6 or more",
+      icon: Users,
+      price: "Custom pricing",
+      features: [
+        "Group Discounts",
+        "Custom Itinerary",
+        "Dedicated Guide",
+        "Group Transportation",
+      ],
+    },
+    {
+      title: "Shuttle Bus Packages",
+      description:
+        "Convenient shuttle service to popular destinations outside Seoul",
+      icon: Shield,
+      price: "From $26 per person",
+      features: [
+        "Multiple Routes",
+        "Comfortable Buses",
+        "English Guide",
+        "On-time Departure",
+      ],
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
@@ -324,7 +191,7 @@ export default function HomePage() {
         actions={[
           {
             text: "Explore Tours",
-            onClick: scrollToTours,
+            href: "#tours",
             className:
               "bg-[#651d2a] hover:bg-[#651d2a]/90 text-white px-8 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300",
           },
@@ -359,76 +226,61 @@ export default function HomePage() {
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {popularDestinations.map((destination, index) => {
-              const destinationLinks = [
-                "/destinations/seoul",
-                "/destinations/jeju",
-                "/destinations/busan",
-                "/destinations/dmz",
-              ];
-
-              return (
-                <div
-                  key={index}
-                  className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group"
-                >
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <Image
-                      src={destination.image || "/placeholder.svg"}
-                      alt={destination.name}
-                      width={400}
-                      height={300}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      loading="lazy" // 이미지 lazy loading 추가
-                    />
-                    <div className="absolute top-4 left-4">
-                      <div className="flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3 py-1">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
-                        <span className="text-sm font-medium">
-                          {destination.rating}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="absolute top-4 right-4">
-                      <span className="bg-[#651d2a] text-white px-3 py-1 rounded-full text-xs font-medium">
-                        {destination.duration}
-                      </span>
-                    </div>
+            {popularDestinations.map((tour, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group flex flex-col h-full"
+              >
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  <Image
+                    src={tour.image || "/placeholder.svg"}
+                    alt={tour.title}
+                    width={400}
+                    height={300}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                  <div className="absolute top-4 left-4">
+                    <span className="bg-[#651d2a]/90 text-white px-3 py-1 rounded-full text-xs font-medium">
+                      {categoryDisplayNames[tour.category]}
+                    </span>
                   </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {destination.name}
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                      {destination.description}
-                    </p>
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {destination.highlights.map((highlight, i) => (
-                        <span
-                          key={i}
-                          className="bg-[#eda89b]/20 text-[#651d2a] px-2 py-1 rounded text-xs"
-                        >
-                          {highlight}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-2xl font-bold text-[#651d2a]">
-                        {destination.price}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        ({destination.reviews} reviews)
-                      </span>
-                    </div>
-                    <Link href={destinationLinks[index]}>
-                      <Button className="w-full bg-[#651d2a] hover:bg-[#651d2a]/90 text-white rounded-full">
-                        View Details
-                      </Button>
-                    </Link>
+                  <div className="absolute top-4 right-4">
+                    <span className="bg-white text-[#651d2a] px-3 py-1 rounded-full text-xs font-bold">
+                      {tour.price}
+                    </span>
                   </div>
                 </div>
-              );
-            })}
+                <div className="p-6 flex flex-col flex-1">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    {tour.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-3 h-16">
+                    {tour.description}
+                  </p>
+                  <div className="space-y-2 mb-4">
+                    <div className="text-sm text-[#c4982a] font-medium flex items-center">
+                      <Clock className="w-4 h-4 mr-1" />
+                      {tour.duration}
+                    </div>
+                    {tour.location && (
+                      <div className="text-sm text-gray-500 flex items-center">
+                        <MapPin className="w-4 h-4 mr-1" />
+                        {tour.location}
+                      </div>
+                    )}
+                  </div>
+                  <Link
+                    href={`/tours/${tour.category}/${tour.bokunExperienceId}`}
+                    className="mt-auto"
+                  >
+                    <Button className="w-full bg-[#651d2a] hover:bg-[#651d2a]/90 text-white rounded-full">
+                      Book Now
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -449,75 +301,60 @@ export default function HomePage() {
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8 mb-12">
-            {recommendedTours.map((tour, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group border border-gray-100"
-              >
-                <div className="relative aspect-video overflow-hidden">
-                  <Image
-                    src={tour.image || "/placeholder.svg"}
-                    alt={tour.title}
-                    width={600}
-                    height={400}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    loading="lazy" // 이미지 lazy loading 추가
-                  />
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-[#651d2a] text-white px-3 py-1 rounded-full text-xs font-medium">
-                      {tour.category}
-                    </span>
-                  </div>
-                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1">
-                    <div className="flex items-center space-x-1">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-medium">{tour.rating}</span>
+            {recommendedTours.filter(Boolean).map(
+              (tour, index) =>
+                tour && (
+                  <div
+                    key={index}
+                    className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group border border-gray-100 flex flex-col h-full"
+                  >
+                    <div className="relative aspect-video overflow-hidden">
+                      <Image
+                        src={tour.image || "/placeholder.svg"}
+                        alt={tour.title}
+                        width={600}
+                        height={400}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                      <div className="absolute top-4 left-4">
+                        <span className="bg-[#651d2a] text-white px-3 py-1 rounded-full text-xs font-medium">
+                          {categoryDisplayNames[tour.category]}
+                        </span>
+                      </div>
+                      {tour.price && (
+                        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1">
+                          <span className="text-sm font-bold text-[#651d2a]">
+                            {tour.price}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm text-[#c4982a] font-medium flex items-center">
-                      <Clock className="w-4 h-4 mr-1" />
-                      {tour.duration}
-                    </span>
-                    <div className="text-right">
-                      <span className="text-2xl font-bold text-[#651d2a]">
-                        {tour.price}
-                      </span>
-                      <span className="text-sm text-gray-400 line-through ml-2">
-                        {tour.originalPrice}
-                      </span>
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-3">
-                    {tour.title}
-                  </h3>
-                  <ul className="space-y-2 mb-6">
-                    {tour.features.map((feature, i) => (
-                      <li
-                        key={i}
-                        className="flex items-start text-sm text-gray-600"
+                    <div className="p-6 flex flex-col flex-1">
+                      <div className="flex items-center mb-4">
+                        <span className="text-sm text-[#c4982a] font-medium flex items-center">
+                          <Clock className="w-4 h-4 mr-1" />
+                          {tour.duration}
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-semibold text-gray-800 mb-3">
+                        {tour.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm mb-6 line-clamp-4 h-20">
+                        {tour.description}
+                      </p>
+                      <Link
+                        href={`/tours/${tour.category}/${tour.bokunExperienceId}`}
+                        className="mt-auto"
                       >
-                        <div className="w-2 h-2 bg-[#651d2a] rounded-full mr-3 mt-2 flex-shrink-0"></div>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="flex space-x-3">
-                    <Button className="flex-1 bg-[#651d2a] hover:bg-[#651d2a]/90 text-white py-3 rounded-full">
-                      Book Now
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="px-4 py-3 rounded-full border-[#eda89b] text-[#651d2a] hover:bg-[#eda89b]/10 bg-transparent"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </Button>
+                        <Button className="w-full bg-[#651d2a] hover:bg-[#651d2a]/90 text-white py-3 rounded-full">
+                          Book Now
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                )
+            )}
           </div>
         </div>
       </section>
@@ -537,7 +374,7 @@ export default function HomePage() {
               tour booking
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12 max-w-5xl mx-auto">
             {souvenirs.map((product, index) => (
               <div
                 key={index}
