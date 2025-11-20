@@ -171,7 +171,8 @@ export function transformBokunActivityToTour(
     exclusions: parseHtmlToArray(activity.excluded),
     duration: durationDisplay,
     durationText: activity.durationText || "",
-    price: activity.pricing?.from ? `$${activity.pricing.from}` : "",
+    price: activity.nextDefaultPriceAsText ||
+           (activity.pricing?.from ? `$${activity.pricing.from}` : ""),
     activityCategories: Array.isArray(activity.activityCategories)
       ? activity.activityCategories
       : [],
