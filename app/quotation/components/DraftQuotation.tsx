@@ -64,10 +64,31 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
   // Separate common services (transportation and contents) from day-specific items
   const commonServiceTypes = ['이동수단', '컨텐츠'];
 
-  // Apply onlyPlace filter if enabled
-  const filteredDetails = batchInfo.onlyPlace
-    ? estimateDetails.filter(detail => detail.item.type === '여행지')
-    : estimateDetails;
+  // Apply item filter based on selected types
+  const filteredDetails = React.useMemo(() => {
+    // Parse itemFilter if available
+    let selectedTypes: string[] = [];
+    if (batchInfo.itemFilter) {
+      try {
+        selectedTypes = JSON.parse(batchInfo.itemFilter);
+      } catch (e) {
+        console.error('Failed to parse itemFilter:', e);
+      }
+    }
+
+    // If itemFilter has selections, use it
+    if (selectedTypes.length > 0) {
+      return estimateDetails.filter(detail => selectedTypes.includes(detail.item.type));
+    }
+
+    // Fall back to onlyPlace for backward compatibility
+    if (batchInfo.onlyPlace) {
+      return estimateDetails.filter(detail => detail.item.type === '여행지');
+    }
+
+    // Show all items if no filter is set
+    return estimateDetails;
+  }, [batchInfo.itemFilter, batchInfo.onlyPlace, estimateDetails]);
 
   const daySpecificDetails = filteredDetails.filter(
     detail => !commonServiceTypes.includes(detail.item.type) && detail.days !== 0
