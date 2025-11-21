@@ -16,6 +16,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
+import { getToursFromConfig } from "@/lib/bokun";
+import { multidayToursConfig } from "@/config/tours";
+import MultidayTourList from "@/components/MultidayTourList";
 
 export const revalidate = 3600; // 1시간마다 재생성
 
@@ -24,7 +27,14 @@ export const revalidate = 3600; // 1시간마다 재생성
  *
  * 예약 페이지가 아닌 Multiday Tour가 무엇인지 설명하는 페이지로 재구성
  */
-export default function MultidayTourPage() {
+export default async function MultidayTourPage() {
+  // 서버 사이드에서 투어 데이터 가져오기
+  const toursData = await getToursFromConfig(multidayToursConfig);
+
+  // 임시로 투어를 9개로 복제 (나중에 실제 데이터로 교체 예정)
+  const tours = toursData.length > 0
+    ? Array(9).fill(toursData[0])
+    : [];
   return (
     <div className="min-h-screen bg-[#f5f3f0]">
       {/* Hero Section */}
@@ -144,7 +154,7 @@ export default function MultidayTourPage() {
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Tour Highlights
+              Available Multiday Tours
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               Experience the full spectrum of Korean history and culture across
@@ -152,67 +162,7 @@ export default function MultidayTourPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="p-0 overflow-hidden border-0 shadow-lg">
-              <div className="relative h-64">
-                <Image
-                  src="/images/design-mode/castle1.png"
-                  alt="Royal Palace"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Royal Palaces & Dynasties
-                </h3>
-                <p className="text-gray-600">
-                  Explore the grand palaces of Seoul and understand the Joseon
-                  Dynasty's legacy
-                </p>
-              </div>
-            </Card>
-
-            <Card className="p-0 overflow-hidden border-0 shadow-lg">
-              <div className="relative h-64">
-                <Image
-                  src="/images/design-mode/castle1.png"
-                  alt="Temple Stay"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Temple Stay Experience
-                </h3>
-                <p className="text-gray-600">
-                  Immerse yourself in Buddhist culture with overnight temple
-                  stays
-                </p>
-              </div>
-            </Card>
-
-            <Card className="p-0 overflow-hidden border-0 shadow-lg">
-              <div className="relative h-64">
-                <Image
-                  src="/images/design-mode/castle1.png"
-                  alt="Traditional Village"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Traditional Villages
-                </h3>
-                <p className="text-gray-600">
-                  Visit preserved hanok villages and experience traditional
-                  Korean life
-                </p>
-              </div>
-            </Card>
-          </div>
+          <MultidayTourList tours={tours} initialDisplayCount={3} />
         </div>
       </section>
 
