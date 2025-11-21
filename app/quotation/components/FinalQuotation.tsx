@@ -93,8 +93,8 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
       return estimateDetails.filter(detail => detail.item.type === '여행지');
     }
 
-    // Show all items if no filter is set
-    return estimateDetails;
+    // Show nothing if no filter is selected
+    return [];
   }, [batchInfo.itemFilter, batchInfo.onlyPlace, estimateDetails]);
 
   const daySpecificDetails = filteredDetails.filter(
