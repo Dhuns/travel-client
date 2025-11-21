@@ -157,10 +157,8 @@ export default function SignupPage() {
         privacyAgreed: agreements.privacy,
       });
 
-      alert(
-        "Registration successful! Please check your email for verification."
-      );
-      router.push("/login"); // 회원가입 성공 시 로그인 페이지로 이동
+      // 회원가입 성공 시 이메일 인증 대기 페이지로 이동
+      router.push(`/email-sent?email=${encodeURIComponent(formData.email)}`);
     } catch (error: any) {
       console.error("Signup failed:", error);
       alert(
