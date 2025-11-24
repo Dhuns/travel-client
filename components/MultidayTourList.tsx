@@ -65,6 +65,16 @@ export default function MultidayTourList({
                   <div className="absolute bottom-4 right-4">
                     <FavoriteButton
                       tourId={`${tour.bokunExperienceId}-${index}`}
+                      tourData={{
+                        id: `${tour.bokunExperienceId}-${index}`,
+                        title: tour.title,
+                        image: tour.image || "/placeholder.svg",
+                        description: tour.description,
+                        price: tour.price,
+                        duration: tour.duration,
+                        location: tour.location,
+                        bokunExperienceId: tour.bokunExperienceId,
+                      }}
                     />
                   </div>
                 </div>

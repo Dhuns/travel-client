@@ -232,7 +232,19 @@ export default async function HistoryTourPage() {
                             {tour.badge}
                           </Badge>
                           <div className="absolute bottom-4 right-4">
-                            <FavoriteButton tourId={tour.bokunExperienceId} />
+                            <FavoriteButton
+                              tourId={tour.bokunExperienceId}
+                              tourData={{
+                                id: tour.bokunExperienceId,
+                                title: tour.title,
+                                image: tour.image || "/placeholder.svg",
+                                description: tour.description,
+                                price: tour.price,
+                                duration: tour.duration,
+                                location: tour.location,
+                                bokunExperienceId: tour.bokunExperienceId,
+                              }}
+                            />
                           </div>
                         </div>
 

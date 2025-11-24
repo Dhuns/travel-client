@@ -1,26 +1,48 @@
 "use client";
 
 import { Heart } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { wishlistUtils, WishlistTour } from "@/lib/wishlist";
 
 interface FavoriteButtonProps {
   tourId: string;
+  tourData?: Omit<WishlistTour, "addedDate">;
   className?: string;
 }
 
-export function FavoriteButton({ tourId, className = "" }: FavoriteButtonProps) {
+export function FavoriteButton({
+  tourId,
+  tourData,
+  className = "",
+}: FavoriteButtonProps) {
   const [isFavorite, setIsFavorite] = useState(false);
+
+  // Check if item is in wishlist on mount
+  useEffect(() => {
+    setIsFavorite(wishlistUtils.isInWishlist(tourId));
+  }, [tourId]);
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsFavorite(!isFavorite);
 
-    // TODO: 나중에 실제 저장 로직 추가 (localStorage, API 등)
     if (!isFavorite) {
-      console.log(`Added to favorites: ${tourId}`);
+      // Add to wishlist
+      if (tourData) {
+        const success = wishlistUtils.addToWishlist({
+          ...tourData,
+          id: tourId,
+        });
+        if (success) {
+          setIsFavorite(true);
+        }
+      }
     } else {
-      console.log(`Removed from favorites: ${tourId}`);
+      // Remove from wishlist
+      const success = wishlistUtils.removeFromWishlist(tourId);
+      if (success) {
+        setIsFavorite(false);
+      }
     }
   };
 

@@ -356,28 +356,28 @@ export default function Header() {
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-[#eda89b]/10 hover:text-[#651d2a]"
                       onClick={() => setUserDropdownOpen(false)}
                     >
-                      마이페이지
+                      My Page
                     </Link>
                     <Link
                       href="/orders"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-[#eda89b]/10 hover:text-[#651d2a]"
                       onClick={() => setUserDropdownOpen(false)}
                     >
-                      주문내역
+                      Order History
                     </Link>
                     <Link
                       href="/wishlist"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-[#eda89b]/10 hover:text-[#651d2a]"
                       onClick={() => setUserDropdownOpen(false)}
                     >
-                      찜한상품
+                      Wishlist
                     </Link>
                     <hr className="my-1" />
                     <button
                       onClick={handleLogout}
                       className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                     >
-                      로그아웃
+                      Logout
                     </button>
                   </div>
                 )}
@@ -495,7 +495,7 @@ export default function Header() {
                 className="hover:text-[#651d2a] transition-colors duration-300 py-2 flex items-center justify-between"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <span>장바구니</span>
+                <span>Cart</span>
                 {cartItemCount > 0 && (
                   <span className="bg-[#651d2a] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                     {cartItemCount > 99 ? "99+" : cartItemCount}
@@ -508,7 +508,7 @@ export default function Header() {
                   className="hover:text-[#651d2a] transition-colors duration-300 py-2"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  로그인
+                  Login
                 </Link>
               ) : (
                 <>
@@ -517,14 +517,21 @@ export default function Header() {
                     className="hover:text-[#651d2a] transition-colors duration-300 py-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    마이페이지
+                    My Page
                   </Link>
                   <Link
                     href="/orders"
                     className="hover:text-[#651d2a] transition-colors duration-300 py-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    주문내역
+                    Order History
+                  </Link>
+                  <Link
+                    href="/wishlist"
+                    className="hover:text-[#651d2a] transition-colors duration-300 py-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Wishlist
                   </Link>
                   <button
                     onClick={() => {
@@ -533,7 +540,7 @@ export default function Header() {
                     }}
                     className="text-left hover:text-red-600 transition-colors duration-300 py-2"
                   >
-                    로그아웃
+                    Logout
                   </button>
                 </>
               )}
