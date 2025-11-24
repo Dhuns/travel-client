@@ -252,7 +252,19 @@ export default async function HomePage() {
                     </span>
                   </div>
                   <div className="absolute bottom-3 right-3">
-                    <FavoriteButton tourId={tour.bokunExperienceId} />
+                    <FavoriteButton
+                      tourId={tour.bokunExperienceId}
+                      tourData={{
+                        id: tour.bokunExperienceId,
+                        title: tour.title,
+                        image: tour.image || "/placeholder.svg",
+                        description: tour.description,
+                        price: tour.price,
+                        duration: tour.duration,
+                        location: tour.location,
+                        bokunExperienceId: tour.bokunExperienceId,
+                      }}
+                    />
                   </div>
                 </div>
                 <div className="p-6 flex flex-col flex-1">
@@ -334,7 +346,19 @@ export default async function HomePage() {
                         </div>
                       )}
                       <div className="absolute bottom-3 right-3">
-                        <FavoriteButton tourId={tour.bokunExperienceId} />
+                        <FavoriteButton
+                          tourId={tour.bokunExperienceId}
+                          tourData={{
+                            id: tour.bokunExperienceId,
+                            title: tour.title,
+                            image: tour.image || "/placeholder.svg",
+                            description: tour.description,
+                            price: tour.price,
+                            duration: tour.duration,
+                            location: tour.location,
+                            bokunExperienceId: tour.bokunExperienceId,
+                          }}
+                        />
                       </div>
                     </div>
                     <div className="p-6 flex flex-col flex-1">

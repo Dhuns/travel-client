@@ -112,7 +112,19 @@ export default async function ToursPage() {
                   </Badge>
                 )}
                 <div className="absolute bottom-3 right-3">
-                  <FavoriteButton tourId={tour.bokunExperienceId} />
+                  <FavoriteButton
+                    tourId={tour.bokunExperienceId}
+                    tourData={{
+                      id: tour.bokunExperienceId,
+                      title: tour.title,
+                      image: tour.image || "/placeholder.svg",
+                      description: tour.description,
+                      price: tour.price,
+                      duration: tour.duration,
+                      location: tour.location,
+                      bokunExperienceId: tour.bokunExperienceId,
+                    }}
+                  />
                 </div>
               </div>
 
