@@ -254,39 +254,39 @@ export default function HomePageClient({
       {/* 2. Main Services Split Section */}
       <section
         id="main-services"
-        className="relative h-screen flex flex-col lg:flex-row"
+        className="relative min-h-screen lg:h-screen flex flex-col lg:flex-row"
       >
         {/* Left: AI Chatbot */}
-        <div className="relative w-full lg:w-1/2 bg-[#c4982a] flex items-center justify-center p-8 lg:p-16 overflow-hidden group">
+        <div className="relative w-full lg:w-1/2 bg-[#c4982a] flex items-center justify-center py-16 px-6 md:py-20 md:px-12 lg:p-16 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1),transparent)]" />
-          <div className="absolute top-10 right-10 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute top-10 right-10 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse hidden lg:block" />
 
           <div className="relative z-10 max-w-xl text-white">
-            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
+            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-4 lg:mb-6">
               <Sparkles className="w-4 h-4" />
               <span className="text-sm font-bold">AI-Powered Planning</span>
             </div>
 
-            <h2 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 lg:mb-6 leading-tight">
               Plan Your
               <br />
               Perfect Trip
             </h2>
 
-            <p className="text-xl text-white/90 mb-8 leading-relaxed">
+            <p className="text-base md:text-lg lg:text-xl text-white/90 mb-6 lg:mb-8 leading-relaxed">
               Get instant itinerary suggestions, real-time advice, and seamless
               booking with our intelligent travel assistant.
             </p>
 
-            <ul className="space-y-4 mb-10">
+            <ul className="space-y-3 lg:space-y-4 mb-6 lg:mb-10">
               {[
                 "24/7 Smart Planning",
                 "Custom Itineraries",
                 "Instant Recommendations",
               ].map((item, i) => (
-                <li key={i} className="flex items-center text-lg">
-                  <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center mr-3">
-                    <ChevronRight className="w-4 h-4" />
+                <li key={i} className="flex items-center text-base lg:text-lg">
+                  <div className="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-white/20 flex items-center justify-center mr-3">
+                    <ChevronRight className="w-3 h-3 lg:w-4 lg:h-4" />
                   </div>
                   {item}
                 </li>
@@ -295,43 +295,43 @@ export default function HomePageClient({
 
             <Button
               size="lg"
-              className="bg-white text-[#c4982a] hover:bg-white/90 px-10 py-7 text-lg rounded-full shadow-2xl group/btn"
+              className="bg-white text-[#c4982a] hover:bg-white/90 px-6 py-5 md:px-8 md:py-6 lg:px-10 lg:py-7 text-base lg:text-lg rounded-full shadow-2xl group/btn"
             >
-              <MessageCircle className="w-5 h-5 mr-2" />
+              <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
               Start Chat Now
-              <ArrowRight className="w-5 h-5 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+              <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5 ml-2 group-hover/btn:translate-x-1 transition-transform" />
             </Button>
           </div>
         </div>
 
         {/* Right: Oneday Legacy */}
-        <div className="relative w-full lg:w-1/2 bg-[#651d2a] flex items-center justify-center p-8 lg:p-16 overflow-hidden group">
+        <div className="relative w-full lg:w-1/2 bg-[#651d2a] flex items-center justify-center py-16 px-6 md:py-20 md:px-12 lg:p-16 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(255,255,255,0.05),transparent)]" />
-          <div className="absolute bottom-10 left-10 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-10 left-10 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse hidden lg:block" />
 
           <div className="relative z-10 max-w-xl text-white">
-            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
+            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-4 lg:mb-6">
               <Star className="w-4 h-4 fill-white" />
               <span className="text-sm font-bold">Most Popular</span>
             </div>
 
-            <h2 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 lg:mb-6 leading-tight">
               Classic
               <br />
               Oneday Tours
             </h2>
 
-            <p className="text-xl text-white/90 mb-8 leading-relaxed">
+            <p className="text-base md:text-lg lg:text-xl text-white/90 mb-6 lg:mb-8 leading-relaxed">
               Join thousands of travelers on our beloved daily group tours to
               Nami Island, DMZ, and iconic Korean destinations.
             </p>
 
-            <ul className="space-y-4 mb-10">
+            <ul className="space-y-3 lg:space-y-4 mb-6 lg:mb-10">
               {["Daily Departures", "Small Groups", "Expert Guides"].map(
                 (item, i) => (
-                  <li key={i} className="flex items-center text-lg">
-                    <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center mr-3">
-                      <ChevronRight className="w-4 h-4" />
+                  <li key={i} className="flex items-center text-base lg:text-lg">
+                    <div className="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-white/20 flex items-center justify-center mr-3">
+                      <ChevronRight className="w-3 h-3 lg:w-4 lg:h-4" />
                     </div>
                     {item}
                   </li>
@@ -342,23 +342,23 @@ export default function HomePageClient({
             <Link href="https://www.onedaykorea.com" target="_blank">
               <Button
                 size="lg"
-                className="bg-white text-[#651d2a] hover:bg-white/90 px-10 py-7 text-lg rounded-full shadow-2xl group/btn"
+                className="bg-white text-[#651d2a] hover:bg-white/90 px-6 py-5 md:px-8 md:py-6 lg:px-10 lg:py-7 text-base lg:text-lg rounded-full shadow-2xl group/btn"
               >
-                <Calendar className="w-5 h-5 mr-2" />
+                <Calendar className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
                 Explore Tours
-                <ExternalLink className="w-5 h-5 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+                <ExternalLink className="w-4 h-4 lg:w-5 lg:h-5 ml-2 group-hover/btn:translate-x-1 transition-transform" />
               </Button>
             </Link>
           </div>
         </div>
 
         {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/70 z-20">
-          <span className="text-sm font-semibold tracking-wider uppercase">
+        <div className="absolute bottom-4 lg:bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/70 z-20">
+          <span className="text-xs lg:text-sm font-semibold tracking-wider uppercase">
             Scroll Down
           </span>
           <button onClick={scrollToTours} className="focus:outline-none">
-            <ChevronRight className="w-6 h-6 rotate-90 animate-bounce" />
+            <ChevronRight className="w-5 h-5 lg:w-6 lg:h-6 rotate-90 animate-bounce" />
           </button>
         </div>
       </section>
