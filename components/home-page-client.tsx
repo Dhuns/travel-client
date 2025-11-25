@@ -98,11 +98,14 @@ export default function HomePageClient({ children }: HomePageClientProps) {
     section?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
-  // 3초 후 자동 스크롤 (main-services 섹션으로)
+  // 4.7초 후 자동 스크롤 (스크롤 위치가 맨 위일 때만)
   useEffect(() => {
     const timer = setTimeout(() => {
-      const section = document.getElementById("main-services");
-      section?.scrollIntoView({ behavior: "smooth" });
+      // 스크롤이 맨 위에 있을 때만 자동 스크롤 실행
+      if (window.scrollY < 100) {
+        const section = document.getElementById("main-services");
+        section?.scrollIntoView({ behavior: "smooth" });
+      }
     }, 4700);
 
     return () => clearTimeout(timer);
