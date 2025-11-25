@@ -16,6 +16,7 @@ import {
   getGoogleAuthUrl,
   signup,
 } from "@/src/shared/apis/user";
+import { isValidPassword, ValidationMessages } from "@/src/shared/utils/validation";
 
 import { Button } from "@/components/ui/button";
 import type React from "react";
@@ -55,6 +56,8 @@ export default function SignupPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [emailChecked, setEmailChecked] = useState(false);
   const [emailAvailable, setEmailAvailable] = useState(false);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 약관 동의 상태 관리
   const [agreements, setAgreements] = useState({
@@ -86,6 +89,15 @@ export default function SignupPage() {
       return;
     }
 
+    // 이메일 형식 검증
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      alert("Please enter a valid email address");
+      return;
+    }
+
+    setIsCheckingEmail(true);
+
     // 백엔드 이메일(username) 중복확인 API 호출
     try {
       await checkUsername(formData.email);
@@ -97,6 +109,8 @@ export default function SignupPage() {
       setEmailChecked(true);
       setEmailAvailable(false);
       alert(error.response?.data?.message || "This email is already in use");
+    } finally {
+      setIsCheckingEmail(false);
     }
   };
 
@@ -130,12 +144,12 @@ export default function SignupPage() {
     }
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+      alert(ValidationMessages.PASSWORD_MISMATCH);
       return;
     }
 
-    if (formData.password.length < 8) {
-      alert("Password must be at least 8 characters long");
+    if (!isValidPassword(formData.password)) {
+      alert(ValidationMessages.PASSWORD_TOO_SHORT);
       return;
     }
 
@@ -145,6 +159,7 @@ export default function SignupPage() {
     }
 
     // 백엔드 회원가입 API 호출
+    setIsSubmitting(true);
     try {
       await signup({
         username: formData.email, // email을 username으로 사용
@@ -164,6 +179,8 @@ export default function SignupPage() {
       alert(
         error.response?.data?.message || "Signup failed. Please try again."
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -242,9 +259,10 @@ export default function SignupPage() {
                   <Button
                     type="button"
                     onClick={handleCheckEmail}
-                    className="px-6 bg-slate-600 hover:bg-slate-700 text-white whitespace-nowrap"
+                    disabled={isCheckingEmail}
+                    className="px-6 bg-slate-600 hover:bg-slate-700 text-white whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Check
+                    {isCheckingEmail ? "Checking..." : "Check"}
                   </Button>
                 </div>
                 {emailChecked && (
@@ -455,9 +473,10 @@ export default function SignupPage() {
               {/* 회원가입 버튼 */}
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-[#651d2a] to-[#7a2433] hover:from-[#7a2433] hover:to-[#8b2a3d] text-white py-3 rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg"
+                disabled={isSubmitting}
+                className="w-full bg-gradient-to-r from-[#651d2a] to-[#7a2433] hover:from-[#7a2433] hover:to-[#8b2a3d] text-white py-3 rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Create Account
+                {isSubmitting ? "Creating Account..." : "Create Account"}
               </Button>
             </form>
 
