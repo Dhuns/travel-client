@@ -1,12 +1,6 @@
-import { Suspense } from "react";
-
-import { Button } from "@/components/ui/button";
-import { TourGrid } from "@/components/tours/tour-grid";
 import { TourGridSkeleton } from "@/components/tours/tour-card-skeleton";
 
-export const revalidate = 3600; // 1시간마다 재생성
-
-export default function ToursPage() {
+export default function ToursLoading() {
   return (
     <div className="min-h-screen bg-[#f5f3f0]">
       {/* Hero Section */}
@@ -53,7 +47,7 @@ export default function ToursPage() {
         </div>
       </div>
 
-      {/* All Tours Grid */}
+      {/* All Tours Grid with Skeleton */}
       <div className="container mx-auto px-6 py-12">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-800 mb-3">
@@ -65,9 +59,7 @@ export default function ToursPage() {
           <div className="w-16 h-1 bg-[#651d2a] mx-auto mt-4 rounded-full"></div>
         </div>
 
-        <Suspense fallback={<TourGridSkeleton count={8} />}>
-          <TourGrid />
-        </Suspense>
+        <TourGridSkeleton count={8} />
       </div>
 
       {/* CTA Section */}
@@ -80,12 +72,7 @@ export default function ToursPage() {
             Let us create a custom tour just for you. Our local experts will
             design the perfect Korean experience.
           </p>
-          <Button
-            size="lg"
-            className="bg-white text-[#651d2a] hover:bg-gray-100 font-semibold px-6"
-          >
-            Create Custom Tour
-          </Button>
+          <div className="h-12 w-48 bg-white/20 rounded-lg mx-auto animate-pulse"></div>
         </div>
       </div>
     </div>
