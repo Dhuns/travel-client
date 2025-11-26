@@ -32,11 +32,11 @@ interface HomePageClientProps {
 export default function HomePageClient({ children }: HomePageClientProps) {
   const tourCategories = [
     {
-      title: "Private Tours",
-      description: "Exclusive experiences tailored just for you",
+      title: "History Tours",
+      description: "Deep dive into Korea's rich heritage",
       image: "/beautiful-korean-traditional-palace-with-tourists-.jpg",
-      link: "/tours/private",
-      icon: Users,
+      link: "/tours/history",
+      icon: MapPin,
       color: "#651d2a", // tumakr-maroon
     },
     {
@@ -48,11 +48,11 @@ export default function HomePageClient({ children }: HomePageClientProps) {
       color: "#c4982a", // tumakr-mustard
     },
     {
-      title: "Korea  Tour",
-      description: "Deep dive into Korea's rich heritage",
+      title: "Private Tours",
+      description: "Exclusive experiences tailored just for you",
       image: "/korean-dmz-border-historical-site-and-observation-.jpg",
-      link: "/tours/history",
-      icon: MapPin,
+      link: "/tours/private",
+      icon: Users,
       color: "#6d8675", // tumakr-sage-green
     },
   ];

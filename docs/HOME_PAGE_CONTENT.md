@@ -7,38 +7,48 @@
 ## 1. Hero Section (첫 화면)
 
 ### 배지 텍스트
+
 ```
 Premium Korea Travel Experience
 ```
+
 **위치:** 라인 167
 
 ### 메인 타이틀
+
 ```
 tumakr
 Korea History Tour
 Curated by AI, Guided by Experts.
 ```
+
 **위치:** 라인 173-179
 
 ### 서브 설명
+
 ```
 Design your perfect trip with our intelligent assistant or explore our premium tour collections.
 ```
+
 **위치:** 라인 183-184
 
 ### 버튼 텍스트
+
 - **첫 번째 버튼:** `Chat with AI Planner` (라인 197)
 - **두 번째 버튼:** `Explore Tours` (라인 209)
 
 ### 챗봇 미리보기 (오른쪽)
+
 - **AI 메시지:** `Hello! I can help you plan your Korea trip.` (라인 224)
 - **AI 서브 메시지:** `Looking for a private family tour or a historical adventure?` (라인 227)
 - **사용자 메시지:** `I want to visit Gyeongbokgung and have a Hanbok experience!` (라인 236)
 
 ### 스크롤 인디케이터
+
 ```
 Scroll Down
 ```
+
 **위치:** 라인 246
 
 ---
@@ -48,22 +58,26 @@ Scroll Down
 ### 왼쪽 패널 (AI Chatbot) - 배경색: #c4982a (mustard)
 
 #### 배지
+
 ```
 AI-Powered Planning
 ```
 
 #### 타이틀
+
 ```
 Plan Your
 Perfect Trip
 ```
 
 #### 설명
+
 ```
 Get instant itinerary suggestions, real-time advice, and seamless booking with our intelligent travel assistant.
 ```
 
 #### 특징 리스트
+
 ```
 - 24/7 Smart Planning
 - Custom Itineraries
@@ -71,6 +85,7 @@ Get instant itinerary suggestions, real-time advice, and seamless booking with o
 ```
 
 #### 버튼
+
 ```
 Start Chat Now
 ```
@@ -80,22 +95,26 @@ Start Chat Now
 ### 오른쪽 패널 (Oneday Tours) - 배경색: #651d2a (maroon)
 
 #### 배지
+
 ```
 Most Popular
 ```
 
 #### 타이틀
+
 ```
 Classic
 Oneday Tours
 ```
 
 #### 설명
+
 ```
 Join thousands of travelers on our beloved daily group tours to Nami Island, DMZ, and iconic Korean destinations.
 ```
 
 #### 특징 리스트
+
 ```
 - Daily Departures
 - Small Groups
@@ -103,11 +122,13 @@ Join thousands of travelers on our beloved daily group tours to Nami Island, DMZ
 ```
 
 #### 버튼
+
 ```
 Explore Tours
 ```
 
 #### 외부 링크
+
 ```
 https://www.onedaykorea.com
 ```
@@ -117,24 +138,27 @@ https://www.onedaykorea.com
 ## 3. tumakr Exclusives Section (투어 카테고리)
 
 ### 섹션 헤더
+
 - **배지:** `Curated Experiences`
 - **타이틀:** `tumakr Exclusives`
 - **설명:** `Choose your adventure from our premium collection`
 
 ### 투어 카테고리 데이터 (라인 59-84)
 
-#### Private Tours
+#### History Tour
+
 ```javascript
 {
-  title: "Private Tours",
-  description: "Exclusive experiences tailored just for you",
+  title: "History Tour",
+  description: "Deep dive into Korea's rich heritage",
   image: "/beautiful-korean-traditional-palace-with-tourists-.jpg",
-  link: "/tours/private",
+  link: "/tours/history",
   color: "#651d2a" // maroon
 }
 ```
 
 #### Multiday Tours
+
 ```javascript
 {
   title: "Multiday Tours",
@@ -145,13 +169,14 @@ https://www.onedaykorea.com
 }
 ```
 
-#### Korea Tour
+#### Private Tours
+
 ```javascript
 {
-  title: "Korea Tour",
-  description: "Deep dive into Korea's rich heritage",
+  title: "Private Tours",
+  description: "Exclusive experiences tailored just for you",
   image: "/korean-dmz-border-historical-site-and-observation-.jpg",
-  link: "/tours/history",
+  link: "/tours/private",
   color: "#6d8675" // sage-green
 }
 ```
@@ -161,6 +186,7 @@ https://www.onedaykorea.com
 ## 4. Most Popular Destinations Section
 
 ### 섹션 헤더
+
 - **타이틀:** `Most Popular Destinations`
 - **설명:** `Discover Korea's most beloved destinations with our expert local guides`
 
@@ -171,22 +197,26 @@ https://www.onedaykorea.com
 ## 5. AI Chatbot Promotion Section
 
 ### 배지
+
 ```
 Powered by AI
 ```
 
 ### 타이틀
+
 ```
 Not Sure Where
 to Start?
 ```
 
 ### 설명
+
 ```
 Our AI assistant connects you to everything: from classic Oneday tours to custom private adventures.
 ```
 
 ### 기능 카드
+
 ```
 - Find Legacy Tours
 - Custom Itineraries
@@ -195,11 +225,13 @@ Our AI assistant connects you to everything: from classic Oneday tours to custom
 ```
 
 ### 버튼
+
 ```
 Launch AI Chat
 ```
 
 ### 챗봇 프리뷰 (오른쪽 카드)
+
 - **타이틀:** `AI Travel Assistant`
 - **상태:** `Online now`
 - **사용자 메시지:** `I want to visit Nami Island tomorrow. Any tours available?`
@@ -207,6 +239,7 @@ Launch AI Chat
 - **타이핑 인디케이터:** `AI is typing...`
 
 ### 플로팅 배지
+
 ```
 Free to Use! ✨
 ```
@@ -216,6 +249,7 @@ Free to Use! ✨
 ## 6. Goods Showcase Section (기념품)
 
 ### 섹션 헤더
+
 - **배지:** `Exclusive Benefits`
 - **타이틀:** `Memories to Take Home`
 - **설명:** `Receive premium Korean souvenirs with select tour bookings`
@@ -243,6 +277,7 @@ const goods = [
 ```
 
 ### 카드 내 텍스트
+
 - **배지:** `FREE`
 - **설명:** `Complimentary with tour`
 
@@ -251,6 +286,7 @@ const goods = [
 ## 7. FAQ Section
 
 ### 섹션 헤더
+
 - **타이틀:** `Frequently Asked Questions`
 - **설명:** `Everything you need to know about planning your trip`
 
@@ -260,15 +296,18 @@ const goods = [
 const faqs = [
   {
     question: "What is the difference between Oneday Tours and other tours?",
-    answer: "Oneday Tours focus on classic day trips to popular spots. Our Private, Multiday, and History tours offer deeper, more specialized experiences with custom itineraries.",
+    answer:
+      "Oneday Tours focus on classic day trips to popular spots. Our Private, Multiday, and History tours offer deeper, more specialized experiences with custom itineraries.",
   },
   {
     question: "How does the AI Chatbot work?",
-    answer: "Our AI Chatbot helps you customize your itinerary, answer questions about Korea, and even guide you to our legacy Oneday Tour options.",
+    answer:
+      "Our AI Chatbot helps you customize your itinerary, answer questions about Korea, and even guide you to our legacy Oneday Tour options.",
   },
   {
     question: "Are the souvenirs really free?",
-    answer: "Yes! We offer exclusive complimentary gifts like hoodies, tote bags, and tumblers with specific tour bookings as a thank you for choosing us.",
+    answer:
+      "Yes! We offer exclusive complimentary gifts like hoodies, tote bags, and tumblers with specific tour bookings as a thank you for choosing us.",
   },
 ];
 ```
@@ -277,12 +316,12 @@ const faqs = [
 
 ## 브랜드 컬러 가이드
 
-| 이름 | Hex 코드 | 용도 |
-|------|----------|------|
-| Maroon | `#651d2a` | 메인 브랜드 색상, 버튼, 헤더 |
-| Mustard | `#c4982a` | AI 챗봇 섹션, 강조 |
-| Sage Green | `#6d8675` | 기념품 섹션, 보조 색상 |
-| Dusty Pink | `#eda89b` | 배경 그라데이션 |
+| 이름       | Hex 코드  | 용도                         |
+| ---------- | --------- | ---------------------------- |
+| Maroon     | `#651d2a` | 메인 브랜드 색상, 버튼, 헤더 |
+| Mustard    | `#c4982a` | AI 챗봇 섹션, 강조           |
+| Sage Green | `#6d8675` | 기념품 섹션, 보조 색상       |
+| Dusty Pink | `#eda89b` | 배경 그라데이션              |
 
 ---
 
@@ -301,12 +340,12 @@ setTimeout(() => {
 
 ## 이미지 경로
 
-| 섹션 | 이미지 경로 |
-|------|------------|
-| Hero 배경 | `/images/design-mode/castle4.png` |
-| Private Tours | `/beautiful-korean-traditional-palace-with-tourists-.jpg` |
+| 섹션           | 이미지 경로                                               |
+| -------------- | --------------------------------------------------------- |
+| Hero 배경      | `/images/design-mode/castle4.png`                         |
+| History Tours  | `/beautiful-korean-traditional-palace-with-tourists-.jpg` |
 | Multiday Tours | `/beautiful-jeju-island-hallasan-mountain-and-nature.jpg` |
-| Korea Tour | `/korean-dmz-border-historical-site-and-observation-.jpg` |
-| 기념품 1 | `/images/design-mode/gift-1.png` |
-| 기념품 2 | `/images/design-mode/gift-2.png` |
-| 기념품 3 | `/images/design-mode/gift-3.png` |
+| Private Tours  | `/korean-dmz-border-historical-site-and-observation-.jpg` |
+| 기념품 1       | `/images/design-mode/gift-1.png`                          |
+| 기념품 2       | `/images/design-mode/gift-2.png`                          |
+| 기념품 3       | `/images/design-mode/gift-3.png`                          |
