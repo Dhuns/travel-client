@@ -105,6 +105,18 @@ export const resendVerificationEmail = async (email: string): Promise<{ success:
 	return response.data;
 };
 
+// 비밀번호 재설정 요청
+export const requestPasswordReset = async (email: string): Promise<{ success: boolean; message: string }> => {
+	const response = await axios.post(`${API_URL}/user/request-password-reset`, { email });
+	return response.data;
+};
+
+// 비밀번호 재설정
+export const resetPassword = async (token: string, newPassword: string): Promise<{ success: boolean; message: string }> => {
+	const response = await axios.post(`${API_URL}/user/reset-password`, { token, newPassword });
+	return response.data;
+};
+
 // Google OAuth
 export const getGoogleAuthUrl = (): string => {
 	return `${API_URL}/user/auth/google`;
