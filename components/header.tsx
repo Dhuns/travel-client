@@ -427,7 +427,7 @@ export default function Header() {
 
         {/* 모바일 메뉴 */}
         {mobileMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-gray-200 bg-white/95 backdrop-blur-md">
+          <div className="lg:hidden py-4 border-t border-gray-200">
             <div className="flex flex-col space-y-4 text-sm text-gray-600">
               {/* Tours 카테고리 */}
               <div className="border-b border-gray-100 pb-2">
@@ -452,44 +452,35 @@ export default function Header() {
                 </div>
               </div>
 
-              {/* 나머지 메뉴 항목들 */}
-              {navigationItems.slice(1).map((item) =>
-                item.hasDropdown && item.isContact ? (
-                  <div
-                    key={item.href}
-                    className="border-b border-gray-100 pb-2"
-                  >
-                    <div className="py-2 font-medium text-gray-900">
-                      {item.label}
-                    </div>
-                    <div className="pl-4 space-y-2 mt-2">
-                      <Link
-                        href="/chat"
-                        className="block py-1 text-xs text-gray-500 hover:text-[#651d2a] transition-colors"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        AI Assistant
-                      </Link>
-                      <Link
-                        href="/contact"
-                        className="block py-1 text-xs text-gray-500 hover:text-[#651d2a] transition-colors"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        Email Us
-                      </Link>
-                    </div>
-                  </div>
-                ) : (
+              {/* Souvenir 메뉴 */}
+              <Link
+                href="/souvenir"
+                className="hover:text-[#651d2a] transition-colors duration-300 py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Souvenir
+              </Link>
+
+              {/* Contact 카테고리 */}
+              <div className="border-b border-gray-100 pb-2">
+                <div className="py-2 font-medium text-gray-900">Contact</div>
+                <div className="pl-4 space-y-2 mt-2">
                   <Link
-                    key={item.href}
-                    href={item.href}
-                    className="hover:text-[#651d2a] transition-colors duration-300 py-2"
+                    href="/chat"
+                    className="block py-1 text-xs text-gray-500 hover:text-[#651d2a] transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    {item.label}
+                    AI Assistant
                   </Link>
-                )
-              )}
+                  <Link
+                    href="/contact"
+                    className="block py-1 text-xs text-gray-500 hover:text-[#651d2a] transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Email Us
+                  </Link>
+                </div>
+              </div>
               <Link
                 href="/cart"
                 className="hover:text-[#651d2a] transition-colors duration-300 py-2 flex items-center justify-between"
