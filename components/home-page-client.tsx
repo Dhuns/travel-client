@@ -79,7 +79,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
     {
       question: "What is the difference between Oneday Tours and other tours?",
       answer:
-        "Oneday Tours focus on classic day trips to popular spots. Our Private, Multiday, and History tours offer deeper, more specialized experiences with custom itineraries.",
+        "Our platform offers a wide range of specialized experiences beyond classic day trips. While our Oneday Tours are perfect for efficient visits to popular spots, we specialize in Private, Multiday, and Thematic Tours that provide deeper, more flexible, and custom-designed itineraries. Furthermore, our service integrates a powerful chatbot for custom itinerary planning and offers unique, high-quality merchandise (Goods) to enhance your journey.",
     },
     {
       question: "How does the AI Chatbot work?",
