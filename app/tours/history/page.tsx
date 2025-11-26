@@ -1,5 +1,3 @@
-"use client";
-
 import {
   ArrowRight,
   BookOpen,
@@ -16,151 +14,16 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { FavoriteButton } from "@/components/favorite-button";
 import Link from "next/link";
-import type React from "react";
-import { historyTours, type Tour } from "@/data/mockTours";
-import { useState, useEffect } from "react";
+import { getToursFromConfig } from "@/lib/bokun";
+import { historyToursConfig } from "@/config/tours";
 
-export default function HistoryTourPage() {
-  // 투어 데이터 상태
-  const [tours, setTours] = useState<Tour[]>([]);
-  const [loading, setLoading] = useState(true);
+export const revalidate = 3600; // 1시간마다 재생성
 
-  // 폼 상태 관리
-  const [formData, setFormData] = useState({
-    name: "",
-    contactMethod: "",
-    email: "",
-    travelDate: "",
-    numberOfTravelers: "",
-  });
-
-  // HTML 태그 제거 함수
-  const stripHtmlTags = (html: string): string => {
-    return html.replace(/<[^>]*>/g, "").trim();
-  };
-
-  // HTML을 배열로 파싱하는 함수
-  const parseHtmlToArray = (html: string | string[]): string[] => {
-    if (Array.isArray(html)) return html;
-    if (!html || typeof html !== "string") return [];
-
-    // <p> 태그로 분리하여 텍스트만 추출
-    const matches = html.match(/<p[^>]*>(.*?)<\/p>/g);
-    if (!matches) return [];
-
-    return matches
-      .map((match) => {
-        const text = match.replace(/<[^>]*>/g, "").trim();
-        return text;
-      })
-      .filter((text) => text.length > 0);
-  };
-
-  // knowBeforeYouGoItems 코드를 텍스트로 변환
-  const parseKnowBeforeYouGo = (items: string[] | null): string[] => {
-    if (!Array.isArray(items)) return [];
-
-    const translations: Record<string, string> = {
-      PUBLIC_TRANSPORTATION_NEARBY: "Public transportation nearby",
-      WHEELCHAIR_ACCESSIBLE: "Wheelchair accessible",
-      STROLLER_ACCESSIBLE: "Stroller accessible",
-      INFANTS_ALLOWED: "Infants allowed",
-      NOT_RECOMMENDED_FOR_PREGNANT: "Not recommended for pregnant travelers",
-      NO_HEART_PROBLEMS: "Not recommended for travelers with heart problems",
-      MODERATE_PHYSICAL_FITNESS: "Moderate physical fitness required",
-    };
-
-    return items.map((item) => translations[item] || item);
-  };
-
-  // Bokun API에서 투어 데이터 가져오기
-  useEffect(() => {
-    async function fetchTours() {
-      try {
-        const tourPromises = historyTours.map(async (tour) => {
-          try {
-            const response = await fetch(
-              `/api/bokun/activity/${tour.bokunExperienceId}`
-            );
-            if (response.ok) {
-              const bokunData = await response.json();
-              // Bokun 데이터를 우리 형식으로 변환
-              const rawDescription =
-                bokunData.excerpt ||
-                bokunData.shortDescription ||
-                bokunData.description ||
-                "";
-              const description = stripHtmlTags(rawDescription);
-
-              // Duration 계산
-              let durationDisplay = "";
-              if (bokunData.durationHours && bokunData.durationMinutes) {
-                durationDisplay = `${bokunData.durationHours}h ${bokunData.durationMinutes}m`;
-              } else if (bokunData.durationHours) {
-                durationDisplay = `${bokunData.durationHours} hours`;
-              } else if (bokunData.duration) {
-                durationDisplay = `${bokunData.duration} hours`;
-              }
-
-              return {
-                ...tour,
-                title: bokunData.title || "",
-                description: description,
-                image: bokunData.photos?.[0]?.url || tour.image,
-                location:
-                  bokunData.googlePlace?.name ||
-                  bokunData.meetingPoint?.title ||
-                  bokunData.address?.city ||
-                  "",
-                duration: durationDisplay,
-                durationText: bokunData.durationText || "",
-                price: bokunData.pricing?.from
-                  ? `$${bokunData.pricing.from}`
-                  : "",
-                included: parseHtmlToArray(bokunData.included),
-                exclusions: parseHtmlToArray(bokunData.excluded),
-                highlights: Array.isArray(bokunData.highlights)
-                  ? bokunData.highlights
-                  : [],
-                activityCategories: Array.isArray(bokunData.activityCategories)
-                  ? bokunData.activityCategories
-                  : [],
-                knowBeforeYouGo: parseKnowBeforeYouGo(
-                  bokunData.knowBeforeYouGoItems
-                ),
-                minAge: bokunData.minAge || 0,
-                cancellationPolicy: bokunData.cancellationPolicy?.title || "",
-              };
-            }
-            return null; // API 실패시 null 반환
-          } catch (error) {
-            console.error(
-              `Failed to fetch tour ${tour.bokunExperienceId}:`,
-              error
-            );
-            return null; // 에러시 null 반환
-          }
-        });
-
-        const fetchedTours = await Promise.all(tourPromises);
-        // null이 아닌 투어만 필터링
-        setTours(fetchedTours.filter((tour) => tour !== null) as Tour[]);
-      } catch (error) {
-        console.error("Failed to fetch tours:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchTours();
-  }, []);
-
-  // 폼 제출 핸들러
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: API 호출하여 견적 요청 전송
-  };
+export default async function HistoryTourPage() {
+  // 서버 사이드에서 투어 데이터 가져오기
+  const tours = await getToursFromConfig(historyToursConfig);
 
   return (
     <div className="min-h-screen bg-white">
@@ -187,16 +50,11 @@ export default function HistoryTourPage() {
                 create lifelong memories.
               </p>
               <div className="flex gap-4 mb-8">
-                <Button
-                  className="bg-[#651d2a] hover:bg-[#4a1520] text-white px-6 flex items-center gap-2 transition-colors font-semibold"
-                  onClick={() => {
-                    document
-                      .getElementById("tour-list")
-                      ?.scrollIntoView({ behavior: "smooth" });
-                  }}
-                >
-                  Explore Tours
-                </Button>
+                <a href="#tour-list">
+                  <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white px-6 flex items-center gap-2 transition-colors font-semibold">
+                    Explore Tours
+                  </Button>
+                </a>
                 <Link href="/chat">
                   <Button className="border-1 border-[#651d2a] text-[#651d2a] hover:bg-[#651d2a]/20 hover:border-[#651d2a]/20  bg-white px-6 transition-colors font-semibold flex items-center gap-2">
                     Get Custom Quote
@@ -350,114 +208,164 @@ export default function HistoryTourPage() {
 
           <div className="space-y-8">
             {/* 히스토리 투어 목록 */}
-            {loading ? (
+            {tours.length === 0 ? (
               <div className="text-center py-20">
-                <p className="text-gray-600">Loading tours...</p>
+                <p className="text-gray-600">
+                  No tours available at the moment.
+                </p>
               </div>
             ) : (
               tours.map((tour) => (
-                <Link
-                  key={tour.id}
-                  href={`/tours/history/${tour.id}`}
-                  className="block"
-                >
-                  <Card className="overflow-hidden hover:shadow-xl transition-shadow p-0 cursor-pointer">
-                    <div className="grid md:grid-cols-2 gap-0">
-                      <div className="relative h-[300px] md:h-auto">
-                        <img
-                          src={tour.image}
-                          alt={tour.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="p-8 flex flex-col justify-center">
-                        <Badge className="bg-[#651d2a] text-white w-fit mb-3">
-                          {tour.badge}
-                        </Badge>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                          {tour.title}
-                        </h3>
-                        <div className="flex flex-wrap gap-4 mb-3 text-sm text-gray-600">
-                          {tour.location && (
-                            <div className="flex items-center gap-1">
-                              <MapPin className="w-4 h-4" />
-                              {tour.location}
-                            </div>
-                          )}
-                          {tour.duration && (
-                            <div className="flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
-                              {tour.duration}
-                            </div>
-                          )}
-                        </div>
-                        {tour.description && (
-                          <p className="text-gray-600 mb-4 text-sm leading-relaxed line-clamp-3">
-                            {tour.description}
-                          </p>
-                        )}
-                        {tour.price && (
-                          <p className="text-2xl font-bold text-[#651d2a] mb-4">
-                            {tour.price}
-                          </p>
-                        )}
-                        <div className="grid md:grid-cols-2 gap-6 mb-4">
-                          {tour.included && tour.included.length > 0 && (
-                            <div>
-                              <h4 className="font-semibold text-gray-900 mb-2 text-sm">
-                                Included:
-                              </h4>
-                              <ul className="space-y-2 text-sm text-gray-600">
-                                {tour.included.map((item, index) => (
-                                  <li
-                                    key={index}
-                                    className="flex items-start gap-2"
-                                  >
-                                    <Check className="w-4 h-4 text-[#651d2a] mt-0.5 flex-shrink-0" />
-                                    {item}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          {tour.exclusions && tour.exclusions.length > 0 && (
-                            <div>
-                              <h4 className="font-semibold text-gray-900 mb-2 text-sm">
-                                Not Included:
-                              </h4>
-                              <ul className="space-y-2 text-sm text-gray-600">
-                                {tour.exclusions.map((item, index) => (
-                                  <li
-                                    key={index}
-                                    className="flex items-start gap-2"
-                                  >
-                                    <X className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                                    {item}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                        {tour.highlights && tour.highlights.length > 0 && (
-                          <div className="mb-4">
-                            <h4 className="font-semibold text-gray-900 mb-2 text-sm">
-                              Highlights:
-                            </h4>
-                            <ul className="space-y-2 text-sm text-gray-600">
-                              {tour.highlights.map((highlight, index) => (
-                                <li key={index}>• {highlight}</li>
-                              ))}
-                            </ul>
+                <div key={tour.bokunExperienceId} className="max-w-5xl mx-auto">
+                  <Link href={`/tours/history/${tour.bokunExperienceId}`}>
+                    <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-white p-0">
+                      <div className="grid md:grid-cols-5 gap-0">
+                        {/* Left: Large Image */}
+                        <div className="relative md:col-span-2 h-64 md:h-auto">
+                          <img
+                            src={tour.image || "/placeholder.svg"}
+                            alt={tour.title}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/20"></div>
+                          <Badge className="absolute top-4 left-4 bg-[#651d2a] text-white font-medium px-3 py-1.5">
+                            {tour.badge}
+                          </Badge>
+                          <div className="absolute bottom-4 right-4">
+                            <FavoriteButton
+                              tourId={tour.bokunExperienceId}
+                              tourData={{
+                                id: tour.bokunExperienceId,
+                                title: tour.title,
+                                image: tour.image || "/placeholder.svg",
+                                description: tour.description,
+                                price: tour.price,
+                                duration: tour.duration,
+                                location: tour.location,
+                                bokunExperienceId: tour.bokunExperienceId,
+                              }}
+                            />
                           </div>
-                        )}
-                        <Button className="bg-[#651d2a] hover:bg-[#651d2a]/90 text-white w-fit">
-                          View Details & Book
-                        </Button>
+                        </div>
+
+                        {/* Right: Content */}
+                        <div className="md:col-span-3 p-8 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-start justify-between mb-4">
+                              <div>
+                                <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-[#651d2a] transition-colors">
+                                  {tour.title}
+                                </h3>
+                                <div className="flex flex-wrap gap-3">
+                                  {tour.duration && (
+                                    <div className="flex items-center space-x-2 bg-[#651d2a]/10 px-3 py-1.5 rounded-full">
+                                      <Calendar className="w-4 h-4 text-[#651d2a]" />
+                                      <span className="text-[#651d2a] font-medium text-sm">
+                                        {tour.duration}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {tour.location && (
+                                    <div className="flex items-center space-x-2 bg-[#6d8675]/10 px-3 py-1.5 rounded-full">
+                                      <MapPin className="w-4 h-4 text-[#6d8675]" />
+                                      <span className="text-[#6d8675] font-medium text-sm">
+                                        {tour.location}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              {tour.price && (
+                                <Badge className="bg-[#651d2a] text-white font-bold px-4 py-2 text-lg">
+                                  {tour.price}
+                                </Badge>
+                              )}
+                            </div>
+
+                            {tour.description && (
+                              <p className="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-2">
+                                {tour.description}
+                              </p>
+                            )}
+
+                            <div className="grid md:grid-cols-2 gap-6 mb-6">
+                              {/* Included */}
+                              {tour.included && tour.included.length > 0 && (
+                                <div>
+                                  <h4 className="font-semibold mb-3 text-gray-800 flex items-center">
+                                    <Check className="w-4 h-4 mr-2 text-[#651d2a]" />
+                                    What's Included:
+                                  </h4>
+                                  <div className="space-y-2">
+                                    {tour.included.slice(0, 4).map((item, index) => (
+                                      <div
+                                        key={index}
+                                        className="flex items-start space-x-2"
+                                      >
+                                        <Check className="w-4 h-4 text-[#651d2a] mt-0.5 flex-shrink-0" />
+                                        <span className="text-gray-600 text-sm">
+                                          {item}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Excluded */}
+                              {tour.exclusions && tour.exclusions.length > 0 && (
+                                <div>
+                                  <h4 className="font-semibold mb-3 text-gray-800 flex items-center">
+                                    <X className="w-4 h-4 mr-2 text-gray-500" />
+                                    Not Included:
+                                  </h4>
+                                  <div className="space-y-2">
+                                    {tour.exclusions.slice(0, 4).map((item, index) => (
+                                      <div
+                                        key={index}
+                                        className="flex items-start space-x-2"
+                                      >
+                                        <X className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <span className="text-gray-600 text-sm">
+                                          {item}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {tour.highlights && tour.highlights.length > 0 && (
+                              <div className="mb-6">
+                                <h4 className="font-semibold mb-3 text-gray-800">
+                                  Tour Highlights:
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                  {tour.highlights.slice(0, 4).map((highlight: string, index: number) => (
+                                    <div
+                                      key={index}
+                                      className="flex items-center space-x-2"
+                                    >
+                                      <div className="w-2 h-2 bg-[#651d2a] rounded-full flex-shrink-0"></div>
+                                      <span className="text-gray-600 text-sm">
+                                        {highlight}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <Button className="w-full md:w-auto bg-[#651d2a] hover:bg-[#651d2a]/90 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300">
+                            View Details & Book Now
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  </Card>
-                </Link>
+                    </Card>
+                  </Link>
+                </div>
               ))
             )}
           </div>
@@ -552,6 +460,7 @@ export default function HistoryTourPage() {
           </div>
         </div>
       </section>
+
       {/* Feel the Breath of History Section */}
       <section className="flex items-center px-6 bg-gray-50">
         <div className="container mx-auto max-w-6xl py-32">

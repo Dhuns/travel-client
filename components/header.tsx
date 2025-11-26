@@ -1,13 +1,22 @@
 "use client";
 
-import type React from "react"
-import { useState, useCallback, useMemo, useEffect, useRef } from "react"
-import { useRouter, usePathname } from "next/navigation"
-import Link from "next/link"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Search, User, Menu, X, LogIn, ShoppingCart, ChevronDown } from "lucide-react"
-import { useAuthStore } from "@/src/shared/store/authStore"
+import {
+  ChevronDown,
+  LogIn,
+  Menu,
+  Search,
+  ShoppingCart,
+  User,
+  X,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import Link from "next/link";
+import type React from "react";
+import { useAuthStore } from "@/src/shared/store/authStore";
 
 /**
  * 헤더 컴포넌트 - 웹사이트의 상단 네비게이션
@@ -46,20 +55,28 @@ export default function Header() {
   const userDropdownRef = useRef<HTMLDivElement>(null);
 
   // Auth Store 연동
-  const { isAuthenticated, user: authUser, logout: authLogout, fetchUser } = useAuthStore()
-  const [cartItemCount, setCartItemCount] = useState(0) // 백엔드에서 장바구니 아이템 수 조회
+  const {
+    isAuthenticated,
+    user: authUser,
+    logout: authLogout,
+    fetchUser,
+  } = useAuthStore();
+  const [cartItemCount, setCartItemCount] = useState(0); // 백엔드에서 장바구니 아이템 수 조회
 
   // 로그인 시 사용자 정보 가져오기
   useEffect(() => {
     if (isAuthenticated && !authUser) {
-      fetchUser()
+      fetchUser();
     }
-  }, [isAuthenticated, authUser, fetchUser])
+  }, [isAuthenticated, authUser, fetchUser]);
 
   // 사용자 드롭다운 외부 클릭 감지
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+      if (
+        userDropdownRef.current &&
+        !userDropdownRef.current.contains(event.target as Node)
+      ) {
         setUserDropdownOpen(false);
       }
     };
@@ -90,11 +107,6 @@ export default function Header() {
         label: "Multiday Tour",
         description: "Extended adventures across Korea",
       },
-      {
-        href: "/tours/package",
-        label: "Package Tour",
-        description: "All-inclusive tour packages",
-      },
     ],
     []
   );
@@ -102,12 +114,10 @@ export default function Header() {
   // 네비게이션 메뉴 항목들
   const navigationItems = useMemo(
     () => [
-      { href: "/tours", label: "Tours", hasDropdown: true }, // Tours에 드롭다운 플래그 추가
-      { href: "/destinations", label: "Destinations" },
-      { href: "/services", label: "Services" },
-      { href: "/shop", label: "Shop" },
-      { href: "/insights", label: "Travel Insights" },
-      { href: "#", label: "Contact", hasDropdown: true, isContact: true }, // Contact 드롭다운 추가
+      { href: "/", label: "Home" },
+      { href: "/souvenir", label: "Souvenir" },
+      { href: "/tours", label: "Tours", hasDropdown: true },
+      { href: "#", label: "Contact", hasDropdown: true, isContact: true },
     ],
     []
   );
@@ -128,13 +138,13 @@ export default function Header() {
 
   const handleLogout = useCallback(async () => {
     try {
-      await authLogout()
-      setUserDropdownOpen(false)
-      router.push("/")
+      await authLogout();
+      setUserDropdownOpen(false);
+      router.push("/");
     } catch (error) {
-      console.error("Logout failed:", error)
+      console.error("Logout failed:", error);
     }
-  }, [authLogout, router])
+  }, [authLogout, router]);
 
   // 모바일 메뉴 토글 함수
   const toggleMobileMenu = useCallback(() => {
@@ -325,43 +335,49 @@ export default function Header() {
                   title="사용자 메뉴"
                 >
                   <User className="w-5 h-5 stroke-2" />
-                  <span className="hidden md:inline text-xs">{authUser?.name || "User"}</span>
+                  <span className="hidden md:inline text-xs">
+                    {authUser?.name || "User"}
+                  </span>
                   <ChevronDown className="w-3 h-3 stroke-2" />
                 </button>
 
                 {userDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                     <div className="px-4 py-2 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-900">{authUser?.name || "User"}</p>
-                      <p className="text-xs text-gray-500">{authUser?.email || authUser?.username}</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {authUser?.name || "User"}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {authUser?.email || authUser?.username}
+                      </p>
                     </div>
                     <Link
                       href="/mypage"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-[#eda89b]/10 hover:text-[#651d2a]"
                       onClick={() => setUserDropdownOpen(false)}
                     >
-                      마이페이지
+                      My Page
                     </Link>
                     <Link
                       href="/orders"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-[#eda89b]/10 hover:text-[#651d2a]"
                       onClick={() => setUserDropdownOpen(false)}
                     >
-                      주문내역
+                      Order History
                     </Link>
                     <Link
                       href="/wishlist"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-[#eda89b]/10 hover:text-[#651d2a]"
                       onClick={() => setUserDropdownOpen(false)}
                     >
-                      찜한상품
+                      Wishlist
                     </Link>
                     <hr className="my-1" />
                     <button
                       onClick={handleLogout}
                       className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                     >
-                      로그아웃
+                      Logout
                     </button>
                   </div>
                 )}
@@ -411,7 +427,7 @@ export default function Header() {
 
         {/* 모바일 메뉴 */}
         {mobileMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-gray-200 bg-white/95 backdrop-blur-md">
+          <div className="lg:hidden py-4 border-t border-gray-200">
             <div className="flex flex-col space-y-4 text-sm text-gray-600">
               {/* Tours 카테고리 */}
               <div className="border-b border-gray-100 pb-2">
@@ -436,50 +452,41 @@ export default function Header() {
                 </div>
               </div>
 
-              {/* 나머지 메뉴 항목들 */}
-              {navigationItems.slice(1).map((item) =>
-                item.hasDropdown && item.isContact ? (
-                  <div
-                    key={item.href}
-                    className="border-b border-gray-100 pb-2"
-                  >
-                    <div className="py-2 font-medium text-gray-900">
-                      {item.label}
-                    </div>
-                    <div className="pl-4 space-y-2 mt-2">
-                      <Link
-                        href="/chat"
-                        className="block py-1 text-xs text-gray-500 hover:text-[#651d2a] transition-colors"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        AI Assistant
-                      </Link>
-                      <Link
-                        href="/contact"
-                        className="block py-1 text-xs text-gray-500 hover:text-[#651d2a] transition-colors"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        Email Us
-                      </Link>
-                    </div>
-                  </div>
-                ) : (
+              {/* Souvenir 메뉴 */}
+              <Link
+                href="/souvenir"
+                className="hover:text-[#651d2a] transition-colors duration-300 py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Souvenir
+              </Link>
+
+              {/* Contact 카테고리 */}
+              <div className="border-b border-gray-100 pb-2">
+                <div className="py-2 font-medium text-gray-900">Contact</div>
+                <div className="pl-4 space-y-2 mt-2">
                   <Link
-                    key={item.href}
-                    href={item.href}
-                    className="hover:text-[#651d2a] transition-colors duration-300 py-2"
+                    href="/chat"
+                    className="block py-1 text-xs text-gray-500 hover:text-[#651d2a] transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    {item.label}
+                    AI Assistant
                   </Link>
-                )
-              )}
+                  <Link
+                    href="/contact"
+                    className="block py-1 text-xs text-gray-500 hover:text-[#651d2a] transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Email Us
+                  </Link>
+                </div>
+              </div>
               <Link
                 href="/cart"
                 className="hover:text-[#651d2a] transition-colors duration-300 py-2 flex items-center justify-between"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <span>장바구니</span>
+                <span>Cart</span>
                 {cartItemCount > 0 && (
                   <span className="bg-[#651d2a] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                     {cartItemCount > 99 ? "99+" : cartItemCount}
@@ -492,7 +499,7 @@ export default function Header() {
                   className="hover:text-[#651d2a] transition-colors duration-300 py-2"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  로그인
+                  Login
                 </Link>
               ) : (
                 <>
@@ -501,14 +508,21 @@ export default function Header() {
                     className="hover:text-[#651d2a] transition-colors duration-300 py-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    마이페이지
+                    My Page
                   </Link>
                   <Link
                     href="/orders"
                     className="hover:text-[#651d2a] transition-colors duration-300 py-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    주문내역
+                    Order History
+                  </Link>
+                  <Link
+                    href="/wishlist"
+                    className="hover:text-[#651d2a] transition-colors duration-300 py-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Wishlist
                   </Link>
                   <button
                     onClick={() => {
@@ -517,7 +531,7 @@ export default function Header() {
                     }}
                     className="text-left hover:text-red-600 transition-colors duration-300 py-2"
                   >
-                    로그아웃
+                    Logout
                   </button>
                 </>
               )}
