@@ -27,6 +27,11 @@ export default function VerifyEmailPage() {
         const result = await verifyEmail(token);
         setSuccess(true);
         setError("");
+
+        // 3초 후 자동으로 로그인 페이지로 이동
+        setTimeout(() => {
+          router.push("/login");
+        }, 3000);
       } catch (err: any) {
         console.error("Email verification failed:", err);
         setError(err.response?.data?.message || "Verification failed. The link may have expired.");
@@ -37,7 +42,7 @@ export default function VerifyEmailPage() {
     };
 
     verify();
-  }, [token]);
+  }, [token, router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f5f3f0] to-[#faf8f5] flex items-center justify-center pt-32 pb-16">
@@ -54,14 +59,17 @@ export default function VerifyEmailPage() {
           <div className="text-center">
             <CheckCircle2 className="w-16 h-16 mx-auto text-green-500 mb-4" />
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Email Verified!</h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 mb-2">
               Your email has been successfully verified. You can now sign in to your account.
+            </p>
+            <p className="text-sm text-gray-500 mb-6">
+              Redirecting to login page in 3 seconds...
             </p>
             <Button
               onClick={() => router.push("/login")}
               className="w-full bg-gradient-to-r from-[#651d2a] to-[#7a2433] hover:from-[#7a2433] hover:to-[#8b2a3d] text-white"
             >
-              Go to Login
+              Go to Login Now
             </Button>
           </div>
         )}

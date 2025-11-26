@@ -56,10 +56,10 @@ export default function LoginPage() {
       router.push("/"); // 로그인 성공 시 메인 페이지로 이동
     } catch (error: any) {
       console.error("Login failed:", error);
-      setError(
+      const errorMessage =
         error.response?.data?.message ||
-          "Login failed. Please check your credentials."
-      );
+        "Login failed. Please check your credentials.";
+      setError(errorMessage);
     }
   };
 
@@ -93,7 +93,19 @@ export default function LoginPage() {
                 {/* 에러 메시지 */}
                 {error && (
                   <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                    {error}
+                    <p>{error}</p>
+                    {error.includes("이메일 인증") && (
+                      <p className="mt-2 text-sm">
+                        <a
+                          href={`/email-sent?email=${encodeURIComponent(
+                            formData.username
+                          )}`}
+                          className="text-[#651d2a] hover:text-[#7a2433] font-medium underline"
+                        >
+                          Resend verification email
+                        </a>
+                      </p>
+                    )}
                   </div>
                 )}
 

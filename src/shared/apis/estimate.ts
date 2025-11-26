@@ -49,6 +49,7 @@ export interface Batch {
   recipient: string;
   onlyPlace: boolean;
   hidePrice: boolean;
+  itemFilter?: string;
   quotation?: string;
   preparedBy?: string;
   address?: string;
