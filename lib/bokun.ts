@@ -88,6 +88,45 @@ export async function getBokunActivities(experienceIds: string[]) {
   return activities.filter((activity) => activity !== null);
 }
 
+// HTML 태그 제거 함수
+const stripHtmlTags = (html: string): string => {
+  return html.replace(/<[^>]*>/g, "").trim();
+};
+
+// HTML을 배열로 파싱하는 함수
+const parseHtmlToArray = (html: string | string[]): string[] => {
+  if (Array.isArray(html)) return html;
+  if (!html || typeof html !== "string") return [];
+
+  // <p> 태그로 분리하여 텍스트만 추출
+  const matches = html.match(/<p[^>]*>(.*?)<\/p>/g);
+  if (!matches) return [];
+
+  return matches
+    .map((match) => {
+      const text = match.replace(/<[^>]*>/g, "").trim();
+      return text;
+    })
+    .filter((text) => text.length > 0);
+};
+
+// knowBeforeYouGoItems 코드를 텍스트로 변환
+const parseKnowBeforeYouGo = (items: string[] | null): string[] => {
+  if (!Array.isArray(items)) return [];
+
+  const translations: Record<string, string> = {
+    PUBLIC_TRANSPORTATION_NEARBY: "Public transportation nearby",
+    WHEELCHAIR_ACCESSIBLE: "Wheelchair accessible",
+    STROLLER_ACCESSIBLE: "Stroller accessible",
+    INFANTS_ALLOWED: "Infants allowed",
+    NOT_RECOMMENDED_FOR_PREGNANT: "Not recommended for pregnant travelers",
+    NO_HEART_PROBLEMS: "Not recommended for travelers with heart problems",
+    MODERATE_PHYSICAL_FITNESS: "Moderate physical fitness required",
+  };
+
+  return items.map((item) => translations[item] || item);
+};
+
 /**
  * Bokun activity 데이터를 우리 Tour 형식으로 변환
  */
@@ -96,29 +135,326 @@ export function transformBokunActivityToTour(
   category: string,
   badge: string
 ) {
+  const rawDescription =
+    activity.excerpt || activity.shortDescription || activity.description || "";
+  const description = stripHtmlTags(rawDescription);
+
+  // Duration 계산
+  let durationDisplay = "";
+  if (activity.durationHours && activity.durationMinutes) {
+    durationDisplay = `${activity.durationHours}h ${activity.durationMinutes}m`;
+  } else if (activity.durationHours) {
+    durationDisplay = `${activity.durationHours} hours`;
+  } else if (activity.duration) {
+    durationDisplay = `${activity.duration} hours`;
+  }
+
+  const bokunExperienceId = activity.id?.toString() || "";
+
   return {
-    id: activity.id?.toString() || "",
+    id: bokunExperienceId, // bokunExperienceId를 id로 사용
     title: activity.title || "",
     subtitle: activity.shortDescription || "",
     category: category,
     badge: badge,
-    description: activity.description || activity.shortDescription || "",
-    highlights: activity.highlights || [],
-    image:
-      activity.photos?.[0]?.url ||
-      activity.photos?.[0]?.large ||
-      "/images/design-mode/castle1.png",
-    bokunExperienceId: activity.id?.toString() || "",
+    description: description,
+    highlights: Array.isArray(activity.highlights) ? activity.highlights : [],
+    image: activity.photos?.[0]?.originalUrl || "/images/placeholder-tour.jpg",
+    bokunExperienceId: bokunExperienceId,
     categories: activity.categories || [],
-    location: activity.meetingPoint?.title || activity.address?.city || "",
-    included: activity.included || [],
-    duration: activity.duration
-      ? `${activity.duration.hours || 0} hours`
-      : undefined,
-    price: activity.pricing?.from
-      ? `$${activity.pricing.from}`
-      : activity.defaultPrice
-      ? `$${activity.defaultPrice}`
-      : undefined,
+    location:
+      activity.googlePlace?.name ||
+      activity.meetingPoint?.title ||
+      activity.address?.city ||
+      "",
+    included: parseHtmlToArray(activity.included),
+    exclusions: parseHtmlToArray(activity.excluded),
+    duration: durationDisplay,
+    durationText: activity.durationText || "",
+    price: activity.nextDefaultPriceAsText ||
+           (activity.pricing?.from ? `$${activity.pricing.from}` : ""),
+    activityCategories: Array.isArray(activity.activityCategories)
+      ? activity.activityCategories
+      : [],
+    knowBeforeYouGo: parseKnowBeforeYouGo(activity.knowBeforeYouGoItems),
+    minAge: activity.minAge || 0,
+    cancellationPolicy: activity.cancellationPolicy?.title || "",
+  };
+}
+
+/**
+ * TourConfig 배열로부터 투어 데이터를 가져옵니다 (서버 사이드용)
+ */
+export async function getToursFromConfig(
+  configs: Array<{
+    bokunExperienceId: string;
+    category: string;
+    badge: string;
+  }>
+) {
+  const tourPromises = configs.map(async (config) => {
+    const activity = await getBokunActivity(config.bokunExperienceId);
+    if (!activity) return null;
+
+    return transformBokunActivityToTour(
+      activity,
+      config.category,
+      config.badge
+    );
+  });
+
+  const tours = await Promise.all(tourPromises);
+  return tours.filter((tour) => tour !== null);
+}
+
+// ==================== Booking API ====================
+
+/**
+ * Bokun 예약 검색 쿼리 타입
+ */
+export interface BookingSearchQuery {
+  customerEmail?: string;
+  customerName?: string;
+  confirmationCode?: string;
+  startDate?: string; // yyyy-MM-dd
+  endDate?: string; // yyyy-MM-dd
+  statuses?: string[]; // CONFIRMED, CANCELLED, etc.
+  pageSize?: number;
+  page?: number;
+}
+
+/**
+ * Bokun 예약 정보 타입
+ */
+export interface BokunBooking {
+  id: number;
+  confirmationCode: string;
+  status: string;
+  creationDate: string;
+  totalPrice: number;
+  totalPriceFormatted: string;
+  currency: string;
+  customer: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber?: string;
+  };
+  productBookings: Array<{
+    id: number;
+    confirmationCode: string;
+    productTitle: string;
+    productType: string;
+    startDate: string;
+    startTime?: string;
+    participants: number;
+    totalPrice: number;
+    totalPriceFormatted: string;
+    status: string;
+  }>;
+}
+
+/**
+ * Bokun 예약 검색 결과 타입
+ */
+export interface BookingSearchResult {
+  items: BokunBooking[];
+  totalCount: number;
+  pageSize: number;
+  page: number;
+}
+
+/**
+ * 예약 검색 (이메일, 이름, 날짜 등으로 검색)
+ */
+export async function searchBookings(
+  query: BookingSearchQuery
+): Promise<BookingSearchResult | null> {
+  const path = "/booking.json/booking-search";
+  const url = `${BOKUN_API_BASE_URL}${path}`;
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        ...getAuthHeaders("POST", path),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        customerEmail: query.customerEmail,
+        customerName: query.customerName,
+        confirmationCode: query.confirmationCode,
+        startDateFrom: query.startDate,
+        startDateTo: query.endDate,
+        statuses: query.statuses,
+        pageSize: query.pageSize || 20,
+        page: query.page || 1,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Failed to search bookings:", response.status, errorText);
+      return null;
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error searching bookings:", error);
+    return null;
+  }
+}
+
+/**
+ * 특정 예약 조회 (확인 코드로)
+ */
+export async function getBookingByConfirmationCode(
+  confirmationCode: string
+): Promise<BokunBooking | null> {
+  const path = `/booking.json/booking/${confirmationCode}`;
+  const url = `${BOKUN_API_BASE_URL}${path}`;
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        ...getAuthHeaders("GET", path),
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(
+        `Failed to fetch booking ${confirmationCode}:`,
+        response.status,
+        errorText
+      );
+      return null;
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(`Error fetching booking ${confirmationCode}:`, error);
+    return null;
+  }
+}
+
+/**
+ * 사용자 이메일로 예약 목록 조회
+ */
+export async function getBookingsByEmail(
+  email: string,
+  options?: {
+    pageSize?: number;
+    page?: number;
+  }
+): Promise<BookingSearchResult | null> {
+  return searchBookings({
+    customerEmail: email,
+    pageSize: options?.pageSize || 50,
+    page: options?.page || 1,
+  });
+}
+
+/**
+ * 예약 취소 요청 타입
+ */
+export interface CancelBookingRequest {
+  reason?: string;
+  sendNotification?: boolean;
+}
+
+/**
+ * 예약 취소 결과 타입
+ */
+export interface CancelBookingResult {
+  success: boolean;
+  booking?: BokunBooking;
+  refundAmount?: number;
+  refundAmountFormatted?: string;
+  message?: string;
+}
+
+/**
+ * 예약 취소
+ */
+export async function cancelBooking(
+  confirmationCode: string,
+  options?: CancelBookingRequest
+): Promise<CancelBookingResult | null> {
+  const path = `/booking.json/cancel-booking/${confirmationCode}`;
+  const url = `${BOKUN_API_BASE_URL}${path}`;
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        ...getAuthHeaders("POST", path),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        reason: options?.reason || "Customer requested cancellation",
+        sendNotification: options?.sendNotification ?? true,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(
+        `Failed to cancel booking ${confirmationCode}:`,
+        response.status,
+        errorText
+      );
+      return {
+        success: false,
+        message: `Failed to cancel booking: ${response.statusText}`,
+      };
+    }
+
+    const data = await response.json();
+    return {
+      success: true,
+      booking: data,
+      refundAmount: data.refundAmount,
+      refundAmountFormatted: data.refundAmountFormatted,
+    };
+  } catch (error) {
+    console.error(`Error cancelling booking ${confirmationCode}:`, error);
+    return {
+      success: false,
+      message: "An error occurred while cancelling the booking",
+    };
+  }
+}
+
+/**
+ * 취소 정책 및 환불 금액 조회
+ */
+export async function getCancellationInfo(
+  confirmationCode: string
+): Promise<{
+  canCancel: boolean;
+  refundAmount?: number;
+  refundAmountFormatted?: string;
+  cancellationPolicy?: string;
+  message?: string;
+} | null> {
+  // 먼저 예약 정보를 가져와서 취소 가능 여부 확인
+  const booking = await getBookingByConfirmationCode(confirmationCode);
+
+  if (!booking) {
+    return null;
+  }
+
+  // CONFIRMED 상태만 취소 가능
+  const canCancel = booking.status === "CONFIRMED";
+
+  return {
+    canCancel,
+    message: canCancel
+      ? "이 예약은 취소할 수 있습니다."
+      : `현재 상태(${booking.status})에서는 취소할 수 없습니다.`,
   };
 }

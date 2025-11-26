@@ -3,14 +3,14 @@
 import BokunWidget from "@/components/BokunWidget";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { privateToursConfig, BOKUN_CONFIG } from "@/config/tours";
+import { multidayToursConfig, BOKUN_CONFIG } from "@/config/tours";
 
-export default function PrivateTourDetailPage() {
+export default function TourDetailPage() {
   const params = useParams();
   const experienceId = params.id as string; // URL의 id가 이제 bokunExperienceId
 
   // 설정에 해당 experienceId가 있는지 확인
-  const tourExists = privateToursConfig.some(
+  const tourExists = multidayToursConfig.some(
     (t) => t.bokunExperienceId === experienceId
   );
 
@@ -26,10 +26,10 @@ export default function PrivateTourDetailPage() {
             The tour you're looking for doesn't exist.
           </p>
           <Link
-            href="/tours/private"
+            href="/tours/multiday"
             className="inline-flex items-center px-6 py-3 bg-[#651d2a] text-white rounded-lg hover:bg-[#4a1520] transition-colors"
           >
-            Back to Private Tours
+            Back to Multiday Tours
           </Link>
         </div>
       </div>
