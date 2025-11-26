@@ -499,13 +499,15 @@ export default function HomePageClient({ children }: HomePageClientProps) {
                 ))}
               </div>
 
-              <Button
-                size="lg"
-                className="bg-[#c4982a] text-white hover:bg-[#c4982a]/90 px-12 py-8 text-xl rounded-full shadow-2xl mt-8 group"
-              >
-                Launch AI Chat
-                <MessageCircle className="w-6 h-6 ml-3 group-hover:scale-110 transition-transform" />
-              </Button>
+              <Link href="/chat">
+                <Button
+                  size="lg"
+                  className="bg-[#c4982a] text-white hover:bg-[#c4982a]/90 px-12 py-8 text-xl rounded-full shadow-2xl mt-8 group"
+                >
+                  Launch AI Chat
+                  <MessageCircle className="w-6 h-6 ml-3 group-hover:scale-110 transition-transform" />
+                </Button>
+              </Link>
             </div>
 
             {/* Right: Chat Preview */}
