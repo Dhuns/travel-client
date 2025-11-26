@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { TourGrid } from "@/components/tours/tour-grid";
 import { TourGridSkeleton } from "@/components/tours/tour-card-skeleton";
 
@@ -80,12 +81,14 @@ export default function ToursPage() {
             Let us create a custom tour just for you. Our local experts will
             design the perfect Korean experience.
           </p>
-          <Button
-            size="lg"
-            className="bg-white text-[#651d2a] hover:bg-gray-100 font-semibold px-6"
-          >
-            Create Custom Tour
-          </Button>
+          <Link href="/chat">
+            <Button
+              size="lg"
+              className="bg-white text-[#651d2a] hover:bg-gray-100 font-semibold px-6"
+            >
+              Create Custom Tour
+            </Button>
+          </Link>
         </div>
       </div>
     </div>
