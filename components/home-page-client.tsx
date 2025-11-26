@@ -306,7 +306,10 @@ export default function HomePageClient({ children }: HomePageClientProps) {
             <ul className="space-y-3 lg:space-y-4 mb-6 lg:mb-10">
               {["Daily Departures", "Small Groups", "Expert Guides"].map(
                 (item, i) => (
-                  <li key={i} className="flex items-center text-base lg:text-lg">
+                  <li
+                    key={i}
+                    className="flex items-center text-base lg:text-lg"
+                  >
                     <div className="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-white/20 flex items-center justify-center mr-3">
                       <ChevronRight className="w-3 h-3 lg:w-4 lg:h-4" />
                     </div>
@@ -358,10 +361,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
           {/* Asymmetric Flex Layout */}
           <div className="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto">
             {/* First Tour - Large */}
-            <Link
-              href={tourCategories[0].link}
-              className="lg:w-1/2 group"
-            >
+            <Link href={tourCategories[0].link} className="lg:w-1/2 group">
               <div className="relative h-full min-h-[500px] lg:min-h-[712px] rounded-3xl overflow-hidden shadow-xl hover:shadow-3xl transition-all duration-700 transform hover:-translate-y-2 hover:rotate-1">
                 <Image
                   src={tourCategories[0].image || "/placeholder.svg"}
@@ -381,7 +381,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
                   <p className="text-xl text-white/90 mb-6">
                     {tourCategories[0].description}
                   </p>
-                  <span className="inline-flex items-center text-white font-bold text-lg group-hover:text-[#651d2a] transition-colors">
+                  <span className="inline-flex items-center text-white font-bold text-lg transition-colors">
                     Explore Now{" "}
                     <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-2 transition-transform" />
                   </span>
