@@ -16,8 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
-import { getToursFromConfig } from "@/lib/bokun";
-import { multidayToursConfig } from "@/config/tours";
+import { getToursWithBokunData } from "@/lib/bokun";
 import MultidayTourList from "@/components/MultidayTourList";
 
 export const revalidate = 3600; // 1시간마다 재생성
@@ -28,13 +27,8 @@ export const revalidate = 3600; // 1시간마다 재생성
  * 예약 페이지가 아닌 Multiday Tour가 무엇인지 설명하는 페이지로 재구성
  */
 export default async function MultidayTourPage() {
-  // 서버 사이드에서 투어 데이터 가져오기
-  const toursData = await getToursFromConfig(multidayToursConfig);
-
-  // 임시로 투어를 9개로 복제 (나중에 실제 데이터로 교체 예정)
-  const tours = toursData.length > 0
-    ? Array(9).fill(toursData[0])
-    : [];
+  // 백엔드에서 ID 가져온 후 직접 Bokun API 호출
+  const tours = await getToursWithBokunData("multiday", "Multi-day Tour");
   return (
     <div className="min-h-screen bg-[#f5f3f0]">
       {/* Hero Section */}
