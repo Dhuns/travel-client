@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Mail, CheckCircle2, RefreshCw } from "lucide-react";
+import { Mail, CheckCircle2, RefreshCw, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { resendVerificationEmail } from "@/src/shared/apis/user";
+
+const COOLDOWN_SECONDS = 60;
 
 export default function EmailSentPage() {
   const router = useRouter();
@@ -14,6 +16,7 @@ export default function EmailSentPage() {
   const [isResending, setIsResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
   const [resendError, setResendError] = useState("");
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
 
   useEffect(() => {
     if (!email) {
@@ -21,8 +24,18 @@ export default function EmailSentPage() {
     }
   }, [email, router]);
 
-  const handleResendEmail = async () => {
-    if (!email) return;
+  // 쿨다운 타이머
+  useEffect(() => {
+    if (cooldownRemaining > 0) {
+      const timer = setInterval(() => {
+        setCooldownRemaining((prev) => Math.max(0, prev - 1));
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [cooldownRemaining]);
+
+  const handleResendEmail = useCallback(async () => {
+    if (!email || cooldownRemaining > 0) return;
 
     setIsResending(true);
     setResendError("");
@@ -31,16 +44,28 @@ export default function EmailSentPage() {
     try {
       await resendVerificationEmail(email);
       setResendSuccess(true);
+      setCooldownRemaining(COOLDOWN_SECONDS);
       setTimeout(() => setResendSuccess(false), 5000);
     } catch (error: any) {
       console.error("Resend email failed:", error);
-      setResendError(
-        error.response?.data?.message || "Failed to resend email. Please try again."
-      );
+      const responseData = error.response?.data;
+
+      // 쿨다운 에러 처리
+      if (responseData?.cooldown || responseData?.message?.cooldown) {
+        const remaining = responseData?.remainingSeconds || responseData?.message?.remainingSeconds || COOLDOWN_SECONDS;
+        setCooldownRemaining(remaining);
+        setResendError(`Please wait ${remaining} seconds before requesting another email`);
+      } else {
+        let errorMsg = responseData?.message;
+        if (typeof errorMsg === 'object') {
+          errorMsg = errorMsg.message || JSON.stringify(errorMsg);
+        }
+        setResendError(errorMsg || "Failed to resend email. Please try again.");
+      }
     } finally {
       setIsResending(false);
     }
-  };
+  }, [email, cooldownRemaining]);
 
   if (!email) {
     return null;
@@ -109,7 +134,7 @@ export default function EmailSentPage() {
           {/* Resend Button */}
           <Button
             onClick={handleResendEmail}
-            disabled={isResending || resendSuccess}
+            disabled={isResending || resendSuccess || cooldownRemaining > 0}
             variant="outline"
             className="w-full mb-4"
           >
@@ -117,6 +142,11 @@ export default function EmailSentPage() {
               <>
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                 Sending...
+              </>
+            ) : cooldownRemaining > 0 ? (
+              <>
+                <Clock className="w-4 h-4 mr-2" />
+                Resend available in {cooldownRemaining}s
               </>
             ) : (
               <>
