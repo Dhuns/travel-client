@@ -56,9 +56,15 @@ export default function LoginPage() {
       router.push("/"); // 로그인 성공 시 메인 페이지로 이동
     } catch (error: any) {
       console.error("Login failed:", error);
-      const errorMessage =
-        error.response?.data?.message ||
-        "Login failed. Please check your credentials.";
+
+      // 에러 메시지 추출 (배열인 경우 첫 번째 요소 사용)
+      let errorMessage = error.response?.data?.message;
+      if (Array.isArray(errorMessage)) {
+        errorMessage = errorMessage[0];
+      }
+      if (!errorMessage || typeof errorMessage !== 'string') {
+        errorMessage = "Login failed. Please check your credentials.";
+      }
 
       // 이메일 인증 필요 에러인 경우 이메일 인증 대기 페이지로 이동
       if (errorMessage.toLowerCase().includes("email verification required") ||
