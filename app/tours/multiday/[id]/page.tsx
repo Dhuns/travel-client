@@ -1,41 +1,15 @@
 "use client";
 
 import BokunWidget from "@/components/BokunWidget";
-import Link from "next/link";
 import { useParams } from "next/navigation";
-import { multidayToursConfig, BOKUN_CONFIG } from "@/config/tours";
+import { BOKUN_CONFIG } from "@/config/tours";
 
 export default function TourDetailPage() {
   const params = useParams();
-  const experienceId = params.id as string; // URL의 id가 이제 bokunExperienceId
+  const experienceId = params.id as string;
 
-  // 설정에 해당 experienceId가 있는지 확인
-  const tourExists = multidayToursConfig.some(
-    (t) => t.bokunExperienceId === experienceId
-  );
-
-  // Experience ID가 설정에 없는 경우 에러 처리
-  if (!tourExists) {
-    return (
-      <div className="min-h-screen bg-white pt-20 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Tour not found
-          </h1>
-          <p className="text-gray-600 mb-6">
-            The tour you're looking for doesn't exist.
-          </p>
-          <Link
-            href="/tours/multiday"
-            className="inline-flex items-center px-6 py-3 bg-[#651d2a] text-white rounded-lg hover:bg-[#4a1520] transition-colors"
-          >
-            Back to Multiday Tours
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
+  // Bokun 위젯이 자체적으로 유효하지 않은 ID 처리
+  // 백엔드 DB에서 관리하는 모든 투어 ID를 허용
   return (
     <div className="min-h-screen bg-white pt-20">
       {/* Bokun 위젯 - 전체 페이지 */}

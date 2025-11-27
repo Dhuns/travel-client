@@ -59,6 +59,14 @@ export default function LoginPage() {
       const errorMessage =
         error.response?.data?.message ||
         "Login failed. Please check your credentials.";
+
+      // 이메일 인증 필요 에러인 경우 이메일 인증 대기 페이지로 이동
+      if (errorMessage.toLowerCase().includes("email verification required") ||
+          errorMessage.includes("이메일 인증")) {
+        router.push(`/email-sent?email=${encodeURIComponent(formData.username)}`);
+        return;
+      }
+
       setError(errorMessage);
     }
   };
