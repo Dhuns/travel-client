@@ -57,20 +57,36 @@ export default function LoginPage() {
     } catch (error: any) {
       console.error("Login failed:", error);
 
+      const responseData = error.response?.data;
+
+      // message가 배열인 경우 첫 번째 요소 추출
+      const messageData = Array.isArray(responseData?.message)
+        ? responseData.message[0]
+        : responseData?.message;
+
+      // 이메일 인증 필요 에러인 경우 이메일 인증 대기 페이지로 이동
+      if (responseData?.requiresVerification ||
+          messageData?.requiresVerification ||
+          (typeof messageData === 'string' &&
+           messageData.toLowerCase().includes("email verification required"))) {
+        // 백엔드에서 반환한 이메일 주소 사용, 없으면 입력한 username 사용
+        const email = responseData?.email ||
+                     messageData?.email ||
+                     formData.username;
+        router.push(`/email-sent?email=${encodeURIComponent(email)}`);
+        return;
+      }
+
       // 에러 메시지 추출 (배열인 경우 첫 번째 요소 사용)
-      let errorMessage = error.response?.data?.message;
+      let errorMessage = responseData?.message;
+      if (typeof errorMessage === 'object' && errorMessage !== null) {
+        errorMessage = errorMessage.message || JSON.stringify(errorMessage);
+      }
       if (Array.isArray(errorMessage)) {
         errorMessage = errorMessage[0];
       }
       if (!errorMessage || typeof errorMessage !== 'string') {
         errorMessage = "Login failed. Please check your credentials.";
-      }
-
-      // 이메일 인증 필요 에러인 경우 이메일 인증 대기 페이지로 이동
-      if (errorMessage.toLowerCase().includes("email verification required") ||
-          errorMessage.includes("이메일 인증")) {
-        router.push(`/email-sent?email=${encodeURIComponent(formData.username)}`);
-        return;
       }
 
       setError(errorMessage);
@@ -108,18 +124,6 @@ export default function LoginPage() {
                 {error && (
                   <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
                     <p>{error}</p>
-                    {error.includes("이메일 인증") && (
-                      <p className="mt-2 text-sm">
-                        <a
-                          href={`/email-sent?email=${encodeURIComponent(
-                            formData.username
-                          )}`}
-                          className="text-[#651d2a] hover:text-[#7a2433] font-medium underline"
-                        >
-                          Resend verification email
-                        </a>
-                      </p>
-                    )}
                   </div>
                 )}
 
