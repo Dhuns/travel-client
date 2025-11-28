@@ -606,3 +606,12 @@ img[data-loaded="false"] {
 img[data-loaded="true"] {
   opacity: 1;
 }
+
+/* Bokun 플로팅 장바구니 위젯 - 흰색 사각형 배경 제거 */
+.bokun-widgets-cart-wrapper,
+.sc-gueYoa,
+.cbxSxv {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}

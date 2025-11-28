@@ -9,7 +9,7 @@ import type { Metadata } from "next";
 import type React from "react";
 import { Suspense } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
-import ChatButton from "@/components/ChatButton";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "OneDay Korea - Authentic Korean Tours & Experiences",
@@ -26,6 +26,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Bokun 위젯 프리로드 - 로딩 속도 개선 */}
+        <link rel="preconnect" href="https://widgets.bokun.io" />
+        <link rel="dns-prefetch" href="https://widgets.bokun.io" />
+        <link rel="preconnect" href="https://api.bokun.io" />
+        <link rel="dns-prefetch" href="https://api.bokun.io" />
+
         <style
           dangerouslySetInnerHTML={{
             __html: `
@@ -38,6 +44,12 @@ html {
         />
       </head>
       <body>
+        {/* Bokun 위젯 스크립트 - Next.js Script 컴포넌트 사용 */}
+        <Script
+          src="https://widgets.bokun.io/assets/javascripts/apps/build/BokunWidgetsLoader.js?bookingChannelUUID=0a1af831-37c4-40d2-8aa7-2a8b7b985ea2"
+          strategy="afterInteractive"
+        />
+
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -49,7 +61,6 @@ html {
             <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
           </main>
           <Footer />
-          <ChatButton />
         </ThemeProvider>
 
         <Analytics />
