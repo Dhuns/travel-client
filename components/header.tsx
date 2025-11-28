@@ -335,8 +335,8 @@ export default function Header() {
                   title="사용자 메뉴"
                 >
                   <User className="w-5 h-5 stroke-2" />
-                  <span className="hidden md:inline text-xs">
-                    {authUser?.name || "User"}
+                  <span className="hidden md:inline text-xs max-w-[80px] truncate">
+                    {authUser?.name?.split(' ')[0] || "User"}
                   </span>
                   <ChevronDown className="w-3 h-3 stroke-2" />
                 </button>
