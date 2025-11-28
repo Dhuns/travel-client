@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 /**
  * 푸터 컴포넌트 - 웹사이트 하단 정보 및 링크 섹션
@@ -29,21 +29,29 @@ export default function Footer() {
   return (
     <footer className="bg-[#272b38] text-white py-12">
       <div className="container mx-auto px-6">
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
           {/* 첫 번째 컬럼 - OneDay Korea 회사 정보 */}
           <div className="space-y-4">
             <div>
-              <h3 className="font-semibold text-lg text-white mb-2">OnedayKorea</h3>
+              <h3 className="font-semibold text-lg text-white mb-2">
+                OnedayKorea
+              </h3>
               <div className="w-12 h-0.5 bg-white mb-4"></div>
             </div>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
+                <a
+                  href="#"
+                  className="text-gray-300 hover:text-white transition-colors duration-300 text-sm"
+                >
                   About us
                 </a>
               </li>
               <li>
-                <Link href="/tours" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
+                <Link
+                  href="/tours"
+                  className="text-gray-300 hover:text-white transition-colors duration-300 text-sm"
+                >
                   Tour Recommendation
                 </Link>
               </li>
@@ -52,17 +60,23 @@ export default function Footer() {
                   href="#"
                   className="text-gray-300 hover:text-white transition-colors duration-300 text-sm"
                 >
-                  Travel Insight
+                  Daily Tour
                 </a>
               </li>
               <li>
-                <Link href="/tours" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
-                  Plan Trips
+                <Link
+                  href="/tours"
+                  className="text-gray-300 hover:text-white transition-colors duration-300 text-sm"
+                >
+                  Seasonal Tour
                 </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
-                  How it Works
+                <a
+                  href="#"
+                  className="text-gray-300 hover:text-white transition-colors duration-300 text-sm"
+                >
+                  Theme Tour
                 </a>
               </li>
             </ul>
@@ -84,7 +98,10 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
+                <a
+                  href="#"
+                  className="text-gray-300 hover:text-white transition-colors duration-300 text-sm"
+                >
                   FAQ
                 </a>
               </li>
@@ -97,58 +114,17 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
+                <a
+                  href="#"
+                  className="text-gray-300 hover:text-white transition-colors duration-300 text-sm"
+                >
                   Terms & Conditions
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
-                  Seoul Travel Guide
                 </a>
               </li>
             </ul>
           </div>
 
-          {/* 세 번째 컬럼 - 소셜 미디어 팔로우 */}
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold text-lg text-white mb-2">Follow us</h3>
-              <div className="w-12 h-0.5 bg-white mb-4"></div>
-            </div>
-            <div className="space-y-2">
-              {/* TODO: 백엔드 연동 시 실제 소셜 미디어 URL로 교체 */}
-              <a
-                href="#"
-                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors duration-300 text-sm"
-              >
-                <span>📘</span>
-                <span>Facebook</span>
-              </a>
-              <a
-                href="#"
-                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors duration-300 text-sm"
-              >
-                <span>📸</span>
-                <span>Flickr</span>
-              </a>
-              <a
-                href="#"
-                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors duration-300 text-sm"
-              >
-                <span>📷</span>
-                <span>Instagram</span>
-              </a>
-              <a
-                href="#"
-                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors duration-300 text-sm"
-              >
-                <span>🐦</span>
-                <span>Twitter</span>
-              </a>
-            </div>
-          </div>
-
-          {/* 네 번째 컬럼 - 소셜 위젯 (Facebook + TripAdvisor) */}
+          {/* 세 번째 컬럼 - 소셜 위젯 (Facebook + TripAdvisor) */}
           <div className="space-y-4">
             {/* Facebook 페이지 위젯 */}
             <div className="bg-white rounded-lg p-3">
@@ -157,20 +133,28 @@ export default function Footer() {
                   <span className="text-white font-bold text-sm">K</span>
                 </div>
                 <div className="text-black">
-                  <h4 className="font-semibold text-sm">Korea Travel - OneDay Korea</h4>
+                  <h4 className="font-semibold text-sm">
+                    Korea Travel - OneDay Korea
+                  </h4>
                   <p className="text-xs">302k followers</p>
                 </div>
               </div>
               {/* TODO: 백엔드 연동 시 실제 Facebook 페이지 팔로우 기능 구현 */}
-              <Button className="w-full bg-[#651D2A] hover:bg-white text-white text-sm py-2">Follow Page</Button>
+              <Button className="w-full bg-[#651D2A] hover:bg-white text-white text-sm py-2">
+                Follow Page
+              </Button>
             </div>
 
             {/* TripAdvisor 리뷰 위젯 */}
             <div className="bg-white rounded-lg p-3">
               <div className="text-center">
-                <p className="text-gray-800 text-sm font-medium mb-2">Read reviews of One Day Korea</p>
+                <p className="text-gray-800 text-sm font-medium mb-2">
+                  Read reviews of One Day Korea
+                </p>
                 <div className="flex justify-center items-center space-x-2">
-                  <span className="text-[#651D2A] font-bold text-sm">TripAdvisor</span>
+                  <span className="text-[#651D2A] font-bold text-sm">
+                    TripAdvisor
+                  </span>
                   {/* TODO: 백엔드 연동 시 TripAdvisor API로 실제 평점 데이터 연동 */}
                   <div className="flex text-orange-600">
                     {"★★★★★".split("").map((star, i) => (
@@ -187,9 +171,11 @@ export default function Footer() {
 
         {/* 저작권 정보 */}
         <div className="border-t border-gray-700 pt-6 text-center">
-          <p className="text-gray-400 text-sm">© 2025 OneDay Korea. All rights reserved.</p>
+          <p className="text-gray-400 text-sm">
+            © 2025 OneDay Korea. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
-  )
+  );
 }
