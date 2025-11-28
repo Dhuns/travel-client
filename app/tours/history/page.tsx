@@ -16,14 +16,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FavoriteButton } from "@/components/favorite-button";
 import Link from "next/link";
-import { getToursFromConfig } from "@/lib/bokun";
-import { historyToursConfig } from "@/config/tours";
+import { getToursWithBokunData } from "@/lib/bokun";
 
 export const revalidate = 3600; // 1시간마다 재생성
 
 export default async function HistoryTourPage() {
-  // 서버 사이드에서 투어 데이터 가져오기
-  const tours = await getToursFromConfig(historyToursConfig);
+  // 백엔드에서 ID 가져온 후 직접 Bokun API 호출
+  const tours = await getToursWithBokunData("history", "History Tour");
 
   return (
     <div className="min-h-screen bg-white">

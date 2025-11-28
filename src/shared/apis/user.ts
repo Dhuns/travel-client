@@ -126,3 +126,34 @@ export const getGoogleAuthUrl = (): string => {
 export const getAppleAuthUrl = (): string => {
 	return `${API_URL}/user/auth/apple`;
 };
+
+// 프로필 수정
+export interface UpdateProfileData {
+	id: number;
+	name?: string;
+	phone?: string;
+}
+
+export const updateProfile = async (accessToken: string, data: UpdateProfileData): Promise<{ affected: number }> => {
+	const response = await axios.put(`${API_URL}/user/edit`, data, {
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+		},
+	});
+	return response.data;
+};
+
+// 비밀번호 변경
+export interface ChangePasswordData {
+	id: number;
+	password: string;
+}
+
+export const changePassword = async (accessToken: string, data: ChangePasswordData): Promise<{ affected: number }> => {
+	const response = await axios.put(`${API_URL}/user/edit`, data, {
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+		},
+	});
+	return response.data;
+};
