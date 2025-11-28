@@ -14,7 +14,7 @@ export default function ChatButton() {
   return (
     <a
       href="/chat"
-      className="fixed bottom-8 right-8 z-50 h-16 w-16 rounded-full shadow-lg transition-transform duration-300 ease-in-out hover:scale-110 bg-sky-600 hover:bg-sky-700 text-white flex items-center justify-center"
+      className="fixed bottom-8 left-8 z-50 h-16 w-16 rounded-full shadow-lg transition-transform duration-300 ease-in-out hover:scale-110 bg-sky-600 hover:bg-sky-700 text-white flex items-center justify-center"
       aria-label="Open chat page"
       style={{
         textDecoration: "none",

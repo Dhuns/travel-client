@@ -5,7 +5,6 @@ import {
   LogIn,
   Menu,
   Search,
-  ShoppingCart,
   User,
   X,
 } from "lucide-react";
@@ -61,7 +60,6 @@ export default function Header() {
     logout: authLogout,
     fetchUser,
   } = useAuthStore();
-  const [cartItemCount, setCartItemCount] = useState(0); // 백엔드에서 장바구니 아이템 수 조회
 
   // 로그인 시 사용자 정보 가져오기
   useEffect(() => {
@@ -303,19 +301,6 @@ export default function Header() {
               <Search className="w-5 h-5 stroke-2" />
             </button>
 
-            <Link
-              href="/cart"
-              className="hover:text-[#651d2a] transition-colors duration-300 p-2 rounded-full hover:bg-[#eda89b]/10 relative"
-              title="장바구니"
-            >
-              <ShoppingCart className="w-5 h-5 stroke-2" />
-              {cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#651d2a] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {cartItemCount > 99 ? "99+" : cartItemCount}
-                </span>
-              )}
-            </Link>
-
             {!isAuthenticated ? (
               // 로그인 전: 로그인 버튼만 표시
               <Link
@@ -481,18 +466,6 @@ export default function Header() {
                   </Link>
                 </div>
               </div>
-              <Link
-                href="/cart"
-                className="hover:text-[#651d2a] transition-colors duration-300 py-2 flex items-center justify-between"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <span>Cart</span>
-                {cartItemCount > 0 && (
-                  <span className="bg-[#651d2a] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {cartItemCount > 99 ? "99+" : cartItemCount}
-                  </span>
-                )}
-              </Link>
               {!isAuthenticated ? (
                 <Link
                   href="/login"
