@@ -55,12 +55,6 @@ export default async function HistoryTourPage() {
                     Explore Tours
                   </Button>
                 </a>
-                <Link href="/chat">
-                  <Button className="border-1 border-[#651d2a] text-[#651d2a] hover:bg-[#651d2a]/20 hover:border-[#651d2a]/20  bg-white px-6 transition-colors font-semibold flex items-center gap-2">
-                    Get Custom Quote
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </Link>
               </div>
               <div className="flex items-center gap-6 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
@@ -93,9 +87,9 @@ export default async function HistoryTourPage() {
                 </div>
                 <div>
                   <h4 className="font-bold text-gray-900 text-sm">
-                    100% Customized
+                    Signature Tour
                   </h4>
-                  <p className="text-xs text-gray-600">Your special journey</p>
+                  <p className="text-xs text-gray-600">special journey</p>
                 </div>
               </div>
             </div>
@@ -297,43 +291,48 @@ export default async function HistoryTourPage() {
                                     What's Included:
                                   </h4>
                                   <div className="space-y-2">
-                                    {tour.included.slice(0, 4).map((item, index) => (
-                                      <div
-                                        key={index}
-                                        className="flex items-start space-x-2"
-                                      >
-                                        <Check className="w-4 h-4 text-[#651d2a] mt-0.5 flex-shrink-0" />
-                                        <span className="text-gray-600 text-sm">
-                                          {item}
-                                        </span>
-                                      </div>
-                                    ))}
+                                    {tour.included
+                                      .slice(0, 4)
+                                      .map((item, index) => (
+                                        <div
+                                          key={index}
+                                          className="flex items-start space-x-2"
+                                        >
+                                          <Check className="w-4 h-4 text-[#651d2a] mt-0.5 flex-shrink-0" />
+                                          <span className="text-gray-600 text-sm">
+                                            {item}
+                                          </span>
+                                        </div>
+                                      ))}
                                   </div>
                                 </div>
                               )}
 
                               {/* Excluded */}
-                              {tour.exclusions && tour.exclusions.length > 0 && (
-                                <div>
-                                  <h4 className="font-semibold mb-3 text-gray-800 flex items-center">
-                                    <X className="w-4 h-4 mr-2 text-gray-500" />
-                                    Not Included:
-                                  </h4>
-                                  <div className="space-y-2">
-                                    {tour.exclusions.slice(0, 4).map((item, index) => (
-                                      <div
-                                        key={index}
-                                        className="flex items-start space-x-2"
-                                      >
-                                        <X className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                                        <span className="text-gray-600 text-sm">
-                                          {item}
-                                        </span>
-                                      </div>
-                                    ))}
+                              {tour.exclusions &&
+                                tour.exclusions.length > 0 && (
+                                  <div>
+                                    <h4 className="font-semibold mb-3 text-gray-800 flex items-center">
+                                      <X className="w-4 h-4 mr-2 text-gray-500" />
+                                      Not Included:
+                                    </h4>
+                                    <div className="space-y-2">
+                                      {tour.exclusions
+                                        .slice(0, 4)
+                                        .map((item, index) => (
+                                          <div
+                                            key={index}
+                                            className="flex items-start space-x-2"
+                                          >
+                                            <X className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                            <span className="text-gray-600 text-sm">
+                                              {item}
+                                            </span>
+                                          </div>
+                                        ))}
+                                    </div>
                                   </div>
-                                </div>
-                              )}
+                                )}
                             </div>
 
                             {tour.highlights && tour.highlights.length > 0 && (
@@ -342,17 +341,19 @@ export default async function HistoryTourPage() {
                                   Tour Highlights:
                                 </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                  {tour.highlights.slice(0, 4).map((highlight: string, index: number) => (
-                                    <div
-                                      key={index}
-                                      className="flex items-center space-x-2"
-                                    >
-                                      <div className="w-2 h-2 bg-[#651d2a] rounded-full flex-shrink-0"></div>
-                                      <span className="text-gray-600 text-sm">
-                                        {highlight}
-                                      </span>
-                                    </div>
-                                  ))}
+                                  {tour.highlights
+                                    .slice(0, 4)
+                                    .map((highlight: string, index: number) => (
+                                      <div
+                                        key={index}
+                                        className="flex items-center space-x-2"
+                                      >
+                                        <div className="w-2 h-2 bg-[#651d2a] rounded-full flex-shrink-0"></div>
+                                        <span className="text-gray-600 text-sm">
+                                          {highlight}
+                                        </span>
+                                      </div>
+                                    ))}
                                 </div>
                               </div>
                             )}
@@ -377,7 +378,7 @@ export default async function HistoryTourPage() {
         <div className="container mx-auto max-w-6xl w-full">
           <div className="text-center mb-12">
             <div className="flex items-center justify-center gap-2 mb-4">
-              <Gift className="text-[#c4982a]" size={32} />
+              <Gift className="text-[#651d2a]" size={32} />
               <h2 className="text-4xl font-bold text-gray-900">
                 Products & Souvenirs
               </h2>
@@ -400,10 +401,6 @@ export default async function HistoryTourPage() {
                 <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#651d2a]">
                   Traditional
                 </div>
-                <div className="absolute top-4 right-4 flex items-center gap-1 bg-white px-2 py-1 rounded-full">
-                  <Star className="text-yellow-400 fill-yellow-400" size={14} />
-                  <span className="text-xs font-semibold">4.9</span>
-                </div>
               </div>
               <div className="p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-2">
@@ -420,12 +417,8 @@ export default async function HistoryTourPage() {
                   alt="K-Beauty Skincare"
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#eda89b]">
+                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#c4982a]">
                   Beauty
-                </div>
-                <div className="absolute top-4 right-4 flex items-center gap-1 bg-white px-2 py-1 rounded-full">
-                  <Star className="text-yellow-400 fill-yellow-400" size={14} />
-                  <span className="text-xs font-semibold">4.8</span>
                 </div>
               </div>
               <div className="p-6">
@@ -445,10 +438,6 @@ export default async function HistoryTourPage() {
                 />
                 <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#6d8675]">
                   Food
-                </div>
-                <div className="absolute top-4 right-4 flex items-center gap-1 bg-white px-2 py-1 rounded-full">
-                  <Star className="text-yellow-400 fill-yellow-400" size={14} />
-                  <span className="text-xs font-semibold">4.7</span>
                 </div>
               </div>
               <div className="p-6">
@@ -492,7 +481,7 @@ export default async function HistoryTourPage() {
                   {i === 0 &&
                     "More than just visiting sites, we provide rich historical context and engaging narratives that bring the past to life."}
                   {i === 1 &&
-                    "Our guides encourage questions and discussions, making history an interactive experience rather than a one-way lecture."}
+                    "Your curiosity is Tumakr's guide. You can explore in-depth through the app and content at any time, completing your journey at your own pace."}
                   {i === 2 &&
                     "We leave room for spontaneity, allowing unexpected discoveries and memorable moments to unfold naturally."}
                   {i === 3 &&
