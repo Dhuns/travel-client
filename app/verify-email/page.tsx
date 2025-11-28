@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { verifyEmail } from "@/src/shared/apis/user";
-import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CheckCircle2, XCircle } from "lucide-react";
 
 export default function VerifyEmailPage() {
   const router = useRouter();
@@ -24,11 +23,10 @@ export default function VerifyEmailPage() {
       }
 
       try {
-        const result = await verifyEmail(token);
+        await verifyEmail(token);
         setSuccess(true);
         setError("");
 
-        // 3초 후 자동으로 로그인 페이지로 이동
         setTimeout(() => {
           router.push("/login");
         }, 3000);
@@ -45,56 +43,72 @@ export default function VerifyEmailPage() {
   }, [token, router]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f5f3f0] to-[#faf8f5] flex items-center justify-center pt-32 pb-16">
-      <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8">
+    <div className="min-h-screen bg-[#faf9f7] flex items-center justify-center px-4">
+      <div className="max-w-sm w-full text-center">
         {loading && (
-          <div className="text-center">
-            <Loader2 className="w-16 h-16 mx-auto text-[#651d2a] animate-spin mb-4" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Verifying your email...</h2>
-            <p className="text-gray-600">Please wait a moment</p>
-          </div>
+          <>
+            <div className="flex justify-center mb-6">
+              <div className="w-12 h-12 border-2 border-gray-200 border-t-[#651d2a] rounded-full animate-spin" />
+            </div>
+            <h1 className="text-lg font-medium text-gray-900 mb-2">
+              Verifying your email
+            </h1>
+            <p className="text-sm text-gray-500">
+              Please wait...
+            </p>
+          </>
         )}
 
         {!loading && success && (
-          <div className="text-center">
-            <CheckCircle2 className="w-16 h-16 mx-auto text-green-500 mb-4" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Email Verified!</h2>
-            <p className="text-gray-600 mb-2">
-              Your email has been successfully verified. You can now sign in to your account.
-            </p>
+          <>
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center">
+                <CheckCircle2 className="w-8 h-8 text-green-500" />
+              </div>
+            </div>
+            <h1 className="text-lg font-medium text-gray-900 mb-2">
+              Email verified
+            </h1>
             <p className="text-sm text-gray-500 mb-6">
-              Redirecting to login page in 3 seconds...
+              Your account is now active. Redirecting to sign in...
             </p>
-            <Button
+            <button
               onClick={() => router.push("/login")}
-              className="w-full bg-gradient-to-r from-[#651d2a] to-[#7a2433] hover:from-[#7a2433] hover:to-[#8b2a3d] text-white"
+              className="w-full py-3 text-sm font-medium text-white bg-[#651d2a] rounded-lg hover:bg-[#7a2433] transition-colors"
             >
-              Go to Login Now
-            </Button>
-          </div>
+              Continue to sign in
+            </button>
+          </>
         )}
 
         {!loading && error && (
-          <div className="text-center">
-            <XCircle className="w-16 h-16 mx-auto text-red-500 mb-4" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Verification Failed</h2>
-            <p className="text-gray-600 mb-6">{error}</p>
-            <div className="space-y-2">
-              <Button
-                onClick={() => router.push("/login")}
-                className="w-full bg-gradient-to-r from-[#651d2a] to-[#7a2433] hover:from-[#7a2433] hover:to-[#8b2a3d] text-white"
-              >
-                Go to Login
-              </Button>
-              <Button
-                onClick={() => router.push("/signup")}
-                variant="outline"
-                className="w-full"
-              >
-                Back to Sign Up
-              </Button>
+          <>
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center">
+                <XCircle className="w-8 h-8 text-red-500" />
+              </div>
             </div>
-          </div>
+            <h1 className="text-lg font-medium text-gray-900 mb-2">
+              Verification failed
+            </h1>
+            <p className="text-sm text-gray-500 mb-6">
+              {error}
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={() => router.push("/login")}
+                className="w-full py-3 text-sm font-medium text-white bg-[#651d2a] rounded-lg hover:bg-[#7a2433] transition-colors"
+              >
+                Go to sign in
+              </button>
+              <button
+                onClick={() => router.push("/signup")}
+                className="w-full py-3 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Create new account
+              </button>
+            </div>
+          </>
         )}
       </div>
     </div>

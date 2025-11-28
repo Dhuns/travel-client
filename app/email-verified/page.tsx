@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, XCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 export default function EmailVerifiedPage() {
   const router = useRouter();
@@ -14,7 +13,6 @@ export default function EmailVerifiedPage() {
 
   useEffect(() => {
     if (success) {
-      // 성공 시 3초 카운트다운 후 로그인 페이지로 이동
       const timer = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
@@ -31,52 +29,56 @@ export default function EmailVerifiedPage() {
   }, [success, router]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f5f3f0] to-[#faf8f5] flex items-center justify-center pt-32 pb-16">
-      <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8">
+    <div className="min-h-screen bg-[#faf9f7] flex items-center justify-center px-4">
+      <div className="max-w-sm w-full text-center">
         {success ? (
-          <div className="text-center">
-            <CheckCircle2 className="w-16 h-16 mx-auto text-green-500 mb-4" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              Registration Complete!
-            </h2>
-            <p className="text-gray-600 mb-2">
-              Your email has been successfully verified. Welcome to OneDayKorea!
-            </p>
-            <p className="text-sm text-gray-500 mb-6">
-              Redirecting to login page in {countdown} seconds...
-            </p>
-            <Button
-              onClick={() => router.push("/login")}
-              className="w-full bg-gradient-to-r from-[#651d2a] to-[#7a2433] hover:from-[#7a2433] hover:to-[#8b2a3d] text-white"
-            >
-              Go to Login Now
-            </Button>
-          </div>
-        ) : (
-          <div className="text-center">
-            <XCircle className="w-16 h-16 mx-auto text-red-500 mb-4" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              Verification Failed
-            </h2>
-            <p className="text-gray-600 mb-6">
-              {error || "The verification link may have expired or is invalid."}
-            </p>
-            <div className="space-y-2">
-              <Button
-                onClick={() => router.push("/login")}
-                className="w-full bg-gradient-to-r from-[#651d2a] to-[#7a2433] hover:from-[#7a2433] hover:to-[#8b2a3d] text-white"
-              >
-                Go to Login
-              </Button>
-              <Button
-                onClick={() => router.push("/signup")}
-                variant="outline"
-                className="w-full"
-              >
-                Back to Sign Up
-              </Button>
+          <>
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center">
+                <CheckCircle2 className="w-8 h-8 text-green-500" />
+              </div>
             </div>
-          </div>
+            <h1 className="text-lg font-medium text-gray-900 mb-2">
+              You're all set
+            </h1>
+            <p className="text-sm text-gray-500 mb-6">
+              Redirecting to sign in in {countdown}s...
+            </p>
+            <button
+              onClick={() => router.push("/login")}
+              className="w-full py-3 text-sm font-medium text-white bg-[#651d2a] rounded-lg hover:bg-[#7a2433] transition-colors"
+            >
+              Continue to sign in
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center">
+                <XCircle className="w-8 h-8 text-red-500" />
+              </div>
+            </div>
+            <h1 className="text-lg font-medium text-gray-900 mb-2">
+              Verification failed
+            </h1>
+            <p className="text-sm text-gray-500 mb-6">
+              {error || "The link may have expired or is invalid."}
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={() => router.push("/login")}
+                className="w-full py-3 text-sm font-medium text-white bg-[#651d2a] rounded-lg hover:bg-[#7a2433] transition-colors"
+              >
+                Go to sign in
+              </button>
+              <button
+                onClick={() => router.push("/signup")}
+                className="w-full py-3 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Create new account
+              </button>
+            </div>
+          </>
         )}
       </div>
     </div>
