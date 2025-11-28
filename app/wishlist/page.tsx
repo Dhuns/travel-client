@@ -1,12 +1,14 @@
 "use client";
 
-import { ChevronRight, Heart, MapPin, Clock } from "lucide-react";
+import { ChevronRight, Heart, MapPin, Clock, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { wishlistUtils, WishlistTour } from "@/lib/wishlist";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/src/shared/store/authStore";
+import { getMyWishlist, removeFromWishlist, WishlistItem } from "@/src/shared/apis/wishlist";
 
 /**
  * Wishlist Page
@@ -14,20 +16,64 @@ import { wishlistUtils, WishlistTour } from "@/lib/wishlist";
  * Displays user's favorite tours with:
  * - Remove from wishlist functionality
  * - Direct booking links
+ * - Requires authentication
  */
 
 export default function WishlistPage() {
-  const [wishlistItems, setWishlistItems] = useState<WishlistTour[]>([]);
+  const router = useRouter();
+  const { isAuthenticated, accessToken } = useAuthStore();
+  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
 
-  // Load wishlist from localStorage on mount
+  // Redirect to login if not authenticated
   useEffect(() => {
-    setWishlistItems(wishlistUtils.getWishlist());
-  }, []);
+    if (!isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isAuthenticated, router]);
 
-  const removeFromWishlist = (id: string) => {
-    const success = wishlistUtils.removeFromWishlist(id);
-    if (success) {
-      setWishlistItems((prev) => prev.filter((item) => item.id !== id));
+  // Load wishlist from API on mount
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      if (!isAuthenticated || !accessToken) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const items = await getMyWishlist(accessToken);
+        setWishlistItems(items);
+      } catch (error) {
+        console.error("Error fetching wishlist:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchWishlist();
+  }, [isAuthenticated, accessToken]);
+
+  const handleRemoveFromWishlist = async (bokunExperienceId: string) => {
+    if (!accessToken || removingIds.has(bokunExperienceId)) return;
+
+    // Optimistic UI update
+    setRemovingIds((prev) => new Set(prev).add(bokunExperienceId));
+    const previousItems = [...wishlistItems];
+    setWishlistItems((prev) => prev.filter((item) => item.bokunExperienceId !== bokunExperienceId));
+
+    try {
+      await removeFromWishlist(accessToken, bokunExperienceId);
+    } catch (error) {
+      console.error("Error removing from wishlist:", error);
+      // Rollback on error
+      setWishlistItems(previousItems);
+    } finally {
+      setRemovingIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(bokunExperienceId);
+        return newSet;
+      });
     }
   };
 
@@ -44,7 +90,14 @@ export default function WishlistPage() {
 
         {/* Wishlist items */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-          {wishlistItems.length === 0 ? (
+          {isLoading ? (
+            <div className="col-span-full">
+              <Card className="p-12 text-center shadow-lg border border-gray-200 bg-white rounded-xl">
+                <Loader2 className="w-12 h-12 text-[#651d2a] mx-auto mb-4 animate-spin" />
+                <p className="text-gray-600">Loading your wishlist...</p>
+              </Card>
+            </div>
+          ) : wishlistItems.length === 0 ? (
             <div className="col-span-full">
               <Card className="p-12 text-center shadow-lg border border-gray-200 bg-white rounded-xl">
                 <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -69,15 +122,21 @@ export default function WishlistPage() {
               >
                 {/* Image */}
                 <div className="relative h-48 overflow-hidden flex-shrink-0">
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    fill
-                    className="object-cover"
-                  />
+                  {item.image ? (
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <MapPin className="w-12 h-12 text-gray-400" />
+                    </div>
+                  )}
                   {/* Remove button */}
                   <button
-                    onClick={() => removeFromWishlist(item.id)}
+                    onClick={() => handleRemoveFromWishlist(item.bokunExperienceId)}
                     className="absolute bottom-3 right-3 transition-all hover:scale-110 group/heart"
                     aria-label="Remove from wishlist"
                   >
@@ -90,9 +149,11 @@ export default function WishlistPage() {
                   <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
                     {item.title}
                   </h3>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                    {item.description}
-                  </p>
+                  {item.description && (
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {item.description}
+                    </p>
+                  )}
 
                   {/* Tour details */}
                   <div className="space-y-2 mb-4">
@@ -117,13 +178,7 @@ export default function WishlistPage() {
                         {item.price}
                       </div>
                     )}
-                    <Link
-                      href={
-                        item.bokunExperienceId
-                          ? `/tours/multiday/${item.bokunExperienceId}`
-                          : `/tours/${item.id}`
-                      }
-                    >
+                    <Link href={`/tours/multiday/${item.bokunExperienceId}`}>
                       <Button
                         size="sm"
                         className="bg-[#651d2a] hover:bg-[#4a1520] text-white"

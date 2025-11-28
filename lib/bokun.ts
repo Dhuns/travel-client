@@ -207,6 +207,148 @@ export async function getToursFromConfig(
   return tours.filter((tour) => tour !== null);
 }
 
+// ==================== Backend API (Dev Server) ====================
+
+/**
+ * 백엔드 API에서 반환하는 투어 타입
+ */
+export interface BackendTour {
+  id: number;
+  bokunExperienceId: string;
+  category: string | null;
+  categoryOverride: string | null;
+  isActive: boolean;
+  displayOrder: number | null;
+  title: string | null;
+  description: string | null;
+  thumbnailUrl: string | null;
+  price: number | null;
+  currency: string | null;
+  duration: string | null;
+  lastSyncedAt: string | null;
+}
+
+/**
+ * 백엔드 API에서 카테고리별 투어 가져오기
+ */
+export async function getToursByCategory(category: string): Promise<BackendTour[]> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9191/api";
+
+  try {
+    const response = await fetch(`${apiUrl}/tour/category?category=${category}`, {
+      next: { revalidate: 3600 }, // 1시간마다 캐시 갱신
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch ${category} tours:`, response.status);
+      return [];
+    }
+
+    const data: BackendTour[] = await response.json();
+    return data;
+  } catch (error) {
+    console.error(`Error fetching ${category} tours:`, error);
+    return [];
+  }
+}
+
+/**
+ * 백엔드 API에서 카테고리별 Bokun Experience ID 목록만 가져오기
+ */
+export async function getBokunIdsByCategory(category: string): Promise<string[]> {
+  const backendTours = await getToursByCategory(category);
+  return backendTours.map(tour => tour.bokunExperienceId);
+}
+
+/**
+ * 백엔드 API에서 인기 투어 가져오기
+ */
+export async function getPopularTours(): Promise<BackendTour[]> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9191/api";
+
+  try {
+    const response = await fetch(`${apiUrl}/tour/popular`, {
+      next: { revalidate: 3600 },
+    });
+
+    if (!response.ok) {
+      console.error("Failed to fetch popular tours:", response.status);
+      return [];
+    }
+
+    const data: BackendTour[] = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching popular tours:", error);
+    return [];
+  }
+}
+
+/**
+ * 백엔드 투어를 프론트엔드 Tour 형식으로 변환
+ */
+export function transformBackendTourToFrontend(tour: BackendTour, badge?: string) {
+  // HTML 태그 제거
+  const cleanDescription = tour.description
+    ? tour.description.replace(/<[^>]*>/g, "").trim()
+    : "";
+
+  return {
+    id: tour.bokunExperienceId,
+    title: tour.title || "Untitled Tour",
+    subtitle: "",
+    category: tour.categoryOverride || tour.category || "",
+    badge: badge || tour.categoryOverride || tour.category || "Tour",
+    description: cleanDescription,
+    highlights: [],
+    image: tour.thumbnailUrl || "/images/placeholder-tour.jpg",
+    bokunExperienceId: tour.bokunExperienceId,
+    categories: [],
+    location: "",
+    included: [],
+    exclusions: [],
+    duration: tour.duration || "",
+    durationText: tour.duration || "",
+    price: tour.price ? `${tour.currency === "USD" ? "$" : tour.currency}${tour.price}` : "",
+    activityCategories: [],
+    knowBeforeYouGo: [],
+    minAge: 0,
+    cancellationPolicy: "",
+  };
+}
+
+/**
+ * 백엔드 API로 카테고리별 투어를 가져와 프론트엔드 형식으로 변환
+ * (백엔드 데이터만 사용 - 위젯 없이 간단한 정보만 필요할 때)
+ */
+export async function getToursFromBackend(category: string, badge?: string) {
+  const backendTours = await getToursByCategory(category);
+  return backendTours.map(tour => transformBackendTourToFrontend(tour, badge));
+}
+
+/**
+ * 백엔드에서 카테고리별 Bokun ID 가져온 후 직접 Bokun API 호출
+ * (위젯용 전체 데이터 필요할 때)
+ */
+export async function getToursWithBokunData(category: string, badge?: string) {
+  // 1. 백엔드에서 해당 카테고리의 bokunExperienceId 목록 가져오기
+  const bokunIds = await getBokunIdsByCategory(category);
+
+  if (bokunIds.length === 0) {
+    return [];
+  }
+
+  // 2. 각 ID로 직접 Bokun API 호출해서 전체 데이터 가져오기
+  const tourPromises = bokunIds.map(async (id) => {
+    const activity = await getBokunActivity(id);
+    if (!activity) return null;
+    return transformBokunActivityToTour(activity, category, badge || category);
+  });
+
+  const tours = await Promise.all(tourPromises);
+  return tours.filter((tour) => tour !== null);
+}
+
 // ==================== Booking API ====================
 
 /**
