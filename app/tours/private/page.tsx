@@ -4,9 +4,9 @@ import {
   Clock,
   Gift,
   MapPin,
+  MessageCircle,
   Star,
   Users,
-  X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,8 @@ import { FavoriteButton } from "@/components/favorite-button";
 import Link from "next/link";
 import { getToursWithBokunData } from "@/lib/bokun";
 import PrivateTourInquiryForm from "@/components/PrivateTourInquiryForm";
+import { getToursFromConfig } from "@/lib/bokun";
+import { privateToursConfig } from "@/config/tours";
 
 export const revalidate = 3600; // 1시간마다 재생성
 
@@ -204,134 +206,230 @@ export default async function PrivateTourPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {tours.length === 0 ? (
-              <div className="col-span-3 text-center py-20">
-                <p className="text-gray-600">No tours available at the moment.</p>
-              </div>
-            ) : (
-              tours.map((tour, index) => {
-                // 투어별 색상 테마
-                const colorThemes = [
-                  { badge: "bg-[#651d2a]", text: "text-[#651d2a]", button: "bg-[#651d2a] hover:bg-[#651d2a]/90" },
-                  { badge: "bg-[#c4982a]", text: "text-[#c4982a]", button: "bg-[#c4982a] hover:bg-[#c4982a]/90" },
-                  { badge: "bg-[#6d8675]", text: "text-[#6d8675]", button: "bg-[#6d8675] hover:bg-[#6d8675]/90" },
-                ];
-                const theme = colorThemes[index % 3];
+          {tours.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-gray-600">No tours available at the moment.</p>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {/* 첫 줄: 2개의 큰 카드 */}
+              <div className="grid md:grid-cols-2 gap-8">
+                {tours.slice(0, 2).map((tour, index) => {
+                  const colorThemes = [
+                    {
+                      badge: "bg-[#651d2a]",
+                      text: "text-[#651d2a]",
+                      button: "bg-[#651d2a] hover:bg-[#651d2a]/90",
+                    },
+                    {
+                      badge: "bg-[#c4982a]",
+                      text: "text-[#c4982a]",
+                      button: "bg-[#c4982a] hover:bg-[#c4982a]/90",
+                    },
+                  ];
+                  const theme = colorThemes[index % 2];
 
-                return (
-                  <Link key={tour.bokunExperienceId} href={`/tours/private/${tour.bokunExperienceId}`}>
-                    <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow cursor-pointer">
-                      <div className="relative h-64">
-                        <img
-                          src={tour.image}
-                          alt={tour.title}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white ${theme.badge}`}>
-                          {tour.badge}
-                        </div>
-                        <div className="absolute bottom-3 right-3">
-                          <FavoriteButton
-                            tourId={tour.bokunExperienceId}
-                            tourData={{
-                              id: tour.bokunExperienceId,
-                              title: tour.title,
-                              image: tour.image || "/placeholder.svg",
-                              description: tour.description,
-                              price: tour.price,
-                              duration: tour.duration,
-                              location: tour.location,
-                              bokunExperienceId: tour.bokunExperienceId,
-                            }}
+                  return (
+                    <Link
+                      key={tour.bokunExperienceId}
+                      href={`/tours/private/${tour.bokunExperienceId}`}
+                    >
+                      <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow cursor-pointer h-full">
+                        <div className="relative h-72">
+                          <img
+                            src={tour.image}
+                            alt={tour.title}
+                            className="w-full h-full object-cover"
                           />
-                        </div>
-                      </div>
-                      <div className="p-6">
-                        <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                          {tour.location && (
-                            <div className="flex items-center gap-1">
-                              <MapPin size={16} />
-                              <span>{tour.location}</span>
-                            </div>
-                          )}
-                          {tour.duration && (
-                            <div className="flex items-center gap-1">
-                              <Clock size={16} />
-                              <span>{tour.duration}</span>
-                            </div>
-                          )}
-                        </div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-4">
-                          {tour.title}
-                        </h3>
-                        {tour.description && (
-                          <p className="text-gray-600 mb-4 text-sm leading-relaxed line-clamp-3">
-                            {tour.description}
-                          </p>
-                        )}
-                        {tour.price && (
-                          <div className="mb-4">
-                            <span className={`text-2xl font-bold ${theme.text}`}>
-                              {tour.price}
-                            </span>
+                          <div
+                            className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white ${theme.badge}`}
+                          >
+                            {tour.badge}
                           </div>
-                        )}
-                        <div className="grid md:grid-cols-2 gap-6 mb-4">
-                          {tour.included && tour.included.length > 0 && (
-                            <div>
-                              <h4 className="font-semibold text-gray-900 mb-2 text-sm">
-                                Included:
-                              </h4>
-                              <ul className="space-y-2 text-sm text-gray-600">
-                                {tour.included.map((item, index) => (
-                                  <li key={index} className="flex items-start gap-2">
-                                    <Check className="w-4 h-4 text-[#651d2a] mt-0.5 flex-shrink-0" />
-                                    {item}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          {tour.exclusions && tour.exclusions.length > 0 && (
-                            <div>
-                              <h4 className="font-semibold text-gray-900 mb-2 text-sm">
-                                Not Included:
-                              </h4>
-                              <ul className="space-y-2 text-sm text-gray-600">
-                                {tour.exclusions.map((item, index) => (
-                                  <li key={index} className="flex items-start gap-2">
-                                    <X className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                                    {item}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
+                          <div className="absolute bottom-3 right-3">
+                            <FavoriteButton
+                              tourId={tour.bokunExperienceId}
+                              tourData={{
+                                id: tour.bokunExperienceId,
+                                title: tour.title,
+                                image: tour.image || "/placeholder.svg",
+                                description: tour.description,
+                                price: tour.price,
+                                duration: tour.duration,
+                                location: tour.location,
+                                bokunExperienceId: tour.bokunExperienceId,
+                              }}
+                            />
+                          </div>
                         </div>
-                        {tour.highlights && tour.highlights.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            {tour.highlights.map((highlight: string, i: number) => (
+                        <div className="p-6">
+                          <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                            {tour.location && (
+                              <div className="flex items-center gap-1">
+                                <MapPin size={16} />
+                                <span>{tour.location}</span>
+                              </div>
+                            )}
+                            {tour.duration && (
+                              <div className="flex items-center gap-1">
+                                <Clock size={16} />
+                                <span>{tour.duration}</span>
+                              </div>
+                            )}
+                          </div>
+                          <h3 className="text-xl font-bold text-gray-900 mb-3">
+                            {tour.title}
+                          </h3>
+                          {tour.description && (
+                            <p className="text-gray-600 mb-4 text-sm leading-relaxed line-clamp-2">
+                              {tour.description}
+                            </p>
+                          )}
+                          {tour.price && (
+                            <div className="mb-4">
                               <span
-                                key={i}
-                                className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
+                                className={`text-2xl font-bold ${theme.text}`}
                               >
-                                {highlight}
+                                {tour.price}
                               </span>
-                            ))}
-                          </div>
-                        )}
-                        <div className="flex items-center justify-between">
-                          <Button className={`${theme.button} text-white w-full`}>
+                            </div>
+                          )}
+                          <Button
+                            className={`${theme.button} text-white w-full`}
+                          >
                             Book Now
                           </Button>
                         </div>
                       </div>
-                    </div>
-                  </Link>
-                );
-              })
-            )}
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {/* 둘째 줄: 3개의 작은 카드 */}
+              <div className="grid md:grid-cols-3 gap-6">
+                {tours.slice(2, 5).map((tour, index) => {
+                  const colorThemes = [
+                    {
+                      badge: "bg-[#6d8675]",
+                      text: "text-[#6d8675]",
+                      button: "bg-[#6d8675] hover:bg-[#6d8675]/90",
+                    },
+                    {
+                      badge: "bg-[#651d2a]",
+                      text: "text-[#651d2a]",
+                      button: "bg-[#651d2a] hover:bg-[#651d2a]/90",
+                    },
+                    {
+                      badge: "bg-[#c4982a]",
+                      text: "text-[#c4982a]",
+                      button: "bg-[#c4982a] hover:bg-[#c4982a]/90",
+                    },
+                  ];
+                  const theme = colorThemes[index % 3];
+
+                  return (
+                    <Link
+                      key={tour.bokunExperienceId}
+                      href={`/tours/private/${tour.bokunExperienceId}`}
+                    >
+                      <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow cursor-pointer h-full">
+                        <div className="relative h-48">
+                          <img
+                            src={tour.image}
+                            alt={tour.title}
+                            className="w-full h-full object-cover"
+                          />
+                          <div
+                            className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white ${theme.badge}`}
+                          >
+                            {tour.badge}
+                          </div>
+                          <div className="absolute bottom-3 right-3">
+                            <FavoriteButton
+                              tourId={tour.bokunExperienceId}
+                              tourData={{
+                                id: tour.bokunExperienceId,
+                                title: tour.title,
+                                image: tour.image || "/placeholder.svg",
+                                description: tour.description,
+                                price: tour.price,
+                                duration: tour.duration,
+                                location: tour.location,
+                                bokunExperienceId: tour.bokunExperienceId,
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <div className="p-5">
+                          <div className="flex items-center gap-3 text-xs text-gray-600 mb-2">
+                            {tour.location && (
+                              <div className="flex items-center gap-1">
+                                <MapPin size={14} />
+                                <span>{tour.location}</span>
+                              </div>
+                            )}
+                            {tour.duration && (
+                              <div className="flex items-center gap-1">
+                                <Clock size={14} />
+                                <span>{tour.duration}</span>
+                              </div>
+                            )}
+                          </div>
+                          <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
+                            {tour.title}
+                          </h3>
+                          {tour.description && (
+                            <p className="text-gray-600 mb-3 text-xs leading-relaxed line-clamp-2">
+                              {tour.description}
+                            </p>
+                          )}
+                          {tour.price && (
+                            <div className="mb-3">
+                              <span
+                                className={`text-xl font-bold ${theme.text}`}
+                              >
+                                {tour.price}
+                              </span>
+                            </div>
+                          )}
+                          <Button
+                            className={`${theme.button} text-white w-full text-sm`}
+                          >
+                            Book Now
+                          </Button>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Chatbot CTA */}
+          <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-6 bg-[#651d2a] rounded-2xl p-8">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center">
+                <MessageCircle className="text-white" size={28} />
+              </div>
+              <div className="text-white">
+                <h3 className="text-xl font-bold mb-1">
+                  Need Help Planning Your Tour?
+                </h3>
+                <p className="text-white/80 text-sm">
+                  Chat with our AI assistant to create your perfect private tour
+                </p>
+              </div>
+            </div>
+            <Link href="/chat">
+              <Button
+                size="lg"
+                className="bg-white text-[#651d2a] hover:bg-white/90 font-semibold"
+              >
+                Start Chatting
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -495,10 +593,6 @@ export default async function PrivateTourPage() {
                 <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#651d2a]">
                   Traditional
                 </div>
-                <div className="absolute top-4 right-4 flex items-center gap-1 bg-white px-2 py-1 rounded-full">
-                  <Star className="text-yellow-400 fill-yellow-400" size={14} />
-                  <span className="text-xs font-semibold">4.9</span>
-                </div>
               </div>
               <div className="p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-2">
@@ -515,12 +609,8 @@ export default async function PrivateTourPage() {
                   alt="K-Beauty Skincare"
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#eda89b]">
+                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#c4982a]">
                   Beauty
-                </div>
-                <div className="absolute top-4 right-4 flex items-center gap-1 bg-white px-2 py-1 rounded-full">
-                  <Star className="text-yellow-400 fill-yellow-400" size={14} />
-                  <span className="text-xs font-semibold">4.8</span>
                 </div>
               </div>
               <div className="p-6">
@@ -540,10 +630,6 @@ export default async function PrivateTourPage() {
                 />
                 <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#6d8675]">
                   Food
-                </div>
-                <div className="absolute top-4 right-4 flex items-center gap-1 bg-white px-2 py-1 rounded-full">
-                  <Star className="text-yellow-400 fill-yellow-400" size={14} />
-                  <span className="text-xs font-semibold">4.7</span>
                 </div>
               </div>
               <div className="p-6">
