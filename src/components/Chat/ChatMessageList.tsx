@@ -35,7 +35,7 @@ const ChatMessageList: FC<Props> = ({
     setQuotationHash(null);
   };
 
-  // 새 메시지가 추가되면 자동 스크롤 (더 부드럽게)
+  // Auto-scroll on new messages
   useEffect(() => {
     if (messagesEndRef.current) {
       setTimeout(() => {
@@ -52,22 +52,27 @@ const ChatMessageList: FC<Props> = ({
       <MessagesList hasMessages={hasMessages}>
         {/* Welcome message and input when no messages */}
         {messages.length === 0 && !isTyping && (
-          <WelcomeMessageContainer>
-            <WelcomeMessage>
-              <WelcomeIcon>✈️</WelcomeIcon>
-              <WelcomeText>{UI_TEXT.WELCOME_TITLE}</WelcomeText>
-              <WelcomeSubtext>{UI_TEXT.WELCOME_SUBTITLE}</WelcomeSubtext>
-            </WelcomeMessage>
+          <WelcomeContainer>
+            <WelcomeContent>
+              <WelcomeIcon>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+              </WelcomeIcon>
+              <WelcomeTitle>{UI_TEXT.WELCOME_TITLE}</WelcomeTitle>
+              <WelcomeSubtitle>{UI_TEXT.WELCOME_SUBTITLE}</WelcomeSubtitle>
+            </WelcomeContent>
             {onSend && (
               <WelcomeInputWrapper>
                 <ChatInput onSend={onSend} disabled={isTyping} />
               </WelcomeInputWrapper>
             )}
-          </WelcomeMessageContainer>
+          </WelcomeContainer>
         )}
 
         {messages.map((message) => {
-          // 견적서 카드 타입
+          // Estimate card type
           if (
             message.type === "estimate" &&
             message.metadata?.estimatePreview
@@ -83,14 +88,14 @@ const ChatMessageList: FC<Props> = ({
             );
           }
 
-          // 일반 텍스트 메시지
-          return <ChatMessage key={message.id} message={message} />;
+          // Regular text message (including estimate type)
+          return <ChatMessage key={message.id} message={message} onViewQuote={handleViewQuote} />;
         })}
 
-        {/* 타이핑 인디케이터 */}
+        {/* Typing indicator */}
         {isTyping && <TypingIndicator />}
 
-        {/* 자동 스크롤용 더미 엘리먼트 */}
+        {/* Auto-scroll anchor */}
         <div ref={messagesEndRef} />
       </MessagesList>
 
@@ -114,14 +119,32 @@ const Container = styled.div<{ hasMessages: boolean }>`
   overflow-y: auto;
   background-color: #ffffff;
   min-height: 0;
+
   ${({ hasMessages }) =>
     !hasMessages &&
     `
     display: flex;
-    align-items: start;
+    align-items: flex-start;
     justify-content: center;
-    padding-top: 10vh;
+    padding-top: 8vh;
   `}
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.2);
+  }
 `;
 
 const MessagesList = styled.div<{ hasMessages: boolean }>`
@@ -129,54 +152,77 @@ const MessagesList = styled.div<{ hasMessages: boolean }>`
   min-height: ${({ hasMessages }) => (hasMessages ? "100%" : "auto")};
   display: flex;
   flex-direction: column;
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   width: 100%;
 `;
 
 const EstimateCardWrapper = styled.div`
   padding: 16px 24px;
-  background-color: #f9f9f9;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    padding: 12px 16px;
+  }
 `;
 
-const WelcomeMessageContainer = styled.div`
+const WelcomeContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
-  gap: 32px;
+  gap: 40px;
+  padding: 0 24px;
 `;
 
-const WelcomeMessage = styled.div`
+const WelcomeContent = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 40px 24px 0;
   text-align: center;
 `;
 
 const WelcomeIcon = styled.div`
-  font-size: 48px;
-  margin-bottom: 16px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 24px rgba(101, 29, 42, 0.25);
 `;
 
-const WelcomeText = styled.h2`
-  font-size: 24px;
+const WelcomeTitle = styled.h2`
+  font-size: 28px;
   font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 8px 0;
+  color: #111827;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.5px;
+
+  @media (max-width: 768px) {
+    font-size: 24px;
+  }
 `;
 
-const WelcomeSubtext = styled.p`
-  font-size: 15px;
-  color: #888;
+const WelcomeSubtitle = styled.p`
+  font-size: 16px;
+  color: #6b7280;
   margin: 0;
+  max-width: 400px;
+  line-height: 1.6;
+
+  @media (max-width: 768px) {
+    font-size: 15px;
+  }
 `;
 
 const WelcomeInputWrapper = styled.div`
   width: 100%;
-  max-width: 800px;
-  padding: 0 24px 40px;
+  max-width: 700px;
 `;

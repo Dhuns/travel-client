@@ -9,9 +9,10 @@ import remarkGfm from "remark-gfm";
 
 interface Props {
   message: ChatMessageType;
+  onViewQuote?: (hash: string) => void;
 }
 
-const ChatMessage: FC<Props> = ({ message }) => {
+const ChatMessage: FC<Props> = ({ message, onViewQuote }) => {
   const { role, content, timestamp, type, metadata } = message;
   const isUser = role === "user";
 
@@ -19,57 +20,94 @@ const ChatMessage: FC<Props> = ({ message }) => {
   if (type === "estimate" && metadata?.batchId) {
     // Generate encrypted hash for the quotation link
     const hash = aesEncrypt(String(metadata.batchId));
-    const quotationLink = `/quotation/${encodeURIComponent(hash)}`;
+    const encodedHash = encodeURIComponent(hash);
+
+    const handleViewClick = (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (onViewQuote) {
+        onViewQuote(encodedHash);
+      }
+    };
 
     return (
       <MessageContainer isUser={false}>
-        <MessageBubble isUser={false}>
+        <AvatarWrapper>
+          <AssistantAvatar>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+          </AssistantAvatar>
+        </AvatarWrapper>
+        <MessageContent>
           <EstimateCard>
             <EstimateHeader>
-              <EstimateIcon>✨</EstimateIcon>
-              <EstimateTitle>Quotation Generated!</EstimateTitle>
+              <EstimateIcon>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                  <line x1="16" y1="17" x2="8" y2="17"/>
+                  <polyline points="10 9 9 9 8 9"/>
+                </svg>
+              </EstimateIcon>
+              <EstimateTitle>Quotation Ready</EstimateTitle>
             </EstimateHeader>
-            <EstimateContent>
+            <EstimateBody>
               <EstimateInfo>
-                <InfoLabel>Total Amount</InfoLabel>
-                <InfoValue>${metadata.totalAmount?.toLocaleString()}</InfoValue>
+                <InfoRow>
+                  <InfoLabel>Total Amount</InfoLabel>
+                  <InfoValue>${metadata.totalAmount?.toLocaleString()}</InfoValue>
+                </InfoRow>
+                <InfoRow>
+                  <InfoLabel>Items</InfoLabel>
+                  <InfoValue>{metadata.itemCount}</InfoValue>
+                </InfoRow>
               </EstimateInfo>
-              <EstimateInfo>
-                <InfoLabel>Items</InfoLabel>
-                <InfoValue>{metadata.itemCount}</InfoValue>
-              </EstimateInfo>
-            </EstimateContent>
-            <EstimateMessage>{content}</EstimateMessage>
+              {content && <EstimateMessage>{content}</EstimateMessage>}
+            </EstimateBody>
             <EstimateActions>
-              <ViewQuotationButton
-                href={quotationLink}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View Quotation Details →
+              <ViewQuotationButton onClick={handleViewClick}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>
+                </svg>
+                View Details
               </ViewQuotationButton>
             </EstimateActions>
           </EstimateCard>
           <MessageTime>{dayjs(timestamp).format("HH:mm")}</MessageTime>
-        </MessageBubble>
+        </MessageContent>
       </MessageContainer>
     );
   }
 
   return (
     <MessageContainer isUser={isUser}>
-      <MessageBubble isUser={isUser}>
-        <MessageContent isUser={isUser}>
+      {!isUser && (
+        <AvatarWrapper>
+          <AssistantAvatar>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+          </AssistantAvatar>
+        </AvatarWrapper>
+      )}
+      <MessageContent>
+        <MessageBubble isUser={isUser}>
           {isUser ? (
             content
           ) : (
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {content}
-            </ReactMarkdown>
+            <MarkdownContent>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {content}
+              </ReactMarkdown>
+            </MarkdownContent>
           )}
-        </MessageContent>
+        </MessageBubble>
         {!isUser && <MessageTime>{dayjs(timestamp).format("HH:mm")}</MessageTime>}
-      </MessageBubble>
+      </MessageContent>
     </MessageContainer>
   );
 };
@@ -80,230 +118,260 @@ export default React.memo(ChatMessage);
 const MessageContainer = styled.div<{ isUser: boolean }>`
   display: flex;
   justify-content: ${({ isUser }) => (isUser ? "flex-end" : "flex-start")};
-  padding: 12px 24px;
-  background-color: transparent;
+  gap: 12px;
+  padding: 16px 24px;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    padding: 12px 16px;
+  }
 `;
 
-const MessageBubble = styled.div<{ isUser: boolean }>`
-  max-width: 85%;
+const AvatarWrapper = styled.div`
+  flex-shrink: 0;
+  padding-top: 4px;
+`;
+
+const AssistantAvatar = styled.div`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+`;
+
+const MessageContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: ${({ isUser }) => (isUser ? "12px 16px" : "0")};
-  background-color: ${({ isUser }) => (isUser ? "#f0f0f0" : "transparent")};
-  border-radius: ${({ isUser }) => (isUser ? "18px 4px 18px 18px" : "0")};
+  max-width: 85%;
+  min-width: 0;
 `;
 
-const MessageContent = styled.div<{ isUser: boolean }>`
-  margin: 0;
+const MessageBubble = styled.div<{ isUser: boolean }>`
+  padding: ${({ isUser }) => (isUser ? "12px 16px" : "0")};
+  background-color: ${({ isUser }) => (isUser ? "#f3f4f6" : "transparent")};
+  border-radius: ${({ isUser }) => (isUser ? "20px 4px 20px 20px" : "0")};
   font-size: 15px;
   line-height: 1.65;
   white-space: ${({ isUser }) => (isUser ? "pre-wrap" : "normal")};
   color: #1a1a1a;
   word-break: break-word;
+`;
 
-  /* Markdown 스타일링 (assistant 메시지에만 적용) */
-  ${({ isUser }) => !isUser && `
-    p {
-      margin: 0 0 12px 0;
-      &:last-child {
-        margin-bottom: 0;
-      }
+const MarkdownContent = styled.div`
+  p {
+    margin: 0 0 12px 0;
+    &:last-child {
+      margin-bottom: 0;
     }
+  }
 
-    h1, h2, h3, h4, h5, h6 {
-      margin: 16px 0 8px 0;
-      font-weight: 600;
-      line-height: 1.4;
-      &:first-of-type {
-        margin-top: 0;
-      }
+  h1, h2, h3, h4, h5, h6 {
+    margin: 20px 0 10px 0;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #111827;
+    &:first-of-type {
+      margin-top: 0;
     }
+  }
 
-    h1 { font-size: 24px; }
-    h2 { font-size: 20px; }
-    h3 { font-size: 18px; }
-    h4 { font-size: 16px; }
-    h5 { font-size: 15px; }
-    h6 { font-size: 14px; }
+  h1 { font-size: 24px; }
+  h2 { font-size: 20px; }
+  h3 { font-size: 18px; }
+  h4 { font-size: 16px; }
+  h5 { font-size: 15px; }
+  h6 { font-size: 14px; }
 
-    ul, ol {
-      margin: 8px 0;
-      padding-left: 24px;
-    }
+  ul, ol {
+    margin: 10px 0;
+    padding-left: 24px;
+  }
 
-    li {
-      margin: 4px 0;
-    }
+  li {
+    margin: 6px 0;
+  }
+
+  code {
+    background-color: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+    font-size: 13px;
+    color: #1f2937;
+  }
+
+  pre {
+    background-color: #1f2937;
+    color: #e5e7eb;
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 16px 0;
 
     code {
-      background-color: #f5f5f5;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
-      font-size: 14px;
+      background-color: transparent;
+      padding: 0;
+      color: inherit;
     }
+  }
 
-    pre {
-      background-color: #f5f5f5;
-      padding: 12px;
-      border-radius: 6px;
-      overflow-x: auto;
-      margin: 12px 0;
+  blockquote {
+    border-left: 3px solid #651d2a;
+    padding-left: 16px;
+    margin: 16px 0;
+    color: #4b5563;
+    font-style: italic;
+  }
 
-      code {
-        background-color: transparent;
-        padding: 0;
-      }
+  a {
+    color: #651d2a;
+    text-decoration: none;
+    font-weight: 500;
+    &:hover {
+      text-decoration: underline;
     }
+  }
 
-    blockquote {
-      border-left: 3px solid #ddd;
-      padding-left: 12px;
-      margin: 12px 0;
-      color: #666;
-    }
+  hr {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 20px 0;
+  }
 
-    a {
-      color: #0066cc;
-      text-decoration: none;
-      &:hover {
-        text-decoration: underline;
-      }
-    }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 16px 0;
+    font-size: 14px;
+  }
 
-    hr {
-      border: none;
-      border-top: 1px solid #e0e0e0;
-      margin: 16px 0;
-    }
+  th, td {
+    border: 1px solid #e5e7eb;
+    padding: 10px 14px;
+    text-align: left;
+  }
 
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin: 12px 0;
-    }
+  th {
+    background-color: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+  }
 
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px 12px;
-      text-align: left;
-    }
+  strong {
+    font-weight: 600;
+  }
 
-    th {
-      background-color: #f5f5f5;
-      font-weight: 600;
-    }
-
-    strong {
-      font-weight: 600;
-    }
-
-    em {
-      font-style: italic;
-    }
-  `}
+  em {
+    font-style: italic;
+  }
 `;
 
 const MessageTime = styled.span`
   font-size: 11px;
-  color: #aaa;
-  margin-top: 2px;
+  color: #9ca3af;
+  margin-left: 4px;
 `;
 
 // Estimate Card Styles
 const EstimateCard = styled.div`
-  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-  max-width: 400px;
+  max-width: 380px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 `;
 
 const EstimateHeader = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
 `;
 
 const EstimateIcon = styled.span`
-  font-size: 28px;
+  color: white;
+  display: flex;
+  align-items: center;
 `;
 
 const EstimateTitle = styled.h3`
   margin: 0;
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 600;
   color: white;
 `;
 
-const EstimateContent = styled.div`
-  display: flex;
-  gap: 20px;
+const EstimateBody = styled.div`
   padding: 20px;
-  background: rgba(255, 255, 255, 0.95);
 `;
 
 const EstimateInfo = styled.div`
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 12px;
+`;
+
+const InfoRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;
 
 const InfoLabel = styled.span`
-  font-size: 12px;
+  font-size: 13px;
   color: #6b7280;
-  font-weight: 500;
 `;
 
 const InfoValue = styled.span`
-  font-size: 18px;
-  font-weight: 700;
-  color: #1a1a1a;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
 `;
 
 const EstimateMessage = styled.p`
-  margin: 0;
-  padding: 16px 20px;
-  background: rgba(255, 255, 255, 0.9);
-  color: #374151;
+  margin: 16px 0 0 0;
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
+  color: #4b5563;
   font-size: 14px;
   line-height: 1.6;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
   white-space: pre-wrap;
 `;
 
 const EstimateActions = styled.div`
   padding: 16px 20px;
-  background: rgba(255, 255, 255, 0.95);
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  background: #f9fafb;
+  border-top: 1px solid #f3f4f6;
 `;
 
-const ViewQuotationButton = styled.a`
+const ViewQuotationButton = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   width: 100%;
   padding: 12px 20px;
-  background: #651d2a;
+  background: #1a1a1a;
   color: white;
   border: none;
   border-radius: 10px;
-  font-size: 15px;
-  font-weight: 600;
-  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(101, 29, 42, 0.3);
 
   &:hover {
-    background: #4a1520;
+    background: #2d2d2d;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(101, 29, 42, 0.4);
   }
 
   &:active {
