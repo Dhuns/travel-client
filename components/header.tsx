@@ -2,6 +2,7 @@
 
 import {
   ChevronDown,
+  ClipboardList,
   LogIn,
   Menu,
   Search,
@@ -301,8 +302,18 @@ export default function Header() {
               <Search className="w-5 h-5 stroke-2" />
             </button>
 
+            {/* 예약 조회 - 로그인 상태와 무관하게 항상 표시 */}
+            <Link
+              href="/orders"
+              className="hover:text-[#651d2a] transition-colors duration-300 p-2 flex items-center space-x-1 rounded-full hover:bg-[#eda89b]/10"
+              title="예약 조회"
+            >
+              <ClipboardList className="w-5 h-5 stroke-2" />
+              <span className="hidden md:inline text-xs">Orders</span>
+            </Link>
+
             {!isAuthenticated ? (
-              // 로그인 전: 로그인 버튼만 표시
+              // 로그인 전: 로그인 버튼 표시
               <Link
                 href="/login"
                 className="hover:text-[#651d2a] transition-colors duration-300 p-2 flex items-center space-x-1 rounded-full hover:bg-[#eda89b]/10"
@@ -466,7 +477,18 @@ export default function Header() {
                   </Link>
                 </div>
               </div>
+
+              {/* Orders - 로그인 상태와 무관하게 항상 표시 */}
+              <Link
+                href="/orders"
+                className="hover:text-[#651d2a] transition-colors duration-300 py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Orders
+              </Link>
+
               {!isAuthenticated ? (
+                // 비로그인: 로그인 링크만 표시
                 <Link
                   href="/login"
                   className="hover:text-[#651d2a] transition-colors duration-300 py-2"
@@ -475,6 +497,7 @@ export default function Header() {
                   Login
                 </Link>
               ) : (
+                // 로그인: 마이페이지, 위시리스트, 로그아웃
                 <>
                   <Link
                     href="/mypage"
@@ -482,13 +505,6 @@ export default function Header() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     My Page
-                  </Link>
-                  <Link
-                    href="/orders"
-                    className="hover:text-[#651d2a] transition-colors duration-300 py-2"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Order History
                   </Link>
                   <Link
                     href="/wishlist"
