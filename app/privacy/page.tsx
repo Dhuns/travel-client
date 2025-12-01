@@ -148,8 +148,10 @@ export default function PrivacyPage() {
                 If you have any questions about this Privacy Policy or our data practices, please contact us at:
               </p>
               <p className="text-gray-700 leading-relaxed mt-3">
-                Email: privacy@onedaykorea.com<br />
-                Address: Seoul, South Korea
+                Email: <a href="mailto:info@onedaykorea.com" className="text-[#651d2a] hover:underline">info@onedaykorea.com</a><br />
+                Phone: +82 70 7556 5355 / +82 10 2479 1242<br />
+                Address: 2F, Bukhansan TheSharp Sang-ga, 510 Tongil-ro,<br />
+                Seodaemun-gu, Seoul 03615, Korea
               </p>
             </section>
           </div>

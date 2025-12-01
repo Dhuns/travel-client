@@ -12,16 +12,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/favorite-button";
 import Link from "next/link";
-import { getToursWithBokunData } from "@/lib/bokun";
+import { getToursFromBackend } from "@/lib/bokun";
 import PrivateTourInquiryForm from "@/components/PrivateTourInquiryForm";
-import { getToursFromConfig } from "@/lib/bokun";
-import { privateToursConfig } from "@/config/tours";
 
 export const revalidate = 3600; // 1시간마다 재생성
 
 export default async function PrivateTourPage() {
-  // 백엔드에서 ID 가져온 후 직접 Bokun API 호출
-  const tours = await getToursWithBokunData("private", "Private Tour");
+  // 백엔드 API에서 투어 데이터 가져오기 (안정적)
+  const tours = await getToursFromBackend("private", "Private Tour");
 
   return (
     <div className="min-h-screen bg-white">

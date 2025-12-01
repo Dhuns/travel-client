@@ -21,10 +21,19 @@ import { isValidPassword, ValidationMessages } from "@/src/shared/utils/validati
 import { Button } from "@/components/ui/button";
 import type React from "react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuthStore } from "@/src/shared/store/authStore";
 
 export default function SignupPage() {
   const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
+
+  // 이미 로그인된 사용자는 홈으로 리다이렉트
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace("/");
+    }
+  }, [isAuthenticated, router]);
 
   const [formData, setFormData] = useState({
     name: "",

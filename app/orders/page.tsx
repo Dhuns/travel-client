@@ -1,9 +1,10 @@
 "use client";
 
-import { Calendar, ChevronRight, Package, Users, Loader2, FileText, ShoppingBag } from "lucide-react";
+import { Calendar, ChevronRight, Package, Users, Loader2, FileText, ShoppingBag, Search, Mail, Hash, RefreshCw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/src/shared/store/authStore";
@@ -78,19 +79,28 @@ export default function OrdersPage() {
 
   // Bokun 예약 상태
   const [bookings, setBookings] = useState<BokunBooking[]>([]);
-  const [isLoadingBookings, setIsLoadingBookings] = useState(true);
+  const [isLoadingBookings, setIsLoadingBookings] = useState(false);
   const [bookingsError, setBookingsError] = useState<string | null>(null);
   const [bookingFilter, setBookingFilter] = useState<"all" | "confirmed" | "cancelled">("all");
+
+  // 예약 검색 상태 (비로그인 or 수동 검색용)
+  const [searchType, setSearchType] = useState<"email" | "confirmation">("email"); // 검색 유형
+  const [searchEmail, setSearchEmail] = useState("");
+  const [searchConfirmationCode, setSearchConfirmationCode] = useState("");
+  const [showManualSearch, setShowManualSearch] = useState(false); // 로그인 사용자의 수동 검색 표시 여부
+  const [hasSearched, setHasSearched] = useState(false); // 검색 실행 여부
 
   // 견적서 상태 (TODO: 백엔드 연동)
   const [quotes, setQuotes] = useState<QuoteRequest[]>([]);
   const [isLoadingQuotes, setIsLoadingQuotes] = useState(false);
 
-  // 예약 데이터 가져오기
+  /**
+   * 로그인 사용자용: 페이지 로드 시 자동으로 예약 데이터 조회
+   * - 로그인 상태이고 이메일이 있을 때만 자동 실행
+   */
   useEffect(() => {
     async function fetchBookings() {
       if (!isAuthenticated || !user?.email) {
-        setIsLoadingBookings(false);
         return;
       }
 
@@ -106,9 +116,10 @@ export default function OrdersPage() {
 
         const data: BookingSearchResult = await response.json();
         setBookings(data.items || []);
+        setHasSearched(true);
       } catch (err) {
         console.error("Error fetching orders:", err);
-        setBookingsError("예약 내역을 불러오는데 실패했습니다.");
+        setBookingsError("Failed to load booking history.");
       } finally {
         setIsLoadingBookings(false);
       }
@@ -116,6 +127,105 @@ export default function OrdersPage() {
 
     fetchBookings();
   }, [isAuthenticated, user?.email]);
+
+  /**
+   * 예약 검색 함수 (비로그인 or 수동 검색)
+   * - 이메일: 해당 이메일로 예약된 모든 건 조회
+   * - 예약번호: 특정 예약 1건만 조회
+   */
+  const handleBookingSearch = async () => {
+    setBookingsError(null);
+    setBookings([]);
+
+    // 이메일로 검색
+    if (searchType === "email") {
+      if (!searchEmail || !searchEmail.includes("@")) {
+        setBookingsError("Please enter a valid email address.");
+        return;
+      }
+
+      try {
+        setIsLoadingBookings(true);
+        const response = await fetch(`/api/orders?email=${encodeURIComponent(searchEmail)}`);
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch orders");
+        }
+
+        const data: BookingSearchResult = await response.json();
+        setBookings(data.items || []);
+        setHasSearched(true);
+
+        if (!data.items || data.items.length === 0) {
+          setBookingsError("No bookings found for this email address.");
+        }
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+        setBookingsError("Failed to search bookings. Please try again.");
+      } finally {
+        setIsLoadingBookings(false);
+      }
+    } else {
+      // 예약번호(confirmation code)로 검색
+      if (!searchConfirmationCode.trim()) {
+        setBookingsError("Please enter a confirmation code.");
+        return;
+      }
+
+      try {
+        setIsLoadingBookings(true);
+        const response = await fetch(`/api/orders?confirmationCode=${encodeURIComponent(searchConfirmationCode.trim())}`);
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            setBookingsError("No booking found with this confirmation code.");
+            setHasSearched(true);
+            return;
+          }
+          throw new Error("Failed to fetch booking");
+        }
+
+        const data = await response.json();
+        // 단일 예약을 배열로 변환 (UI 일관성)
+        setBookings(data ? [data] : []);
+        setHasSearched(true);
+      } catch (err) {
+        console.error("Error fetching booking:", err);
+        setBookingsError("Failed to search booking. Please try again.");
+      } finally {
+        setIsLoadingBookings(false);
+      }
+    }
+  };
+
+  /**
+   * 로그인 사용자의 내 예약 다시 불러오기
+   */
+  const handleRefreshMyBookings = async () => {
+    if (!user?.email) return;
+
+    setShowManualSearch(false);
+    setBookingsError(null);
+    setBookings([]);
+
+    try {
+      setIsLoadingBookings(true);
+      const response = await fetch(`/api/orders?email=${encodeURIComponent(user.email)}`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch orders");
+      }
+
+      const data: BookingSearchResult = await response.json();
+      setBookings(data.items || []);
+      setHasSearched(true);
+    } catch (err) {
+      console.error("Error fetching orders:", err);
+      setBookingsError("Failed to load booking history.");
+    } finally {
+      setIsLoadingBookings(false);
+    }
+  };
 
   // 견적서 데이터 가져오기 (TODO: 백엔드 연동)
   useEffect(() => {
@@ -193,13 +303,13 @@ export default function OrdersPage() {
     return true;
   });
 
-  // 예약 상태 뱃지
+  // 예약 상태 뱃지 (영문 라벨)
   const getBookingStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; color: string }> = {
-      CONFIRMED: { label: "예약확정", color: "bg-[#6d8675] text-white" },
-      CANCELLED: { label: "취소됨", color: "bg-[#8b4a52] text-white" },
-      RESERVED: { label: "예약대기", color: "bg-[#c4982a] text-white" },
-      PENDING: { label: "처리중", color: "bg-gray-500 text-white" },
+      CONFIRMED: { label: "Confirmed", color: "bg-[#6d8675] text-white" },
+      CANCELLED: { label: "Cancelled", color: "bg-[#8b4a52] text-white" },
+      RESERVED: { label: "Reserved", color: "bg-[#c4982a] text-white" },
+      PENDING: { label: "Pending", color: "bg-gray-500 text-white" },
     };
     const config = statusConfig[status] || { label: status, color: "bg-gray-400 text-white" };
     return <Badge className={`${config.color} px-3 py-1`}>{config.label}</Badge>;
@@ -233,24 +343,225 @@ export default function OrdersPage() {
     return `₩${price.toLocaleString()}`;
   };
 
-  // 비로그인 상태
+  // ==================== 비로그인 상태: 검색 폼 표시 ====================
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
-        <div className="container mx-auto px-6 max-w-7xl">
-          <Card className="p-12 text-center shadow-lg border border-gray-200 bg-white rounded-xl">
-            <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              로그인이 필요합니다
-            </h3>
-            <p className="text-gray-600 mb-6">
-              주문 내역을 확인하려면 로그인해주세요
+        <div className="container mx-auto px-6 max-w-4xl">
+          {/* 헤더 */}
+          <div className="mb-8 text-center">
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">Order History</h1>
+            <p className="text-gray-600">
+              Look up your booking with email or confirmation code
             </p>
-            <Link href="/login">
-              <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white">
-                로그인하기
+          </div>
+
+          {/* 검색 카드 */}
+          <Card className="p-8 shadow-lg border border-gray-200 bg-white rounded-xl mb-8">
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <Search className="w-6 h-6 text-[#651d2a]" />
+              <h2 className="text-xl font-semibold text-gray-900">Find Your Booking</h2>
+            </div>
+
+            {/* 검색 타입 선택 */}
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <button
+                onClick={() => {
+                  setSearchType("email");
+                  setBookingsError(null);
+                }}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                  searchType === "email"
+                    ? "bg-[#651d2a] text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                <Mail className="w-4 h-4" />
+                Search by Email
+              </button>
+              <button
+                onClick={() => {
+                  setSearchType("confirmation");
+                  setBookingsError(null);
+                }}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                  searchType === "confirmation"
+                    ? "bg-[#651d2a] text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                <Hash className="w-4 h-4" />
+                Search by Confirmation Code
+              </button>
+            </div>
+
+            {/* 검색 입력 */}
+            <div className="max-w-md mx-auto">
+              {searchType === "email" ? (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email Address
+                    </label>
+                    <Input
+                      type="email"
+                      placeholder="Enter the email used for booking"
+                      value={searchEmail}
+                      onChange={(e) => setSearchEmail(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleBookingSearch()}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Confirmation Code
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="e.g., ABC123"
+                      value={searchConfirmationCode}
+                      onChange={(e) => setSearchConfirmationCode(e.target.value.toUpperCase())}
+                      onKeyDown={(e) => e.key === "Enter" && handleBookingSearch()}
+                      className="w-full font-mono"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {bookingsError && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-700 text-sm">{bookingsError}</p>
+                </div>
+              )}
+
+              <Button
+                onClick={handleBookingSearch}
+                disabled={isLoadingBookings}
+                className="w-full mt-6 bg-[#651d2a] hover:bg-[#4a1520] text-white"
+              >
+                {isLoadingBookings ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Searching...
+                  </>
+                ) : (
+                  <>
+                    <Search className="w-4 h-4 mr-2" />
+                    Search Booking
+                  </>
+                )}
               </Button>
-            </Link>
+            </div>
+          </Card>
+
+          {/* 검색 결과 */}
+          {hasSearched && bookings.length > 0 && (
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Found {bookings.length} booking{bookings.length > 1 ? "s" : ""}
+              </h3>
+              {bookings.map((booking) => (
+                <Card
+                  key={booking.id}
+                  className="overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 bg-white rounded-xl"
+                >
+                  <div className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <div className="flex items-center space-x-3 mb-2">
+                          {getBookingStatusBadge(booking.status)}
+                        </div>
+                        <p className="text-sm text-gray-500">
+                          Confirmation: {booking.confirmationCode}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-gray-900">
+                          {booking.totalPriceFormatted || (booking.totalPrice ? `${booking.currency || ''} ${booking.totalPrice.toLocaleString()}` : '')}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 mb-4">
+                      {(booking.productBookings || []).map((product) => (
+                        <div
+                          key={product.id}
+                          className="bg-gray-50 rounded-lg p-4 border-l-4 border-[#651d2a]"
+                        >
+                          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                            {product.productTitle}
+                          </h3>
+                          <div className="grid md:grid-cols-3 gap-3 text-sm">
+                            <div className="flex items-center space-x-2 text-gray-600">
+                              <Calendar className="w-4 h-4" />
+                              <span>{formatDate(product.startDate)}</span>
+                              {product.startTime && (
+                                <span className="text-gray-500">{product.startTime}</span>
+                              )}
+                            </div>
+                            <div className="flex items-center space-x-2 text-gray-600">
+                              <Users className="w-4 h-4" />
+                              <span>{product.participants || 0} people</span>
+                            </div>
+                            <div className="text-right">
+                              <span className="font-medium text-gray-900">
+                                {product.totalPriceFormatted || ''}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-200">
+                      <div className="flex items-center space-x-4">
+                        <span>Booked: {formatDate(booking.creationDate)}</span>
+                        {booking.customer && (
+                          <span>Guest: {booking.customer.firstName || ''} {booking.customer.lastName || ''}</span>
+                        )}
+                      </div>
+                      <Link href={`/orders/${booking.confirmationCode}`}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-[#651d2a] text-[#651d2a] hover:bg-[#651d2a] hover:text-white"
+                        >
+                          View Details
+                          <ChevronRight className="w-4 h-4 ml-1" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* 로그인 유도 */}
+          <Card className="mt-8 bg-gradient-to-r from-[#651d2a]/5 to-[#6d8675]/5 border border-gray-200 shadow-lg rounded-xl">
+            <CardContent className="p-8 text-center">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Have an account?
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Log in to automatically view all bookings linked to your account
+              </p>
+              <div className="flex justify-center space-x-4">
+                <Link href="/login">
+                  <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white">
+                    Log In
+                  </Button>
+                </Link>
+                <Link href="/signup">
+                  <Button variant="outline" className="border-[#651d2a] text-[#651d2a] hover:bg-[#651d2a] hover:text-white">
+                    Sign Up
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
           </Card>
         </div>
       </div>
@@ -262,9 +573,9 @@ export default function OrdersPage() {
       <div className="container mx-auto px-6 max-w-7xl">
         {/* 헤더 */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">주문내역</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Order History</h1>
           <p className="text-gray-600">
-            투어 예약 및 견적 요청 내역을 확인하세요
+            View your tour bookings and quote requests
           </p>
         </div>
 
@@ -279,7 +590,7 @@ export default function OrdersPage() {
             }`}
           >
             <ShoppingBag className="w-5 h-5" />
-            구매 내역
+            Bookings
             {bookings.length > 0 && (
               <span className="bg-[#651d2a] text-white text-xs px-2 py-0.5 rounded-full">
                 {bookings.length}
@@ -295,7 +606,7 @@ export default function OrdersPage() {
             }`}
           >
             <FileText className="w-5 h-5" />
-            견적서 현황
+            Quote Requests
             {quotes.length > 0 && (
               <span className="bg-[#c4982a] text-white text-xs px-2 py-0.5 rounded-full">
                 {quotes.length}
@@ -307,6 +618,119 @@ export default function OrdersPage() {
         {/* ==================== 구매 내역 탭 ==================== */}
         {activeTab === "bookings" && (
           <>
+            {/* 수동 검색 토글 & 검색 폼 (로그인 사용자용) */}
+            <div className="mb-6">
+              {/* 검색 모드 토글 버튼 */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-sm text-gray-500">
+                  {!showManualSearch && user?.email && (
+                    <span>Showing bookings for: <strong>{user.email}</strong></span>
+                  )}
+                  {showManualSearch && (
+                    <span>Manual search mode</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  {showManualSearch && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRefreshMyBookings}
+                      className="border-[#651d2a] text-[#651d2a] hover:bg-[#651d2a] hover:text-white"
+                    >
+                      <RefreshCw className="w-4 h-4 mr-1" />
+                      Back to My Bookings
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowManualSearch(!showManualSearch)}
+                    className="border-gray-300 text-gray-600 hover:bg-gray-100"
+                  >
+                    <Search className="w-4 h-4 mr-1" />
+                    {showManualSearch ? "Hide Search" : "Search Other Bookings"}
+                  </Button>
+                </div>
+              </div>
+
+              {/* 수동 검색 폼 */}
+              {showManualSearch && (
+                <Card className="p-6 bg-gray-50 border border-gray-200 rounded-xl mb-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Search className="w-5 h-5 text-[#651d2a]" />
+                    <h3 className="font-semibold text-gray-900">Search Bookings</h3>
+                  </div>
+
+                  {/* 검색 타입 선택 */}
+                  <div className="flex items-center gap-3 mb-4">
+                    <button
+                      onClick={() => {
+                        setSearchType("email");
+                        setBookingsError(null);
+                      }}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        searchType === "email"
+                          ? "bg-[#651d2a] text-white"
+                          : "bg-white text-gray-600 border border-gray-300 hover:bg-gray-100"
+                      }`}
+                    >
+                      <Mail className="w-4 h-4" />
+                      Email
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSearchType("confirmation");
+                        setBookingsError(null);
+                      }}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        searchType === "confirmation"
+                          ? "bg-[#651d2a] text-white"
+                          : "bg-white text-gray-600 border border-gray-300 hover:bg-gray-100"
+                      }`}
+                    >
+                      <Hash className="w-4 h-4" />
+                      Confirmation Code
+                    </button>
+                  </div>
+
+                  {/* 검색 입력 */}
+                  <div className="flex gap-3">
+                    {searchType === "email" ? (
+                      <Input
+                        type="email"
+                        placeholder="Enter email address"
+                        value={searchEmail}
+                        onChange={(e) => setSearchEmail(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleBookingSearch()}
+                        className="flex-1 bg-white"
+                      />
+                    ) : (
+                      <Input
+                        type="text"
+                        placeholder="Enter confirmation code (e.g., ABC123)"
+                        value={searchConfirmationCode}
+                        onChange={(e) => setSearchConfirmationCode(e.target.value.toUpperCase())}
+                        onKeyDown={(e) => e.key === "Enter" && handleBookingSearch()}
+                        className="flex-1 bg-white font-mono"
+                      />
+                    )}
+                    <Button
+                      onClick={handleBookingSearch}
+                      disabled={isLoadingBookings}
+                      className="bg-[#651d2a] hover:bg-[#4a1520] text-white"
+                    >
+                      {isLoadingBookings ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Search className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </div>
+                </Card>
+              )}
+            </div>
+
             {/* 필터 버튼 */}
             <div className="flex items-center space-x-3 mb-6">
               <Button
@@ -318,7 +742,7 @@ export default function OrdersPage() {
                     : "border border-[#651d2a] text-[#651d2a] bg-white hover:!bg-[#651d2a] hover:!text-white"
                 }
               >
-                전체
+                All
               </Button>
               <Button
                 onClick={() => setBookingFilter("confirmed")}
@@ -329,7 +753,7 @@ export default function OrdersPage() {
                     : "border border-[#651d2a] text-[#651d2a] bg-white hover:!bg-[#651d2a] hover:!text-white"
                 }
               >
-                예약확정
+                Confirmed
               </Button>
               <Button
                 onClick={() => setBookingFilter("cancelled")}
@@ -340,15 +764,15 @@ export default function OrdersPage() {
                     : "border border-[#651d2a] text-[#651d2a] bg-white hover:!bg-[#651d2a] hover:!text-white"
                 }
               >
-                취소됨
+                Cancelled
               </Button>
             </div>
 
-            {/* 로딩 */}
+            {/* 로딩 / 에러 / 빈 상태 */}
             {isLoadingBookings ? (
               <div className="flex flex-col items-center justify-center py-20">
                 <Loader2 className="w-12 h-12 text-[#651d2a] animate-spin mb-4" />
-                <p className="text-gray-600">예약 내역을 불러오는 중...</p>
+                <p className="text-gray-600">Loading bookings...</p>
               </div>
             ) : bookingsError ? (
               <Card className="p-6 mb-8 bg-red-50 border border-red-200">
@@ -358,12 +782,12 @@ export default function OrdersPage() {
               <Card className="p-12 text-center shadow-lg border border-gray-200 bg-white rounded-xl">
                 <ShoppingBag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  {bookingFilter === "all" ? "구매 내역이 없습니다" : `${bookingFilter === "confirmed" ? "예약확정" : "취소"} 내역이 없습니다`}
+                  {bookingFilter === "all" ? "No bookings found" : `No ${bookingFilter} bookings`}
                 </h3>
-                <p className="text-gray-600 mb-6">새로운 투어를 예약해보세요</p>
+                <p className="text-gray-600 mb-6">Book your first tour to see it here</p>
                 <Link href="/tours">
                   <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white">
-                    투어 둘러보기
+                    Browse Tours
                   </Button>
                 </Link>
               </Card>
@@ -381,7 +805,7 @@ export default function OrdersPage() {
                             {getBookingStatusBadge(booking.status)}
                           </div>
                           <p className="text-sm text-gray-500">
-                            예약번호: {booking.confirmationCode}
+                            Confirmation: {booking.confirmationCode}
                           </p>
                         </div>
                         <div className="text-right">
@@ -410,7 +834,7 @@ export default function OrdersPage() {
                               </div>
                               <div className="flex items-center space-x-2 text-gray-600">
                                 <Users className="w-4 h-4" />
-                                <span>{product.participants || 0}명</span>
+                                <span>{product.participants || 0} people</span>
                               </div>
                               <div className="text-right">
                                 <span className="font-medium text-gray-900">
@@ -424,9 +848,9 @@ export default function OrdersPage() {
 
                       <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-200">
                         <div className="flex items-center space-x-4">
-                          <span>예약일: {formatDate(booking.creationDate)}</span>
+                          <span>Booked: {formatDate(booking.creationDate)}</span>
                           {booking.customer && (
-                            <span>예약자: {booking.customer.firstName || ''} {booking.customer.lastName || ''}</span>
+                            <span>Guest: {booking.customer.firstName || ''} {booking.customer.lastName || ''}</span>
                           )}
                         </div>
                         <Link href={`/orders/${booking.confirmationCode}`}>
@@ -435,7 +859,7 @@ export default function OrdersPage() {
                             size="sm"
                             className="border-[#651d2a] text-[#651d2a] hover:bg-[#651d2a] hover:text-white"
                           >
-                            상세보기
+                            View Details
                             <ChevronRight className="w-4 h-4 ml-1" />
                           </Button>
                         </Link>
@@ -617,20 +1041,20 @@ export default function OrdersPage() {
         <Card className="mt-12 bg-gradient-to-r from-[#651d2a]/5 to-[#6d8675]/5 border border-gray-200 shadow-lg rounded-xl">
           <CardContent className="p-8 text-center">
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              주문 관련 문의가 있으신가요?
+              Need help with your order?
             </h3>
             <p className="text-gray-600 mb-4">
-              고객센터에서 친절하게 도와드리겠습니다
+              Our customer service team is happy to assist you
             </p>
             <div className="flex justify-center space-x-4">
               <Link href="/contact">
                 <Button className="border border-[#651d2a] text-[#651d2a] bg-white hover:!bg-[#651d2a] hover:!text-white">
-                  문의하기
+                  Contact Us
                 </Button>
               </Link>
               <Link href="/tours">
                 <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white">
-                  새 투어 예약하기
+                  Book New Tour
                 </Button>
               </Link>
             </div>

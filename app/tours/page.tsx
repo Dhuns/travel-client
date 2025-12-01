@@ -1,13 +1,10 @@
-import { Suspense } from "react";
-
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { TourGrid } from "@/components/tours/tour-grid";
-import { TourGridSkeleton } from "@/components/tours/tour-card-skeleton";
 
 export const revalidate = 3600; // 1시간마다 재생성
 
-export default function ToursPage() {
+export default async function ToursPage() {
   return (
     <div className="min-h-screen bg-[#f5f3f0]">
       {/* Hero Section */}
@@ -66,9 +63,7 @@ export default function ToursPage() {
           <div className="w-16 h-1 bg-[#651d2a] mx-auto mt-4 rounded-full"></div>
         </div>
 
-        <Suspense fallback={<TourGridSkeleton count={8} />}>
-          <TourGrid />
-        </Suspense>
+        <TourGrid />
       </div>
 
       {/* CTA Section */}
