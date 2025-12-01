@@ -48,15 +48,15 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
 
   return (
     <Container>
-      {/* Header - Desktop only */}
-      <Header>
-        <Title>Trip Details</Title>
-        <Badge>{messageCount} messages</Badge>
-      </Header>
-
-      {/* Collected Information */}
+      {/* Collected Information - 최상단 */}
       <Section>
-        <SectionTitle>📍 Collected Info</SectionTitle>
+        <SectionTitle>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          Collected Info
+        </SectionTitle>
 
         {destination ? (
           <InfoItem>
@@ -64,7 +64,7 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
             <Value>{destination}</Value>
           </InfoItem>
         ) : (
-          <EmptyState>Where would you like to go? 😊</EmptyState>
+          <EmptyState>Where would you like to go?</EmptyState>
         )}
 
         {startDate && endDate && (
@@ -104,7 +104,7 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
         {budget && (
           <InfoItem>
             <Label>Budget</Label>
-            <Value>₩{budget.toLocaleString()}</Value>
+            <Value>${budget.toLocaleString()}</Value>
           </InfoItem>
         )}
 
@@ -127,29 +127,63 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
             onClick={handleGenerateEstimate}
             disabled={isGeneratingEstimate}
           >
-            {isGeneratingEstimate
-              ? "Creating your quote..."
-              : "Generate My Quote"}
+            {isGeneratingEstimate ? (
+              <>
+                <LoadingSpinner />
+                Creating your quote...
+              </>
+            ) : (
+              <>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                </svg>
+                Generate AI Itinerary
+              </>
+            )}
           </GenerateButton>
           <EstimateHint>
-            All set! Click to create your personalized travel plan
+            Get your AI-suggested daily destinations. Our experts will add accommodations & transport.
           </EstimateHint>
         </EstimateButtonSection>
       )}
 
-      {/* Help Section */}
-      <HelpSection>
-        <HelpTitle>💡 How It Works</HelpTitle>
-        <HelpList>
-          <HelpItem>📍 Tell us where, when, and how many travelers</HelpItem>
-          <HelpItem>
-            🎨 Share what kind of experience you're looking for
-          </HelpItem>
-          <HelpItem>💰 Let us know your budget range (optional)</HelpItem>
-          <HelpItem>✏️ You can update or add info anytime during chat</HelpItem>
-          <HelpItem>🗣️ We support both English and Korean</HelpItem>
-        </HelpList>
-      </HelpSection>
+      {/* Process Explanation - Collected Info 아래 */}
+      <ProcessSection>
+        <ProcessHeader>
+          <ProcessIcon>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 16v-4M12 8h.01"/>
+            </svg>
+          </ProcessIcon>
+          <ProcessTitle>How It Works</ProcessTitle>
+        </ProcessHeader>
+        <ProcessSteps>
+          <ProcessStep>
+            <StepNumber active>1</StepNumber>
+            <StepContent>
+              <StepLabel active>AI Draft</StepLabel>
+              <StepDescription>AI creates a daily itinerary with recommended destinations and activities only. (No pricing yet)</StepDescription>
+            </StepContent>
+          </ProcessStep>
+          <StepConnector />
+          <ProcessStep>
+            <StepNumber>2</StepNumber>
+            <StepContent>
+              <StepLabel>Expert Enhancement</StepLabel>
+              <StepDescription>Our travel experts review your draft and add accommodations, transportation, tickets, and calculate accurate pricing.</StepDescription>
+            </StepContent>
+          </ProcessStep>
+          <StepConnector />
+          <ProcessStep>
+            <StepNumber>3</StepNumber>
+            <StepContent>
+              <StepLabel>Final Quote</StepLabel>
+              <StepDescription>Receive your complete, bookable travel package with all details and final pricing via email.</StepDescription>
+            </StepContent>
+          </ProcessStep>
+        </ProcessSteps>
+      </ProcessSection>
     </Container>
   );
 };
@@ -164,44 +198,110 @@ const Container = styled.div`
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  padding: 0 16px;
-`;
+  padding: 0 16px 16px;
 
-const Header = styled.div`
-  padding: 18px 4px;
-  background-color: transparent;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
 
-  @media (max-width: 1280px) {
-    display: none;
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
   }
 `;
 
-const Title = styled.h2`
+// Process Section Styles
+const ProcessSection = styled.div`
+  margin: 14px 0;
+  padding: 16px;
+  background: linear-gradient(135deg, #faf5f6 0%, #f5f0f1 100%);
+  border-radius: 14px;
+  border: 1px solid rgba(101, 29, 42, 0.1);
+`;
+
+const ProcessHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+`;
+
+const ProcessIcon = styled.div`
+  color: #651d2a;
+  display: flex;
+  align-items: center;
+`;
+
+const ProcessTitle = styled.h3`
   margin: 0;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: #1a1a1a;
 `;
 
-const Badge = styled.span`
-  padding: 4px 10px;
-  background-color: #651d2a;
-  color: #ffffff;
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: 600;
+const ProcessSteps = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 `;
 
+const ProcessStep = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+`;
+
+const StepNumber = styled.div<{ active?: boolean }>`
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: ${({ active }) => (active ? "linear-gradient(135deg, #651d2a 0%, #8b3a47 100%)" : "#e5e5e5")};
+  color: ${({ active }) => (active ? "#ffffff" : "#888")};
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+`;
+
+const StepContent = styled.div`
+  flex: 1;
+  padding-bottom: 8px;
+`;
+
+const StepLabel = styled.div<{ active?: boolean }>`
+  font-size: 13px;
+  font-weight: 600;
+  color: ${({ active }) => (active ? "#651d2a" : "#666")};
+  margin-bottom: 2px;
+`;
+
+const StepDescription = styled.div`
+  font-size: 12px;
+  color: #888;
+  line-height: 1.4;
+`;
+
+const StepConnector = styled.div`
+  width: 2px;
+  height: 12px;
+  background: #e0e0e0;
+  margin-left: 11px;
+`;
+
+
+// Section Styles
 const Section = styled.div`
   padding: 14px;
   background-color: #ffffff;
   margin: 14px 0;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid #e8e8e8;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 `;
 
 const SectionTitle = styled.h3`
@@ -209,6 +309,9 @@ const SectionTitle = styled.h3`
   font-size: 14px;
   font-weight: 600;
   color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `;
 
 const InfoItem = styled.div`
@@ -238,7 +341,7 @@ const ValueList = styled.div`
 `;
 
 const ValueItem = styled.span`
-  padding: 4px 8px;
+  padding: 4px 10px;
   background-color: #f5f5f5;
   border-radius: 6px;
   font-size: 13px;
@@ -269,70 +372,34 @@ const EmptyState = styled.div`
   border-radius: 8px;
 `;
 
-const HelpSection = styled.div`
-  padding: 14px;
-  margin: 0 4px 16px 4px;
-  background-color: #fffbf0;
-  border-radius: 10px;
-  border: 1px solid #ffe4a3;
-`;
-
-const HelpTitle = styled.h4`
-  margin: 0 0 10px 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: #f57c00;
-`;
-
-const HelpList = styled.ul`
-  margin: 0;
-  padding: 0 0 0 18px;
-  list-style: none;
-`;
-
-const HelpItem = styled.li`
-  font-size: 13px;
-  color: #e67300;
-  margin-bottom: 5px;
-  position: relative;
-
-  &:before {
-    content: "•";
-    position: absolute;
-    left: -13px;
-  }
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-`;
-
+// Estimate Button Styles
 const EstimateButtonSection = styled.div`
   padding: 16px;
-  margin: 0 4px 16px 4px;
-  background: #f8f9fa;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
+  margin: 0 0 14px 0;
+  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  border-radius: 14px;
   text-align: center;
 `;
 
 const GenerateButton = styled.button`
   width: 100%;
   padding: 14px 20px;
-  background-color: #651d2a;
-  color: #ffffff;
+  background-color: #ffffff;
+  color: #651d2a;
   border: none;
   border-radius: 10px;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(101, 29, 42, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 
   &:hover:not(:disabled) {
-    background-color: #4a1520;
+    background-color: #f5f5f5;
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(101, 29, 42, 0.3);
   }
 
   &:active:not(:disabled) {
@@ -340,16 +407,30 @@ const GenerateButton = styled.button`
   }
 
   &:disabled {
-    background-color: #ccc;
-    opacity: 0.6;
+    background-color: rgba(255, 255, 255, 0.6);
     cursor: not-allowed;
-    box-shadow: none;
+  }
+`;
+
+const LoadingSpinner = styled.div`
+  width: 16px;
+  height: 16px;
+  border: 2px solid #651d2a;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 `;
 
 const EstimateHint = styled.p`
   margin: 12px 0 0 0;
-  font-size: 13px;
-  color: #6b7280;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
   line-height: 1.5;
 `;
+
