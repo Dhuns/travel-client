@@ -24,23 +24,45 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
 
   return (
     <Container>
-      {/* Logo */}
-      <LogoSection>
-        <Logo>✈️ Tumakr AI</Logo>
-      </LogoSection>
+      {/* Header */}
+      <Header>
+        <LogoWrapper onClick={() => router.push("/")}>
+          <LogoIcon>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" strokeWidth="1.5"/>
+            </svg>
+          </LogoIcon>
+          <LogoText>Tumakr</LogoText>
+        </LogoWrapper>
+      </Header>
 
       {/* New Chat Button */}
       <NewChatButton onClick={onNewChat}>
-        <PlusIcon>+</PlusIcon>{UI_TEXT.NEW_CHAT}
-        <SessionCount>({sessions.length}/{MAX_CHAT_SESSIONS})</SessionCount>
+        <NewChatIconWrapper>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+        </NewChatIconWrapper>
+        <span>New Conversation</span>
       </NewChatButton>
 
       {/* Chat List */}
       <ChatListSection>
-        <SectionTitle>{UI_TEXT.CHATS}</SectionTitle>
+        <SectionHeader>
+          <SectionLabel>History</SectionLabel>
+          <SessionCount>{sessions.length}</SessionCount>
+        </SectionHeader>
         <ChatList>
           {sessions.length === 0 ? (
-            <EmptyState>{UI_TEXT.NO_CHATS}</EmptyState>
+            <EmptyState>
+              <EmptyIcon>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+              </EmptyIcon>
+              <EmptyText>Start your first conversation</EmptyText>
+            </EmptyState>
           ) : (
             [...sessions]
               .sort((a, b) => {
@@ -48,26 +70,30 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
                 const bTime = b.lastMessageAt || b.createdAt;
                 return new Date(bTime).getTime() - new Date(aTime).getTime();
               })
-              .map((session) => (
+              .map((session, index) => (
                 <ChatItem
                   key={session.sessionId}
                   active={currentSession?.sessionId === session.sessionId}
                   onClick={() => loadSession(session.sessionId)}
                 >
-                  <ChatItemLeft>
-                    <ChatItemIcon>💬</ChatItemIcon>
-                    <ChatItemTextWrapper>
-                      <ChatItemText>{session.title || "새 대화"}</ChatItemText>
-                      <ChatItemDate>
-                        {dayjs(session.lastMessageAt || session.createdAt).format("MM/DD HH:mm")}
-                      </ChatItemDate>
-                    </ChatItemTextWrapper>
-                  </ChatItemLeft>
+                  <ChatItemIcon active={currentSession?.sessionId === session.sessionId}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                  </ChatItemIcon>
+                  <ChatItemContent>
+                    <ChatItemTitle>{session.title || "New Chat"}</ChatItemTitle>
+                    <ChatItemMeta>
+                      {dayjs(session.lastMessageAt || session.createdAt).format("MMM D, HH:mm")}
+                    </ChatItemMeta>
+                  </ChatItemContent>
                   <DeleteButton
                     onClick={(e) => handleDeleteSession(e, session.sessionId)}
-                    title="삭제"
+                    title="Delete"
                   >
-                    ×
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                    </svg>
                   </DeleteButton>
                 </ChatItem>
               ))
@@ -75,13 +101,24 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
         </ChatList>
       </ChatListSection>
 
-      {/* Bottom Menu */}
-      <BottomMenu>
-        <MenuItem onClick={() => router.push("/")}>🏠 Home</MenuItem>
-        <MenuItem onClick={() => router.push("/my-estimates")}>
-          📋 My Quotes
-        </MenuItem>
-      </BottomMenu>
+      {/* Bottom Navigation */}
+      <BottomNav>
+        <NavItem onClick={() => router.push("/")}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <span>Home</span>
+        </NavItem>
+        <NavItem onClick={() => router.push("/orders")}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+            <rect x="9" y="3" width="6" height="4" rx="1"/>
+            <path d="M9 12h6M9 16h6"/>
+          </svg>
+          <span>Orders</span>
+        </NavItem>
+      </BottomNav>
     </Container>
   );
 };
@@ -90,12 +127,12 @@ export default React.memo(ChatSidebar);
 
 // Styled Components
 const Container = styled.div`
-  width: 260px;
-  background-color: #f8f9fa;
+  width: 280px;
+  background: linear-gradient(180deg, #fefefe 0%, #f8f7f5 100%);
+  border-right: 1px solid #eee;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding: 0 12px;
   flex-shrink: 0;
 
   @media (max-width: 1024px) {
@@ -103,93 +140,160 @@ const Container = styled.div`
   }
 `;
 
-const LogoSection = styled.div`
-  padding: 18px 4px;
+const Header = styled.div`
+  padding: 20px 16px 16px;
   flex-shrink: 0;
 `;
 
-const Logo = styled.div`
-  font-size: 17px;
-  font-weight: 600;
-  color: #1a1a1a;
-`;
-
-const NewChatButton = styled.button`
-  margin: 14px 0;
-  padding: 11px 14px;
-  background-color: #f8f8f8;
-  border: none;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #1a1a1a;
+const LogoWrapper = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
-  transition: all 0.15s;
-  flex-shrink: 0;
+  padding: 8px 12px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
 
   &:hover {
-    background-color: #f0f0f0;
+    background-color: rgba(101, 29, 42, 0.05);
   }
 `;
 
-const PlusIcon = styled.span`
-  font-size: 20px;
-  font-weight: 300;
+const LogoIcon = styled.div`
+  color: #651d2a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
-const SessionCount = styled.span`
-  font-size: 11px;
-  color: #aaa;
-  margin-left: auto;
+const LogoText = styled.span`
+  font-size: 20px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+`;
+
+const NewChatButton = styled.button`
+  margin: 0 16px 20px 16px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  border: none;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(101, 29, 42, 0.25);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(101, 29, 42, 0.35);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const NewChatIconWrapper = styled.span`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
 `;
 
 const ChatListSection = styled.div`
   flex: 1;
-  padding: 8px 0;
   overflow-y: auto;
   min-height: 0;
+  padding: 0 12px;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(101, 29, 42, 0.15);
+    border-radius: 4px;
+  }
 `;
 
-const SectionTitle = styled.div`
-  padding: 12px 4px 8px 4px;
-  font-size: 11px;
+const SectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 8px 12px 8px;
+`;
+
+const SectionLabel = styled.div`
+  font-size: 12px;
   font-weight: 600;
   color: #888;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 `;
 
+const SessionCount = styled.span`
+  font-size: 11px;
+  font-weight: 600;
+  color: #651d2a;
+  background: rgba(101, 29, 42, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+`;
+
 const ChatList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 4px;
 `;
 
 const EmptyState = styled.div`
-  padding: 32px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
   text-align: center;
+`;
+
+const EmptyIcon = styled.div`
+  color: #ccc;
+  margin-bottom: 12px;
+`;
+
+const EmptyText = styled.div`
   font-size: 13px;
-  color: #aaa;
+  color: #999;
 `;
 
 const ChatItem = styled.div<{ active?: boolean }>`
-  padding: 10px 8px;
-  border-radius: 6px;
-  background-color: ${({ active }) => (active ? "#f0f0f0" : "transparent")};
+  padding: 12px 14px;
+  border-radius: 12px;
+  background-color: ${({ active }) => (active ? "rgba(101, 29, 42, 0.08)" : "transparent")};
+  border: 1px solid ${({ active }) => (active ? "rgba(101, 29, 42, 0.15)" : "transparent")};
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  transition: all 0.15s;
-  position: relative;
+  gap: 12px;
+  transition: all 0.15s ease;
 
   &:hover {
-    background-color: #f5f5f5;
+    background-color: ${({ active }) => (active ? "rgba(101, 29, 42, 0.1)" : "rgba(0, 0, 0, 0.03)")};
   }
 
   &:hover button {
@@ -197,83 +301,92 @@ const ChatItem = styled.div<{ active?: boolean }>`
   }
 `;
 
-const ChatItemLeft = styled.div`
+const ChatItemIcon = styled.div<{ active?: boolean }>`
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: ${({ active }) => (active ? "linear-gradient(135deg, #651d2a 0%, #8b3a47 100%)" : "#f0f0f0")};
+  color: ${({ active }) => (active ? "white" : "#888")};
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+`;
+
+const ChatItemContent = styled.div`
   flex: 1;
   min-width: 0;
-`;
-
-const ChatItemIcon = styled.span`
-  font-size: 16px;
-  flex-shrink: 0;
-`;
-
-const ChatItemTextWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  flex: 1;
-  min-width: 0;
+  gap: 3px;
 `;
 
-const ChatItemText = styled.span`
-  font-size: 13px;
-  color: #1a1a1a;
+const ChatItemTitle = styled.span`
+  font-size: 14px;
+  color: #333;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 500;
 `;
 
-const ChatItemDate = styled.span`
+const ChatItemMeta = styled.span`
   font-size: 11px;
-  color: #aaa;
+  color: #999;
 `;
 
 const DeleteButton = styled.button`
-  width: 22px;
-  height: 22px;
-  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   background-color: transparent;
   border: none;
-  color: #ccc;
-  font-size: 18px;
+  color: #bbb;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   opacity: 0;
-  transition: all 0.15s;
+  transition: all 0.15s ease;
   flex-shrink: 0;
 
   &:hover {
-    background-color: #ff4444;
-    color: #ffffff;
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
   }
 `;
 
-const BottomMenu = styled.div`
-  padding: 14px 0;
+const BottomNav = styled.div`
+  padding: 16px;
+  border-top: 1px solid #eee;
   flex-shrink: 0;
+  display: flex;
+  gap: 8px;
 `;
 
-const MenuItem = styled.div`
-  padding: 10px 8px;
-  font-size: 13px;
+const NavItem = styled.button`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  font-size: 11px;
+  font-weight: 500;
   color: #666;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 12px;
   cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.15s;
-  margin-bottom: 2px;
+  transition: all 0.15s ease;
 
   &:hover {
-    background-color: #f5f5f5;
-    color: #1a1a1a;
+    background-color: rgba(101, 29, 42, 0.08);
+    color: #651d2a;
   }
 
-  &:last-child {
-    margin-bottom: 0;
+  span {
+    letter-spacing: 0.3px;
   }
 `;
