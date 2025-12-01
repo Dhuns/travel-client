@@ -13,23 +13,43 @@ const bounce = keyframes`
 
 const Container = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  gap: 12px;
   padding: 16px 24px;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    padding: 12px 16px;
+  }
 `;
 
-const Bubble = styled.div`
+const Avatar = styled.div`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
   display: flex;
   align-items: center;
-  padding: 10px 14px;
-  background-color: #f0f0f0;
-  border-radius: 18px;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+`;
+
+const DotsWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 14px 18px;
+  background-color: #f3f4f6;
+  border-radius: 20px;
 `;
 
 const Dot = styled.div`
   width: 8px;
   height: 8px;
-  margin: 0 2px;
-  background-color: #999;
+  margin: 0 3px;
+  background-color: #9ca3af;
   border-radius: 50%;
   animation: ${bounce} 1.4s infinite ease-in-out both;
 
@@ -40,16 +60,26 @@ const Dot = styled.div`
   &:nth-of-type(2) {
     animation-delay: -0.16s;
   }
+
+  &:nth-of-type(3) {
+    animation-delay: 0s;
+  }
 `;
 
 const TypingIndicator: React.FC = () => {
   return (
     <Container>
-      <Bubble>
+      <Avatar>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+      </Avatar>
+      <DotsWrapper>
         <Dot />
         <Dot />
         <Dot />
-      </Bubble>
+      </DotsWrapper>
     </Container>
   );
 };
