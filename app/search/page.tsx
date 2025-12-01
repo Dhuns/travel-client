@@ -1,281 +1,267 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { MapPin, Clock, Star, ShoppingBag } from "lucide-react"
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { MapPin, Gift, Clock, Loader2, Search as SearchIcon } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { searchAll, SearchResult, SearchCategory, SearchResponse } from "@shared/apis/search";
 
-const searchData = {
-  tours: [
-    {
-      id: 1,
-      title: "Seoul City Highlights Tour",
-      description: "Explore the best of Seoul including Gyeongbokgung Palace, Bukchon Hanok Village, and Myeongdong",
-      price: "$89",
-      duration: "8 hours",
-      rating: 4.8,
-      image: "/beautiful-korean-traditional-palace-with-tourists-.jpg",
-      keywords: ["seoul", "city", "palace", "hanok", "myeongdong", "highlights"],
-    },
-    {
-      id: 2,
-      title: "Seoul Food & Culture Experience",
-      description: "Taste authentic Korean cuisine and learn about traditional culture in Seoul",
-      price: "$75",
-      duration: "6 hours",
-      rating: 4.9,
-      image: "/korean-traditional-food-bibimbap.jpg",
-      keywords: ["seoul", "food", "culture", "korean", "cuisine", "traditional"],
-    },
-    {
-      id: 3,
-      title: "Jeju Island Nature Tour",
-      description: "Discover the natural beauty of Jeju Island with waterfalls and volcanic landscapes",
-      price: "$120",
-      duration: "Full day",
-      rating: 4.7,
-      image: "/jeju-island-nature.jpg",
-      keywords: ["jeju", "island", "nature", "waterfall", "volcanic", "landscape"],
-    },
-    {
-      id: 4,
-      title: "Busan Coastal Adventure",
-      description: "Experience the coastal beauty of Busan with beaches and temples",
-      price: "$95",
-      duration: "10 hours",
-      rating: 4.6,
-      image: "/busan-coastal-temple.jpg",
-      keywords: ["busan", "coastal", "beach", "temple", "adventure", "sea"],
-    },
-  ],
-  destinations: [
-    {
-      id: 1,
-      title: "Gyeongbokgung Palace",
-      description: "The largest of the Five Grand Palaces built during the Joseon Dynasty in Seoul",
-      location: "Seoul",
-      image: "/beautiful-korean-traditional-palace-with-tourists-.jpg",
-      keywords: ["seoul", "palace", "gyeongbokgung", "joseon", "traditional", "history"],
-    },
-    {
-      id: 2,
-      title: "Bukchon Hanok Village",
-      description: "Traditional Korean village with hundreds of hanoks (traditional houses) in Seoul",
-      location: "Seoul",
-      image: "/bukchon-hanok-village.jpg",
-      keywords: ["seoul", "bukchon", "hanok", "village", "traditional", "houses"],
-    },
-    {
-      id: 3,
-      title: "Hallasan National Park",
-      description: "South Korea's highest mountain located in Jeju Island",
-      location: "Jeju",
-      image: "/hallasan-mountain-jeju.jpg",
-      keywords: ["jeju", "hallasan", "mountain", "national", "park", "hiking"],
-    },
-  ],
-  products: [
-    {
-      id: 1,
-      title: "Traditional Hanbok Dress",
-      description: "Authentic Korean traditional dress perfect for cultural experiences",
-      price: "$89",
-      image: "/beautiful-korean-traditional-hanbok-dress.jpg",
-      keywords: ["hanbok", "traditional", "dress", "korean", "culture", "clothing"],
-    },
-    {
-      id: 2,
-      title: "Korean Tea Set",
-      description: "Elegant traditional Korean tea set for authentic tea ceremony",
-      price: "$45",
-      image: "/elegant-korean-traditional-tea-set.jpg",
-      keywords: ["tea", "set", "traditional", "korean", "ceremony", "elegant"],
-    },
-    {
-      id: 3,
-      title: "K-Beauty Skincare Set",
-      description: "Premium Korean skincare products for healthy, glowing skin",
-      price: "$65",
-      image: "/korean-skincare-beauty-products-set.jpg",
-      keywords: ["beauty", "skincare", "korean", "cosmetics", "k-beauty", "seoul"],
-    },
-    {
-      id: 4,
-      title: "Korean Snacks Box",
-      description: "Assorted traditional Korean snacks and treats",
-      price: "$25",
-      image: "/korean-traditional-snacks-and-treats-box.jpg",
-      keywords: ["snacks", "treats", "korean", "traditional", "food", "box"],
-    },
-  ],
-}
+// 카테고리별 설정
+const categoryConfig = {
+  tours: { icon: MapPin, color: "text-[#651d2a]", bgColor: "bg-[#651d2a]", label: "Tour" },
+  souvenirs: { icon: Gift, color: "text-[#6d8675]", bgColor: "bg-[#6d8675]", label: "Souvenir" },
+};
 
-export default function SearchPage() {
-  const searchParams = useSearchParams()
-  const query = searchParams.get("q") || ""
-  const [searchResults, setSearchResults] = useState<any>({ tours: [], destinations: [], products: [] })
+function SearchContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const query = searchParams.get("q") || "";
+  const categoryParam = (searchParams.get("category") as SearchCategory) || "all";
+
+  const [searchResults, setSearchResults] = useState<SearchResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<SearchCategory>(categoryParam);
+
+  const performSearch = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await searchAll(query, selectedCategory);
+      setSearchResults(result);
+    } catch (err) {
+      setError("Failed to search. Please try again.");
+      console.error("Search error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [query, selectedCategory]);
 
   useEffect(() => {
-    if (query) {
-      const searchTerm = query.toLowerCase()
+    performSearch();
+  }, [performSearch]);
 
-      const filteredTours = searchData.tours.filter(
-        (tour) =>
-          tour.keywords.some((keyword) => keyword.includes(searchTerm)) ||
-          tour.title.toLowerCase().includes(searchTerm) ||
-          tour.description.toLowerCase().includes(searchTerm),
-      )
-
-      const filteredDestinations = searchData.destinations.filter(
-        (destination) =>
-          destination.keywords.some((keyword) => keyword.includes(searchTerm)) ||
-          destination.title.toLowerCase().includes(searchTerm) ||
-          destination.description.toLowerCase().includes(searchTerm),
-      )
-
-      const filteredProducts = searchData.products.filter(
-        (product) =>
-          product.keywords.some((keyword) => keyword.includes(searchTerm)) ||
-          product.title.toLowerCase().includes(searchTerm) ||
-          product.description.toLowerCase().includes(searchTerm),
-      )
-
-      setSearchResults({
-        tours: filteredTours,
-        destinations: filteredDestinations,
-        products: filteredProducts,
-      })
-    }
-  }, [query])
-
-  const totalResults = searchResults.tours.length + searchResults.destinations.length + searchResults.products.length
+  // Update URL when category filter changes
+  const handleCategoryFilter = (category: SearchCategory) => {
+    setSelectedCategory(category);
+    const params = new URLSearchParams();
+    if (query) params.set("q", query);
+    if (category !== "all") params.set("category", category);
+    router.push(`/search?${params.toString()}`, { scroll: false });
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white pt-32">
-      <div className="container mx-auto px-6 py-8">
+    <div className="min-h-screen bg-gray-50 pt-24">
+      <div className="container mx-auto px-4 sm:px-6 py-8">
+        {/* Search Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Search Results for "{query}"</h1>
-          <p className="text-gray-600">Found {totalResults} results</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+            {query ? (
+              <>Search Results for "<span className="text-[#651d2a]">{query}</span>"</>
+            ) : (
+              "Browse All"
+            )}
+          </h1>
+          {searchResults && (
+            <p className="text-gray-600">
+              Found {searchResults.total} result{searchResults.total !== 1 ? "s" : ""}
+              {searchResults.tours.length > 0 && ` (${searchResults.tours.length} tours`}
+              {searchResults.tours.length > 0 && searchResults.souvenirs.length > 0 && ", "}
+              {searchResults.souvenirs.length > 0 && `${searchResults.souvenirs.length} souvenirs`}
+              {(searchResults.tours.length > 0 || searchResults.souvenirs.length > 0) && ")"}
+            </p>
+          )}
         </div>
 
-        {totalResults === 0 && query && (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No results found for "{query}"</p>
-            <p className="text-gray-400 mt-2">Try searching for tours, destinations, or products</p>
+        {/* Category Filters */}
+        <div className="mb-6 flex flex-wrap gap-2">
+          <Button
+            variant={selectedCategory === "all" ? "default" : "outline"}
+            size="sm"
+            onClick={() => handleCategoryFilter("all")}
+            className={selectedCategory === "all" ? "bg-[#651d2a] hover:bg-[#7d2534]" : ""}
+          >
+            All
+          </Button>
+          <Button
+            variant={selectedCategory === "tours" ? "default" : "outline"}
+            size="sm"
+            onClick={() => handleCategoryFilter("tours")}
+            className={selectedCategory === "tours" ? "bg-[#651d2a] hover:bg-[#7d2534]" : ""}
+          >
+            <MapPin className="w-4 h-4 mr-1" />
+            Tours
+          </Button>
+          <Button
+            variant={selectedCategory === "souvenirs" ? "default" : "outline"}
+            size="sm"
+            onClick={() => handleCategoryFilter("souvenirs")}
+            className={selectedCategory === "souvenirs" ? "bg-[#6d8675] hover:bg-[#5a7562]" : ""}
+          >
+            <Gift className="w-4 h-4 mr-1" />
+            Souvenirs
+          </Button>
+        </div>
+
+        {/* Loading State - Skeleton */}
+        {isLoading && (
+          <div className="space-y-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="bg-white rounded-lg overflow-hidden shadow animate-pulse">
+                  <div className="aspect-[4/3] bg-gray-200" />
+                  <div className="p-4 space-y-3">
+                    <div className="h-4 bg-gray-200 rounded w-3/4" />
+                    <div className="h-3 bg-gray-200 rounded w-full" />
+                    <div className="h-3 bg-gray-200 rounded w-2/3" />
+                    <div className="flex justify-between pt-2">
+                      <div className="h-3 bg-gray-200 rounded w-16" />
+                      <div className="h-4 bg-gray-200 rounded w-20" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
-        {searchResults.tours.length > 0 && (
-          <section className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-              <MapPin className="w-6 h-6 mr-2 text-blue-600" />
-              Tours ({searchResults.tours.length})
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {searchResults.tours.map((tour: any) => (
-                <Card key={tour.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="aspect-video relative overflow-hidden">
-                    <img
-                      src={tour.image || "/placeholder.svg"}
-                      alt={tour.title}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                  <CardContent className="p-6">
-                    <h3 className="font-bold text-lg mb-2">{tour.title}</h3>
-                    <p className="text-gray-600 text-sm mb-4">{tour.description}</p>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <div className="flex items-center">
-                          <Clock className="w-4 h-4 mr-1" />
-                          {tour.duration}
-                        </div>
-                        <div className="flex items-center">
-                          <Star className="w-4 h-4 mr-1 text-yellow-400" />
-                          {tour.rating}
-                        </div>
-                      </div>
-                      <span className="text-xl font-bold text-blue-600">{tour.price}</span>
-                    </div>
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700">Book Now</Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-12">
+            <p className="text-red-500 text-lg">{error}</p>
+            <Button onClick={performSearch} className="mt-4 bg-[#651d2a] hover:bg-[#7d2534]">
+              Try Again
+            </Button>
+          </div>
         )}
 
-        {searchResults.destinations.length > 0 && (
-          <section className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-              <MapPin className="w-6 h-6 mr-2 text-green-600" />
-              Destinations ({searchResults.destinations.length})
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {searchResults.destinations.map((destination: any) => (
-                <Card key={destination.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="aspect-video relative overflow-hidden">
-                    <img
-                      src={destination.image || "/placeholder.svg"}
-                      alt={destination.title}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                  <CardContent className="p-6">
-                    <h3 className="font-bold text-lg mb-2">{destination.title}</h3>
-                    <p className="text-gray-600 text-sm mb-4">{destination.description}</p>
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline" className="text-green-600 border-green-600">
-                        {destination.location}
-                      </Badge>
-                      <Button
-                        variant="outline"
-                        className="border-green-600 text-green-600 hover:bg-green-50 bg-transparent"
-                      >
-                        Learn More
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
+        {/* No Results */}
+        {!isLoading && !error && searchResults?.total === 0 && (
+          <div className="text-center py-12">
+            <SearchIcon className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+            <p className="text-gray-500 text-lg">
+              {query ? `No results found for "${query}"` : "No items available"}
+            </p>
+            <p className="text-gray-400 mt-2">
+              Try different keywords or browse all categories
+            </p>
+          </div>
         )}
 
-        {searchResults.products.length > 0 && (
-          <section className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-              <ShoppingBag className="w-6 h-6 mr-2 text-purple-600" />
-              Products ({searchResults.products.length})
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {searchResults.products.map((product: any) => (
-                <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="aspect-square relative overflow-hidden">
-                    <img
-                      src={product.image || "/placeholder.svg"}
-                      alt={product.title}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-bold text-sm mb-2">{product.title}</h3>
-                    <p className="text-gray-600 text-xs mb-3">{product.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-lg font-bold text-purple-600">{product.price}</span>
-                      <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
-                        Add to Cart
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
+        {/* Results */}
+        {!isLoading && !error && searchResults && searchResults.total > 0 && (
+          <>
+            {/* Tours Section */}
+            {searchResults.tours.length > 0 && (
+              <section className="mb-10">
+                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                  <MapPin className="w-5 h-5 mr-2 text-[#651d2a]" />
+                  Tours ({searchResults.tours.length})
+                </h2>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {searchResults.tours.map((item) => (
+                    <ResultCard key={item.id} item={item} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Souvenirs Section */}
+            {searchResults.souvenirs.length > 0 && (
+              <section className="mb-10">
+                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                  <Gift className="w-5 h-5 mr-2 text-[#6d8675]" />
+                  Souvenirs ({searchResults.souvenirs.length})
+                </h2>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {searchResults.souvenirs.map((item) => (
+                    <ResultCard key={item.id} item={item} />
+                  ))}
+                </div>
+              </section>
+            )}
+          </>
         )}
       </div>
     </div>
-  )
+  );
+}
+
+// Result Card Component
+function ResultCard({ item }: { item: SearchResult }) {
+  const config = item.type === "tour" ? categoryConfig.tours : categoryConfig.souvenirs;
+  const Icon = config.icon;
+
+  return (
+    <Link href={item.link}>
+      <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group h-full">
+        <div className="aspect-[4/3] relative overflow-hidden bg-gray-100">
+          {item.thumbnailUrl ? (
+            <Image
+              src={item.thumbnailUrl}
+              alt={item.title}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Icon className="w-12 h-12 text-gray-300" />
+            </div>
+          )}
+          <Badge className={`absolute top-3 left-3 ${config.bgColor} text-white`}>
+            {config.label}
+          </Badge>
+          {item.category && (
+            <Badge variant="secondary" className="absolute top-3 right-3 bg-white/90 text-gray-700">
+              {item.category}
+            </Badge>
+          )}
+        </div>
+        <CardContent className="p-4">
+          <h3 className="font-semibold text-gray-900 mb-2 line-clamp-1 group-hover:text-[#651d2a] transition-colors">
+            {item.title}
+          </h3>
+          {item.description && (
+            <p className="text-sm text-gray-600 mb-3 line-clamp-2">{item.description}</p>
+          )}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {item.duration && (
+                <span className="flex items-center text-xs text-gray-500">
+                  <Clock className="w-3 h-3 mr-1" />
+                  {item.duration}
+                </span>
+              )}
+            </div>
+            {item.price && (
+              <span className={`text-sm font-semibold ${item.type === "tour" ? "text-[#651d2a]" : "text-[#6d8675]"}`}>
+                {item.price}
+              </span>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+
+// Main export with Suspense
+export default function SearchPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 pt-24 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-[#651d2a]" />
+        </div>
+      }
+    >
+      <SearchContent />
+    </Suspense>
+  );
 }
