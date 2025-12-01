@@ -57,7 +57,7 @@ export const multidayToursConfig: TourConfig[] = [
   },
 ];
 
-// Bokun Configuration
+// Bokun Configuration (Public - safe to expose)
 export const BOKUN_CONFIG = {
-  bookingChannelUUID: "0a1af831-37c4-40d2-8aa7-2a8b7b985ea2",
+  bookingChannelUUID: process.env.NEXT_PUBLIC_BOKUN_BOOKING_CHANNEL_UUID || "0a1af831-37c4-40d2-8aa7-2a8b7b985ea2",
 };

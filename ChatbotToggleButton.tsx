@@ -14,7 +14,7 @@ export function ChatbotToggleButton() {
       onClick={toggleChat}
       className={cn(
         "fixed bottom-8 right-8 z-50 h-16 w-16 rounded-full shadow-lg transition-transform duration-300 ease-in-out hover:scale-110",
-        "bg-sky-600 hover:bg-sky-700 text-white"
+        "bg-[#651d2a] hover:bg-[#7d2534] text-white"
       )}
       aria-label={isChatOpen ? "Close chat" : "Open chat"}
     >

@@ -7,6 +7,7 @@ import DayMap from "@/src/components/Chat/DayMap";
 import dayjs from "dayjs";
 import { getItemImg } from "@/src/shared/utils/base";
 import { draftToHtml } from "@/src/shared/utils/draftjs";
+import { sanitizeHtml } from "@/src/shared/utils/sanitize";
 import styled from "@emotion/styled";
 
 // Korean to English type mapping
@@ -319,7 +320,7 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
                               </ItemHeader>
                               {detail.item.description && (
                                 <ItemDescription
-                                  dangerouslySetInnerHTML={{ __html: draftToHtml(detail.item.description) }}
+                                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(draftToHtml(detail.item.description)) }}
                                 />
                               )}
                               <ItemFooter>
@@ -418,7 +419,7 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
         <Section>
           <SectionTitle>Additional Information</SectionTitle>
           <CommentBox
-            dangerouslySetInnerHTML={{ __html: draftToHtml(estimateInfo.comment) }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(draftToHtml(estimateInfo.comment)) }}
           />
         </Section>
       )}

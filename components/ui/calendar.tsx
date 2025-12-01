@@ -7,11 +7,12 @@ import { cn } from "@/lib/utils"
 
 interface CalendarProps {
   selected?: Date
-  onSelect?: (date: Date) => void
+  onSelect?: (date: Date | undefined) => void
+  disabled?: (date: Date) => boolean
   className?: string
 }
 
-export function Calendar({ selected, onSelect, className }: CalendarProps) {
+export function Calendar({ selected, onSelect, disabled, className }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date())
 
   const today = new Date()
@@ -64,8 +65,8 @@ export function Calendar({ selected, onSelect, className }: CalendarProps) {
   }
 
   const handleDateClick = (date: Date) => {
-    // 과거 날짜는 선택 불가
-    if (date < today) return
+    // 비활성화된 날짜는 선택 불가
+    if (disabled ? disabled(date) : isPastDate(date)) return
     onSelect?.(date)
   }
 
@@ -83,6 +84,14 @@ export function Calendar({ selected, onSelect, className }: CalendarProps) {
 
   const isPastDate = (date: Date) => {
     return date < today
+  }
+
+  const isDateDisabled = (date: Date) => {
+    // 외부에서 전달된 disabled 함수가 있으면 사용, 없으면 isPastDate 사용
+    if (disabled) {
+      return disabled(date)
+    }
+    return isPastDate(date)
   }
 
   return (
@@ -117,23 +126,23 @@ export function Calendar({ selected, onSelect, className }: CalendarProps) {
           <button
             key={index}
             onClick={() => handleDateClick(date)}
-            disabled={isPastDate(date)}
+            disabled={isDateDisabled(date)}
             className={cn(
               "h-8 w-8 text-sm rounded-md transition-colors",
               "hover:bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-1",
               {
                 // 현재 월이 아닌 날짜
                 "text-gray-300": !isCurrentMonth(date),
-                // 현��� 월의 날짜
-                "text-gray-900": isCurrentMonth(date) && !isPastDate(date),
-                // 과거 날짜
-                "text-gray-300 cursor-not-allowed": isPastDate(date),
+                // 현재 월의 날짜
+                "text-gray-900": isCurrentMonth(date) && !isDateDisabled(date),
+                // 비활성화된 날짜
+                "text-gray-300 cursor-not-allowed": isDateDisabled(date),
                 // 오늘
                 "bg-sky-100 text-sky-700 font-semibold": isToday(date) && !isSelected(date),
                 // 선택된 날짜
                 "bg-sky-600 text-white font-semibold": isSelected(date),
-                // 호버 효과 (과거 날짜 제외)
-                "hover:bg-sky-50": !isPastDate(date) && !isSelected(date),
+                // 호버 효과 (비활성화된 날짜 제외)
+                "hover:bg-sky-50": !isDateDisabled(date) && !isSelected(date),
               },
             )}
           >
