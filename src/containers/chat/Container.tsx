@@ -94,20 +94,25 @@ const Container: FC = () => {
       <PageContainer>
         <LoginPromptContainer>
           <LoginPromptContent>
-            <LoginPromptIcon>🔐</LoginPromptIcon>
-            <LoginPromptTitle>Sign In Required</LoginPromptTitle>
+            <LoginPromptIconWrapper>
+              <LoginPromptIcon>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </LoginPromptIcon>
+            </LoginPromptIconWrapper>
+            <LoginPromptTitle>Plan Your Korea Trip with AI</LoginPromptTitle>
             <LoginPromptSubtitle>
-              Please sign in to access our AI travel assistant and save your conversation history.
+              Sign in to chat with our AI travel assistant and get personalized recommendations for your Korean adventure.
             </LoginPromptSubtitle>
-            <LoginButton onClick={() => router.push("/login")}>
-              Sign In
-            </LoginButton>
-            <SignUpPrompt>
-              Don't have an account?{" "}
-              <SignUpLink onClick={() => router.push("/signup")}>
-                Sign Up
-              </SignUpLink>
-            </SignUpPrompt>
+            <LoginButtonGroup>
+              <LoginButton onClick={() => router.push("/login")}>
+                Sign In
+              </LoginButton>
+              <SignUpButton onClick={() => router.push("/signup")}>
+                Create Account
+              </SignUpButton>
+            </LoginButtonGroup>
           </LoginPromptContent>
         </LoginPromptContainer>
       </PageContainer>
@@ -117,7 +122,8 @@ const Container: FC = () => {
   if (!session) {
     return (
       <LoadingContainer>
-        <LoadingText>✈️ Preparing your AI travel planner...</LoadingText>
+        <LoadingSpinner />
+        <LoadingText>Preparing your AI travel planner...</LoadingText>
       </LoadingContainer>
     );
   }
@@ -130,20 +136,28 @@ const Container: FC = () => {
     return (
       <EmptyStateContainer>
         <EmptyStateContent>
-          <EmptyStateTitle>✈️ AI Travel Planner for Korea</EmptyStateTitle>
-          <EmptyStateSubtitle>Let's plan your perfect Korean adventure!</EmptyStateSubtitle>
+          <EmptyStateIconWrapper>
+            <EmptyStateIcon>
+              <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+            </EmptyStateIcon>
+          </EmptyStateIconWrapper>
+          <EmptyStateTitle>Where would you like to go in Korea?</EmptyStateTitle>
+          <EmptyStateSubtitle>I can help you plan the perfect trip - just tell me about your travel dreams.</EmptyStateSubtitle>
           <EmptyStateInputWrapper>
             <ChatInput
               onSend={handleSendMessage}
               disabled={isTyping}
-              placeholder="e.g., I want to visit Seoul for 3 days in December (2 adults)"
+              placeholder="e.g., I want to explore Seoul and Busan for 5 days..."
             />
           </EmptyStateInputWrapper>
           <EmptyStateHints>
-            <HintItem>💬 Just chat naturally - tell us your travel dreams</HintItem>
-            <HintItem>📅 Rough dates and number of travelers are enough to start</HintItem>
-            <HintItem>💰 Share your budget range for better recommendations</HintItem>
-            <HintItem>🗣️ We speak Korean too! (한국어도 가능합니다)</HintItem>
+            <HintChip>Seoul in December</HintChip>
+            <HintChip>Traditional temples tour</HintChip>
+            <HintChip>K-food experience</HintChip>
+            <HintChip>DMZ visit</HintChip>
           </EmptyStateHints>
         </EmptyStateContent>
       </EmptyStateContainer>
@@ -162,15 +176,27 @@ const Container: FC = () => {
           <ChatSection hasMessages={hasMessages}>
             {/* Top Bar */}
             <TopBar>
-              <TopBarLeft>
-                <ModelBadge>🤖 AI Travel Planner</ModelBadge>
-              </TopBarLeft>
+              <TopBarCenter>
+                <ModelBadge>
+                  <ModelIcon>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                    </svg>
+                  </ModelIcon>
+                  Korea Travel AI
+                </ModelBadge>
+              </TopBarCenter>
               <TopBarRight>
                 <IconButton
                   onClick={() => setShowInfoPanel(!showInfoPanel)}
-                  title="Toggle info panel"
+                  title="Trip details"
+                  active={showInfoPanel}
                 >
-                  {showInfoPanel ? "›" : "‹"}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 16v-4M12 8h.01"/>
+                  </svg>
                 </IconButton>
               </TopBarRight>
             </TopBar>
@@ -186,13 +212,16 @@ const Container: FC = () => {
             {/* Input Area - shown at bottom when messages exist */}
             {hasMessages && (
               <InputArea>
-                <ChatInput
-                  onSend={handleSendMessage}
-                  disabled={isTyping}
-                  placeholder={
-                    isTyping ? "AI is typing..." : "Type your message..."
-                  }
-                />
+                <InputContainer>
+                  <ChatInput
+                    onSend={handleSendMessage}
+                    disabled={isTyping}
+                    placeholder={
+                      isTyping ? "AI is thinking..." : "Message Korea Travel AI..."
+                    }
+                  />
+                  <InputHint>AI can make mistakes. Please verify important travel information.</InputHint>
+                </InputContainer>
               </InputArea>
             )}
           </ChatSection>
@@ -204,7 +233,11 @@ const Container: FC = () => {
           <InfoPanelContent isVisible={showInfoPanel}>
             <InfoPanelHeader>
               <InfoPanelTitle>Trip Details</InfoPanelTitle>
-              <CloseButton onClick={() => setShowInfoPanel(false)}>✕</CloseButton>
+              <CloseButton onClick={() => setShowInfoPanel(false)}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+              </CloseButton>
             </InfoPanelHeader>
             <ChatInfoPanel
               context={context}
@@ -259,46 +292,56 @@ const ChatSection = styled.div<{ hasMessages: boolean }>`
 
 const TopBar = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 14px 24px;
+  padding: 12px 24px;
   background-color: #ffffff;
+  border-bottom: 1px solid #f0f0f0;
   z-index: 10;
   flex-shrink: 0;
-  max-width: 800px;
-  margin: 0 auto;
-  width: 100%;
+  position: relative;
 `;
 
-const TopBarLeft = styled.div`
+const TopBarCenter = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
 `;
 
 const TopBarRight = styled.div`
+  position: absolute;
+  right: 24px;
   display: flex;
   align-items: center;
   gap: 8px;
 `;
 
 const ModelBadge = styled.div`
-  padding: 6px 14px;
-  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background-color: #fafafa;
+  border: 1px solid #e5e5e5;
   border-radius: 20px;
   font-size: 13px;
   font-weight: 500;
-  color: #444;
+  color: #333;
 `;
 
-const IconButton = styled.button`
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  border: none;
-  background-color: transparent;
-  color: #888;
-  font-size: 20px;
+const ModelIcon = styled.span`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #651d2a;
+`;
+
+const IconButton = styled.button<{ active?: boolean }>`
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid ${({ active }) => active ? '#651d2a' : '#e5e5e5'};
+  background-color: ${({ active }) => active ? 'rgba(101, 29, 42, 0.05)' : 'transparent'};
+  color: ${({ active }) => active ? '#651d2a' : '#666'};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -306,42 +349,53 @@ const IconButton = styled.button`
   transition: all 0.15s;
 
   &:hover {
-    background-color: #f0f0f0;
-    color: #000;
+    background-color: ${({ active }) => active ? 'rgba(101, 29, 42, 0.1)' : '#f5f5f5'};
+    border-color: ${({ active }) => active ? '#651d2a' : '#ddd'};
   }
 `;
 
 const InputArea = styled.div`
-  padding: 16px 24px 24px 24px;
-  background-color: #ffffff;
+  padding: 0 24px 24px 24px;
+  background: linear-gradient(to bottom, transparent, #ffffff 20%);
   flex-shrink: 0;
-  max-width: 800px;
+`;
+
+const InputContainer = styled.div`
+  max-width: 768px;
   margin: 0 auto;
   width: 100%;
 `;
 
+const InputHint = styled.div`
+  text-align: center;
+  font-size: 11px;
+  color: #999;
+  margin-top: 8px;
+`;
+
 const InfoPanel = styled.div<{ isVisible: boolean }>`
-  width: ${({ isVisible }) => (isVisible ? "340px" : "0")};
-  background-color: #ffffff;
+  width: ${({ isVisible }) => (isVisible ? "320px" : "0")};
+  background-color: #fafafa;
+  border-left: 1px solid #f0f0f0;
   overflow: hidden;
   flex-shrink: 0;
   transition: width 0.3s ease-in-out;
 
   @media (max-width: 1280px) {
     position: fixed;
-    right: ${({ isVisible }) => (isVisible ? "0" : "-340px")};
+    right: ${({ isVisible }) => (isVisible ? "0" : "-320px")};
     top: 80px;
     bottom: 0;
-    width: 340px;
+    width: 320px;
     max-width: 85vw;
-    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.08);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.08);
     z-index: 1001;
     transition: right 0.3s ease-in-out;
   }
 `;
 
 const InfoPanelContent = styled.div<{ isVisible: boolean }>`
-  width: 340px;
+  width: 320px;
   height: 100%;
   opacity: ${({ isVisible }) => (isVisible ? "1" : "0")};
   transition: opacity ${({ isVisible }) => (isVisible ? "0.3s 0.15s" : "0.15s")} ease-in-out;
@@ -359,27 +413,23 @@ const InfoPanelBackdrop = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.4);
     z-index: 1000;
   }
 `;
 
 const InfoPanelHeader = styled.div`
-  display: none;
-
-  @media (max-width: 1280px) {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    border-bottom: 1px solid #e8e8e8;
-    background-color: #ffffff;
-  }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e8e8e8;
+  background-color: #ffffff;
 `;
 
 const InfoPanelTitle = styled.h3`
   margin: 0;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: #1a1a1a;
 `;
@@ -391,7 +441,6 @@ const CloseButton = styled.button`
   border: none;
   background-color: transparent;
   color: #888;
-  font-size: 20px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -400,22 +449,37 @@ const CloseButton = styled.button`
 
   &:hover {
     background-color: #f0f0f0;
-    color: #000;
+    color: #333;
   }
 `;
 
 const LoadingContainer = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   flex: 1;
   min-height: 0;
   background-color: #ffffff;
+  gap: 16px;
+`;
+
+const LoadingSpinner = styled.div`
+  width: 32px;
+  height: 32px;
+  border: 2px solid #f0f0f0;
+  border-top-color: #651d2a;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
 `;
 
 const LoadingText = styled.p`
-  font-size: 15px;
-  color: #888;
+  font-size: 14px;
+  color: #666;
 `;
 
 const EmptyStateContainer = styled.div`
@@ -427,40 +491,57 @@ const EmptyStateContainer = styled.div`
   background-color: #ffffff;
   padding: 24px;
   overflow-y: auto;
-  max-width: 800px;
-  margin: 0 auto;
-  width: 100%;
 `;
 
 const EmptyStateContent = styled.div`
   width: 100%;
-  max-width: 700px;
+  max-width: 640px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
+`;
+
+const EmptyStateIconWrapper = styled.div`
+  width: 80px;
+  height: 80px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+`;
+
+const EmptyStateIcon = styled.div`
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const EmptyStateTitle = styled.h1`
-  font-size: 48px;
+  font-size: 28px;
   font-weight: 600;
   color: #1a1a1a;
   margin: 0;
   text-align: center;
 
   @media (max-width: 768px) {
-    font-size: 36px;
+    font-size: 24px;
   }
 `;
 
 const EmptyStateSubtitle = styled.p`
-  font-size: 20px;
-  color: #888;
+  font-size: 16px;
+  color: #666;
   margin: 0;
   text-align: center;
+  max-width: 480px;
+  line-height: 1.5;
 
   @media (max-width: 768px) {
-    font-size: 16px;
+    font-size: 14px;
   }
 `;
 
@@ -471,18 +552,26 @@ const EmptyStateInputWrapper = styled.div`
 
 const EmptyStateHints = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
   margin-top: 8px;
 `;
 
-const HintItem = styled.div`
-  font-size: 14px;
-  color: #aaa;
-  text-align: center;
+const HintChip = styled.button`
+  padding: 8px 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 20px;
+  background-color: #ffffff;
+  font-size: 13px;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.15s;
 
-  @media (max-width: 768px) {
-    font-size: 13px;
+  &:hover {
+    border-color: #651d2a;
+    color: #651d2a;
+    background-color: rgba(101, 29, 42, 0.03);
   }
 `;
 
@@ -497,7 +586,7 @@ const LoginPromptContainer = styled.div`
 `;
 
 const LoginPromptContent = styled.div`
-  max-width: 500px;
+  max-width: 420px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -506,24 +595,37 @@ const LoginPromptContent = styled.div`
   text-align: center;
 `;
 
-const LoginPromptIcon = styled.div`
-  font-size: 64px;
+const LoginPromptIconWrapper = styled.div`
+  width: 80px;
+  height: 80px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 8px;
 `;
 
+const LoginPromptIcon = styled.div`
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
 const LoginPromptTitle = styled.h2`
-  font-size: 32px;
+  font-size: 26px;
   font-weight: 600;
   color: #1a1a1a;
   margin: 0;
 
   @media (max-width: 768px) {
-    font-size: 24px;
+    font-size: 22px;
   }
 `;
 
 const LoginPromptSubtitle = styled.p`
-  font-size: 16px;
+  font-size: 15px;
   color: #666;
   margin: 0;
   line-height: 1.6;
@@ -533,41 +635,45 @@ const LoginPromptSubtitle = styled.p`
   }
 `;
 
+const LoginButtonGroup = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  width: 100%;
+  max-width: 320px;
+`;
+
 const LoginButton = styled.button`
-  padding: 14px 40px;
+  flex: 1;
+  padding: 14px 24px;
   background-color: #651d2a;
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 12px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  margin-top: 8px;
 
   &:hover {
     background-color: #4a1520;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(101, 29, 42, 0.3);
-  }
-
-  &:active {
-    transform: translateY(0);
   }
 `;
 
-const SignUpPrompt = styled.p`
-  font-size: 14px;
-  color: #888;
-  margin: 0;
-`;
-
-const SignUpLink = styled.span`
-  color: #651d2a;
+const SignUpButton = styled.button`
+  flex: 1;
+  padding: 14px 24px;
+  background-color: #ffffff;
+  color: #333;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-  font-weight: 500;
+  transition: all 0.2s;
 
   &:hover {
-    text-decoration: underline;
+    background-color: #f5f5f5;
+    border-color: #ddd;
   }
 `;
