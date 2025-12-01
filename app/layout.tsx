@@ -1,6 +1,7 @@
 import "./globals.css";
 
 import { Analytics } from "@vercel/analytics/next";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Footer from "@/components/footer";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
@@ -58,7 +59,9 @@ html {
         >
           <Header />
           <main className="pt-8">
-            <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+            <ErrorBoundary>
+              <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+            </ErrorBoundary>
           </main>
           <Footer />
         </ThemeProvider>

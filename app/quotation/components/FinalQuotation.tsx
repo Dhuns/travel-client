@@ -5,6 +5,7 @@ import styled from '@emotion/styled';
 import { QuotationResponse, EstimateDetail } from '@/src/shared/apis/estimate';
 import { getItemImg } from '@/src/shared/utils/base';
 import { draftToHtml } from '@/src/shared/utils/draftjs';
+import { sanitizeHtml } from '@/src/shared/utils/sanitize';
 import dayjs from 'dayjs';
 import DayMap from '@/src/components/Chat/DayMap';
 
@@ -270,7 +271,7 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
                               </FinalItemHeader>
                               {detail.item.description && (
                                 <FinalItemDescription
-                                  dangerouslySetInnerHTML={{ __html: draftToHtml(detail.item.description) }}
+                                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(draftToHtml(detail.item.description)) }}
                                 />
                               )}
                               <FinalItemFooter>
@@ -365,7 +366,7 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
           {estimateInfo.comment && (
             <FinalSection>
               <FinalSectionTitle>Additional Information</FinalSectionTitle>
-              <FinalCommentBox dangerouslySetInnerHTML={{ __html: draftToHtml(estimateInfo.comment) }} />
+              <FinalCommentBox dangerouslySetInnerHTML={{ __html: sanitizeHtml(draftToHtml(estimateInfo.comment)) }} />
             </FinalSection>
           )}
 

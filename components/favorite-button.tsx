@@ -9,12 +9,14 @@ import { useRouter } from "next/navigation";
 interface FavoriteButtonProps {
   tourId: string; // bokunExperienceId
   tourData?: {
+    id?: string;
     title: string;
     image?: string;
     description?: string;
     price?: string;
     duration?: string;
     location?: string;
+    bokunExperienceId?: string;
   };
   className?: string;
   onAuthRequired?: () => void;
