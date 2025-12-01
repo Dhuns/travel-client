@@ -18,15 +18,32 @@ export interface Tour {
 	updatedAt: string;
 }
 
-// 전체 투어 목록 조회 (공개 API)
-export const getAllTours = async (): Promise<Tour[]> => {
+// 클라이언트 사이드 캐시 (5분)
+const CACHE_DURATION = 5 * 60 * 1000;
+let toursCache: { data: Tour[] | null; timestamp: number } = { data: null, timestamp: 0 };
+
+// 전체 투어 목록 조회 (공개 API) - 클라이언트 캐싱 적용
+export const getAllTours = async (forceRefresh = false): Promise<Tour[]> => {
+	const now = Date.now();
+
+	// 캐시가 유효하면 캐시된 데이터 반환
+	if (!forceRefresh && toursCache.data && (now - toursCache.timestamp) < CACHE_DURATION) {
+		return toursCache.data;
+	}
+
 	const response = await fetch(`${API_URL}/tour/list`, {
-		next: { revalidate: 900 }, // 15분 캐시
+		next: { revalidate: 900 }, // 15분 서버 캐시
 	});
 	if (!response.ok) {
 		throw new Error('Failed to fetch tours');
 	}
-	return response.json();
+
+	const data = await response.json();
+
+	// 캐시 업데이트
+	toursCache = { data, timestamp: now };
+
+	return data;
 };
 
 // 인기 투어 조회
