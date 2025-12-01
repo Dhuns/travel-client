@@ -6,11 +6,11 @@ import { getAppleAuthUrl, getGoogleAuthUrl } from "@/src/shared/apis/user";
 import type React from "react";
 import { useAuthStore } from "@/src/shared/store/authStore";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isLoading } = useAuthStore();
+  const { login, isLoading, isAuthenticated } = useAuthStore();
 
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -18,6 +18,13 @@ export default function LoginPage() {
     username: "",
     password: "",
   });
+
+  // 이미 로그인된 사용자는 홈으로 리다이렉트
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace("/");
+    }
+  }, [isAuthenticated, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -32,7 +39,8 @@ export default function LoginPage() {
 
     try {
       await login(formData.username, formData.password);
-      router.push("/");
+      // replace를 사용하여 뒤로가기 시 로그인 페이지로 돌아오지 않도록 함
+      router.replace("/");
     } catch (error: any) {
       console.error("Login failed:", error);
 
@@ -53,14 +61,23 @@ export default function LoginPage() {
       }
 
       let errorMessage = responseData?.message;
-      if (typeof errorMessage === 'object' && errorMessage !== null) {
-        errorMessage = errorMessage.message || JSON.stringify(errorMessage);
-      }
+
+      // 배열인 경우 첫 번째 요소 추출
       if (Array.isArray(errorMessage)) {
         errorMessage = errorMessage[0];
       }
+      // 객체인 경우 message 속성 추출
+      if (typeof errorMessage === 'object' && errorMessage !== null) {
+        errorMessage = errorMessage.message || "Login failed";
+      }
+      // 문자열이 아니거나 비어있으면 기본 메시지
       if (!errorMessage || typeof errorMessage !== 'string') {
         errorMessage = "Login failed. Please check your credentials.";
+      }
+
+      // 사용자 친화적인 메시지로 변환
+      if (errorMessage.toLowerCase().includes("invalid username or password")) {
+        errorMessage = "Incorrect email or password. Please try again.";
       }
 
       setError(errorMessage);

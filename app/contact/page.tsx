@@ -206,7 +206,7 @@ export default function ContactPage() {
                     <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                       <p className="text-red-800 text-sm">
                         Something went wrong. Please try again or contact us
-                        directly at contact@tumakr.com
+                        directly at info@onedaykorea.com
                       </p>
                     </div>
                   )}
@@ -241,7 +241,11 @@ export default function ContactPage() {
                     <h3 className="font-semibold text-gray-800">
                       Office Address
                     </h3>
-                    <p className="text-gray-600">Seoul, South Korea</p>
+                    <p className="text-gray-600">
+                      2F, Bukhansan TheSharp Sang-ga,<br />
+                      510 Tongil-ro, Seodaemun-gu,<br />
+                      Seoul 03615, Korea
+                    </p>
                   </div>
                 </div>
 
@@ -251,7 +255,11 @@ export default function ContactPage() {
                     <h3 className="font-semibold text-gray-800">
                       Phone Number
                     </h3>
-                    <p className="text-gray-600">Korea: +82-2-1234-5678</p>
+                    <p className="text-gray-600">
+                      <a href="tel:+82707556355" className="hover:text-[#651d2a]">+82 (0) 70 7556 5355</a>
+                      <br />
+                      <a href="tel:+821024791242" className="hover:text-[#651d2a]">+82 10 2479 1242</a>
+                    </p>
                   </div>
                 </div>
 
@@ -261,7 +269,9 @@ export default function ContactPage() {
                     <h3 className="font-semibold text-gray-800">
                       Email Address
                     </h3>
-                    <p className="text-gray-600">contact@tumakr.com</p>
+                    <p className="text-gray-600">
+                      <a href="mailto:info@onedaykorea.com" className="hover:text-[#651d2a]">info@onedaykorea.com</a>
+                    </p>
                   </div>
                 </div>
 
@@ -269,14 +279,12 @@ export default function ContactPage() {
                   <Clock className="w-6 h-6 text-[#651d2a] mt-1" />
                   <div>
                     <h3 className="font-semibold text-gray-800">
-                      Business Hours
+                      Office Hours
                     </h3>
                     <p className="text-gray-600">
-                      Monday - Friday: 9:00 AM - 6:00 PM KST
+                      09:00 – 17:00 (GMT +9)
                       <br />
-                      Saturday: 10:00 AM - 4:00 PM KST
-                      <br />
-                      Sunday: Closed
+                      Monday – Friday
                     </p>
                   </div>
                 </div>
@@ -299,7 +307,7 @@ export default function ContactPage() {
                     Emergency Hotline:
                   </p>
                   <p className="text-red-700 text-lg font-bold">
-                    +82-10-1234-5678
+                    <a href="tel:+821024791242">+82 10 2479 1242</a>
                   </p>
                   <p className="text-sm text-red-600">
                     Available 24/7 for urgent assistance during your tour
