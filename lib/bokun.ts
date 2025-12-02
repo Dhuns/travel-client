@@ -127,11 +127,62 @@ const parseKnowBeforeYouGo = (items: string[] | null): string[] => {
   return items.map((item) => translations[item] || item);
 };
 
+// Bokun Activity 타입 정의
+interface BokunPhoto {
+  originalUrl?: string;
+}
+
+interface BokunPlace {
+  name?: string;
+}
+
+interface BokunMeetingPoint {
+  title?: string;
+}
+
+interface BokunAddress {
+  city?: string;
+}
+
+interface BokunPricing {
+  from?: number;
+}
+
+interface BokunCancellationPolicy {
+  title?: string;
+}
+
+interface BokunActivity {
+  id?: number | string;
+  title?: string;
+  shortDescription?: string;
+  excerpt?: string;
+  description?: string;
+  highlights?: string[];
+  photos?: BokunPhoto[];
+  categories?: string[];
+  googlePlace?: BokunPlace;
+  meetingPoint?: BokunMeetingPoint;
+  address?: BokunAddress;
+  included?: string | string[];
+  excluded?: string | string[];
+  durationHours?: number;
+  durationMinutes?: number;
+  duration?: number;
+  durationText?: string;
+  nextDefaultPriceAsText?: string;
+  pricing?: BokunPricing;
+  activityCategories?: string[];
+  knowBeforeYouGoItems?: string[] | null;
+  minAge?: number;
+  cancellationPolicy?: BokunCancellationPolicy;
+}
+
 /**
  * Bokun activity 데이터를 우리 Tour 형식으로 변환
  */
 export function transformBokunActivityToTour(
-  activity: any,
+  activity: BokunActivity,
   category: string,
   badge: string
 ) {
@@ -167,8 +218,8 @@ export function transformBokunActivityToTour(
       activity.meetingPoint?.title ||
       activity.address?.city ||
       "",
-    included: parseHtmlToArray(activity.included),
-    exclusions: parseHtmlToArray(activity.excluded),
+    included: parseHtmlToArray(activity.included || []),
+    exclusions: parseHtmlToArray(activity.excluded || []),
     duration: durationDisplay,
     durationText: activity.durationText || "",
     price: activity.nextDefaultPriceAsText ||
@@ -176,7 +227,7 @@ export function transformBokunActivityToTour(
     activityCategories: Array.isArray(activity.activityCategories)
       ? activity.activityCategories
       : [],
-    knowBeforeYouGo: parseKnowBeforeYouGo(activity.knowBeforeYouGoItems),
+    knowBeforeYouGo: parseKnowBeforeYouGo(activity.knowBeforeYouGoItems ?? null),
     minAge: activity.minAge || 0,
     cancellationPolicy: activity.cancellationPolicy?.title || "",
   };

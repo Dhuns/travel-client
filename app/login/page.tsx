@@ -41,20 +41,22 @@ export default function LoginPage() {
       await login(formData.username, formData.password);
       // replace를 사용하여 뒤로가기 시 로그인 페이지로 돌아오지 않도록 함
       router.replace("/");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Login failed:", error);
 
-      const responseData = error.response?.data;
+      const axiosError = error as { response?: { data?: { message?: string | string[] | { message?: string; requiresVerification?: boolean; email?: string }; requiresVerification?: boolean; email?: string } } };
+      const responseData = axiosError.response?.data;
       const messageData = Array.isArray(responseData?.message)
         ? responseData.message[0]
         : responseData?.message;
+      const messageObj = typeof messageData === 'object' && messageData !== null ? messageData : null;
 
       if (responseData?.requiresVerification ||
-          messageData?.requiresVerification ||
+          messageObj?.requiresVerification ||
           (typeof messageData === 'string' &&
            messageData.toLowerCase().includes("email verification required"))) {
         const email = responseData?.email ||
-                     messageData?.email ||
+                     messageObj?.email ||
                      formData.username;
         router.push(`/email-sent?email=${encodeURIComponent(email)}`);
         return;

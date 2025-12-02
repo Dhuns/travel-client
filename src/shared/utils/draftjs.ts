@@ -1,9 +1,24 @@
+// Draft.js content types
+interface DraftBlock {
+  type: string;
+  text: string;
+  inlineStyleRanges?: Array<{
+    offset: number;
+    length: number;
+    style: string;
+  }>;
+}
+
+interface DraftContent {
+  blocks: DraftBlock[];
+}
+
 /**
  * Convert Draft.js raw JSON to HTML
  * @param rawContent - Draft.js raw content (string or object)
  * @returns HTML string
  */
-export const draftToHtml = (rawContent: string | any): string => {
+export const draftToHtml = (rawContent: string | DraftContent | null): string => {
   try {
     // If rawContent is empty or null, return empty string
     if (!rawContent) {
@@ -29,11 +44,12 @@ export const draftToHtml = (rawContent: string | any): string => {
     }
 
     // Check if it's valid Draft.js content
-    if (!content || !content.blocks) {
+    const draftContent = content as DraftContent;
+    if (!draftContent || !draftContent.blocks) {
       return typeof rawContent === 'string' ? `<p>${rawContent}</p>` : '';
     }
 
-    const htmlBlocks = content.blocks.map((block: any) => {
+    const htmlBlocks = draftContent.blocks.map((block: DraftBlock) => {
       let text = block.text || '';
 
       // Apply inline styles
@@ -63,7 +79,7 @@ export const draftToHtml = (rawContent: string | any): string => {
         }
 
         // Apply all styles to each character
-        block.inlineStyleRanges.forEach((range: any) => {
+        block.inlineStyleRanges.forEach((range: { offset: number; length: number; style: string }) => {
           for (let i = range.offset; i < range.offset + range.length && i < chars.length; i++) {
             const style = range.style;
 
@@ -185,7 +201,7 @@ export const draftToHtml = (rawContent: string | any): string => {
     let html = '';
     let inList: 'ul' | 'ol' | null = null;
 
-    content.blocks.forEach((block: any, index: number) => {
+    draftContent.blocks.forEach((block: DraftBlock, index: number) => {
       if (block.type === 'unordered-list-item') {
         if (inList !== 'ul') {
           if (inList) html += `</${inList}>`;

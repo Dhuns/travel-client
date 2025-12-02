@@ -30,9 +30,10 @@ export default function VerifyEmailPage() {
         setTimeout(() => {
           router.push("/login");
         }, 3000);
-      } catch (err: any) {
+      } catch (err) {
         console.error("Email verification failed:", err);
-        setError(err.response?.data?.message || "Verification failed. The link may have expired.");
+        const axiosError = err as { response?: { data?: { message?: string } } };
+        setError(axiosError.response?.data?.message || "Verification failed. The link may have expired.");
         setSuccess(false);
       } finally {
         setLoading(false);

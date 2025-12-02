@@ -40,9 +40,10 @@ const QuotationModal: React.FC<Props> = ({ hash, batchId, isOpen, onClose }) => 
           ? await getQuotationByBatchId(batchId)
           : await getQuotationByHash(hash!);
         setQuotation(data);
-      } catch (err: any) {
+      } catch (err) {
+        const axiosError = err as { response?: { data?: { message?: string } } };
         setError(
-          err?.response?.data?.message ||
+          axiosError?.response?.data?.message ||
             "Failed to load quotation. The link may be invalid or expired."
         );
       } finally {
@@ -77,10 +78,10 @@ const QuotationModal: React.FC<Props> = ({ hash, batchId, isOpen, onClose }) => 
 
           {error && !isLoading && (
             <ErrorContainer>
-              <ErrorMessage>
+              <ErrorMessageStyled>
                 <h2>Unable to Load Quotation</h2>
                 <p>{error}</p>
-              </ErrorMessage>
+              </ErrorMessageStyled>
             </ErrorContainer>
           )}
 
@@ -201,7 +202,7 @@ const ErrorContainer = styled.div`
   align-items: center;
 `;
 
-const ErrorMessage = styled.div`
+const ErrorMessageStyled = styled.div`
   text-align: center;
   padding: 40px;
 

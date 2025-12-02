@@ -9,7 +9,7 @@ import {
   User,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,62 @@ import Image from "next/image";
 import Link from "next/link";
 import type React from "react";
 import { useAuthStore } from "@/src/shared/store/authStore";
+
+// Header UI 상태 타입
+interface HeaderState {
+  mobileMenuOpen: boolean;
+  searchOpen: boolean;
+  searchQuery: string;
+  userDropdownOpen: boolean;
+  toursDropdownOpen: boolean;
+  contactDropdownOpen: boolean;
+}
+
+// Action 타입
+type HeaderAction =
+  | { type: 'TOGGLE_MOBILE_MENU' }
+  | { type: 'TOGGLE_SEARCH' }
+  | { type: 'SET_SEARCH_QUERY'; payload: string }
+  | { type: 'TOGGLE_USER_DROPDOWN' }
+  | { type: 'CLOSE_USER_DROPDOWN' }
+  | { type: 'SET_TOURS_DROPDOWN'; payload: boolean }
+  | { type: 'SET_CONTACT_DROPDOWN'; payload: boolean }
+  | { type: 'CLOSE_SEARCH' }
+  | { type: 'CLOSE_MOBILE_MENU' };
+
+const initialState: HeaderState = {
+  mobileMenuOpen: false,
+  searchOpen: false,
+  searchQuery: '',
+  userDropdownOpen: false,
+  toursDropdownOpen: false,
+  contactDropdownOpen: false,
+};
+
+function headerReducer(state: HeaderState, action: HeaderAction): HeaderState {
+  switch (action.type) {
+    case 'TOGGLE_MOBILE_MENU':
+      return { ...state, mobileMenuOpen: !state.mobileMenuOpen };
+    case 'TOGGLE_SEARCH':
+      return { ...state, searchOpen: !state.searchOpen };
+    case 'SET_SEARCH_QUERY':
+      return { ...state, searchQuery: action.payload };
+    case 'TOGGLE_USER_DROPDOWN':
+      return { ...state, userDropdownOpen: !state.userDropdownOpen };
+    case 'CLOSE_USER_DROPDOWN':
+      return { ...state, userDropdownOpen: false };
+    case 'SET_TOURS_DROPDOWN':
+      return { ...state, toursDropdownOpen: action.payload };
+    case 'SET_CONTACT_DROPDOWN':
+      return { ...state, contactDropdownOpen: action.payload };
+    case 'CLOSE_SEARCH':
+      return { ...state, searchOpen: false, searchQuery: '' };
+    case 'CLOSE_MOBILE_MENU':
+      return { ...state, mobileMenuOpen: false };
+    default:
+      return state;
+  }
+}
 
 /**
  * 헤더 컴포넌트 - 웹사이트의 상단 네비게이션
@@ -42,13 +98,9 @@ export default function Header() {
     return null;
   }
 
-  // 상태 관리
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [toursDropdownOpen, setToursDropdownOpen] = useState(false); // Tours 드롭다운 메뉴 상태 추가
-  const [contactDropdownOpen, setContactDropdownOpen] = useState(false); // Contact 드롭다운 메뉴 상태 추가
+  // useReducer로 상태 관리
+  const [state, dispatch] = useReducer(headerReducer, initialState);
+  const { mobileMenuOpen, searchOpen, searchQuery, userDropdownOpen, toursDropdownOpen, contactDropdownOpen } = state;
   const router = useRouter();
 
   // 사용자 드롭다운 ref
@@ -76,7 +128,7 @@ export default function Header() {
         userDropdownRef.current &&
         !userDropdownRef.current.contains(event.target as Node)
       ) {
-        setUserDropdownOpen(false);
+        dispatch({ type: 'CLOSE_USER_DROPDOWN' });
       }
     };
 
@@ -126,10 +178,8 @@ export default function Header() {
     (e: React.FormEvent) => {
       e.preventDefault();
       if (searchQuery.trim()) {
-        // TODO: 백엔드 연동 시 검색 API 호출
         router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-        setSearchOpen(false);
-        setSearchQuery("");
+        dispatch({ type: 'CLOSE_SEARCH' });
       }
     },
     [searchQuery, router]
@@ -138,33 +188,37 @@ export default function Header() {
   const handleLogout = useCallback(async () => {
     try {
       await authLogout();
-      setUserDropdownOpen(false);
+      dispatch({ type: 'CLOSE_USER_DROPDOWN' });
       router.push("/");
     } catch (error) {
-      console.error("Logout failed:", error);
+      // 로그아웃 실패 시 에러 처리
     }
   }, [authLogout, router]);
 
   // 모바일 메뉴 토글 함수
   const toggleMobileMenu = useCallback(() => {
-    setMobileMenuOpen((prev) => !prev);
+    dispatch({ type: 'TOGGLE_MOBILE_MENU' });
   }, []);
 
   // 검색창 토글 함수
   const toggleSearch = useCallback(() => {
-    setSearchOpen((prev) => !prev);
+    dispatch({ type: 'TOGGLE_SEARCH' });
   }, []);
 
   const toggleUserDropdown = useCallback(() => {
-    setUserDropdownOpen((prev) => !prev);
+    dispatch({ type: 'TOGGLE_USER_DROPDOWN' });
   }, []);
 
-  const toggleToursDropdown = useCallback(() => {
-    setToursDropdownOpen((prev) => !prev);
+  const setToursDropdown = useCallback((open: boolean) => {
+    dispatch({ type: 'SET_TOURS_DROPDOWN', payload: open });
   }, []);
 
-  const toggleContactDropdown = useCallback(() => {
-    setContactDropdownOpen((prev) => !prev);
+  const setContactDropdown = useCallback((open: boolean) => {
+    dispatch({ type: 'SET_CONTACT_DROPDOWN', payload: open });
+  }, []);
+
+  const closeMobileMenu = useCallback(() => {
+    dispatch({ type: 'CLOSE_MOBILE_MENU' });
   }, []);
 
   return (
@@ -196,13 +250,13 @@ export default function Header() {
                   className="relative group"
                   onMouseEnter={() =>
                     item.isContact
-                      ? setContactDropdownOpen(true)
-                      : setToursDropdownOpen(true)
+                      ? setContactDropdown(true)
+                      : setToursDropdown(true)
                   }
                   onMouseLeave={() =>
                     item.isContact
-                      ? setContactDropdownOpen(false)
-                      : setToursDropdownOpen(false)
+                      ? setContactDropdown(false)
+                      : setToursDropdown(false)
                   }
                 >
                   <Link
@@ -218,8 +272,8 @@ export default function Header() {
                   {!item.isContact && toursDropdownOpen && (
                     <div
                       className="absolute left-0 top-full pt-2 w-72 z-50"
-                      onMouseEnter={() => setToursDropdownOpen(true)}
-                      onMouseLeave={() => setToursDropdownOpen(false)}
+                      onMouseEnter={() => setToursDropdown(true)}
+                      onMouseLeave={() => setToursDropdown(false)}
                     >
                       <div className="bg-white rounded-lg shadow-xl border border-gray-200 py-2">
                         {tourCategories.map((category) => (
@@ -227,7 +281,7 @@ export default function Header() {
                             key={category.href}
                             href={category.href}
                             className="block px-4 py-3 hover:bg-[#eda89b]/10 transition-colors duration-200"
-                            onClick={() => setToursDropdownOpen(false)}
+                            onClick={() => setToursDropdown(false)}
                           >
                             <div className="font-medium text-gray-900 hover:text-[#651d2a] transition-colors">
                               {category.label}
@@ -245,14 +299,14 @@ export default function Header() {
                   {item.isContact && contactDropdownOpen && (
                     <div
                       className="absolute left-0 top-full pt-2 w-64 z-50"
-                      onMouseEnter={() => setContactDropdownOpen(true)}
-                      onMouseLeave={() => setContactDropdownOpen(false)}
+                      onMouseEnter={() => setContactDropdown(true)}
+                      onMouseLeave={() => setContactDropdown(false)}
                     >
                       <div className="bg-white rounded-lg shadow-xl border border-gray-200 py-2">
                         <Link
                           href="/chat"
                           className="block px-4 py-3 hover:bg-[#eda89b]/10 transition-colors duration-200"
-                          onClick={() => setContactDropdownOpen(false)}
+                          onClick={() => setContactDropdown(false)}
                         >
                           <div className="font-medium text-gray-900 hover:text-[#651d2a] transition-colors">
                             AI Assistant
@@ -264,7 +318,7 @@ export default function Header() {
                         <Link
                           href="/contact"
                           className="block px-4 py-3 hover:bg-[#eda89b]/10 transition-colors duration-200"
-                          onClick={() => setContactDropdownOpen(false)}
+                          onClick={() => setContactDropdown(false)}
                         >
                           <div className="font-medium text-gray-900 hover:text-[#651d2a] transition-colors">
                             Email Us
@@ -350,21 +404,21 @@ export default function Header() {
                     <Link
                       href="/mypage"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-[#eda89b]/10 hover:text-[#651d2a]"
-                      onClick={() => setUserDropdownOpen(false)}
+                      onClick={() => dispatch({ type: 'CLOSE_USER_DROPDOWN' })}
                     >
                       My Page
                     </Link>
                     <Link
                       href="/orders"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-[#eda89b]/10 hover:text-[#651d2a]"
-                      onClick={() => setUserDropdownOpen(false)}
+                      onClick={() => dispatch({ type: 'CLOSE_USER_DROPDOWN' })}
                     >
                       Order History
                     </Link>
                     <Link
                       href="/wishlist"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-[#eda89b]/10 hover:text-[#651d2a]"
-                      onClick={() => setUserDropdownOpen(false)}
+                      onClick={() => dispatch({ type: 'CLOSE_USER_DROPDOWN' })}
                     >
                       Wishlist
                     </Link>
@@ -405,7 +459,7 @@ export default function Header() {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => dispatch({ type: 'SET_SEARCH_QUERY', payload: e.target.value })}
                 placeholder="Search for tours, destinations, and products..."
                 className="flex-1 px-4 py-2 border border-[#6d8675] rounded-full focus:outline-none focus:ring-2 focus:ring-[#651d2a]"
                 autoFocus
@@ -430,7 +484,7 @@ export default function Header() {
                 <Link
                   href="/tours"
                   className="hover:text-[#651d2a] transition-colors duration-300 py-2 font-medium block"
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={() => closeMobileMenu()}
                 >
                   Tours
                 </Link>
@@ -440,7 +494,7 @@ export default function Header() {
                       key={category.href}
                       href={category.href}
                       className="block py-1 text-xs text-gray-500 hover:text-[#651d2a] transition-colors"
-                      onClick={() => setMobileMenuOpen(false)}
+                      onClick={() => closeMobileMenu()}
                     >
                       {category.label}
                     </Link>
@@ -452,7 +506,7 @@ export default function Header() {
               <Link
                 href="/souvenir"
                 className="hover:text-[#651d2a] transition-colors duration-300 py-2"
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => closeMobileMenu()}
               >
                 Souvenir
               </Link>
@@ -464,14 +518,14 @@ export default function Header() {
                   <Link
                     href="/chat"
                     className="block py-1 text-xs text-gray-500 hover:text-[#651d2a] transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={() => closeMobileMenu()}
                   >
                     AI Assistant
                   </Link>
                   <Link
                     href="/contact"
                     className="block py-1 text-xs text-gray-500 hover:text-[#651d2a] transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={() => closeMobileMenu()}
                   >
                     Email Us
                   </Link>
@@ -482,7 +536,7 @@ export default function Header() {
               <Link
                 href="/orders"
                 className="hover:text-[#651d2a] transition-colors duration-300 py-2"
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => closeMobileMenu()}
               >
                 Orders
               </Link>
@@ -492,7 +546,7 @@ export default function Header() {
                 <Link
                   href="/login"
                   className="hover:text-[#651d2a] transition-colors duration-300 py-2"
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={() => closeMobileMenu()}
                 >
                   Login
                 </Link>
@@ -502,21 +556,21 @@ export default function Header() {
                   <Link
                     href="/mypage"
                     className="hover:text-[#651d2a] transition-colors duration-300 py-2"
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={() => closeMobileMenu()}
                   >
                     My Page
                   </Link>
                   <Link
                     href="/wishlist"
                     className="hover:text-[#651d2a] transition-colors duration-300 py-2"
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={() => closeMobileMenu()}
                   >
                     Wishlist
                   </Link>
                   <button
                     onClick={() => {
                       handleLogout();
-                      setMobileMenuOpen(false);
+                      closeMobileMenu();
                     }}
                     className="text-left hover:text-red-600 transition-colors duration-300 py-2"
                   >

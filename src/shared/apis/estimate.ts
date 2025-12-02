@@ -78,3 +78,27 @@ export const getQuotationByBatchId = async (batchId: number): Promise<QuotationR
   const response = await axios.get(`${API_URL}/estimate/batch/${batchId}`);
   return response.data;
 };
+
+// Customer quote response types
+export type CustomerResponseType = 'approve' | 'reject' | 'request_changes';
+
+export interface CustomerQuoteResponsePayload {
+  batchId: number;
+  responseType: CustomerResponseType;
+  message?: string;
+}
+
+export interface CustomerQuoteResponseResult {
+  success: boolean;
+  batchId: number;
+  newStatus: string;
+  message: string;
+}
+
+// Submit customer response to a quote (approve/reject/request changes)
+export const submitCustomerQuoteResponse = async (
+  payload: CustomerQuoteResponsePayload
+): Promise<CustomerQuoteResponseResult> => {
+  const response = await axios.post(`${API_URL}/batch/customer-response`, payload);
+  return response.data;
+};

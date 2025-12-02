@@ -19,11 +19,13 @@ const EstimateCard: FC<Props> = ({ estimate, batchId, onViewQuote }) => {
       return;
     }
 
-    // Encrypt batchId using same method as backend
-    const ENCRYPTION_KEY = 'ONE_DAY_KOREA';
-    const key = ENCRYPTION_KEY.padEnd(32, ' ');
-    const cipher = CryptoJS.AES.encrypt(batchId.toString(), CryptoJS.enc.Utf8.parse(key), {
-      iv: CryptoJS.enc.Utf8.parse(''),
+    // Encrypt batchId using same method as backend (SHA256 key derivation)
+    const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || '';
+    const key = CryptoJS.SHA256(ENCRYPTION_KEY);
+    const iv = CryptoJS.MD5(ENCRYPTION_KEY + '_IV_SALT');
+
+    const cipher = CryptoJS.AES.encrypt(batchId.toString(), key, {
+      iv: iv,
       padding: CryptoJS.pad.Pkcs7,
       mode: CryptoJS.mode.CBC,
     });

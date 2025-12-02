@@ -99,8 +99,9 @@ export default function ChangePasswordPage() {
       setTimeout(() => {
         router.push("/mypage")
       }, 1500)
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to change password")
+    } catch (err) {
+      const axiosError = err as { response?: { data?: { message?: string } } };
+      setError(axiosError.response?.data?.message || "Failed to change password")
     } finally {
       setIsSaving(false)
     }
