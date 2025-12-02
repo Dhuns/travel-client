@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, ChevronRight, Package, Users, Loader2, FileText, ShoppingBag, Search, Mail, Hash, RefreshCw } from "lucide-react";
+import { Calendar, ChevronRight, Package, Users, Loader2, FileText, ShoppingBag, Search, Mail, Hash, RefreshCw, MapPin, Wallet, Check, XCircle, MessageSquarePlus, Send } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,12 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/src/shared/store/authStore";
+import { getAllChatSessions } from "@/src/shared/apis/chat";
+import { getQuotationByBatchId, submitCustomerQuoteResponse, type CustomerResponseType } from "@/src/shared/apis/estimate";
+import { ChatSession } from "@/src/shared/types/chat";
+import QuotationModal from "@/src/components/Chat/QuotationModal";
+import MessageSection from "@/src/components/Message/MessageSection";
+import dayjs from "dayjs";
 
 /**
  * 주문내역 페이지
@@ -56,18 +62,47 @@ interface BookingSearchResult {
 }
 
 // ==================== 견적서 타입 ====================
+/**
+ * Quote Workflow Status (새로운 상태 체계)
+ * - draft: AI 임시 견적 (고객에게 보이지 않음)
+ * - pending_review: Admin 검토 대기 중
+ * - sent: Admin이 승인하여 고객에게 발송됨
+ * - viewed: 고객이 견적서를 열람함
+ * - approved: 고객이 최종 승인함
+ * - rejected: 고객이 거절함
+ * - revision_requested: 고객이 수정을 요청함
+ * - expired: 유효기간(validDate) 만료
+ */
+type QuoteWorkflowStatus =
+  | "draft"
+  | "pending_review"
+  | "sent"
+  | "viewed"
+  | "approved"
+  | "rejected"
+  | "revision_requested"
+  | "expired";
+
 interface QuoteRequest {
   id: string;
+  sessionId: string;
+  batchId?: number;
   title: string;
-  status: "quote-pending" | "quote-received" | "quote-approved" | "quote-rejected";
+  quoteStatus: QuoteWorkflowStatus;
   createdAt: string;
   price: number | null;
+  viewedAt?: string | null;
+  sentAt?: string | null;
+  respondedAt?: string | null;
+  validDate?: string | null;
   details: {
-    location: string;
+    destination: string;
     participants: number;
-    tourDate: string;
-    quoteDetails: string;
-    quoteStage: 1 | 2;
+    startDate: string;
+    endDate: string;
+    duration: string;
+    budget?: number;
+    preferences?: string[];
   };
 }
 
@@ -90,9 +125,82 @@ export default function OrdersPage() {
   const [showManualSearch, setShowManualSearch] = useState(false); // 로그인 사용자의 수동 검색 표시 여부
   const [hasSearched, setHasSearched] = useState(false); // 검색 실행 여부
 
-  // 견적서 상태 (TODO: 백엔드 연동)
+  // 견적서 상태
   const [quotes, setQuotes] = useState<QuoteRequest[]>([]);
   const [isLoadingQuotes, setIsLoadingQuotes] = useState(false);
+  const [quotesRefreshKey, setQuotesRefreshKey] = useState(0);
+
+  // 견적서 모달 상태
+  const [selectedQuoteBatchId, setSelectedQuoteBatchId] = useState<number | null>(null);
+  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
+
+  // 견적 응답 상태 (카드 내 인라인 응답)
+  const [respondingQuoteId, setRespondingQuoteId] = useState<string | null>(null);
+  const [responseType, setResponseType] = useState<CustomerResponseType | null>(null);
+  const [responseMessage, setResponseMessage] = useState("");
+  const [isSubmittingResponse, setIsSubmittingResponse] = useState(false);
+  const [responseError, setResponseError] = useState<string | null>(null);
+
+  // 견적서 모달 열기
+  const handleOpenQuoteModal = (batchId: number) => {
+    setSelectedQuoteBatchId(batchId);
+    setIsQuoteModalOpen(true);
+  };
+
+  // 견적서 모달 닫기
+  const handleCloseQuoteModal = () => {
+    setIsQuoteModalOpen(false);
+    setSelectedQuoteBatchId(null);
+  };
+
+  // 인라인 응답 시작
+  const handleStartResponse = (quoteId: string, type: CustomerResponseType) => {
+    setRespondingQuoteId(quoteId);
+    setResponseType(type);
+    setResponseMessage("");
+    setResponseError(null);
+  };
+
+  // 인라인 응답 취소
+  const handleCancelResponse = () => {
+    setRespondingQuoteId(null);
+    setResponseType(null);
+    setResponseMessage("");
+    setResponseError(null);
+  };
+
+  // 인라인 응답 제출
+  const handleSubmitInlineResponse = async (batchId: number) => {
+    if (!responseType) return;
+
+    // request_changes는 메시지 필수
+    if (responseType === "request_changes" && !responseMessage.trim()) {
+      setResponseError("Please describe the changes you need.");
+      return;
+    }
+
+    setIsSubmittingResponse(true);
+    setResponseError(null);
+
+    try {
+      await submitCustomerQuoteResponse({
+        batchId,
+        responseType,
+        message: responseMessage.trim() || undefined,
+      });
+
+      // 성공 시 상태 초기화 및 목록 새로고침
+      handleCancelResponse();
+      setQuotesRefreshKey((prev) => prev + 1);
+    } catch (err) {
+      const axiosError = err as { response?: { data?: { message?: string } } };
+      setResponseError(
+        axiosError?.response?.data?.message || "Failed to submit. Please try again."
+      );
+    } finally {
+      setIsSubmittingResponse(false);
+    }
+  };
 
   /**
    * 로그인 사용자용: 페이지 로드 시 자동으로 예약 데이터 조회
@@ -227,7 +335,7 @@ export default function OrdersPage() {
     }
   };
 
-  // 견적서 데이터 가져오기 (TODO: 백엔드 연동)
+  // 견적서 데이터 가져오기 - ChatSession에서 batchId가 있는 세션 조회
   useEffect(() => {
     async function fetchQuotes() {
       if (!isAuthenticated || !user?.id) {
@@ -236,64 +344,120 @@ export default function OrdersPage() {
 
       setIsLoadingQuotes(true);
 
-      // TODO: 실제 API 연동
-      // const response = await fetch(`/api/quotes?userId=${user.id}`);
-      // const data = await response.json();
-      // setQuotes(data.items || []);
+      try {
+        // ChatSession 목록 조회 (batchId가 있는 것만 = 견적 생성됨)
+        const { sessions } = await getAllChatSessions({
+          userId: user.id,
+          status: "all",
+        });
 
-      // 임시 더미 데이터
-      setQuotes([
-        {
-          id: "QUOTE-2024-001",
-          title: "맞춤형 패밀리 투어 견적 요청",
-          status: "quote-pending",
-          createdAt: "2024-01-25",
-          price: null,
-          details: {
-            location: "서울, 경주, 부산",
-            participants: 4,
-            tourDate: "2024-03-15 ~ 2024-03-20",
-            quoteDetails: "5박 6일 패밀리 투어 - 문화체험, 한복체험, 전통음식 포함",
-            quoteStage: 1,
-          },
-        },
-        {
-          id: "QUOTE-2024-002",
-          title: "기업 단체 투어 견적 요청",
-          status: "quote-received",
-          createdAt: "2024-01-18",
-          price: 2800000,
-          details: {
-            location: "서울, DMZ",
-            participants: 25,
-            tourDate: "2024-02-28 ~ 2024-03-01",
-            quoteDetails: "2일 기업 워크샵 투어 - 팀빌딩 액티비티, 한식 디너 포함",
-            quoteStage: 2,
-          },
-        },
-        {
-          id: "QUOTE-2023-050",
-          title: "웨딩 포토 투어 견적 요청",
-          status: "quote-approved",
-          createdAt: "2023-12-20",
-          price: 580000,
-          details: {
-            location: "경복궁, 북촌한옥마을",
-            participants: 2,
-            tourDate: "2024-04-05",
-            quoteDetails: "한복 웨딩 포토 투어 - 전문 사진작가, 한복 대여 포함",
-            quoteStage: 2,
-          },
-        },
-      ]);
+        // batchId가 있는 세션만 필터링
+        const sessionsWithBatch = sessions.filter(
+          (session: ChatSession) => session.batchId
+        );
 
-      setIsLoadingQuotes(false);
+        // 각 세션에 대해 견적 금액 및 상태 조회
+        const quotesData: QuoteRequest[] = await Promise.all(
+          sessionsWithBatch.map(async (session: ChatSession) => {
+            const ctx = session.context || {};
+            const totalParticipants =
+              (ctx.adults || 0) + (ctx.children || 0) + (ctx.infants || 0);
+
+            // 날짜 계산
+            const start = ctx.startDate ? dayjs(ctx.startDate) : null;
+            const end = ctx.endDate ? dayjs(ctx.endDate) : null;
+            const days = start && end ? end.diff(start, "day") + 1 : 0;
+            const nights = days > 0 ? days - 1 : 0;
+
+            // 견적 금액 및 상태 조회
+            let price: number | null = null;
+            let quoteStatus: QuoteWorkflowStatus = "draft";
+            let viewedAt: string | null = null;
+            let sentAt: string | null = null;
+            let respondedAt: string | null = null;
+            let validDate: string | null = null;
+
+            try {
+              const quotation = await getQuotationByBatchId(session.batchId!);
+              // batchInfo에서 quoteStatus 및 타임스탬프 확인
+              if (quotation.batchInfo) {
+                // 새로운 quoteStatus 필드 사용
+                quoteStatus = (quotation.batchInfo.quoteStatus as QuoteWorkflowStatus) || "draft";
+                viewedAt = quotation.batchInfo.viewedAt || null;
+                sentAt = quotation.batchInfo.sentAt || null;
+                respondedAt = quotation.batchInfo.respondedAt || null;
+                validDate = quotation.batchInfo.validDate || null;
+
+                // quoteStatus가 없는 기존 데이터 호환성 처리
+                if (!quotation.batchInfo.quoteStatus) {
+                  // Legacy 상태 기반으로 quoteStatus 결정
+                  if (quotation.batchInfo.status === "최종완료") {
+                    quoteStatus = "approved";
+                  } else if (quotation.batchInfo.status === "취소") {
+                    quoteStatus = "rejected";
+                  } else if (quotation.batchInfo.status === "요청") {
+                    quoteStatus = "revision_requested";
+                  } else if (quotation.batchInfo.source === "manual") {
+                    quoteStatus = "sent";
+                  } else {
+                    quoteStatus = "draft";
+                  }
+                }
+              }
+              // estimateDetails에서 총 금액 계산
+              if (quotation.estimateDetails && quotation.estimateDetails.length > 0) {
+                price = quotation.estimateDetails.reduce((sum, detail) => {
+                  return sum + (Number(detail.price) || 0) * (detail.quantity || 1);
+                }, 0);
+              }
+            } catch (err) {
+              console.warn(`Failed to fetch quotation for batchId ${session.batchId}:`, err);
+            }
+
+            return {
+              id: `QUOTE-${session.batchId}`,
+              sessionId: session.sessionId,
+              batchId: session.batchId,
+              title: session.title || `${ctx.destination || "Korea"} Trip`,
+              quoteStatus,
+              createdAt: dayjs(session.createdAt).format("YYYY-MM-DD"),
+              price,
+              viewedAt,
+              sentAt,
+              respondedAt,
+              validDate,
+              details: {
+                destination: ctx.destination || "Korea",
+                participants: totalParticipants || 1,
+                startDate: ctx.startDate
+                  ? dayjs(ctx.startDate).format("YYYY-MM-DD")
+                  : "",
+                endDate: ctx.endDate
+                  ? dayjs(ctx.endDate).format("YYYY-MM-DD")
+                  : "",
+                duration: days > 0 ? `${nights}N ${days}D` : "",
+                budget: ctx.budget,
+                preferences: ctx.preferences,
+              },
+            };
+          })
+        );
+
+        // draft 상태는 고객에게 보이지 않음
+        const visibleQuotes = quotesData.filter(q => q.quoteStatus !== "draft");
+        setQuotes(visibleQuotes);
+      } catch (error) {
+        console.error("Error fetching quotes:", error);
+        setQuotes([]);
+      } finally {
+        setIsLoadingQuotes(false);
+      }
     }
 
     if (activeTab === "quotes") {
       fetchQuotes();
     }
-  }, [isAuthenticated, user?.id, activeTab]);
+  }, [isAuthenticated, user?.id, activeTab, quotesRefreshKey]);
 
   // 필터링된 예약 목록
   const filteredBookings = bookings.filter((booking) => {
@@ -315,16 +479,40 @@ export default function OrdersPage() {
     return <Badge className={`${config.color} px-3 py-1`}>{config.label}</Badge>;
   };
 
-  // 견적서 상태 뱃지
-  const getQuoteStatusBadge = (status: QuoteRequest["status"]) => {
-    const statusConfig = {
-      "quote-pending": { label: "1차 견적 검토중", color: "bg-[#6d8675] text-white animate-pulse" },
-      "quote-received": { label: "2차 견적서 도착", color: "bg-[#c4982a] text-white" },
-      "quote-approved": { label: "견적 승인됨", color: "bg-[#5a7263] text-white" },
-      "quote-rejected": { label: "견적 거절됨", color: "bg-[#8b4a52] text-white" },
+  // 견적서 상태 뱃지 (새로운 상태 체계)
+  const getQuoteStatusBadge = (quoteStatus: QuoteWorkflowStatus) => {
+    const statusConfig: Record<QuoteWorkflowStatus, { label: string; color: string }> = {
+      draft: { label: "Draft", color: "bg-gray-400 text-white" },
+      pending_review: { label: "Under Review", color: "bg-[#6d8675] text-white animate-pulse" },
+      sent: { label: "Quote Ready", color: "bg-[#c4982a] text-white" },
+      viewed: { label: "Quote Viewed", color: "bg-[#c4982a] text-white" },
+      approved: { label: "Approved", color: "bg-[#5a7263] text-white" },
+      rejected: { label: "Declined", color: "bg-[#8b4a52] text-white" },
+      revision_requested: { label: "Revision Requested", color: "bg-[#d97706] text-white" },
+      expired: { label: "Expired", color: "bg-gray-500 text-white" },
     };
-    const config = statusConfig[status];
+    const config = statusConfig[quoteStatus] || { label: quoteStatus, color: "bg-gray-400 text-white" };
     return <Badge className={`${config.color} px-3 py-1`}>{config.label}</Badge>;
+  };
+
+  // 견적서 상태 설명 (새로운 상태 체계)
+  const getQuoteStatusDescription = (quoteStatus: QuoteWorkflowStatus) => {
+    const descriptions: Record<QuoteWorkflowStatus, string> = {
+      draft: "Your quote is being prepared.",
+      pending_review: "Your AI-generated draft is under review. Our travel experts will finalize the itinerary and pricing within 2-3 business days.",
+      sent: "Great news! Your final quote is ready. Review the detailed itinerary and pricing, then approve to proceed with booking.",
+      viewed: "You've viewed the quote. Please review and respond - approve to proceed or request changes if needed.",
+      approved: "Your quote has been approved. Our team will contact you shortly to confirm your booking and arrange payment.",
+      rejected: "This quote was declined. Feel free to start a new chat to request a different itinerary.",
+      revision_requested: "Your revision request has been submitted. Our team will update the quote and get back to you soon.",
+      expired: "This quote has expired. Please start a new chat to request an updated quote.",
+    };
+    return descriptions[quoteStatus] || "";
+  };
+
+  // 고객이 응답할 수 있는 상태인지 확인
+  const canCustomerRespond = (quoteStatus: QuoteWorkflowStatus): boolean => {
+    return quoteStatus === "sent" || quoteStatus === "viewed";
   };
 
   // 날짜 포맷
@@ -878,20 +1066,20 @@ export default function OrdersPage() {
             {isLoadingQuotes ? (
               <div className="flex flex-col items-center justify-center py-20">
                 <Loader2 className="w-12 h-12 text-[#651d2a] animate-spin mb-4" />
-                <p className="text-gray-600">견적서를 불러오는 중...</p>
+                <p className="text-gray-600">Loading quotes...</p>
               </div>
             ) : quotes.length === 0 ? (
               <Card className="p-12 text-center shadow-lg border border-gray-200 bg-white rounded-xl">
                 <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  견적 요청 내역이 없습니다
+                  No Quote Requests
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  맞춤형 프라이빗 투어를 원하시면 견적을 요청해보세요
+                  Start a chat with our AI travel assistant to get a personalized quote
                 </p>
-                <Link href="/tours/private">
+                <Link href="/chat">
                   <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white">
-                    프라이빗 투어 보기
+                    Start Planning Your Trip
                   </Button>
                 </Link>
               </Card>
@@ -906,129 +1094,299 @@ export default function OrdersPage() {
                       <div className="flex items-start justify-between mb-4">
                         <div>
                           <div className="flex items-center space-x-3 mb-2">
-                            {getQuoteStatusBadge(quote.status)}
-                            <Badge className="bg-[#651d2a] text-white">
-                              {quote.details.quoteStage}차 견적
-                            </Badge>
+                            {getQuoteStatusBadge(quote.quoteStatus)}
+                            {quote.details.duration && (
+                              <Badge className="bg-[#651d2a] text-white">
+                                {quote.details.duration}
+                              </Badge>
+                            )}
                           </div>
                           <h3 className="text-xl font-bold text-gray-900 mb-1">
                             {quote.title}
                           </h3>
-                          <p className="text-sm text-gray-500">견적번호: {quote.id}</p>
+                          <p className="text-sm text-gray-500">Quote ID: {quote.id}</p>
                         </div>
                         <div className="text-right">
-                          {quote.status === "quote-pending" ? (
+                          {quote.price ? (
+                            <div>
+                              <p className="text-2xl font-bold text-gray-900">
+                                {formatPrice(quote.price)}
+                              </p>
+                              <p className="text-xs text-gray-500">Estimated Total</p>
+                            </div>
+                          ) : (
                             <div className="inline-flex items-center space-x-2 bg-[#6d8675]/10 rounded-lg px-4 py-2">
                               <div className="w-2 h-2 bg-[#6d8675] rounded-full animate-pulse"></div>
                               <p className="text-sm font-semibold text-[#6d8675]">
-                                검토 중...
+                                Calculating...
                               </p>
                             </div>
-                          ) : quote.price ? (
-                            <p className="text-2xl font-bold text-gray-900">
-                              {formatPrice(quote.price)}
-                            </p>
-                          ) : (
-                            <p className="text-lg font-semibold text-gray-500">
-                              견적 대기중
-                            </p>
                           )}
                         </div>
                       </div>
 
-                      {/* 견적 상세 정보 */}
+                      {/* Trip Details */}
                       <div className="bg-gray-50 rounded-lg p-4 mb-4 border-l-4 border-[#c4982a]">
-                        <p className="text-sm font-semibold text-gray-900 mb-1">요청 내용:</p>
-                        <p className="text-sm text-gray-700">{quote.details.quoteDetails}</p>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div className="flex items-center space-x-2 text-gray-700">
+                            <MapPin className="w-4 h-4 text-[#651d2a]" />
+                            <span className="font-medium">Destination:</span>
+                            <span>{quote.details.destination}</span>
+                          </div>
+                          <div className="flex items-center space-x-2 text-gray-700">
+                            <Users className="w-4 h-4 text-[#651d2a]" />
+                            <span className="font-medium">Travelers:</span>
+                            <span>{quote.details.participants} people</span>
+                          </div>
+                          {quote.details.budget && (
+                            <div className="flex items-center space-x-2 text-gray-700">
+                              <Wallet className="w-4 h-4 text-[#651d2a]" />
+                              <span className="font-medium">Budget:</span>
+                              <span>{formatPrice(quote.details.budget)}</span>
+                            </div>
+                          )}
+                          {quote.details.preferences && quote.details.preferences.length > 0 && (
+                            <div className="flex items-center space-x-2 text-gray-700">
+                              <Package className="w-4 h-4 text-[#651d2a]" />
+                              <span className="font-medium">Preferences:</span>
+                              <span>{quote.details.preferences.join(", ")}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
 
-                      {/* 기본 정보 */}
-                      <div className="grid md:grid-cols-3 gap-4 mb-4 text-sm">
+                      {/* Basic Info */}
+                      <div className="grid md:grid-cols-2 gap-4 mb-4 text-sm">
                         <div className="flex items-center space-x-2 text-gray-600">
                           <Calendar className="w-4 h-4" />
-                          <span>요청일: {quote.createdAt}</span>
+                          <span>Requested: {quote.createdAt}</span>
                         </div>
-                        <div className="flex items-center space-x-2 text-gray-600">
-                          <span>📍 {quote.details.location}</span>
-                        </div>
-                        <div className="flex items-center space-x-2 text-gray-600">
-                          <Users className="w-4 h-4" />
-                          <span>{quote.details.participants}명</span>
-                        </div>
+                        {quote.details.startDate && quote.details.endDate && (
+                          <div className="flex items-center space-x-2 text-gray-600">
+                            <Calendar className="w-4 h-4" />
+                            <span>
+                              Tour Date: {quote.details.startDate} ~ {quote.details.endDate}
+                            </span>
+                          </div>
+                        )}
                       </div>
 
-                      {/* 견적 진행 상태 타임라인 */}
+                      {/* Quote Progress Timeline */}
                       <div className="bg-gradient-to-r from-[#6d8675]/10 to-[#c4982a]/10 rounded-lg p-4 mb-4">
                         <div className="flex items-center justify-between">
+                          {/* Step 1: Created */}
                           <div className="flex flex-col items-center flex-1">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${
-                              quote.details.quoteStage >= 1 ? "bg-[#6d8675] text-white" : "bg-gray-300 text-gray-600"
-                            }`}>
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center mb-1 bg-[#6d8675] text-white">
                               ✓
                             </div>
-                            <p className="text-xs font-semibold text-gray-700">1차 견적 제출</p>
+                            <p className="text-xs font-semibold text-gray-700">Created</p>
                           </div>
+                          {/* Progress Bar 1 */}
                           <div className="flex-1 h-1 bg-gray-300 relative">
                             <div className={`absolute left-0 top-0 h-full transition-all duration-500 ${
-                              quote.status === "quote-received" || quote.status === "quote-approved"
+                              ["sent", "viewed", "approved", "rejected", "revision_requested"].includes(quote.quoteStatus)
                                 ? "bg-[#5a7263] w-full"
                                 : "bg-[#6d8675] w-1/2 animate-pulse"
                             }`}></div>
                           </div>
+                          {/* Step 2: Quote Ready */}
                           <div className="flex flex-col items-center flex-1">
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${
-                              quote.status === "quote-received" || quote.status === "quote-approved"
+                              ["sent", "viewed", "approved", "rejected", "revision_requested"].includes(quote.quoteStatus)
                                 ? "bg-[#5a7263] text-white"
-                                : quote.status === "quote-pending"
+                                : "bg-[#c4982a] text-white animate-pulse"
+                            }`}>
+                              {["sent", "viewed", "approved", "rejected", "revision_requested"].includes(quote.quoteStatus) ? "✓" : "2"}
+                            </div>
+                            <p className="text-xs font-semibold text-gray-700">Quote Ready</p>
+                          </div>
+                          {/* Progress Bar 2 */}
+                          <div className="flex-1 h-1 bg-gray-300 relative">
+                            <div className={`absolute left-0 top-0 h-full transition-all duration-500 ${
+                              ["approved", "rejected"].includes(quote.quoteStatus)
+                                ? "bg-[#5a7263] w-full"
+                                : quote.quoteStatus === "revision_requested"
+                                ? "bg-[#d97706] w-full"
+                                : ["sent", "viewed"].includes(quote.quoteStatus)
+                                ? "bg-[#c4982a] w-1/2 animate-pulse"
+                                : "bg-gray-300 w-0"
+                            }`}></div>
+                          </div>
+                          {/* Step 3: Response */}
+                          <div className="flex flex-col items-center flex-1">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${
+                              quote.quoteStatus === "approved"
+                                ? "bg-[#5a7263] text-white"
+                                : quote.quoteStatus === "rejected"
+                                ? "bg-[#8b4a52] text-white"
+                                : quote.quoteStatus === "revision_requested"
+                                ? "bg-[#d97706] text-white"
+                                : ["sent", "viewed"].includes(quote.quoteStatus)
                                 ? "bg-[#c4982a] text-white animate-pulse"
                                 : "bg-gray-300 text-gray-600"
                             }`}>
-                              {quote.status === "quote-received" || quote.status === "quote-approved" ? "✓" : "2"}
+                              {quote.quoteStatus === "approved" ? "✓" : quote.quoteStatus === "rejected" ? "✕" : "3"}
                             </div>
-                            <p className="text-xs font-semibold text-gray-700">2차 견적 도착</p>
+                            <p className="text-xs font-semibold text-gray-700">
+                              {quote.quoteStatus === "approved" ? "Approved" : quote.quoteStatus === "rejected" ? "Declined" : "Response"}
+                            </p>
                           </div>
                         </div>
-                        {quote.status === "quote-pending" && (
-                          <p className="text-center text-xs text-gray-600 mt-3">
-                            담당자가 견적서를 검토하고 있습니다. 영업일 기준 2-3일 소요됩니다.
+                        <p className="text-center text-xs text-gray-600 mt-3">
+                          {getQuoteStatusDescription(quote.quoteStatus)}
+                        </p>
+                        {quote.validDate && canCustomerRespond(quote.quoteStatus) && (
+                          <p className="text-center text-xs text-[#c4982a] mt-1">
+                            Valid until: {dayjs(quote.validDate).format("YYYY-MM-DD")}
                           </p>
                         )}
                       </div>
 
-                      {/* 투어 예정일 */}
-                      <div className="bg-gray-50 rounded-lg p-3 mb-4">
-                        <p className="text-sm text-gray-700">
-                          <span className="font-semibold">투어 예정일:</span> {quote.details.tourDate}
-                        </p>
-                      </div>
-
-                      {/* 액션 버튼 */}
-                      <div className="flex items-center space-x-3">
-                        {quote.status === "quote-received" && (
-                          <>
-                            <Button className="flex-1 bg-[#651d2a] hover:bg-[#4a1520] text-white">
-                              견적서 승인
-                            </Button>
-                            <Button className="flex-1 border border-gray-400 text-gray-700 bg-white hover:!bg-gray-500 hover:!text-white">
-                              견적서 거절
-                            </Button>
-                          </>
-                        )}
-                        {quote.status === "quote-approved" && (
-                          <Button className="flex-1 bg-[#651d2a] hover:bg-[#4a1520] text-white">
-                            예약 확정하기
+                      {/* Action Buttons */}
+                      <div className="flex items-center space-x-3 mb-3">
+                        {quote.batchId && ["sent", "viewed", "approved", "rejected", "revision_requested"].includes(quote.quoteStatus) && (
+                          <Button
+                            onClick={() => handleOpenQuoteModal(quote.batchId!)}
+                            className="flex-1 bg-[#651d2a] hover:bg-[#4a1520] text-white"
+                          >
+                            View Quote Details
                             <ChevronRight className="w-4 h-4 ml-1" />
                           </Button>
                         )}
-                        {quote.status === "quote-pending" && (
-                          <Link href={`/quotes/${quote.id}`} className="flex-1">
-                            <Button className="w-full border border-[#651d2a] text-[#651d2a] bg-white hover:!bg-[#651d2a] hover:!text-white">
-                              요청 상세보기
-                              <ChevronRight className="w-4 h-4 ml-1" />
-                            </Button>
-                          </Link>
-                        )}
+                        <Link href={`/chat?session=${quote.sessionId}`} className="flex-1">
+                          <Button className="w-full border border-[#651d2a] text-[#651d2a] bg-white hover:!bg-[#651d2a] hover:!text-white">
+                            Continue Chat
+                            <ChevronRight className="w-4 h-4 ml-1" />
+                          </Button>
+                        </Link>
                       </div>
+
+                      {/* Customer Response Section - Only for sent/viewed status */}
+                      {/* Message Section - For quotes with batchId */}
+                      {quote.batchId && ["sent", "viewed", "approved", "rejected", "revision_requested"].includes(quote.quoteStatus) && (
+                        <div className="mt-4">
+                          <MessageSection
+                            batchId={quote.batchId}
+                            quoteTitle={quote.title}
+                            isCollapsible={true}
+                            defaultExpanded={false}
+                          />
+                        </div>
+                      )}
+
+                      {canCustomerRespond(quote.quoteStatus) && quote.batchId && (
+                        <>
+                          {respondingQuoteId !== quote.id ? (
+                            // Response Buttons
+                            <div className="flex items-center gap-2 pt-3 border-t border-gray-200 mt-4">
+                              <Button
+                                onClick={() => handleStartResponse(quote.id, "approve")}
+                                className="flex-1 bg-[#5a7263] hover:bg-[#4d6358] text-white"
+                              >
+                                <Check className="w-4 h-4 mr-1" />
+                                Approve
+                              </Button>
+                              <Button
+                                onClick={() => handleStartResponse(quote.id, "reject")}
+                                className="flex-1 bg-[#8b4a52] hover:bg-[#7a4148] text-white"
+                              >
+                                <XCircle className="w-4 h-4 mr-1" />
+                                Decline
+                              </Button>
+                              <Button
+                                onClick={() => handleStartResponse(quote.id, "request_changes")}
+                                className="flex-1 bg-[#c4982a] hover:bg-[#b38a25] text-white"
+                              >
+                                <MessageSquarePlus className="w-4 h-4 mr-1" />
+                                Request Changes
+                              </Button>
+                            </div>
+                          ) : (
+                            // Response Form
+                            <div className="mt-3 pt-3 border-t border-gray-200">
+                              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                <div className="flex items-center gap-2 mb-3">
+                                  {responseType === "approve" && (
+                                    <>
+                                      <div className="w-7 h-7 rounded-full bg-[#5a7263] text-white flex items-center justify-center">
+                                        <Check className="w-4 h-4" />
+                                      </div>
+                                      <span className="font-semibold text-gray-800 text-sm">Approve this quote</span>
+                                    </>
+                                  )}
+                                  {responseType === "reject" && (
+                                    <>
+                                      <div className="w-7 h-7 rounded-full bg-[#8b4a52] text-white flex items-center justify-center">
+                                        <XCircle className="w-4 h-4" />
+                                      </div>
+                                      <span className="font-semibold text-gray-800 text-sm">Decline this quote</span>
+                                    </>
+                                  )}
+                                  {responseType === "request_changes" && (
+                                    <>
+                                      <div className="w-7 h-7 rounded-full bg-[#c4982a] text-white flex items-center justify-center">
+                                        <MessageSquarePlus className="w-4 h-4" />
+                                      </div>
+                                      <span className="font-semibold text-gray-800 text-sm">Request changes</span>
+                                    </>
+                                  )}
+                                </div>
+                                <textarea
+                                  placeholder={
+                                    responseType === "approve"
+                                      ? "Any additional comments? (optional)"
+                                      : responseType === "reject"
+                                      ? "Please let us know why (optional)"
+                                      : "Please describe the changes you need..."
+                                  }
+                                  value={responseMessage}
+                                  onChange={(e) => setResponseMessage(e.target.value)}
+                                  className="w-full p-3 border border-gray-300 rounded-lg text-sm resize-none focus:outline-none focus:border-[#651d2a] focus:ring-1 focus:ring-[#651d2a] bg-white"
+                                  rows={3}
+                                />
+                                {responseError && (
+                                  <p className="text-red-600 text-sm mt-2">{responseError}</p>
+                                )}
+                                <div className="flex justify-end gap-2 mt-3">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleCancelResponse}
+                                    disabled={isSubmittingResponse}
+                                    className="border-gray-300 text-gray-600"
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleSubmitInlineResponse(quote.batchId!)}
+                                    disabled={isSubmittingResponse}
+                                    className={`text-white ${
+                                      responseType === "approve"
+                                        ? "bg-[#5a7263] hover:bg-[#4d6358]"
+                                        : responseType === "reject"
+                                        ? "bg-[#8b4a52] hover:bg-[#7a4148]"
+                                        : "bg-[#c4982a] hover:bg-[#b38a25]"
+                                    }`}
+                                  >
+                                    {isSubmittingResponse ? (
+                                      <>
+                                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                                        Submitting...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Send className="w-4 h-4 mr-1" />
+                                        Submit
+                                      </>
+                                    )}
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
                     </div>
                   </Card>
                 ))}
@@ -1061,6 +1419,13 @@ export default function OrdersPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Quote Details Modal */}
+      <QuotationModal
+        batchId={selectedQuoteBatchId ?? undefined}
+        isOpen={isQuoteModalOpen}
+        onClose={handleCloseQuoteModal}
+      />
     </div>
   );
 }

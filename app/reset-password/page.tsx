@@ -59,10 +59,11 @@ export default function ResetPasswordPage() {
     try {
       await resetPassword(token, password);
       setIsSuccess(true);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Password reset failed:", error);
+      const axiosError = error as { response?: { data?: { message?: string } } };
       setError(
-        error.response?.data?.message ||
+        axiosError.response?.data?.message ||
           "Failed to reset password. The link may have expired."
       );
     } finally {

@@ -22,9 +22,30 @@ interface DraftQuotationProps {
   quotation: QuotationResponse;
 }
 
+// Map data types
+interface MapLocation {
+  itemId: number;
+  name: string;
+  lat: number;
+  lng: number;
+  description?: string;
+  price?: number;
+  type?: string;
+}
+
+interface MapDayData {
+  day: number;
+  locations: MapLocation[];
+  center: { lat: number; lng: number };
+}
+
+interface MapDataResponse {
+  mapData?: MapDayData[];
+}
+
 const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
   const { batchInfo, estimateInfo, estimateDetails } = quotation;
-  const [mapData, setMapData] = useState<any>(null);
+  const [mapData, setMapData] = useState<MapDataResponse | null>(null);
   const [loadingMap, setLoadingMap] = useState(false);
 
   // Parse timeline string to object if needed
@@ -380,8 +401,8 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
                     {!loadingMap && mapData && mapData.mapData && (
                       <>
                         {mapData.mapData
-                          .filter((dayData: any) => dayData.day === dayNumber)
-                          .map((dayData: any) => (
+                          .filter((dayData: MapDayData) => dayData.day === dayNumber)
+                          .map((dayData: MapDayData) => (
                             <DayMap
                               key={dayData.day}
                               day={dayData.day}

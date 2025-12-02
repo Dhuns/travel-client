@@ -222,8 +222,17 @@ const useChatStore = create<ChatStore>((set, get) => ({
         countPerPage: 50, // 최근 50개 세션
       });
 
-      // 세션 데이터 변환
-      const formattedSessions: ChatSession[] = serverSessions.map((session: any) => ({
+      // 세션 데이터 변환 - 서버 응답 타입
+      type ServerSessionResponse = {
+        sessionId: string;
+        status: 'active' | 'converted' | 'abandoned';
+        context: ChatContext;
+        batchId?: number;
+        title?: string;
+        createdAt: string;
+        lastActivityAt?: string;
+      };
+      const formattedSessions: ChatSession[] = (serverSessions as unknown as ServerSessionResponse[]).map((session) => ({
         ...session,
         createdAt: new Date(session.createdAt),
         lastMessageAt: session.lastActivityAt
@@ -259,45 +268,13 @@ const useChatStore = create<ChatStore>((set, get) => ({
       if (session.sessionId === currentSessionId) {
         const updatedMessages = [...session.messages, newMessage];
 
-        // 제목 자동 생성 (컨텍스트 기반)
-        let title = session.title;
-        if (!title || title === "New Chat") {
-          // 컨텍스트 정보를 기반으로 제목 생성
-          const ctx = session.context;
-          const parts: string[] = [];
-
-          if (ctx.destination) {
-            parts.push(ctx.destination);
-          }
-
-          if (ctx.startDate && ctx.endDate) {
-            const start = new Date(ctx.startDate);
-            const end = new Date(ctx.endDate);
-            const nights = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-            const days = nights + 1;
-            parts.push(`${nights}박${days}일`);
-          }
-
-          const totalPeople = (ctx.adults || 0) + (ctx.children || 0) + (ctx.infants || 0);
-          if (totalPeople > 0) {
-            parts.push(`${totalPeople}명`);
-          }
-
-          // 컨텍스트 기반 제목이 있으면 사용
-          if (parts.length > 0) {
-            title = parts.join(" ");
-          } else if (message.role === "user" && updatedMessages.length > 0) {
-            // 컨텍스트가 없으면 첫 메시지 사용
-            title =
-              message.content.slice(0, 30) +
-              (message.content.length > 30 ? "..." : "");
-          }
-        }
+        // 제목은 백엔드에서 자동 생성됨 (예: "Seoul Trip")
+        // AI 응답 후 백엔드에서 업데이트된 제목이 반영됨
+        // 클라이언트에서는 제목을 변경하지 않음
 
         return {
           ...session,
           messages: updatedMessages,
-          title,
           lastMessageAt: new Date(),
         };
       }
@@ -325,8 +302,9 @@ const useChatStore = create<ChatStore>((set, get) => ({
       setIsTyping(true);
       const aiMessage = await generateAIResponse(currentSessionId, content);
 
-      // 3. AI 응답 로컬 추가 및 백엔드에서 업데이트된 컨텍스트 반영
+      // 3. AI 응답 로컬 추가 및 백엔드에서 업데이트된 컨텍스트/제목 반영
       const { sessions } = get();
+      const aiResponse = aiMessage as ChatMessage & { updatedContext?: ChatContext; updatedTitle?: string };
       const updatedSessions = sessions.map((session) => {
         if (session.sessionId === currentSessionId) {
           return {
@@ -346,7 +324,9 @@ const useChatStore = create<ChatStore>((set, get) => ({
               },
             ],
             // 백엔드가 추출한 컨텍스트 반영
-            context: (aiMessage as any).updatedContext || session.context,
+            context: aiResponse.updatedContext || session.context,
+            // 백엔드에서 업데이트된 제목 반영 (예: "Seoul Trip")
+            title: aiResponse.updatedTitle || session.title,
             lastMessageAt: new Date(),
           };
         }
@@ -449,31 +429,10 @@ const useChatStore = create<ChatStore>((set, get) => ({
             ...newContext,
           };
 
-          // 컨텍스트 기반 제목 자동 생성
+          // 제목 자동 생성: destination이 있으면 "{Destination} Trip" 형식
           let title = session.title;
-          if (!title || title === "New Chat" || title.endsWith("...")) {
-            const parts: string[] = [];
-
-            if (updatedContext.destination) {
-              parts.push(updatedContext.destination);
-            }
-
-            if (updatedContext.startDate && updatedContext.endDate) {
-              const start = new Date(updatedContext.startDate);
-              const end = new Date(updatedContext.endDate);
-              const nights = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-              const days = nights + 1;
-              parts.push(`${nights}박${days}일`);
-            }
-
-            const totalPeople = (updatedContext.adults || 0) + (updatedContext.children || 0) + (updatedContext.infants || 0);
-            if (totalPeople > 0) {
-              parts.push(`${totalPeople}명`);
-            }
-
-            if (parts.length > 0) {
-              title = parts.join(" ");
-            }
+          if ((!title || title === "New Chat") && updatedContext.destination) {
+            title = `${updatedContext.destination} Trip`;
           }
 
           return {
@@ -588,11 +547,12 @@ const useChatStore = create<ChatStore>((set, get) => ({
 
       get().saveToStorage();
       return true;
-    } catch (error: any) {
+    } catch (error) {
       // Failed to generate estimate - show error details
       set({ isGeneratingEstimate: false });
 
-      const errorMessage = error?.response?.data?.message || error?.message || "An unknown error occurred.";
+      const axiosError = error as { response?: { data?: { message?: string } }; message?: string };
+      const errorMessage = axiosError?.response?.data?.message || axiosError?.message || "An unknown error occurred.";
 
       await addMessage({
         role: "assistant",

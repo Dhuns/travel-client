@@ -20,8 +20,9 @@ const QuotationPage = () => {
         setIsLoading(true);
         const data = await getQuotationByHash(hash);
         setQuotation(data);
-      } catch (err: any) {
-        setError(err?.response?.data?.message || 'Failed to load quotation. The link may be invalid or expired.');
+      } catch (err) {
+        const axiosError = err as { response?: { data?: { message?: string } } };
+        setError(axiosError?.response?.data?.message || 'Failed to load quotation. The link may be invalid or expired.');
       } finally {
         setIsLoading(false);
       }

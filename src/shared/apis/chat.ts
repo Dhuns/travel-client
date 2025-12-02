@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ChatSession, ChatMessage, ChatContext } from '../types/chat';
+import { ChatSession, ChatMessage, ChatContext, MessageMetadata } from '../types/chat';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9191/api';
 
@@ -37,7 +37,7 @@ export const sendChatMessage = async (data: {
   content: string;
   role?: 'user' | 'assistant' | 'system';
   type?: 'text' | 'estimate' | 'quick-reply' | 'system';
-  metadata?: any;
+  metadata?: MessageMetadata;
 }): Promise<ChatMessage> => {
   const response = await axios.post(`${API_URL}/chat/messages`, data);
   return response.data;

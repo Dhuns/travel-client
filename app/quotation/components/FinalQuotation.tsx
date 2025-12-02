@@ -21,9 +21,36 @@ interface FinalQuotationProps {
   quotation: QuotationResponse;
 }
 
+// Map data types
+interface MapLocation {
+  itemId: number;
+  name: string;
+  lat: number;
+  lng: number;
+  description?: string;
+  price?: number;
+  type?: string;
+}
+
+interface MapDayData {
+  day: number;
+  locations: MapLocation[];
+  center: { lat: number; lng: number };
+}
+
+interface MapDataResponse {
+  mapData?: MapDayData[];
+}
+
+// Adjustment item type
+interface AdjustmentItem {
+  description?: string;
+  amount: number;
+}
+
 const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
   const { batchInfo, estimateInfo, estimateDetails } = quotation;
-  const [mapData, setMapData] = useState<any>(null);
+  const [mapData, setMapData] = useState<MapDataResponse | null>(null);
   const [loadingMap, setLoadingMap] = useState(false);
 
   // Parse timeline string to object if needed
@@ -303,8 +330,8 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
                     {!loadingMap && mapData && mapData.mapData && (
                       <>
                         {mapData.mapData
-                          .filter((dayData: any) => dayData.day === dayNumber)
-                          .map((dayData: any) => (
+                          .filter((dayData: MapDayData) => dayData.day === dayNumber)
+                          .map((dayData: MapDayData) => (
                             <DayMap
                               key={dayData.day}
                               day={dayData.day}
@@ -334,7 +361,7 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
                     <>
                       <AdjustmentsDivider />
                       <AdjustmentsHeader>Adjustments</AdjustmentsHeader>
-                      {adjustmentItems.map((item: any, index: number) => (
+                      {(adjustmentItems as AdjustmentItem[]).map((item, index) => (
                         <AdjustmentRow key={index}>
                           <AdjustmentDescription>{item.description || 'Adjustment'}</AdjustmentDescription>
                           <AdjustmentAmount isPositive={item.amount >= 0}>

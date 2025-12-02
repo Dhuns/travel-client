@@ -44,12 +44,14 @@ export default function EmailSentPage() {
       setResendSuccess(true);
       setCooldownRemaining(COOLDOWN_SECONDS);
       setTimeout(() => setResendSuccess(false), 5000);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Resend email failed:", error);
-      const responseData = error.response?.data;
+      const axiosError = error as { response?: { data?: { cooldown?: boolean; remainingSeconds?: number; message?: string | { cooldown?: boolean; remainingSeconds?: number; message?: string } } } };
+      const responseData = axiosError.response?.data;
+      const messageObj = typeof responseData?.message === 'object' ? responseData.message : null;
 
-      if (responseData?.cooldown || responseData?.message?.cooldown) {
-        const remaining = responseData?.remainingSeconds || responseData?.message?.remainingSeconds || COOLDOWN_SECONDS;
+      if (responseData?.cooldown || messageObj?.cooldown) {
+        const remaining = responseData?.remainingSeconds || messageObj?.remainingSeconds || COOLDOWN_SECONDS;
         setCooldownRemaining(remaining);
         setResendError(`Please wait ${remaining} seconds`);
       } else {

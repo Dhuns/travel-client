@@ -88,7 +88,7 @@ export default function SignupPage() {
       await checkUsername(formData.email);
       setEmailChecked(true);
       setEmailAvailable(true);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Email check failed:", error);
       setEmailChecked(true);
       setEmailAvailable(false);
@@ -151,10 +151,11 @@ export default function SignupPage() {
       });
 
       router.push(`/email-sent?email=${encodeURIComponent(formData.email)}`);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Signup failed:", error);
+      const axiosError = error as { response?: { data?: { message?: string } } };
       alert(
-        error.response?.data?.message || "Signup failed. Please try again."
+        axiosError.response?.data?.message || "Signup failed. Please try again."
       );
     } finally {
       setIsSubmitting(false);

@@ -73,8 +73,9 @@ export default function EditProfilePage() {
       setTimeout(() => {
         router.push("/mypage")
       }, 1000)
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to update profile")
+    } catch (err) {
+      const axiosError = err as { response?: { data?: { message?: string } } };
+      setError(axiosError.response?.data?.message || "Failed to update profile")
     } finally {
       setIsSaving(false)
     }

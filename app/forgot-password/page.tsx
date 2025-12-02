@@ -36,9 +36,10 @@ export default function ForgotPasswordPage() {
     try {
       await requestPasswordReset(email);
       setIsSubmitted(true);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Password reset request failed:", error);
-      setError(error.response?.data?.message || "Failed to send reset email. Please try again.");
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      setError(axiosError.response?.data?.message || "Failed to send reset email. Please try again.");
     } finally {
       setIsLoading(false);
     }
