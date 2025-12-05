@@ -58,7 +58,7 @@ export default async function PrivateTourPage() {
           </h2>
 
           {/* 설명 */}
-          <p className="text-white/90 text-black md:text-lg mb-12 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
+          <p className="text-white/90 md:text-lg mb-12 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
             Have you felt disappointed by tours that follow rigid schedules with large
             groups?
             <br />
