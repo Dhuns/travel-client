@@ -1,13 +1,8 @@
-import {
-  historyToursConfig,
-  multidayToursConfig,
-  privateToursConfig,
-} from "@/config/tours";
 import { Clock, MapPin, Star } from "lucide-react";
 
 import { FavoriteButton } from "@/components/favorite-button";
 import { Button } from "@/components/ui/button";
-import { getToursFromConfig } from "@/lib/bokun";
+import { getPopularTours, transformBackendTourToFrontend } from "@/lib/bokun";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -18,13 +13,11 @@ const categoryDisplayNames: Record<string, string> = {
 };
 
 export async function PopularDestinations() {
-  const allConfigs = [
-    ...historyToursConfig,
-    ...privateToursConfig,
-    ...multidayToursConfig,
-  ];
-  const allTours = await getToursFromConfig(allConfigs);
-  const popularDestinations = allTours.slice(0, 4);
+  // 백엔드 API에서 인기 투어 가져오기 (Admin에서 관리)
+  const backendTours = await getPopularTours();
+  const popularDestinations = backendTours
+    .slice(0, 4)
+    .map(tour => transformBackendTourToFrontend(tour));
 
   return (
     <section className="py-20 bg-white">

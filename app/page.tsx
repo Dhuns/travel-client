@@ -4,8 +4,6 @@ import HomePageClient from "@/components/home-page-client";
 import { PopularDestinations } from "@/components/popular-destinations";
 import { PopularDestinationsSkeleton } from "@/components/tour-cards-skeleton";
 
-export const revalidate = 3600; // 1시간마다 재생성
-
 /**
  * OneDay Korea 메인 페이지 컴포넌트
  * 서버 컴포넌트로 Bokun API 데이터를 실시간으로 가져와 표시

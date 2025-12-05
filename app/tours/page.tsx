@@ -1,7 +1,5 @@
 import { TourGrid } from "@/components/tours/tour-grid";
 
-export const revalidate = 3600; // 1시간마다 재생성
-
 export default async function ToursPage() {
   return (
     <div className="min-h-screen bg-[#f5f3f0]">

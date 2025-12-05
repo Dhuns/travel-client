@@ -18,8 +18,6 @@ import { getToursFromBackend } from "@/lib/bokun";
 import Image from "next/image";
 import Link from "next/link";
 
-export const revalidate = 3600; // 1시간마다 재생성
-
 /**
  * Multiday Tour 설명 페이지
  *
