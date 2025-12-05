@@ -436,7 +436,7 @@ export default function Header() {
 
             {/* 모바일 메뉴 버튼 */}
             <button
-              className="lg:hidden text-gray-600 hover:text-tumakr-maroon transition-colors duration-300"
+              className="lg:hidden text-gray-600 hover:text-tumakr-maroon transition-colors duration-300 cursor-pointer"
               onClick={toggleMobileMenu}
               aria-label="모바일 메뉴 토글"
             >
@@ -575,7 +575,7 @@ export default function Header() {
                       handleLogout();
                       closeMobileMenu();
                     }}
-                    className="text-left hover:text-red-600 transition-colors duration-300 py-2"
+                    className="cursor-pointer text-left hover:text-red-600 transition-colors duration-300 py-2"
                   >
                     Logout
                   </button>
