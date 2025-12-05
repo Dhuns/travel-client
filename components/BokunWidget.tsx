@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 interface BokunWidgetProps {
   bookingChannelUUID: string;
@@ -36,9 +36,10 @@ export default function BokunWidget({
 
     const observer = new MutationObserver(() => {
       if (widgetRef.current && widgetRef.current.children.length > 0) {
-        const hasContent = widgetRef.current.querySelector('iframe') ||
-                           widgetRef.current.querySelector('[class*="bokun"]') ||
-                           widgetRef.current.innerHTML.length > 100;
+        const hasContent =
+          widgetRef.current.querySelector("iframe") ||
+          widgetRef.current.querySelector('[class*="bokun"]') ||
+          widgetRef.current.innerHTML.length > 100;
         if (hasContent) {
           setIsLoading(false);
           observer.disconnect();
@@ -68,7 +69,7 @@ export default function BokunWidget({
       {/* 로딩 스켈레톤 - 클라이언트에서만 렌더링 */}
       {isMounted && isLoading && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-gray-50 rounded-lg min-h-[400px]">
-          <Loader2 className="w-10 h-10 text-[#651d2a] animate-spin mb-4" />
+          <Loader2 className="w-10 h-10 text-tumakr-maroon animate-spin mb-4" />
           <p className="text-gray-600 text-sm">Loading booking widget...</p>
           <div className="mt-6 w-full max-w-md px-8">
             <div className="space-y-4">
@@ -85,11 +86,7 @@ export default function BokunWidget({
       )}
 
       {/* Bokun 위젯 */}
-      <div
-        ref={widgetRef}
-        className="bokunWidget"
-        data-src={widgetDataSrc}
-      />
+      <div ref={widgetRef} className="bokunWidget" data-src={widgetDataSrc} />
       <noscript>
         <p className="text-center text-gray-600 p-4">
           Please enable JavaScript in your browser to book

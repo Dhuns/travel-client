@@ -25,9 +25,7 @@ export default function ContactPage() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<"success" | "error" | null>(
-    null
-  );
+  const [submitStatus, setSubmitStatus] = useState<"success" | "error" | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,9 +59,7 @@ export default function ContactPage() {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     setFormData({
       ...formData,
@@ -72,9 +68,9 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-50">
+    <div className="min-h-screen bg-linear-to-b from-gray-100 to-gray-50">
       {/* Header */}
-      <div className="pt-32 pb-12 bg-[#651d2a] text-white">
+      <div className="pt-32 pb-12 bg-tumakr-maroon text-white">
         <div className="container mx-auto px-6">
           <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
           <p className="text-xl text-white/90">
@@ -90,12 +86,11 @@ export default function ContactPage() {
             <Card className="shadow-xl bg-white">
               <CardHeader>
                 <CardTitle className="text-2xl flex items-center space-x-2">
-                  <MessageCircle className="w-6 h-6 text-[#651d2a]" />
+                  <MessageCircle className="w-6 h-6 text-tumakr-maroon" />
                   <span className="text-black">Send us a Message</span>
                 </CardTitle>
                 <CardDescription className="text-black">
-                  Fill out the form below and we'll get back to you within 24
-                  hours
+                  Fill out the form below and we'll get back to you within 24 hours
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-6">
@@ -111,7 +106,7 @@ export default function ContactPage() {
                         onChange={handleChange}
                         placeholder="Your first name"
                         required
-                        className="border border-gray-300 focus-visible:border-[#651d2a] focus-visible:ring-1 focus-visible:ring-[#651d2a] bg-white text-gray-900 placeholder:text-gray-400"
+                        className="border border-gray-300 focus-visible:border-tumakr-maroon focus-visible:ring-1 focus-visible:ring-tumakr-maroon bg-white text-gray-900 placeholder:text-gray-400"
                       />
                     </div>
                     <div>
@@ -124,7 +119,7 @@ export default function ContactPage() {
                         onChange={handleChange}
                         placeholder="Your last name"
                         required
-                        className="border border-gray-300 focus-visible:border-[#651d2a] focus-visible:ring-1 focus-visible:ring-[#651d2a] bg-white text-gray-900 placeholder:text-gray-400"
+                        className="border border-gray-300 focus-visible:border-tumakr-maroon focus-visible:ring-1 focus-visible:ring-tumakr-maroon bg-white text-gray-900 placeholder:text-gray-400"
                       />
                     </div>
                   </div>
@@ -140,7 +135,7 @@ export default function ContactPage() {
                       onChange={handleChange}
                       placeholder="your.email@example.com"
                       required
-                      className="border border-gray-300 focus-visible:border-[#651d2a] focus-visible:ring-1 focus-visible:ring-[#651d2a] bg-white text-gray-900 placeholder:text-gray-400"
+                      className="border border-gray-300 focus-visible:border-tumakr-maroon focus-visible:ring-1 focus-visible:ring-tumakr-maroon bg-white text-gray-900 placeholder:text-gray-400"
                     />
                   </div>
 
@@ -153,7 +148,7 @@ export default function ContactPage() {
                       value={formData.phone}
                       onChange={handleChange}
                       placeholder="+82-10-1234-5678"
-                      className="border border-gray-300 focus-visible:border-[#651d2a] focus-visible:ring-1 focus-visible:ring-[#651d2a] bg-white text-gray-900 placeholder:text-gray-400"
+                      className="border border-gray-300 focus-visible:border-tumakr-maroon focus-visible:ring-1 focus-visible:ring-tumakr-maroon bg-white text-gray-900 placeholder:text-gray-400"
                     />
                   </div>
 
@@ -166,7 +161,7 @@ export default function ContactPage() {
                       value={formData.subject}
                       onChange={handleChange}
                       required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#651d2a] focus:border-[#651d2a] bg-white text-gray-900"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tumakr-maroon focus:border-tumakr-maroon bg-white text-gray-900"
                     >
                       <option value="">Select a topic</option>
                       <option value="booking">Tour Booking Inquiry</option>
@@ -189,15 +184,15 @@ export default function ContactPage() {
                       placeholder="Please provide details about your inquiry..."
                       rows={5}
                       required
-                      className="border border-gray-300 focus-visible:border-[#651d2a] focus-visible:ring-1 focus-visible:ring-[#651d2a] bg-white text-gray-900 placeholder:text-gray-400"
+                      className="border border-gray-300 focus-visible:border-tumakr-maroon focus-visible:ring-1 focus-visible:ring-tumakr-maroon bg-white text-gray-900 placeholder:text-gray-400"
                     />
                   </div>
 
                   {submitStatus === "success" && (
                     <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                       <p className="text-green-800 text-sm">
-                        Thank you! Your message has been sent successfully.
-                        We'll get back to you soon.
+                        Thank you! Your message has been sent successfully. We'll get back
+                        to you soon.
                       </p>
                     </div>
                   )}
@@ -205,8 +200,8 @@ export default function ContactPage() {
                   {submitStatus === "error" && (
                     <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                       <p className="text-red-800 text-sm">
-                        Something went wrong. Please try again or contact us
-                        directly at info@onedaykorea.com
+                        Something went wrong. Please try again or contact us directly at
+                        info@onedaykorea.com
                       </p>
                     </div>
                   )}
@@ -214,7 +209,7 @@ export default function ContactPage() {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-[#651d2a] hover:bg-[#4a1520] flex items-center justify-center space-x-2"
+                    className="w-full bg-tumakr-maroon hover:bg-tumakr-maroon/90 flex items-center justify-center space-x-2"
                   >
                     <Send className="w-4 h-4" />
                     <span>{isSubmitting ? "Sending..." : "Send Message"}</span>
@@ -227,7 +222,7 @@ export default function ContactPage() {
           {/* Contact Information */}
           <div className="space-y-8">
             {/* Contact Details */}
-            <Card className="shadow-lg bg-white border-2 border-[#651d2a]/30">
+            <Card className="shadow-lg bg-white border-2 border-tumakr-maroon/30">
               <CardHeader className="text-black">
                 <CardTitle className="text-2xl">Get in Touch</CardTitle>
                 <CardDescription>
@@ -236,51 +231,54 @@ export default function ContactPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-start space-x-4">
-                  <MapPin className="w-6 h-6 text-[#651d2a] mt-1" />
+                  <MapPin className="w-6 h-6 text-tumakr-maroon mt-1" />
                   <div>
-                    <h3 className="font-semibold text-gray-800">
-                      Office Address
-                    </h3>
+                    <h3 className="font-semibold text-gray-800">Office Address</h3>
                     <p className="text-gray-600">
-                      2F, Bukhansan TheSharp Sang-ga,<br />
-                      510 Tongil-ro, Seodaemun-gu,<br />
+                      2F, Bukhansan TheSharp Sang-ga,
+                      <br />
+                      510 Tongil-ro, Seodaemun-gu,
+                      <br />
                       Seoul 03615, Korea
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <Phone className="w-6 h-6 text-[#651d2a] mt-1" />
+                  <Phone className="w-6 h-6 text-tumakr-maroon mt-1" />
                   <div>
-                    <h3 className="font-semibold text-gray-800">
-                      Phone Number
-                    </h3>
+                    <h3 className="font-semibold text-gray-800">Phone Number</h3>
                     <p className="text-gray-600">
-                      <a href="tel:+82707556355" className="hover:text-[#651d2a]">+82 (0) 70 7556 5355</a>
+                      <a href="tel:+82707556355" className="hover:text-tumakr-maroon">
+                        +82 (0) 70 7556 5355
+                      </a>
                       <br />
-                      <a href="tel:+821024791242" className="hover:text-[#651d2a]">+82 10 2479 1242</a>
+                      <a href="tel:+821024791242" className="hover:text-tumakr-maroon">
+                        +82 10 2479 1242
+                      </a>
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <Mail className="w-6 h-6 text-[#651d2a] mt-1" />
+                  <Mail className="w-6 h-6 text-tumakr-maroon mt-1" />
                   <div>
-                    <h3 className="font-semibold text-gray-800">
-                      Email Address
-                    </h3>
+                    <h3 className="font-semibold text-gray-800">Email Address</h3>
                     <p className="text-gray-600">
-                      <a href="mailto:info@onedaykorea.com" className="hover:text-[#651d2a]">info@onedaykorea.com</a>
+                      <a
+                        href="mailto:info@onedaykorea.com"
+                        className="hover:text-tumakr-maroon"
+                      >
+                        info@onedaykorea.com
+                      </a>
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <Clock className="w-6 h-6 text-[#651d2a] mt-1" />
+                  <Clock className="w-6 h-6 text-tumakr-maroon mt-1" />
                   <div>
-                    <h3 className="font-semibold text-gray-800">
-                      Office Hours
-                    </h3>
+                    <h3 className="font-semibold text-gray-800">Office Hours</h3>
                     <p className="text-gray-600">
                       09:00 – 17:00 (GMT +9)
                       <br />
@@ -294,18 +292,14 @@ export default function ContactPage() {
             {/* Emergency Contact */}
             <Card className="bg-red-50 border-red-300 border-2 shadow-lg">
               <CardHeader>
-                <CardTitle className="text-xl text-red-800">
-                  Emergency Contact
-                </CardTitle>
+                <CardTitle className="text-xl text-red-800">Emergency Contact</CardTitle>
                 <CardDescription className="text-red-600">
                   24/7 support for travelers in Korea
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <p className="font-semibold text-red-800">
-                    Emergency Hotline:
-                  </p>
+                  <p className="font-semibold text-red-800">Emergency Hotline:</p>
                   <p className="text-red-700 text-lg font-bold">
                     <a href="tel:+821024791242">+82 10 2479 1242</a>
                   </p>
@@ -317,18 +311,17 @@ export default function ContactPage() {
             </Card>
 
             {/* FAQ Link */}
-            <Card className="bg-[#eda89b]/10 border-[#651d2a]/30 border-2 shadow-lg">
+            <Card className="bg-tumakr-dusty-pink/10 border-tumakr-maroon/30 border-2 shadow-lg">
               <CardContent className="pt-6">
-                <h3 className="font-semibold text-[#651d2a] mb-2">
+                <h3 className="font-semibold text-tumakr-maroon mb-2">
                   Frequently Asked Questions
                 </h3>
                 <p className="text-gray-600 text-sm mb-4">
-                  Find quick answers to common questions about our tours and
-                  services.
+                  Find quick answers to common questions about our tours and services.
                 </p>
                 <Button
                   variant="outline"
-                  className="border-[#651d2a] text-[#651d2a] hover:!bg-[#651d2a] hover:!text-white bg-transparent"
+                  className="border-tumakr-maroon text-tumakr-maroon hover:!bg-tumakr-maroon hover:!text-white bg-transparent"
                 >
                   View FAQ
                 </Button>

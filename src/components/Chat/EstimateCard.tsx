@@ -1,7 +1,7 @@
-import React, { FC } from "react";
-import { EstimatePreview } from "@shared/types/chat";
 import styled from "@emotion/styled";
-import CryptoJS from 'crypto-js';
+import { EstimatePreview } from "@shared/types/chat";
+import CryptoJS from "crypto-js";
+import { FC } from "react";
 
 interface Props {
   estimate: EstimatePreview;
@@ -15,14 +15,14 @@ const EstimateCard: FC<Props> = ({ estimate, batchId, onViewQuote }) => {
 
   const handleViewDetails = () => {
     if (!batchId) {
-      console.error('[EstimateCard] No batchId provided');
+      console.error("[EstimateCard] No batchId provided");
       return;
     }
 
     // Encrypt batchId using same method as backend (SHA256 key derivation)
-    const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || '';
+    const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || "";
     const key = CryptoJS.SHA256(ENCRYPTION_KEY);
-    const iv = CryptoJS.MD5(ENCRYPTION_KEY + '_IV_SALT');
+    const iv = CryptoJS.MD5(ENCRYPTION_KEY + "_IV_SALT");
 
     const cipher = CryptoJS.AES.encrypt(batchId.toString(), key, {
       iv: iv,
@@ -32,10 +32,10 @@ const EstimateCard: FC<Props> = ({ estimate, batchId, onViewQuote }) => {
     const hash = cipher.toString();
     const encodedHash = encodeURIComponent(hash);
 
-    console.log('[EstimateCard] Opening quotation modal:', {
+    console.log("[EstimateCard] Opening quotation modal:", {
       batchId,
       hash,
-      encodedHash
+      encodedHash,
     });
 
     // Open modal instead of navigating
@@ -52,7 +52,8 @@ const EstimateCard: FC<Props> = ({ estimate, batchId, onViewQuote }) => {
       </Header>
       <Summary>
         <SummaryItem>
-          <strong>Travelers:</strong> Total {totalPeople} people (Adults {adults}, Children {children}, Infants {infants})
+          <strong>Travelers:</strong> Total {totalPeople} people (Adults {adults},
+          Children {children}, Infants {infants})
         </SummaryItem>
       </Summary>
       <ItemList>
@@ -63,15 +64,11 @@ const EstimateCard: FC<Props> = ({ estimate, batchId, onViewQuote }) => {
             <ItemPrice>${item.price.toLocaleString()}</ItemPrice>
           </Item>
         ))}
-        {items.length > 3 && (
-          <MoreItems>...and {items.length - 3} more items</MoreItems>
-        )}
+        {items.length > 3 && <MoreItems>...and {items.length - 3} more items</MoreItems>}
       </ItemList>
 
       <Footer>
-        <DetailsButton onClick={handleViewDetails}>
-          View My Quote
-        </DetailsButton>
+        <DetailsButton onClick={handleViewDetails}>View My Quote</DetailsButton>
       </Footer>
     </Card>
   );
@@ -91,7 +88,7 @@ const Card = styled.div`
 
 const Header = styled.div`
   padding: 16px 20px;
-  background-color: #651d2a;
+  background-color: var(--color-tumakr-maroon);
   color: white;
   display: flex;
   justify-content: space-between;
@@ -161,7 +158,7 @@ const Footer = styled.div`
 `;
 
 const DetailsButton = styled.button`
-  background-color: #651d2a;
+  background-color: var(--color-tumakr-maroon);
   color: white;
   border: none;
   padding: 10px 24px;

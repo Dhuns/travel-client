@@ -1,19 +1,34 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Gift, Clock, Loader2, Search as SearchIcon } from "lucide-react";
-import Link from "next/link";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  searchAll,
+  SearchCategory,
+  SearchResponse,
+  SearchResult,
+} from "@shared/apis/search";
+import { Clock, Gift, Loader2, MapPin, Search as SearchIcon } from "lucide-react";
 import Image from "next/image";
-import { searchAll, SearchResult, SearchCategory, SearchResponse } from "@shared/apis/search";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useState } from "react";
 
 // 카테고리별 설정
 const categoryConfig = {
-  tours: { icon: MapPin, color: "text-[#651d2a]", bgColor: "bg-[#651d2a]", label: "Tour" },
-  souvenirs: { icon: Gift, color: "text-[#6d8675]", bgColor: "bg-[#6d8675]", label: "Souvenir" },
+  tours: {
+    icon: MapPin,
+    color: "text-tumakr-maroon",
+    bgColor: "bg-tumakr-maroon",
+    label: "Tour",
+  },
+  souvenirs: {
+    icon: Gift,
+    color: "text-tumakr-sage-green",
+    bgColor: "bg-tumakr-sage-green",
+    label: "Souvenir",
+  },
 };
 
 function SearchContent() {
@@ -62,7 +77,9 @@ function SearchContent() {
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
             {query ? (
-              <>Search Results for "<span className="text-[#651d2a]">{query}</span>"</>
+              <>
+                Search Results for "<span className="text-tumakr-maroon">{query}</span>"
+              </>
             ) : (
               "Browse All"
             )}
@@ -71,9 +88,13 @@ function SearchContent() {
             <p className="text-gray-600">
               Found {searchResults.total} result{searchResults.total !== 1 ? "s" : ""}
               {searchResults.tours.length > 0 && ` (${searchResults.tours.length} tours`}
-              {searchResults.tours.length > 0 && searchResults.souvenirs.length > 0 && ", "}
-              {searchResults.souvenirs.length > 0 && `${searchResults.souvenirs.length} souvenirs`}
-              {(searchResults.tours.length > 0 || searchResults.souvenirs.length > 0) && ")"}
+              {searchResults.tours.length > 0 &&
+                searchResults.souvenirs.length > 0 &&
+                ", "}
+              {searchResults.souvenirs.length > 0 &&
+                `${searchResults.souvenirs.length} souvenirs`}
+              {(searchResults.tours.length > 0 || searchResults.souvenirs.length > 0) &&
+                ")"}
             </p>
           )}
         </div>
@@ -84,7 +105,11 @@ function SearchContent() {
             variant={selectedCategory === "all" ? "default" : "outline"}
             size="sm"
             onClick={() => handleCategoryFilter("all")}
-            className={selectedCategory === "all" ? "bg-[#651d2a] hover:bg-[#7d2534]" : ""}
+            className={
+              selectedCategory === "all"
+                ? "bg-tumakr-maroon hover:bg-tumakr-maroon/90"
+                : ""
+            }
           >
             All
           </Button>
@@ -92,7 +117,11 @@ function SearchContent() {
             variant={selectedCategory === "tours" ? "default" : "outline"}
             size="sm"
             onClick={() => handleCategoryFilter("tours")}
-            className={selectedCategory === "tours" ? "bg-[#651d2a] hover:bg-[#7d2534]" : ""}
+            className={
+              selectedCategory === "tours"
+                ? "bg-tumakr-maroon hover:bg-tumakr-maroon/90"
+                : ""
+            }
           >
             <MapPin className="w-4 h-4 mr-1" />
             Tours
@@ -101,7 +130,11 @@ function SearchContent() {
             variant={selectedCategory === "souvenirs" ? "default" : "outline"}
             size="sm"
             onClick={() => handleCategoryFilter("souvenirs")}
-            className={selectedCategory === "souvenirs" ? "bg-[#6d8675] hover:bg-[#5a7562]" : ""}
+            className={
+              selectedCategory === "souvenirs"
+                ? "bg-tumakr-sage-green hover:bg-tumakr-sage-green/90"
+                : ""
+            }
           >
             <Gift className="w-4 h-4 mr-1" />
             Souvenirs
@@ -113,7 +146,10 @@ function SearchContent() {
           <div className="space-y-6">
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[...Array(8)].map((_, i) => (
-                <div key={i} className="bg-white rounded-lg overflow-hidden shadow animate-pulse">
+                <div
+                  key={i}
+                  className="bg-white rounded-lg overflow-hidden shadow animate-pulse"
+                >
                   <div className="aspect-[4/3] bg-gray-200" />
                   <div className="p-4 space-y-3">
                     <div className="h-4 bg-gray-200 rounded w-3/4" />
@@ -134,7 +170,10 @@ function SearchContent() {
         {error && (
           <div className="text-center py-12">
             <p className="text-red-500 text-lg">{error}</p>
-            <Button onClick={performSearch} className="mt-4 bg-[#651d2a] hover:bg-[#7d2534]">
+            <Button
+              onClick={performSearch}
+              className="mt-4 bg-tumakr-maroon hover:bg-tumakr-maroon/90"
+            >
               Try Again
             </Button>
           </div>
@@ -160,7 +199,7 @@ function SearchContent() {
             {searchResults.tours.length > 0 && (
               <section className="mb-10">
                 <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                  <MapPin className="w-5 h-5 mr-2 text-[#651d2a]" />
+                  <MapPin className="w-5 h-5 mr-2 text-tumakr-maroon" />
                   Tours ({searchResults.tours.length})
                 </h2>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -175,7 +214,7 @@ function SearchContent() {
             {searchResults.souvenirs.length > 0 && (
               <section className="mb-10">
                 <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                  <Gift className="w-5 h-5 mr-2 text-[#6d8675]" />
+                  <Gift className="w-5 h-5 mr-2 text-tumakr-sage-green" />
                   Souvenirs ({searchResults.souvenirs.length})
                 </h2>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -218,13 +257,16 @@ function ResultCard({ item }: { item: SearchResult }) {
             {config.label}
           </Badge>
           {item.category && (
-            <Badge variant="secondary" className="absolute top-3 right-3 bg-white/90 text-gray-700">
+            <Badge
+              variant="secondary"
+              className="absolute top-3 right-3 bg-white/90 text-gray-700"
+            >
               {item.category}
             </Badge>
           )}
         </div>
         <CardContent className="p-4">
-          <h3 className="font-semibold text-gray-900 mb-2 line-clamp-1 group-hover:text-[#651d2a] transition-colors">
+          <h3 className="font-semibold text-gray-900 mb-2 line-clamp-1 group-hover:text-tumakr-maroon transition-colors">
             {item.title}
           </h3>
           {item.description && (
@@ -240,7 +282,11 @@ function ResultCard({ item }: { item: SearchResult }) {
               )}
             </div>
             {item.price && (
-              <span className={`text-sm font-semibold ${item.type === "tour" ? "text-[#651d2a]" : "text-[#6d8675]"}`}>
+              <span
+                className={`text-sm font-semibold ${
+                  item.type === "tour" ? "text-tumakr-maroon" : "text-tumakr-sage-green"
+                }`}
+              >
                 {item.price}
               </span>
             )}
@@ -257,7 +303,7 @@ export default function SearchPage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-gray-50 pt-24 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-[#651d2a]" />
+          <Loader2 className="w-8 h-8 animate-spin text-tumakr-maroon" />
         </div>
       }
     >

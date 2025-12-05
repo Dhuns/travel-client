@@ -1,22 +1,20 @@
 import {
-  ArrowRight,
   BookOpen,
   Calendar,
   Check,
   Gift,
   MapPin,
   Sparkles,
-  Star,
   Users,
   X,
 } from "lucide-react";
 
+import { FavoriteButton } from "@/components/favorite-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { FavoriteButton } from "@/components/favorite-button";
-import Link from "next/link";
 import { getToursFromBackend } from "@/lib/bokun";
+import Link from "next/link";
 
 export const revalidate = 3600; // 1시간마다 재생성
 
@@ -32,7 +30,7 @@ export default async function HistoryTourPage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* 왼쪽: 텍스트 콘텐츠 */}
             <div>
-              <Badge className="bg-[#651d2a] text-white mb-4 px-4 py-1">
+              <Badge className="bg-tumakr-maroon text-white mb-4 px-4 py-1">
                 History Tour
               </Badge>
               <h1 className="font-bold text-gray-900 mb-6 text-5xl">
@@ -44,13 +42,13 @@ export default async function HistoryTourPage() {
                 An Unparalleled Korean History Tour Awaits!
               </p>
               <p className="text-gray-700 leading-relaxed mb-8">
-                It is a profound voyage into the very soul of Korea—the
-                definitive experience designed to satisfy your curiosity and
-                create lifelong memories.
+                It is a profound voyage into the very soul of Korea—the definitive
+                experience designed to satisfy your curiosity and create lifelong
+                memories.
               </p>
               <div className="flex gap-4 mb-8">
                 <a href="#tour-list">
-                  <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white px-6 flex items-center gap-2 transition-colors font-semibold">
+                  <Button className="bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white px-6 flex items-center gap-2 transition-colors font-semibold">
                     Explore Tours
                   </Button>
                 </a>
@@ -81,13 +79,11 @@ export default async function HistoryTourPage() {
 
               {/* 왼쪽 하단 모달 */}
               <div className="absolute bottom-6 left-6 bg-white rounded-lg shadow-lg p-4 flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#651d2a] rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-tumakr-maroon rounded-full flex items-center justify-center shrink-0">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-gray-900 text-sm">
-                    Signature Tour
-                  </h4>
+                  <h4 className="font-bold text-gray-900 text-sm">Signature Tour</h4>
                   <p className="text-xs text-gray-600">special journey</p>
                 </div>
               </div>
@@ -97,7 +93,7 @@ export default async function HistoryTourPage() {
       </section>
 
       {/* Why is Korean History Special Section */}
-      <section className="min-h-screen flex items-center px-6 bg-gradient-to-br from-[#eda89b]/10 to-[#6d8675]/10">
+      <section className="min-h-screen flex items-center px-6 bg-linear-to-br from-tumakr-dusty-pink/10 to-tumakr-sage-green/10">
         <div className="container mx-auto max-w-6xl py-20">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-16">
             Why is Korean History Special?
@@ -119,16 +115,16 @@ export default async function HistoryTourPage() {
                 Discover the World Through an Eastern Lens
               </h3>
               <p className="text-gray-700 leading-relaxed mb-4">
-                Surrounded by powerful nations, the Korean Peninsula has a
-                unique geopolitical story. Despite centuries of foreign
-                influence, its people have preserved their distinct culture,
-                language, and traditions, all rooted in a rich, ancient history.
+                Surrounded by powerful nations, the Korean Peninsula has a unique
+                geopolitical story. Despite centuries of foreign influence, its people
+                have preserved their distinct culture, language, and traditions, all
+                rooted in a rich, ancient history.
               </p>
               <p className="text-gray-700 leading-relaxed">
-                Observed by its neighbors but never entirely lost, Korea's past
-                gives insight about world history. Tumaku invites you to explore
-                this fascinating journey through time, where East meets history,
-                and the stories of the nation they built.
+                Observed by its neighbors but never entirely lost, Korea's past gives
+                insight about world history. Tumaku invites you to explore this
+                fascinating journey through time, where East meets history, and the
+                stories of the nation they built.
               </p>
             </div>
           </div>
@@ -141,15 +137,15 @@ export default async function HistoryTourPage() {
                 Uncover the Excellence and Majesty of Korean Cultural Heritage
               </h3>
               <p className="text-gray-700 leading-relaxed mb-4">
-                Korea's architectural and cultural heritage stands among the
-                world's finest. From the elegant curves of palace roofs to the
-                intricate details of temple art, every structure tells a story
-                of artistic excellence and spiritual depth.
+                Korea's architectural and cultural heritage stands among the world's
+                finest. From the elegant curves of palace roofs to the intricate details
+                of temple art, every structure tells a story of artistic excellence and
+                spiritual depth.
               </p>
               <p className="text-gray-700 leading-relaxed">
-                Walk through centuries-old palaces where kings once ruled,
-                explore temples that have weathered wars and time, and discover
-                the values of the nation they built.
+                Walk through centuries-old palaces where kings once ruled, explore temples
+                that have weathered wars and time, and discover the values of the nation
+                they built.
               </p>
             </div>
 
@@ -166,7 +162,7 @@ export default async function HistoryTourPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-6 bg-gradient-to-r from-[#651d2a] via-[#c4982a] to-[#6d8675]">
+      <section className="py-20 px-6 bg-linear-to-r from-tumakr-maroon via-tumakr-mustard to-tumakr-sage-green">
         <div className="container mx-auto max-w-4xl text-center text-white">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Now, it's your turn to begin your story.
@@ -177,7 +173,7 @@ export default async function HistoryTourPage() {
           <Link href="/chat">
             <Button
               size="lg"
-              className="bg-white text-[#651d2a] hover:bg-gray-100 font-semibold px-8"
+              className="bg-white text-tumakr-maroon hover:bg-gray-100 font-semibold px-8"
             >
               Plan with AI Assistant
             </Button>
@@ -186,26 +182,20 @@ export default async function HistoryTourPage() {
       </section>
 
       {/* Historical Destinations Section */}
-      <section
-        id="tour-list"
-        className="min-h-screen flex items-center px-6 bg-white"
-      >
+      <section id="tour-list" className="min-h-screen flex items-center px-6 bg-white">
         <div className="container mx-auto max-w-6xl py-20">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4">
             Historical Destinations Come Alive
           </h2>
           <p className="text-center text-gray-600 mb-16 max-w-2xl mx-auto">
-            Discover Korea's rich history and culture through our carefully
-            curated tours
+            Discover Korea's rich history and culture through our carefully curated tours
           </p>
 
           <div className="space-y-8">
             {/* 히스토리 투어 목록 */}
             {tours.length === 0 ? (
               <div className="text-center py-20">
-                <p className="text-gray-600">
-                  No tours available at the moment.
-                </p>
+                <p className="text-gray-600">No tours available at the moment.</p>
               </div>
             ) : (
               tours.map((tour) => (
@@ -220,8 +210,8 @@ export default async function HistoryTourPage() {
                             alt={tour.title}
                             className="w-full h-full object-cover"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/20"></div>
-                          <Badge className="absolute top-4 left-4 bg-[#651d2a] text-white font-medium px-3 py-1.5">
+                          <div className="absolute inset-0 bg-linear-to-r from-transparent to-black/20"></div>
+                          <Badge className="absolute top-4 left-4 bg-tumakr-maroon text-white font-medium px-3 py-1.5">
                             {tour.badge}
                           </Badge>
                           <div className="absolute bottom-4 right-4">
@@ -246,22 +236,22 @@ export default async function HistoryTourPage() {
                           <div>
                             <div className="flex items-start justify-between mb-4">
                               <div>
-                                <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-[#651d2a] transition-colors">
+                                <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-tumakr-maroon transition-colors">
                                   {tour.title}
                                 </h3>
                                 <div className="flex flex-wrap gap-3">
                                   {tour.duration && (
-                                    <div className="flex items-center space-x-2 bg-[#651d2a]/10 px-3 py-1.5 rounded-full">
-                                      <Calendar className="w-4 h-4 text-[#651d2a]" />
-                                      <span className="text-[#651d2a] font-medium text-sm">
+                                    <div className="flex items-center space-x-2 bg-tumakr-maroon/10 px-3 py-1.5 rounded-full">
+                                      <Calendar className="w-4 h-4 text-tumakr-maroon" />
+                                      <span className="text-tumakr-maroon font-medium text-sm">
                                         {tour.duration}
                                       </span>
                                     </div>
                                   )}
                                   {tour.location && (
-                                    <div className="flex items-center space-x-2 bg-[#6d8675]/10 px-3 py-1.5 rounded-full">
-                                      <MapPin className="w-4 h-4 text-[#6d8675]" />
-                                      <span className="text-[#6d8675] font-medium text-sm">
+                                    <div className="flex items-center space-x-2 bg-tumakr-sage-green/10 px-3 py-1.5 rounded-full">
+                                      <MapPin className="w-4 h-4 text-tumakr-sage-green" />
+                                      <span className="text-tumakr-sage-green font-medium text-sm">
                                         {tour.location}
                                       </span>
                                     </div>
@@ -269,7 +259,7 @@ export default async function HistoryTourPage() {
                                 </div>
                               </div>
                               {tour.price && (
-                                <Badge className="bg-[#651d2a] text-white font-bold px-4 py-2 text-lg">
+                                <Badge className="bg-tumakr-maroon text-white font-bold px-4 py-2 text-lg">
                                   {tour.price}
                                 </Badge>
                               )}
@@ -286,52 +276,47 @@ export default async function HistoryTourPage() {
                               {tour.included && tour.included.length > 0 && (
                                 <div>
                                   <h4 className="font-semibold mb-3 text-gray-800 flex items-center">
-                                    <Check className="w-4 h-4 mr-2 text-[#651d2a]" />
+                                    <Check className="w-4 h-4 mr-2 text-tumakr-maroon" />
                                     What's Included:
                                   </h4>
                                   <div className="space-y-2">
-                                    {tour.included
-                                      .slice(0, 4)
-                                      .map((item, index) => (
-                                        <div
-                                          key={index}
-                                          className="flex items-start space-x-2"
-                                        >
-                                          <Check className="w-4 h-4 text-[#651d2a] mt-0.5 flex-shrink-0" />
-                                          <span className="text-gray-600 text-sm">
-                                            {item}
-                                          </span>
-                                        </div>
-                                      ))}
+                                    {tour.included.slice(0, 4).map((item, index) => (
+                                      <div
+                                        key={index}
+                                        className="flex items-start space-x-2"
+                                      >
+                                        <Check className="w-4 h-4 text-tumakr-maroon mt-0.5 shrink-0" />
+                                        <span className="text-gray-600 text-sm">
+                                          {item}
+                                        </span>
+                                      </div>
+                                    ))}
                                   </div>
                                 </div>
                               )}
 
                               {/* Excluded */}
-                              {tour.exclusions &&
-                                tour.exclusions.length > 0 && (
-                                  <div>
-                                    <h4 className="font-semibold mb-3 text-gray-800 flex items-center">
-                                      <X className="w-4 h-4 mr-2 text-gray-500" />
-                                      Not Included:
-                                    </h4>
-                                    <div className="space-y-2">
-                                      {tour.exclusions
-                                        .slice(0, 4)
-                                        .map((item, index) => (
-                                          <div
-                                            key={index}
-                                            className="flex items-start space-x-2"
-                                          >
-                                            <X className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                                            <span className="text-gray-600 text-sm">
-                                              {item}
-                                            </span>
-                                          </div>
-                                        ))}
-                                    </div>
+                              {tour.exclusions && tour.exclusions.length > 0 && (
+                                <div>
+                                  <h4 className="font-semibold mb-3 text-gray-800 flex items-center">
+                                    <X className="w-4 h-4 mr-2 text-gray-500" />
+                                    Not Included:
+                                  </h4>
+                                  <div className="space-y-2">
+                                    {tour.exclusions.slice(0, 4).map((item, index) => (
+                                      <div
+                                        key={index}
+                                        className="flex items-start space-x-2"
+                                      >
+                                        <X className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
+                                        <span className="text-gray-600 text-sm">
+                                          {item}
+                                        </span>
+                                      </div>
+                                    ))}
                                   </div>
-                                )}
+                                </div>
+                              )}
                             </div>
 
                             {tour.highlights && tour.highlights.length > 0 && (
@@ -347,7 +332,7 @@ export default async function HistoryTourPage() {
                                         key={index}
                                         className="flex items-center space-x-2"
                                       >
-                                        <div className="w-2 h-2 bg-[#651d2a] rounded-full flex-shrink-0"></div>
+                                        <div className="w-2 h-2 bg-tumakr-maroon rounded-full shrink-0"></div>
                                         <span className="text-gray-600 text-sm">
                                           {highlight}
                                         </span>
@@ -358,7 +343,7 @@ export default async function HistoryTourPage() {
                             )}
                           </div>
 
-                          <Button className="w-full md:w-auto bg-[#651d2a] hover:bg-[#651d2a]/90 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300">
+                          <Button className="w-full md:w-auto bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300">
                             View Details & Book Now
                           </Button>
                         </div>
@@ -373,18 +358,16 @@ export default async function HistoryTourPage() {
       </section>
 
       {/* Products & Souvenirs Section */}
-      <section className="py-16 px-6 flex items-center bg-gradient-to-br from-[#eda89b]/10 to-[#6d8675]/10">
+      <section className="py-16 px-6 flex items-center bg-linear-to-br from-tumakr-dusty-pink/10 to-tumakr-sage-green/10">
         <div className="container mx-auto max-w-6xl w-full">
           <div className="text-center mb-12">
             <div className="flex items-center justify-center gap-2 mb-4">
-              <Gift className="text-[#651d2a]" size={32} />
-              <h2 className="text-4xl font-bold text-gray-900">
-                Products & Souvenirs
-              </h2>
+              <Gift className="text-tumakr-maroon" size={32} />
+              <h2 className="text-4xl font-bold text-gray-900">Products & Souvenirs</h2>
             </div>
             <p className="text-gray-600 text-lg">
-              Take home beautiful memories of Korea with our curated selection
-              of traditional products and special souvenirs
+              Take home beautiful memories of Korea with our curated selection of
+              traditional products and special souvenirs
             </p>
           </div>
 
@@ -397,7 +380,7 @@ export default async function HistoryTourPage() {
                   alt="Traditional Hanbok"
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#651d2a]">
+                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-tumakr-maroon">
                   Traditional
                 </div>
               </div>
@@ -416,7 +399,7 @@ export default async function HistoryTourPage() {
                   alt="K-Beauty Skincare"
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#c4982a]">
+                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-tumakr-mustard">
                   Beauty
                 </div>
               </div>
@@ -435,7 +418,7 @@ export default async function HistoryTourPage() {
                   alt="Korean Tea Collection"
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#6d8675]">
+                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-tumakr-sage-green">
                   Food
                 </div>
               </div>
@@ -470,12 +453,10 @@ export default async function HistoryTourPage() {
                 key={i}
                 className="text-center p-8 shadow-lg hover:shadow-xl transition-shadow bg-white border border-gray-200"
               >
-                <div className="w-16 h-16 bg-[#651d2a] rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-tumakr-maroon rounded-full flex items-center justify-center mx-auto mb-4">
                   <feature.icon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                  {feature.title}
-                </h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">{feature.title}</h3>
                 <p className="text-sm text-gray-600">
                   {i === 0 &&
                     "More than just visiting sites, we provide rich historical context and engaging narratives that bring the past to life."}
@@ -495,8 +476,8 @@ export default async function HistoryTourPage() {
               <span>"This is not a common, mass-produced souvenir.</span>
               <br />
               <span>
-                "It is a special, custom-made memento that fully embodies the
-                emotions of our journey and the beauty of Korea."
+                "It is a special, custom-made memento that fully embodies the emotions of
+                our journey and the beauty of Korea."
               </span>
             </p>
           </div>

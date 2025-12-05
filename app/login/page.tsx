@@ -1,12 +1,12 @@
 "use client";
 
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { getAppleAuthUrl, getGoogleAuthUrl } from "@/src/shared/apis/user";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 
-import type React from "react";
 import { useAuthStore } from "@/src/shared/store/authStore";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -44,20 +44,32 @@ export default function LoginPage() {
     } catch (error) {
       console.error("Login failed:", error);
 
-      const axiosError = error as { response?: { data?: { message?: string | string[] | { message?: string; requiresVerification?: boolean; email?: string }; requiresVerification?: boolean; email?: string } } };
+      const axiosError = error as {
+        response?: {
+          data?: {
+            message?:
+              | string
+              | string[]
+              | { message?: string; requiresVerification?: boolean; email?: string };
+            requiresVerification?: boolean;
+            email?: string;
+          };
+        };
+      };
       const responseData = axiosError.response?.data;
       const messageData = Array.isArray(responseData?.message)
         ? responseData.message[0]
         : responseData?.message;
-      const messageObj = typeof messageData === 'object' && messageData !== null ? messageData : null;
+      const messageObj =
+        typeof messageData === "object" && messageData !== null ? messageData : null;
 
-      if (responseData?.requiresVerification ||
-          messageObj?.requiresVerification ||
-          (typeof messageData === 'string' &&
-           messageData.toLowerCase().includes("email verification required"))) {
-        const email = responseData?.email ||
-                     messageObj?.email ||
-                     formData.username;
+      if (
+        responseData?.requiresVerification ||
+        messageObj?.requiresVerification ||
+        (typeof messageData === "string" &&
+          messageData.toLowerCase().includes("email verification required"))
+      ) {
+        const email = responseData?.email || messageObj?.email || formData.username;
         router.push(`/email-sent?email=${encodeURIComponent(email)}`);
         return;
       }
@@ -69,11 +81,11 @@ export default function LoginPage() {
         errorMessage = errorMessage[0];
       }
       // 객체인 경우 message 속성 추출
-      if (typeof errorMessage === 'object' && errorMessage !== null) {
+      if (typeof errorMessage === "object" && errorMessage !== null) {
         errorMessage = errorMessage.message || "Login failed";
       }
       // 문자열이 아니거나 비어있으면 기본 메시지
-      if (!errorMessage || typeof errorMessage !== 'string') {
+      if (!errorMessage || typeof errorMessage !== "string") {
         errorMessage = "Login failed. Please check your credentials.";
       }
 
@@ -118,7 +130,7 @@ export default function LoginPage() {
                 name="username"
                 value={formData.username}
                 onChange={handleInputChange}
-                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#651d2a] transition-colors"
+                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-tumakr-maroon transition-colors"
                 style={{
                   WebkitBoxShadow: "0 0 0 1000px white inset",
                   WebkitTextFillColor: "#111827",
@@ -138,7 +150,7 @@ export default function LoginPage() {
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className="w-full pl-10 pr-12 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#651d2a] transition-colors"
+                className="w-full pl-10 pr-12 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-tumakr-maroon transition-colors"
                 style={{
                   WebkitBoxShadow: "0 0 0 1000px white inset",
                   WebkitTextFillColor: "#111827",
@@ -152,7 +164,11 @@ export default function LoginPage() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
               </button>
             </div>
           </div>
@@ -160,7 +176,7 @@ export default function LoginPage() {
           <div className="text-right">
             <a
               href="/forgot-password"
-              className="text-xs text-gray-500 hover:text-[#651d2a] transition-colors"
+              className="text-xs text-gray-500 hover:text-tumakr-maroon transition-colors"
             >
               Forgot password?
             </a>
@@ -169,7 +185,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 text-sm font-medium text-white bg-[#651d2a] rounded-lg hover:bg-[#7a2433] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full py-3 text-sm font-medium text-white bg-tumakr-maroon rounded-lg hover:bg-tumakr-maroon/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? "Signing in..." : "Sign in"}
           </button>
@@ -227,7 +243,7 @@ export default function LoginPage() {
 
         <p className="mt-6 text-center text-sm text-gray-500">
           Don't have an account?{" "}
-          <a href="/signup" className="text-[#651d2a] font-medium hover:underline">
+          <a href="/signup" className="text-tumakr-maroon font-medium hover:underline">
             Sign up
           </a>
         </p>
