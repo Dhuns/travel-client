@@ -1,12 +1,12 @@
-import React, { FC, useEffect, useRef, useState } from "react";
 import styled from "@emotion/styled";
+import { AUTO_SCROLL_DELAY, UI_TEXT } from "@shared/constants/chat";
+import { ChatMessage as ChatMessageType } from "@shared/types/chat";
+import { FC, useEffect, useRef, useState } from "react";
 import ChatInput from "./ChatInput";
 import ChatMessage from "./ChatMessage";
-import { ChatMessage as ChatMessageType } from "@shared/types/chat";
 import EstimateCard from "./EstimateCard";
-import TypingIndicator from "./TypingIndicator";
 import QuotationModal from "./QuotationModal";
-import { AUTO_SCROLL_DELAY, UI_TEXT } from "@shared/constants/chat";
+import TypingIndicator from "./TypingIndicator";
 
 interface Props {
   messages: ChatMessageType[];
@@ -55,9 +55,16 @@ const ChatMessageList: FC<Props> = ({
           <WelcomeContainer>
             <WelcomeContent>
               <WelcomeIcon>
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                <svg
+                  width="48"
+                  height="48"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                 </svg>
               </WelcomeIcon>
               <WelcomeTitle>{UI_TEXT.WELCOME_TITLE}</WelcomeTitle>
@@ -73,10 +80,7 @@ const ChatMessageList: FC<Props> = ({
 
         {messages.map((message) => {
           // Estimate card type
-          if (
-            message.type === "estimate" &&
-            message.metadata?.estimatePreview
-          ) {
+          if (message.type === "estimate" && message.metadata?.estimatePreview) {
             return (
               <EstimateCardWrapper key={message.id}>
                 <EstimateCard
@@ -89,7 +93,13 @@ const ChatMessageList: FC<Props> = ({
           }
 
           // Regular text message (including estimate type)
-          return <ChatMessage key={message.id} message={message} onViewQuote={handleViewQuote} />;
+          return (
+            <ChatMessage
+              key={message.id}
+              message={message}
+              onViewQuote={handleViewQuote}
+            />
+          );
         })}
 
         {/* Typing indicator */}
@@ -189,7 +199,11 @@ const WelcomeIcon = styled.div`
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-tumakr-maroon) 0%,
+    var(--color-tumakr-maroon) 100%
+  );
   display: flex;
   align-items: center;
   justify-content: center;

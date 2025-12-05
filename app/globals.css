@@ -481,7 +481,8 @@ body {
 
 /* 그림자 스타일 */
 .shadow-primary {
-  box-shadow: 0 10px 25px -3px rgba(101, 29, 42, 0.1), 0 4px 6px -2px rgba(101, 29, 42, 0.05);
+  box-shadow: 0 10px 25px -3px rgba(101, 29, 42, 0.1),
+    0 4px 6px -2px rgba(101, 29, 42, 0.05);
 }
 
 .shadow-primary-lg {
@@ -569,8 +570,8 @@ body {
 
 /* 글로벌 트랜지션 */
 * {
-  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow,
-    transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color, text-decoration-color, fill,
+    stroke, opacity, box-shadow, transform, filter, backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 300ms;
 }

@@ -1,9 +1,9 @@
-import React, { FC } from "react";
+import { FC } from "react";
 
-import { ChatContext } from "@shared/types/chat";
-import dayjs from "dayjs";
 import styled from "@emotion/styled";
 import useChatStore from "@shared/store/chatStore";
+import { ChatContext } from "@shared/types/chat";
+import dayjs from "dayjs";
 
 interface Props {
   context: ChatContext;
@@ -12,11 +12,8 @@ interface Props {
 }
 
 const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
-  const {
-    canGenerateEstimate,
-    generateEstimateForSession,
-    isGeneratingEstimate,
-  } = useChatStore();
+  const { canGenerateEstimate, generateEstimateForSession, isGeneratingEstimate } =
+    useChatStore();
 
   const {
     destination,
@@ -39,9 +36,7 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
 
   // Calculate total days
   const days =
-    startDate && endDate
-      ? dayjs(endDate).diff(dayjs(startDate), "day") + 1
-      : null;
+    startDate && endDate ? dayjs(endDate).diff(dayjs(startDate), "day") + 1 : null;
 
   // Total travelers
   const totalPeople = adults + children + infants;
@@ -51,9 +46,16 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
       {/* Collected Information - 최상단 */}
       <Section>
         <SectionTitle>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-            <circle cx="12" cy="10" r="3"/>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+            <circle cx="12" cy="10" r="3" />
           </svg>
           Collected Info
         </SectionTitle>
@@ -71,8 +73,7 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
           <InfoItem>
             <Label>Travel Period</Label>
             <Value>
-              {dayjs(startDate).format("YYYY.MM.DD")} ~{" "}
-              {dayjs(endDate).format("MM.DD")}
+              {dayjs(startDate).format("YYYY.MM.DD")} ~ {dayjs(endDate).format("MM.DD")}
               {days && ` (${days} days)`}
             </Value>
           </InfoItem>
@@ -134,15 +135,23 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
               </>
             ) : (
               <>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
                 </svg>
                 Generate AI Itinerary
               </>
             )}
           </GenerateButton>
           <EstimateHint>
-            Get your AI-suggested daily destinations. Our experts will add accommodations & transport.
+            Get your AI-suggested daily destinations. Our experts will add accommodations
+            & transport.
           </EstimateHint>
         </EstimateButtonSection>
       )}
@@ -151,9 +160,16 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
       <ProcessSection>
         <ProcessHeader>
           <ProcessIcon>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 16v-4M12 8h.01"/>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4M12 8h.01" />
             </svg>
           </ProcessIcon>
           <ProcessTitle>How It Works</ProcessTitle>
@@ -163,7 +179,10 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
             <StepNumber active>1</StepNumber>
             <StepContent>
               <StepLabel active>AI Draft</StepLabel>
-              <StepDescription>AI creates a daily itinerary with recommended destinations and activities only. (No pricing yet)</StepDescription>
+              <StepDescription>
+                AI creates a daily itinerary with recommended destinations and activities
+                only. (No pricing yet)
+              </StepDescription>
             </StepContent>
           </ProcessStep>
           <StepConnector />
@@ -171,7 +190,10 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
             <StepNumber>2</StepNumber>
             <StepContent>
               <StepLabel>Expert Enhancement</StepLabel>
-              <StepDescription>Our travel experts review your draft and add accommodations, transportation, tickets, and calculate accurate pricing.</StepDescription>
+              <StepDescription>
+                Our travel experts review your draft and add accommodations,
+                transportation, tickets, and calculate accurate pricing.
+              </StepDescription>
             </StepContent>
           </ProcessStep>
           <StepConnector />
@@ -179,7 +201,10 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
             <StepNumber>3</StepNumber>
             <StepContent>
               <StepLabel>Final Quote</StepLabel>
-              <StepDescription>Receive your complete, bookable travel package with all details and final pricing via email.</StepDescription>
+              <StepDescription>
+                Receive your complete, bookable travel package with all details and final
+                pricing via email.
+              </StepDescription>
             </StepContent>
           </ProcessStep>
         </ProcessSteps>
@@ -231,7 +256,7 @@ const ProcessHeader = styled.div`
 `;
 
 const ProcessIcon = styled.div`
-  color: #651d2a;
+  color: var(--color-tumakr-maroon);
   display: flex;
   align-items: center;
 `;
@@ -259,7 +284,10 @@ const StepNumber = styled.div<{ active?: boolean }>`
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: ${({ active }) => (active ? "linear-gradient(135deg, #651d2a 0%, #8b3a47 100%)" : "#e5e5e5")};
+  background: ${({ active }) =>
+    active
+      ? "linear-gradient(135deg, var(--color-tumakr-maroon) 0%, var(--color-tumakr-maroon) 100%)"
+      : "#e5e5e5"};
   color: ${({ active }) => (active ? "#ffffff" : "#888")};
   font-size: 12px;
   font-weight: 600;
@@ -277,7 +305,7 @@ const StepContent = styled.div`
 const StepLabel = styled.div<{ active?: boolean }>`
   font-size: 13px;
   font-weight: 600;
-  color: ${({ active }) => (active ? "#651d2a" : "#666")};
+  color: ${({ active }) => (active ? "var(--color-tumakr-maroon)" : "#666")};
   margin-bottom: 2px;
 `;
 
@@ -293,7 +321,6 @@ const StepConnector = styled.div`
   background: #e0e0e0;
   margin-left: 11px;
 `;
-
 
 // Section Styles
 const Section = styled.div`
@@ -356,7 +383,7 @@ const TagList = styled.div`
 
 const Tag = styled.span`
   padding: 4px 10px;
-  background-color: #651d2a;
+  background-color: var(--color-tumakr-maroon);
   color: #ffffff;
   border-radius: 12px;
   font-size: 12px;
@@ -376,7 +403,11 @@ const EmptyState = styled.div`
 const EstimateButtonSection = styled.div`
   padding: 16px;
   margin: 0 0 14px 0;
-  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-tumakr-maroon) 0%,
+    var(--color-tumakr-maroon) 100%
+  );
   border-radius: 14px;
   text-align: center;
 `;
@@ -385,7 +416,7 @@ const GenerateButton = styled.button`
   width: 100%;
   padding: 14px 20px;
   background-color: #ffffff;
-  color: #651d2a;
+  color: var(--color-tumakr-maroon);
   border: none;
   border-radius: 10px;
   font-size: 15px;
@@ -415,7 +446,7 @@ const GenerateButton = styled.button`
 const LoadingSpinner = styled.div`
   width: 16px;
   height: 16px;
-  border: 2px solid #651d2a;
+  border: 2px solid var(--color-tumakr-maroon);
   border-top-color: transparent;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -433,4 +464,3 @@ const EstimateHint = styled.p`
   color: rgba(255, 255, 255, 0.85);
   line-height: 1.5;
 `;
-

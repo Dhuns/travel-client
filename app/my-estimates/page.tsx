@@ -1,16 +1,16 @@
 "use client";
 
-import { Calendar, MapPin, Users, ChevronRight } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import QuotationModal from "@/src/components/Chat/QuotationModal";
+import { getAllChatSessions } from "@/src/shared/apis/chat";
+import { useAuthStore } from "@/src/shared/store/authStore";
+import dayjs from "dayjs";
+import { Calendar, ChevronRight, MapPin, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import { useAuthStore } from "@/src/shared/store/authStore";
-import { getAllChatSessions } from "@/src/shared/apis/chat";
-import dayjs from "dayjs";
-import QuotationModal from "@/src/components/Chat/QuotationModal";
+import { useEffect, useState } from "react";
 
 /**
  * My Estimates Page
@@ -116,11 +116,11 @@ export default function MyEstimatesPage() {
     const statusConfig = {
       "quote-pending": {
         label: "Under Review",
-        color: "bg-[#6d8675] text-white animate-pulse",
+        color: "bg-tumakr-sage-green text-white animate-pulse",
       },
       "quote-received": {
         label: "Quote Received",
-        color: "bg-[#c4982a] text-white",
+        color: "bg-tumakr-mustard text-white",
       },
       "quote-approved": {
         label: "Approved",
@@ -132,9 +132,7 @@ export default function MyEstimatesPage() {
       },
     };
     const config = statusConfig[status];
-    return (
-      <Badge className={`${config.color} px-3 py-1`}>{config.label}</Badge>
-    );
+    return <Badge className={`${config.color} px-3 py-1`}>{config.label}</Badge>;
   };
 
   const filteredEstimates =
@@ -159,18 +157,14 @@ export default function MyEstimatesPage() {
   // Not authenticated case
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
         <div className="container mx-auto px-6 max-w-7xl">
           <Card className="p-12 text-center shadow-lg border border-gray-200 bg-white rounded-xl">
             <div className="text-6xl mb-4">🔐</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Sign In Required
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Please sign in to view your estimates
-            </p>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Sign In Required</h3>
+            <p className="text-gray-600 mb-6">Please sign in to view your estimates</p>
             <Link href="/login">
-              <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white">
+              <Button className="bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white">
                 Sign In
               </Button>
             </Link>
@@ -181,7 +175,7 @@ export default function MyEstimatesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
       <div className="container mx-auto px-6 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
@@ -197,8 +191,8 @@ export default function MyEstimatesPage() {
             onClick={() => setFilter("all")}
             className={
               filter === "all"
-                ? "border border-[#651d2a] bg-[#651d2a] hover:bg-[#4a1520] text-white transition-all shadow-sm"
-                : "border border-[#651d2a] text-[#651d2a] bg-white hover:!bg-[#651d2a] hover:!text-white transition-all shadow-sm cursor-pointer"
+                ? "border border-tumakr-maroon bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white transition-all shadow-sm"
+                : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white transition-all shadow-sm cursor-pointer"
             }
           >
             All
@@ -207,8 +201,8 @@ export default function MyEstimatesPage() {
             onClick={() => setFilter("quote-pending")}
             className={
               filter === "quote-pending"
-                ? "border border-[#651d2a] bg-[#651d2a] hover:bg-[#4a1520] text-white transition-all shadow-sm"
-                : "border border-[#651d2a] text-[#651d2a] bg-white hover:!bg-[#651d2a] hover:!text-white transition-all shadow-sm cursor-pointer"
+                ? "border border-tumakr-maroon bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white transition-all shadow-sm"
+                : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white transition-all shadow-sm cursor-pointer"
             }
           >
             Under Review
@@ -217,8 +211,8 @@ export default function MyEstimatesPage() {
             onClick={() => setFilter("quote-received")}
             className={
               filter === "quote-received"
-                ? "border border-[#651d2a] bg-[#651d2a] hover:bg-[#4a1520] text-white transition-all shadow-sm"
-                : "border border-[#651d2a] text-[#651d2a] bg-white hover:!bg-[#651d2a] hover:!text-white transition-all shadow-sm cursor-pointer"
+                ? "border border-tumakr-maroon bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white transition-all shadow-sm"
+                : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white transition-all shadow-sm cursor-pointer"
             }
           >
             Received
@@ -227,8 +221,8 @@ export default function MyEstimatesPage() {
             onClick={() => setFilter("quote-approved")}
             className={
               filter === "quote-approved"
-                ? "border border-[#651d2a] bg-[#651d2a] hover:bg-[#4a1520] text-white transition-all shadow-sm"
-                : "border border-[#651d2a] text-[#651d2a] bg-white hover:!bg-[#651d2a] hover:!text-white transition-all shadow-sm cursor-pointer"
+                ? "border border-tumakr-maroon bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white transition-all shadow-sm"
+                : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white transition-all shadow-sm cursor-pointer"
             }
           >
             Approved
@@ -254,7 +248,7 @@ export default function MyEstimatesPage() {
                 Chat with our AI to get your personalized travel estimate
               </p>
               <Link href="/chat">
-                <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white">
+                <Button className="bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white">
                   Request Estimate via Chat
                 </Button>
               </Link>
@@ -267,7 +261,7 @@ export default function MyEstimatesPage() {
               >
                 <div className="flex flex-col md:flex-row md:h-80">
                   {/* Image */}
-                  <div className="relative w-full md:w-96 h-64 md:h-full flex-shrink-0">
+                  <div className="relative w-full md:w-96 h-64 md:h-full shrink-0">
                     <Image
                       src={estimate.image}
                       alt={estimate.title}
@@ -281,83 +275,81 @@ export default function MyEstimatesPage() {
 
                   {/* Content */}
                   <div className="flex-1 p-6 flex flex-col">
-                      <div className="flex justify-between items-start mb-4">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                          {estimate.title}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          Requested: {estimate.requestDate}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Details */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                      {estimate.details.startDate && estimate.details.endDate && (
+                        <div className="flex items-center space-x-3">
+                          <Calendar className="w-5 h-5 text-tumakr-maroon" />
+                          <div>
+                            <p className="text-xs text-gray-500">Travel Period</p>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {estimate.details.startDate} ~ {estimate.details.endDate}
+                              {estimate.details.duration && (
+                                <span className="text-gray-600 ml-1">
+                                  ({estimate.details.duration})
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex items-center space-x-3">
+                        <MapPin className="w-5 h-5 text-tumakr-maroon" />
                         <div>
-                          <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                            {estimate.title}
-                          </h3>
-                          <p className="text-sm text-gray-500">
-                            Requested: {estimate.requestDate}
+                          <p className="text-xs text-gray-500">Destination</p>
+                          <p className="text-sm font-semibold text-gray-900">
+                            {estimate.destination}
                           </p>
                         </div>
                       </div>
 
-                      {/* Details */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        {estimate.details.startDate &&
-                          estimate.details.endDate && (
-                            <div className="flex items-center space-x-3">
-                              <Calendar className="w-5 h-5 text-[#651d2a]" />
-                              <div>
-                                <p className="text-xs text-gray-500">Travel Period</p>
-                                <p className="text-sm font-semibold text-gray-900">
-                                  {estimate.details.startDate} ~{" "}
-                                  {estimate.details.endDate}
-                                  {estimate.details.duration && (
-                                    <span className="text-gray-600 ml-1">
-                                      ({estimate.details.duration})
-                                    </span>
-                                  )}
-                                </p>
-                              </div>
-                            </div>
-                          )}
-
+                      {estimate.details.travelers && (
                         <div className="flex items-center space-x-3">
-                          <MapPin className="w-5 h-5 text-[#651d2a]" />
+                          <Users className="w-5 h-5 text-tumakr-maroon" />
                           <div>
-                            <p className="text-xs text-gray-500">Destination</p>
+                            <p className="text-xs text-gray-500">Travelers</p>
                             <p className="text-sm font-semibold text-gray-900">
-                              {estimate.destination}
+                              {estimate.details.travelers} pax
                             </p>
                           </div>
                         </div>
+                      )}
 
-                        {estimate.details.travelers && (
-                          <div className="flex items-center space-x-3">
-                            <Users className="w-5 h-5 text-[#651d2a]" />
-                            <div>
-                              <p className="text-xs text-gray-500">Travelers</p>
-                              <p className="text-sm font-semibold text-gray-900">
-                                {estimate.details.travelers} pax
-                              </p>
-                            </div>
+                      {estimate.details.budget && (
+                        <div className="flex items-center space-x-3">
+                          <span className="text-tumakr-maroon text-xl">💰</span>
+                          <div>
+                            <p className="text-xs text-gray-500">Budget</p>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {formatPrice(estimate.details.budget)}
+                            </p>
                           </div>
-                        )}
+                        </div>
+                      )}
+                    </div>
 
-                        {estimate.details.budget && (
-                          <div className="flex items-center space-x-3">
-                            <span className="text-[#651d2a] text-xl">💰</span>
-                            <div>
-                              <p className="text-xs text-gray-500">Budget</p>
-                              <p className="text-sm font-semibold text-gray-900">
-                                {formatPrice(estimate.details.budget)}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Action Button */}
-                      <div className="mt-auto flex justify-end space-x-3">
-                        <Button
-                          onClick={() => handleViewQuotation(estimate.batchId)}
-                          className="border border-[#651d2a] text-[#651d2a] bg-white hover:!bg-[#651d2a] hover:!text-white transition-all shadow-sm cursor-pointer"
-                        >
-                          View Details
-                          <ChevronRight className="w-4 h-4 ml-1" />
-                        </Button>
-                      </div>
+                    {/* Action Button */}
+                    <div className="mt-auto flex justify-end space-x-3">
+                      <Button
+                        onClick={() => handleViewQuotation(estimate.batchId)}
+                        className="border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white transition-all shadow-sm cursor-pointer"
+                      >
+                        View Details
+                        <ChevronRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -367,7 +359,7 @@ export default function MyEstimatesPage() {
 
         {/* Help Section */}
         {filteredEstimates.length > 0 && (
-          <Card className="mt-12 bg-gradient-to-r from-[#651d2a]/5 to-[#6d8675]/5 border border-gray-200 shadow-lg rounded-xl">
+          <Card className="mt-12 bg-linear-to-r from-tumakr-maroon/5 to-tumakr-sage-green/5 border border-gray-200 shadow-lg rounded-xl">
             <CardContent className="p-8 text-center">
               <h3 className="text-xl font-bold text-gray-900 mb-2">
                 Have Questions About Your Estimate?
@@ -376,7 +368,7 @@ export default function MyEstimatesPage() {
                 Chat with our AI assistant anytime for assistance
               </p>
               <Link href="/chat">
-                <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white">
+                <Button className="bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white">
                   Chat with AI
                 </Button>
               </Link>

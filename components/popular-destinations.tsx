@@ -5,11 +5,11 @@ import {
 } from "@/config/tours";
 import { Clock, MapPin, Star } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/favorite-button";
+import { Button } from "@/components/ui/button";
+import { getToursFromConfig } from "@/lib/bokun";
 import Image from "next/image";
 import Link from "next/link";
-import { getToursFromConfig } from "@/lib/bokun";
 
 const categoryDisplayNames: Record<string, string> = {
   history: "History Tours",
@@ -31,14 +31,13 @@ export async function PopularDestinations() {
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <div className="flex items-center justify-center mb-4">
-            <Star className="w-8 h-8 text-[#651d2a] mr-3" />
+            <Star className="w-8 h-8 text-tumakr-maroon mr-3" />
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
               Most Popular Destinations
             </h2>
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Discover Korea&apos;s most beloved destinations with our expert
-            local guides
+            Discover Korea&apos;s most beloved destinations with our expert local guides
           </p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -57,12 +56,12 @@ export async function PopularDestinations() {
                   loading="lazy"
                 />
                 <div className="absolute top-4 left-4">
-                  <span className="bg-[#651d2a]/90 text-white px-3 py-1 rounded-full text-xs font-medium">
+                  <span className="bg-tumakr-maroon/90 text-white px-3 py-1 rounded-full text-xs font-medium">
                     {categoryDisplayNames[tour.category]}
                   </span>
                 </div>
                 <div className="absolute top-4 right-4">
-                  <span className="bg-white text-[#651d2a] px-3 py-1 rounded-full text-xs font-bold">
+                  <span className="bg-white text-tumakr-maroon px-3 py-1 rounded-full text-xs font-bold">
                     {tour.price}
                   </span>
                 </div>
@@ -83,14 +82,12 @@ export async function PopularDestinations() {
                 </div>
               </div>
               <div className="p-6 flex flex-col flex-1">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  {tour.title}
-                </h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{tour.title}</h3>
                 <p className="text-gray-600 text-sm mb-4 line-clamp-3 h-16">
                   {tour.description}
                 </p>
                 <div className="space-y-2 mb-4">
-                  <div className="text-sm text-[#c4982a] font-medium flex items-center">
+                  <div className="text-sm text-tumakr-mustard font-medium flex items-center">
                     <Clock className="w-4 h-4 mr-1" />
                     {tour.duration}
                   </div>
@@ -105,7 +102,7 @@ export async function PopularDestinations() {
                   href={`/tours/${tour.category}/${tour.bokunExperienceId}`}
                   className="mt-auto"
                 >
-                  <Button className="w-full bg-[#651d2a] hover:bg-[#651d2a]/90 text-white rounded-full">
+                  <Button className="w-full bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white rounded-full">
                     Book Now
                   </Button>
                 </Link>

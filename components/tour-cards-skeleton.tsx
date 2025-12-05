@@ -36,7 +36,7 @@ export function PopularDestinationsSkeleton() {
         <div className="text-center mb-16">
           <div className="flex items-center justify-center mb-4">
             <svg
-              className="w-8 h-8 text-[#651d2a] mr-3"
+              className="w-8 h-8 text-tumakr-maroon mr-3"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -51,8 +51,7 @@ export function PopularDestinationsSkeleton() {
             </h2>
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Discover Korea&apos;s most beloved destinations with our expert
-            local guides
+            Discover Korea&apos;s most beloved destinations with our expert local guides
           </p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">

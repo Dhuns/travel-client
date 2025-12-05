@@ -1,14 +1,18 @@
 "use client";
 
-import { ChevronRight, Heart, MapPin, Clock, Loader2 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  getMyWishlist,
+  removeFromWishlist,
+  WishlistItem,
+} from "@/src/shared/apis/wishlist";
+import { useAuthStore } from "@/src/shared/store/authStore";
+import { ChevronRight, Clock, Heart, Loader2, MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/src/shared/store/authStore";
-import { getMyWishlist, removeFromWishlist, WishlistItem } from "@/src/shared/apis/wishlist";
+import { useEffect, useState } from "react";
 
 /**
  * Wishlist Page
@@ -60,7 +64,9 @@ export default function WishlistPage() {
     // Optimistic UI update
     setRemovingIds((prev) => new Set(prev).add(bokunExperienceId));
     const previousItems = [...wishlistItems];
-    setWishlistItems((prev) => prev.filter((item) => item.bokunExperienceId !== bokunExperienceId));
+    setWishlistItems((prev) =>
+      prev.filter((item) => item.bokunExperienceId !== bokunExperienceId)
+    );
 
     try {
       await removeFromWishlist(accessToken, bokunExperienceId);
@@ -78,14 +84,12 @@ export default function WishlistPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
       <div className="container mx-auto px-6 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">My Wishlist</h1>
-          <p className="text-gray-600">
-            Save and compare tours you're interested in
-          </p>
+          <p className="text-gray-600">Save and compare tours you're interested in</p>
         </div>
 
         {/* Wishlist items */}
@@ -93,7 +97,7 @@ export default function WishlistPage() {
           {isLoading ? (
             <div className="col-span-full">
               <Card className="p-12 text-center shadow-lg border border-gray-200 bg-white rounded-xl">
-                <Loader2 className="w-12 h-12 text-[#651d2a] mx-auto mb-4 animate-spin" />
+                <Loader2 className="w-12 h-12 text-tumakr-maroon mx-auto mb-4 animate-spin" />
                 <p className="text-gray-600">Loading your wishlist...</p>
               </Card>
             </div>
@@ -108,7 +112,7 @@ export default function WishlistPage() {
                   Save tours you like and check them out later
                 </p>
                 <Link href="/tours">
-                  <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white">
+                  <Button className="bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white">
                     Browse Tours
                   </Button>
                 </Link>
@@ -121,7 +125,7 @@ export default function WishlistPage() {
                 className="overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 bg-white rounded-xl group p-0 flex flex-col h-full"
               >
                 {/* Image */}
-                <div className="relative h-48 overflow-hidden flex-shrink-0">
+                <div className="relative h-48 overflow-hidden shrink-0">
                   {item.image ? (
                     <Image
                       src={item.image}
@@ -174,14 +178,12 @@ export default function WishlistPage() {
                   {/* Price and action */}
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto">
                     {item.price && (
-                      <div className="text-xl font-bold text-gray-900">
-                        {item.price}
-                      </div>
+                      <div className="text-xl font-bold text-gray-900">{item.price}</div>
                     )}
                     <Link href={`/tours/multiday/${item.bokunExperienceId}`}>
                       <Button
                         size="sm"
-                        className="bg-[#651d2a] hover:bg-[#4a1520] text-white"
+                        className="bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white"
                       >
                         View Details
                         <ChevronRight className="w-4 h-4 ml-1" />
@@ -196,7 +198,7 @@ export default function WishlistPage() {
 
         {/* Help section */}
         {wishlistItems.length > 0 && (
-          <Card className="mt-12 bg-gradient-to-r from-[#651d2a]/5 to-[#6d8675]/5 border border-gray-200 shadow-lg rounded-xl">
+          <Card className="mt-12 bg-linear-to-r from-tumakr-maroon/5 to-tumakr-sage-green/5 border border-gray-200 shadow-lg rounded-xl">
             <CardContent className="p-8 text-center">
               <h3 className="text-xl font-bold text-gray-900 mb-2">
                 Found tours you like?
@@ -206,12 +208,12 @@ export default function WishlistPage() {
               </p>
               <div className="flex justify-center space-x-4">
                 <Link href="/chat">
-                  <Button className="border border-[#651d2a] text-[#651d2a] bg-white hover:!bg-[#651d2a] hover:!text-white transition-all shadow-sm cursor-pointer">
+                  <Button className="border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white transition-all shadow-sm cursor-pointer">
                     Chat with AI
                   </Button>
                 </Link>
                 <Link href="/tours">
-                  <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white">
+                  <Button className="bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white">
                     Explore More Tours
                   </Button>
                 </Link>

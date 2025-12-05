@@ -10,7 +10,7 @@ export default function ShopPage() {
   return (
     <div className="min-h-screen bg-[#f5f3f0]">
       {/* Hero Section */}
-      <div className="relative pt-20 pb-20 bg-gradient-to-r from-[#c4982a] to-[#6d8675] overflow-hidden">
+      <div className="relative pt-20 pb-20 bg-linear-to-r from-tumakr-mustard to-tumakr-sage-green overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center opacity-20"
           style={{
@@ -27,12 +27,12 @@ export default function ShopPage() {
             Memories of Korea, <span className="text-white/90">On Us</span>
           </h1>
           <p className="text-lg text-white/90 max-w-2xl mx-auto mb-8 drop-shadow-md leading-relaxed">
-            We believe the best souvenirs are the ones that tell a story. That's
-            why we gift these exclusive, high-quality mementos to every traveler
-            who joins our tours.
+            We believe the best souvenirs are the ones that tell a story. That's why we
+            gift these exclusive, high-quality mementos to every traveler who joins our
+            tours.
           </p>
           <Link href="/tours">
-            <Button className="bg-white text-[#651d2a] hover:bg-white/90 px-8 py-3 text-lg rounded-full font-semibold shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1">
+            <Button className="bg-white text-tumakr-maroon hover:bg-white/90 px-8 py-3 text-lg rounded-full font-semibold shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1">
               Book a Tour & Get Your Gifts
               <ArrowRight className="w-5 h-5 ml-2 inline" />
             </Button>
@@ -52,56 +52,48 @@ export default function ShopPage() {
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
-              <div className="absolute top-6 left-6 bg-[#c4982a] text-white px-4 py-2 rounded-full font-bold shadow-lg">
+              <div className="absolute top-6 left-6 bg-tumakr-mustard text-white px-4 py-2 rounded-full font-bold shadow-lg">
                 PREMIUM APPAREL
               </div>
             </div>
             <div className="space-y-8 lg:pl-10">
               <div className="space-y-4">
-                <h2 className="text-4xl font-bold text-gray-900">
-                  Signature Hoodie
-                </h2>
-                <p className="text-xl text-[#651d2a] font-medium">
+                <h2 className="text-4xl font-bold text-gray-900">Signature Hoodie</h2>
+                <p className="text-xl text-tumakr-maroon font-medium">
                   Comfort meets Tradition
                 </p>
                 <p className="text-lg text-gray-600 leading-relaxed">
-                  Stay warm and stylish with our exclusive signature hoodie.
-                  Made from high-quality, soft cotton blend, it features subtle
-                  embroidery inspired by traditional Korean patterns. Perfect
-                  for your travels or as a cozy reminder of your journey.
+                  Stay warm and stylish with our exclusive signature hoodie. Made from
+                  high-quality, soft cotton blend, it features subtle embroidery inspired
+                  by traditional Korean patterns. Perfect for your travels or as a cozy
+                  reminder of your journey.
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
-                  <div className="w-10 h-10 bg-[#651d2a]/10 rounded-full flex items-center justify-center text-[#651d2a]">
+                  <div className="w-10 h-10 bg-tumakr-maroon/10 rounded-full flex items-center justify-center text-tumakr-maroon">
                     <Check className="w-5 h-5" />
                   </div>
-                  <span className="font-medium text-gray-800">
-                    Premium Cotton Blend
-                  </span>
+                  <span className="font-medium text-gray-800">Premium Cotton Blend</span>
                 </div>
                 <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
-                  <div className="w-10 h-10 bg-[#651d2a]/10 rounded-full flex items-center justify-center text-[#651d2a]">
+                  <div className="w-10 h-10 bg-tumakr-maroon/10 rounded-full flex items-center justify-center text-tumakr-maroon">
                     <Check className="w-5 h-5" />
                   </div>
-                  <span className="font-medium text-gray-800">
-                    Embroidered Details
-                  </span>
+                  <span className="font-medium text-gray-800">Embroidered Details</span>
                 </div>
                 <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
-                  <div className="w-10 h-10 bg-[#651d2a]/10 rounded-full flex items-center justify-center text-[#651d2a]">
+                  <div className="w-10 h-10 bg-tumakr-maroon/10 rounded-full flex items-center justify-center text-tumakr-maroon">
                     <Check className="w-5 h-5" />
                   </div>
                   <span className="font-medium text-gray-800">Unisex Fit</span>
                 </div>
                 <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
-                  <div className="w-10 h-10 bg-[#651d2a]/10 rounded-full flex items-center justify-center text-[#651d2a]">
+                  <div className="w-10 h-10 bg-tumakr-maroon/10 rounded-full flex items-center justify-center text-tumakr-maroon">
                     <Check className="w-5 h-5" />
                   </div>
-                  <span className="font-medium text-gray-800">
-                    Durable Fabric
-                  </span>
+                  <span className="font-medium text-gray-800">Durable Fabric</span>
                 </div>
               </div>
             </div>
@@ -114,49 +106,41 @@ export default function ShopPage() {
                 <h2 className="text-4xl font-bold text-gray-900">
                   Eco-Friendly Tote Bag
                 </h2>
-                <p className="text-xl text-[#6d8675] font-medium">
+                <p className="text-xl text-tumakr-sage-green font-medium">
                   Sustainable Style for Every Day
                 </p>
                 <p className="text-lg text-gray-600 leading-relaxed">
-                  Carry your memories responsibly with our durable eco-bag.
-                  Featuring unique artwork that captures the beauty of Korean
-                  landscapes, this spacious tote is perfect for shopping, daily
-                  commutes, or carrying your travel essentials.
+                  Carry your memories responsibly with our durable eco-bag. Featuring
+                  unique artwork that captures the beauty of Korean landscapes, this
+                  spacious tote is perfect for shopping, daily commutes, or carrying your
+                  travel essentials.
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
-                  <div className="w-10 h-10 bg-[#6d8675]/10 rounded-full flex items-center justify-center text-[#6d8675]">
+                  <div className="w-10 h-10 bg-tumakr-sage-green/10 rounded-full flex items-center justify-center text-tumakr-sage-green">
                     <Check className="w-5 h-5" />
                   </div>
-                  <span className="font-medium text-gray-800">
-                    100% Organic Cotton
-                  </span>
+                  <span className="font-medium text-gray-800">100% Organic Cotton</span>
                 </div>
                 <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
-                  <div className="w-10 h-10 bg-[#6d8675]/10 rounded-full flex items-center justify-center text-[#6d8675]">
+                  <div className="w-10 h-10 bg-tumakr-sage-green/10 rounded-full flex items-center justify-center text-tumakr-sage-green">
                     <Check className="w-5 h-5" />
                   </div>
-                  <span className="font-medium text-gray-800">
-                    Spacious Design
-                  </span>
+                  <span className="font-medium text-gray-800">Spacious Design</span>
                 </div>
                 <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
-                  <div className="w-10 h-10 bg-[#6d8675]/10 rounded-full flex items-center justify-center text-[#6d8675]">
+                  <div className="w-10 h-10 bg-tumakr-sage-green/10 rounded-full flex items-center justify-center text-tumakr-sage-green">
                     <Check className="w-5 h-5" />
                   </div>
-                  <span className="font-medium text-gray-800">
-                    Unique Art Print
-                  </span>
+                  <span className="font-medium text-gray-800">Unique Art Print</span>
                 </div>
                 <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
-                  <div className="w-10 h-10 bg-[#6d8675]/10 rounded-full flex items-center justify-center text-[#6d8675]">
+                  <div className="w-10 h-10 bg-tumakr-sage-green/10 rounded-full flex items-center justify-center text-tumakr-sage-green">
                     <Check className="w-5 h-5" />
                   </div>
-                  <span className="font-medium text-gray-800">
-                    Reinforced Handles
-                  </span>
+                  <span className="font-medium text-gray-800">Reinforced Handles</span>
                 </div>
               </div>
             </div>
@@ -167,7 +151,7 @@ export default function ShopPage() {
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
-              <div className="absolute top-6 right-6 bg-[#6d8675] text-white px-4 py-2 rounded-full font-bold shadow-lg">
+              <div className="absolute top-6 right-6 bg-tumakr-sage-green text-white px-4 py-2 rounded-full font-bold shadow-lg">
                 SUSTAINABLE
               </div>
             </div>
@@ -182,29 +166,27 @@ export default function ShopPage() {
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
-              <div className="absolute top-6 left-6 bg-[#651d2a] text-white px-4 py-2 rounded-full font-bold shadow-lg">
+              <div className="absolute top-6 left-6 bg-tumakr-maroon text-white px-4 py-2 rounded-full font-bold shadow-lg">
                 DAILY ESSENTIAL
               </div>
             </div>
             <div className="space-y-8 lg:pl-10">
               <div className="space-y-4">
-                <h2 className="text-4xl font-bold text-gray-900">
-                  Premium Tumbler
-                </h2>
-                <p className="text-xl text-[#651d2a] font-medium">
+                <h2 className="text-4xl font-bold text-gray-900">Premium Tumbler</h2>
+                <p className="text-xl text-tumakr-maroon font-medium">
                   Hydration with Elegance
                 </p>
                 <p className="text-lg text-gray-600 leading-relaxed">
                   Keep your beverages at the perfect temperature with our sleek,
-                  double-walled tumbler. Designed for both functionality and
-                  style, it features a minimalist aesthetic with the Tumakr
-                  logo, making it an ideal companion for your daily adventures.
+                  double-walled tumbler. Designed for both functionality and style, it
+                  features a minimalist aesthetic with the Tumakr logo, making it an ideal
+                  companion for your daily adventures.
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
-                  <div className="w-10 h-10 bg-[#651d2a]/10 rounded-full flex items-center justify-center text-[#651d2a]">
+                  <div className="w-10 h-10 bg-tumakr-maroon/10 rounded-full flex items-center justify-center text-tumakr-maroon">
                     <Check className="w-5 h-5" />
                   </div>
                   <span className="font-medium text-gray-800">
@@ -212,26 +194,22 @@ export default function ShopPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
-                  <div className="w-10 h-10 bg-[#651d2a]/10 rounded-full flex items-center justify-center text-[#651d2a]">
+                  <div className="w-10 h-10 bg-tumakr-maroon/10 rounded-full flex items-center justify-center text-tumakr-maroon">
                     <Check className="w-5 h-5" />
                   </div>
-                  <span className="font-medium text-gray-800">
-                    Leak-Proof Lid
-                  </span>
+                  <span className="font-medium text-gray-800">Leak-Proof Lid</span>
                 </div>
                 <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
-                  <div className="w-10 h-10 bg-[#651d2a]/10 rounded-full flex items-center justify-center text-[#651d2a]">
+                  <div className="w-10 h-10 bg-tumakr-maroon/10 rounded-full flex items-center justify-center text-tumakr-maroon">
                     <Check className="w-5 h-5" />
                   </div>
                   <span className="font-medium text-gray-800">BPA Free</span>
                 </div>
                 <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
-                  <div className="w-10 h-10 bg-[#651d2a]/10 rounded-full flex items-center justify-center text-[#651d2a]">
+                  <div className="w-10 h-10 bg-tumakr-maroon/10 rounded-full flex items-center justify-center text-tumakr-maroon">
                     <Check className="w-5 h-5" />
                   </div>
-                  <span className="font-medium text-gray-800">
-                    Sleek Design
-                  </span>
+                  <span className="font-medium text-gray-800">Sleek Design</span>
                 </div>
               </div>
             </div>
