@@ -1,6 +1,4 @@
 import { TourGrid } from "@/components/tours/tour-grid";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 
 export const revalidate = 3600; // 1시간마다 재생성
 
@@ -13,7 +11,7 @@ export default async function ToursPage() {
           className="absolute inset-0 bg-cover bg-center opacity-20"
           style={{
             backgroundImage:
-              "url('/beautiful-korean-traditional-palace-with-tourists-.jpg')",
+              "url('/beautiful-korean-traditional-palace-with-tourists.jpg')",
           }}
         ></div>
         <div className="absolute inset-0 bg-black/20"></div>
@@ -67,7 +65,8 @@ export default async function ToursPage() {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-tumakr-maroon py-8">
+      {/* TODO: Custom Tour Request - 개발 후 활성화 예정 */}
+      {/* <div className="bg-tumakr-maroon py-8">
         <div className="container mx-auto px-6 text-center text-white">
           <h2 className="text-2xl font-bold mb-3">Can't Find What You're Looking For?</h2>
           <p className="text-white/90 mb-6 max-w-xl mx-auto">
@@ -83,7 +82,7 @@ export default async function ToursPage() {
             </Button>
           </Link>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -9,7 +9,7 @@ export default function ToursLoading() {
           className="absolute inset-0 bg-cover bg-center opacity-20"
           style={{
             backgroundImage:
-              "url('/beautiful-korean-traditional-palace-with-tourists-.jpg')",
+              "url('/beautiful-korean-traditional-palace-with-tourists.jpg')",
           }}
         ></div>
         <div className="absolute inset-0 bg-black/20"></div>

@@ -132,7 +132,7 @@ export default function FAQPage() {
     .filter((category) => category.faqs.length > 0);
 
   return (
-    <div className="min-h-screen bg-white pt-20">
+    <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section className="bg-tumakr-maroon py-16">
         <div className="container mx-auto px-6 text-center text-white">
@@ -227,24 +227,25 @@ export default function FAQPage() {
         <div className="container mx-auto max-w-4xl text-center">
           <MessageCircle className="w-12 h-12 text-tumakr-maroon mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Still have questions?</h2>
-          <p className="text-gray-600 mb-8 max-w-xl mx-auto">
-            Can't find what you're looking for? Our team is here to help. Contact us and
-            we'll get back to you as soon as possible.
-          </p>
+          <div className="flex flex-col items-center justify-center text-gray-600 mb-8 max-w-xl mx-auto">
+            <p>Can't find what you're looking for? Our team is here to help.</p>
+            <p>Contact us and we'll get back to you as soon as possible.</p>
+          </div>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/contact">
-              <Button className="bg-tumakr-maroon hover:bg-tumakr-maroon/90">
-                Contact Us
-              </Button>
-            </Link>
-            <Link href="/chat">
-              <Button
-                variant="outline"
-                className="border-tumakr-maroon text-tumakr-maroon hover:bg-tumakr-maroon hover:text-white"
-              >
-                Plan Your Trip
-              </Button>
-            </Link>
+            <Button
+              asChild
+              className="bg-tumakr-maroon hover:bg-transparent text-white hover:text-tumakr-maroon border border-tumakr-maroon hover:border-tumakr-maroon"
+            >
+              <Link href="/contact">Contact Us</Link>
+            </Button>
+            {/* 구현 후 적용 
+            <Button
+              asChild
+              variant="outline"
+              className="border-tumakr-maroon text-tumakr-maroon hover:bg-tumakr-maroon hover:text-white"
+            >
+              <Link href="/chat">Plan Your Trip</Link>
+            </Button> */}
           </div>
         </div>
       </section>

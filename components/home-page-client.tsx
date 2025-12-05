@@ -9,9 +9,9 @@ import {
 import {
   ArrowRight,
   Calendar,
+  ChevronDown,
   ChevronRight,
   ExternalLink,
-  Gift,
   MapPin,
   MessageCircle,
   Sparkles,
@@ -21,7 +21,6 @@ import {
 import { useCallback, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -34,7 +33,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
     {
       title: "History Tours",
       description: "Deep dive into Korea's rich heritage",
-      image: "/beautiful-korean-traditional-palace-with-tourists-.jpg",
+      image: "/korea-palace-4.jpg",
       link: "/tours/history",
       icon: MapPin,
       color: "var(--color-tumakr-maroon)", // tumakr-maroon
@@ -118,7 +117,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
         {/* Background Image */}
         <div className="absolute inset-0">
           <Image
-            src="/images/design-mode/castle4.png"
+            src="/korea-palace-main.jpg"
             alt="Tumakr Korea History Tour"
             fill
             className="object-cover"
@@ -161,6 +160,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
               premium tour collections.
             </p>
             <div className="flex flex-col sm:flex-row items-start gap-4 opacity-0 animate-[fadeIn_1s_ease-in_2s_forwards]">
+              {/* Todo: 구현 후 추가
               <Button
                 size="lg"
                 className="bg-tumakr-maroon text-white hover:bg-tumakr-maroon/90 px-8 py-6 text-lg rounded-full shadow-2xl group"
@@ -172,7 +172,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
               >
                 <MessageCircle className="w-5 h-5 mr-2" />
                 Chat with AI Planner
-              </Button>
+              </Button> */}
               <Button
                 size="lg"
                 variant="outline"
@@ -181,7 +181,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
                   document.getElementById("tours")?.scrollIntoView({ behavior: "smooth" })
                 }
               >
-                Explore Tours
+                View Exclusives
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
@@ -221,7 +221,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
             Scroll Down
           </span>
           <button onClick={scrollToTours} className="focus:outline-none">
-            <ChevronRight className="w-6 h-6 rotate-90 animate-bounce" />
+            <ChevronDown className="w-6 h-6 animate-bounce" />
           </button>
         </div>
       </section>
@@ -270,11 +270,11 @@ export default function HomePageClient({ children }: HomePageClientProps) {
 
             <Button
               size="lg"
-              className="bg-white text-tumakr-mustard hover:bg-white/90 px-6 py-5 md:px-8 md:py-6 lg:px-10 lg:py-7 text-base lg:text-lg rounded-full shadow-2xl group/btn"
+              disabled
+              className="bg-white/60 text-tumakr-mustard cursor-not-allowed px-6 py-5 md:px-8 md:py-6 lg:px-10 lg:py-7 text-base lg:text-lg rounded-full shadow-2xl"
             >
               <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
-              Start Chat Now
-              <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+              Coming Soon
             </Button>
           </div>
         </div>
@@ -319,19 +319,19 @@ export default function HomePageClient({ children }: HomePageClientProps) {
               >
                 <Calendar className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
                 Explore Tours
-                <ExternalLink className="w-4 h-4 lg:w-5 lg:h-5 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+                <ExternalLink className="w-4 h-4 lg:w-5 lg:h-5 ml-2 transition-transform" />
               </Button>
             </Link>
           </div>
         </div>
 
         {/* Scroll Indicator */}
-        <div className="absolute bottom-4 lg:bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/70 z-20">
-          <span className="text-xs lg:text-sm font-semibold tracking-wider uppercase">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/70">
+          <span className="text-sm font-semibold tracking-wider uppercase">
             Scroll Down
           </span>
           <button onClick={scrollToTours} className="focus:outline-none">
-            <ChevronRight className="w-5 h-5 lg:w-6 lg:h-6 rotate-90 animate-bounce" />
+            <ChevronDown className="w-6 h-6 animate-bounce" />
           </button>
         </div>
       </section>
@@ -352,7 +352,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
           </div>
 
           {/* Asymmetric Flex Layout */}
-          <div className="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto">
+          <div className="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto ">
             {/* First Tour - Large */}
             <Link href={tourCategories[0].link} className="lg:w-1/2 group">
               <div className="relative h-full min-h-[500px] lg:min-h-[712px] rounded-3xl overflow-hidden shadow-xl hover:shadow-3xl transition-all duration-700 transform hover:-translate-y-2 hover:rotate-1">
@@ -490,15 +490,16 @@ export default function HomePageClient({ children }: HomePageClientProps) {
                 ))}
               </div>
 
-              <Link href="/chat">
-                <Button
-                  size="lg"
-                  className="bg-tumakr-mustard text-white hover:bg-tumakr-mustard/90 px-12 py-8 text-xl rounded-full shadow-2xl mt-8 group"
-                >
-                  Launch AI Chat
-                  <MessageCircle className="w-6 h-6 ml-3 group-hover:scale-110 transition-transform" />
-                </Button>
-              </Link>
+              <Button
+                disabled
+                size="lg"
+                className="bg-tumakr-mustard text-white hover:bg-tumakr-mustard/90 px-12 py-8 text-xl rounded-full shadow-2xl mt-8 group"
+              >
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                  Coming Soon
+                </div>
+              </Button>
             </div>
 
             {/* Right: Chat Preview */}
@@ -559,8 +560,8 @@ export default function HomePageClient({ children }: HomePageClientProps) {
         </div>
       </section>
 
-      {/* 6. Goods Showcase */}
-      <section className="py-24 bg-white">
+      {/* 6. Goods Showcase - 개발 후 활성화 예정 */}
+      {/* <section className="py-24 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-tumakr-sage-green/10 text-tumakr-sage-green px-5 py-2 rounded-full mb-4">
@@ -580,36 +581,32 @@ export default function HomePageClient({ children }: HomePageClientProps) {
           <div className="max-w-5xl mx-auto">
             <div className="grid md:grid-cols-3 gap-8">
               {goods.map((item, index) => (
-                <Link href={item.link} key={index} className="group">
-                  <Card className="overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 bg-card h-full flex flex-col">
-                    <div className="relative aspect-square overflow-hidden bg-muted">
-                      <Image
-                        src={item.image || "/placeholder.svg"}
-                        alt={item.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute top-4 right-4">
-                        <span className="bg-tumakr-sage-green text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">
-                          FREE
-                        </span>
-                      </div>
+                <Card className="overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 bg-card h-full flex flex-col">
+                  <div className="relative aspect-square overflow-hidden bg-muted">
+                    <Image
+                      src={item.image || "/placeholder.svg"}
+                      alt={item.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute top-4 right-4">
+                      <span className="bg-tumakr-sage-green text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">
+                        FREE
+                      </span>
                     </div>
-                    <div className="p-6 text-center flex-1 flex flex-col justify-center">
-                      <h3 className="font-bold text-xl text-black mb-2 group-hover:text-tumakr-sage-green transition-colors">
-                        {item.name}
-                      </h3>
-                      <p className="text-sm text-gray-900 mb-4">
-                        Complimentary with tour
-                      </p>
-                    </div>
-                  </Card>
-                </Link>
+                  </div>
+                  <div className="p-6 text-center flex-1 flex flex-col justify-center">
+                    <h3 className="font-bold text-xl text-black mb-2 group-hover:text-tumakr-sage-green transition-colors">
+                      {item.name}
+                    </h3>
+                    <p className="text-sm text-gray-900 mb-4">Complimentary with tour</p>
+                  </div>
+                </Card>
               ))}
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* 7. FAQ Section */}
       <section className="py-24 bg-white">
@@ -630,7 +627,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
                 value={`item-${index}`}
                 className="bg-card border-0 rounded-2xl px-6 shadow-md hover:shadow-lg transition-shadow"
               >
-                <AccordionTrigger className="text-left text-lg font-semibold text-black hover:text-tumakr-maroon transition-colors py-6">
+                <AccordionTrigger className="text-left text-lg font-semibold text-black cursor-pointer hover:text-tumakr-maroon transition-colors py-6">
                   {faq.question}
                 </AccordionTrigger>
                 <AccordionContent className="text-gray-900 leading-relaxed pb-6">

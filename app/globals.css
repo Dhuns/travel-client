@@ -608,11 +608,13 @@ img[data-loaded="true"] {
   opacity: 1;
 }
 
-/* Bokun 플로팅 장바구니 위젯 - 흰색 사각형 배경 제거 */
-.bokun-widgets-cart-wrapper,
-.sc-gueYoa,
-.cbxSxv {
-  background: transparent !important;
-  background-color: transparent !important;
-  box-shadow: none !important;
+/* Bokun 플로팅 장바구니 위젯만 숨김 (고정 위치) */
+body > div[style*="position: fixed"][style*="bottom"],
+body > div[style*="position: fixed"][style*="right"]:not([class*="bokunWidget"]) {
+  display: none !important;
+}
+
+/* Bokun 플로팅 카트 래퍼 숨김 */
+.bokun-widgets-cart-wrapper {
+  display: none !important;
 }

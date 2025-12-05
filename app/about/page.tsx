@@ -1,5 +1,6 @@
-import { Award, Globe, Heart, MessageCircle, Quote, Star, Users } from "lucide-react";
+import { Award, Globe, Heart, Quote, Star, Users } from "lucide-react";
 
+import StarRating from "@/components/star-rating";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
@@ -61,8 +62,8 @@ const tripAdvisorReviews = [
 const stats = [
   { value: "10+", label: "Years Experience" },
   { value: "50K+", label: "Happy Travelers" },
-  { value: "716", label: "TripAdvisor Reviews" },
-  { value: "5.0", label: "Average Rating" },
+  { value: "700+", label: "TripAdvisor Reviews" },
+  { value: "4.9", label: "Average Rating" },
 ];
 
 const values = [
@@ -99,7 +100,7 @@ export default function AboutPage() {
       <section className="relative min-h-[60vh] flex items-center">
         <div className="absolute inset-0">
           <Image
-            src="/images/design-mode/castle3.png"
+            src="/korea-palace-2.jpg"
             alt="Korean landscape"
             fill
             className="object-cover"
@@ -220,14 +221,10 @@ export default function AboutPage() {
               <h2 className="text-3xl font-bold text-gray-900">What Our Travelers Say</h2>
             </div>
             <div className="flex items-center justify-center gap-2 mb-2">
-              <div className="flex">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} className="w-6 h-6 text-[#00AA6C] fill-[#00AA6C]" />
-                ))}
-              </div>
-              <span className="text-2xl font-bold text-gray-900">5.0</span>
+              <StarRating rating={4.9} size={24} />
+              <span className="text-2xl font-bold text-gray-900">4.9</span>
             </div>
-            <p className="text-gray-600">Based on 716 reviews on TripAdvisor</p>
+            <p className="text-gray-600">Based on 700+ reviews on TripAdvisor</p>
           </div>
 
           {/* Reviews Grid */}
@@ -246,14 +243,10 @@ export default function AboutPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="flex">
-                        {[1, 2, 3, 4, 5].map((star) => (
+                        {Array.from({ length: review.rating }, (_, index) => (
                           <Star
-                            key={star}
-                            className={`w-4 h-4 ${
-                              star <= review.rating
-                                ? "text-[#00AA6C] fill-[#00AA6C]"
-                                : "text-gray-300"
-                            }`}
+                            key={index}
+                            className="w-4 h-4 text-[#00AA6C] fill-[#00AA6C]"
                           />
                         ))}
                       </div>
@@ -282,7 +275,7 @@ export default function AboutPage() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-[#00AA6C] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#008f5b] transition-colors"
             >
-              Read All 716 Reviews on TripAdvisor
+              Read All Reviews on TripAdvisor
               <svg
                 className="w-4 h-4"
                 fill="none"
@@ -318,7 +311,9 @@ export default function AboutPage() {
                 Browse Tours
               </Button>
             </Link>
-            <Link href="/chat">
+
+            {/* TODO: Chat with Us - 개발 후 활성화 예정 */}
+            {/* <Link href="/chat">
               <Button
                 size="lg"
                 variant="outline"
@@ -327,7 +322,7 @@ export default function AboutPage() {
                 <MessageCircle className="w-5 h-5 mr-2" />
                 Chat With Us
               </Button>
-            </Link>
+            </Link> */}
           </div>
         </div>
       </section>

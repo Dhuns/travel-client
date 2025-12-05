@@ -1,13 +1,4 @@
-import {
-  BookOpen,
-  Calendar,
-  Check,
-  Gift,
-  MapPin,
-  Sparkles,
-  Users,
-  X,
-} from "lucide-react";
+import { BookOpen, Calendar, Check, MapPin, Sparkles, Users, X } from "lucide-react";
 
 import { FavoriteButton } from "@/components/favorite-button";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +17,7 @@ export default async function HistoryTourPage() {
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center px-6">
-        <div className="container mx-auto max-w-6xl">
+        <div className="container mx-auto max-w-7xl">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* 왼쪽: 텍스트 콘텐츠 */}
             <div>
@@ -94,7 +85,7 @@ export default async function HistoryTourPage() {
 
       {/* Why is Korean History Special Section */}
       <section className="min-h-screen flex items-center px-6 bg-linear-to-br from-tumakr-dusty-pink/10 to-tumakr-sage-green/10">
-        <div className="container mx-auto max-w-6xl py-20">
+        <div className="container mx-auto max-w-7xl py-20">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-16">
             Why is Korean History Special?
           </h2>
@@ -103,7 +94,7 @@ export default async function HistoryTourPage() {
             {/* 이미지 */}
             <div className="relative h-[350px] rounded-2xl overflow-hidden shadow-lg">
               <img
-                src="/beautiful-korean-traditional-palace-with-tourists-.jpg"
+                src="/beautiful-korean-traditional-palace.jpg"
                 alt="Korean Palace"
                 className="w-full h-full object-cover"
               />
@@ -152,7 +143,7 @@ export default async function HistoryTourPage() {
             {/* 이미지 */}
             <div className="relative h-[350px] rounded-2xl overflow-hidden shadow-lg order-1 md:order-2">
               <img
-                src="/beautiful-korean-traditional-palace-with-tourists-.jpg"
+                src="/beautiful-korean-traditional-palace-with-tourists.jpg"
                 alt="Korean Cultural Heritage"
                 className="w-full h-full object-cover"
               />
@@ -161,8 +152,8 @@ export default async function HistoryTourPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-6 bg-linear-to-r from-tumakr-maroon via-tumakr-mustard to-tumakr-sage-green">
+      {/* CTA Section: 개발 후 활성화 */}
+      {/* <section className="py-20 px-6 bg-linear-to-r from-tumakr-maroon via-tumakr-mustard to-tumakr-sage-green">
         <div className="container mx-auto max-w-4xl text-center text-white">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Now, it's your turn to begin your story.
@@ -179,11 +170,11 @@ export default async function HistoryTourPage() {
             </Button>
           </Link>
         </div>
-      </section>
+      </section> */}
 
       {/* Historical Destinations Section */}
       <section id="tour-list" className="min-h-screen flex items-center px-6 bg-white">
-        <div className="container mx-auto max-w-6xl py-20">
+        <div className="container mx-auto max-w-7xl py-20">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4">
             Historical Destinations Come Alive
           </h2>
@@ -358,7 +349,8 @@ export default async function HistoryTourPage() {
       </section>
 
       {/* Products & Souvenirs Section */}
-      <section className="py-16 px-6 flex items-center bg-linear-to-br from-tumakr-dusty-pink/10 to-tumakr-sage-green/10">
+      {/* TODO: Products & Souvenirs - 개발 후 활성화 예정 */}
+      {/* <section className="py-16 px-6 flex items-center bg-linear-to-br from-tumakr-dusty-pink/10 to-tumakr-sage-green/10">
         <div className="container mx-auto max-w-6xl w-full">
           <div className="text-center mb-12">
             <div className="flex items-center justify-center gap-2 mb-4">
@@ -372,7 +364,6 @@ export default async function HistoryTourPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Product 1 */}
             <div className="bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-shadow">
               <div className="relative h-64">
                 <img
@@ -391,7 +382,6 @@ export default async function HistoryTourPage() {
               </div>
             </div>
 
-            {/* Product 2 */}
             <div className="bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-shadow">
               <div className="relative h-64">
                 <img
@@ -410,7 +400,6 @@ export default async function HistoryTourPage() {
               </div>
             </div>
 
-            {/* Product 3 */}
             <div className="bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-shadow">
               <div className="relative h-64">
                 <img
@@ -430,11 +419,11 @@ export default async function HistoryTourPage() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Feel the Breath of History Section */}
       <section className="flex items-center px-6 bg-gray-50">
-        <div className="container mx-auto max-w-6xl py-32">
+        <div className="container mx-auto max-w-7xl py-32">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4">
             Feel the Breath of History
           </h2>
