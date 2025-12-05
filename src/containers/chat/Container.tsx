@@ -1,12 +1,12 @@
-import React, { FC, useEffect, useState, useCallback } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 
 import ChatInfoPanel from "@components/Chat/ChatInfoPanel";
 import ChatInput from "@components/Chat/ChatInput";
 import ChatMessageList from "@components/Chat/ChatMessageList";
 import ChatSidebar from "@components/Chat/ChatSidebar";
 import styled from "@emotion/styled";
-import useChatStore from "@shared/store/chatStore";
 import { useAuthStore } from "@shared/store/authStore";
+import useChatStore from "@shared/store/chatStore";
 import { useRouter } from "next/navigation";
 
 const Container: FC = () => {
@@ -37,8 +37,8 @@ const Container: FC = () => {
   useEffect(() => {
     if (!isAuthenticated) {
       // localStorage 캐시만 초기화 (서버 데이터는 유지)
-      const CHAT_STORAGE_KEY = 'chat-sessions-storage';
-      if (typeof window !== 'undefined') {
+      const CHAT_STORAGE_KEY = "chat-sessions-storage";
+      if (typeof window !== "undefined") {
         localStorage.removeItem(CHAT_STORAGE_KEY);
       }
     }
@@ -80,13 +80,16 @@ const Container: FC = () => {
   }, [initSession]);
 
   // 메시지 전송 핸들러
-  const handleSendMessage = useCallback(async (content: string) => {
-    if (!session) return;
+  const handleSendMessage = useCallback(
+    async (content: string) => {
+      if (!session) return;
 
-    // 백엔드 API로 메시지 전송 및 AI 응답 받기 (Gemini AI)
-    // 컨텍스트 추출은 백엔드에서 자동으로 수행됨
-    await sendUserMessage(content);
-  }, [session, sendUserMessage]);
+      // 백엔드 API로 메시지 전송 및 AI 응답 받기 (Gemini AI)
+      // 컨텍스트 추출은 백엔드에서 자동으로 수행됨
+      await sendUserMessage(content);
+    },
+    [session, sendUserMessage]
+  );
 
   // 비로그인 사용자 로그인 유도
   if (!isAuthenticated) {
@@ -96,19 +99,29 @@ const Container: FC = () => {
           <LoginPromptContent>
             <LoginPromptIconWrapper>
               <LoginPromptIcon>
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg
+                  width="48"
+                  height="48"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                >
+                  <path
+                    d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </LoginPromptIcon>
             </LoginPromptIconWrapper>
             <LoginPromptTitle>Plan Your Korea Trip with AI</LoginPromptTitle>
             <LoginPromptSubtitle>
-              Sign in to chat with our AI travel assistant and get personalized recommendations for your Korean adventure.
+              Sign in to chat with our AI travel assistant and get personalized
+              recommendations for your Korean adventure.
             </LoginPromptSubtitle>
             <LoginButtonGroup>
-              <LoginButton onClick={() => router.push("/login")}>
-                Sign In
-              </LoginButton>
+              <LoginButton onClick={() => router.push("/login")}>Sign In</LoginButton>
               <SignUpButton onClick={() => router.push("/signup")}>
                 Create Account
               </SignUpButton>
@@ -138,14 +151,23 @@ const Container: FC = () => {
         <EmptyStateContent>
           <EmptyStateIconWrapper>
             <EmptyStateIcon>
-              <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              <svg
+                width="56"
+                height="56"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
               </svg>
             </EmptyStateIcon>
           </EmptyStateIconWrapper>
           <EmptyStateTitle>Where would you like to go in Korea?</EmptyStateTitle>
-          <EmptyStateSubtitle>I can help you plan the perfect trip - just tell me about your travel dreams.</EmptyStateSubtitle>
+          <EmptyStateSubtitle>
+            I can help you plan the perfect trip - just tell me about your travel dreams.
+          </EmptyStateSubtitle>
           <EmptyStateInputWrapper>
             <ChatInput
               onSend={handleSendMessage}
@@ -179,9 +201,16 @@ const Container: FC = () => {
               <TopBarCenter>
                 <ModelBadge>
                   <ModelIcon>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                     </svg>
                   </ModelIcon>
                   Korea Travel AI
@@ -193,9 +222,16 @@ const Container: FC = () => {
                   title="Trip details"
                   active={showInfoPanel}
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 16v-4M12 8h.01"/>
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 16v-4M12 8h.01" />
                   </svg>
                 </IconButton>
               </TopBarRight>
@@ -220,7 +256,9 @@ const Container: FC = () => {
                       isTyping ? "AI is thinking..." : "Message Korea Travel AI..."
                     }
                   />
-                  <InputHint>AI can make mistakes. Please verify important travel information.</InputHint>
+                  <InputHint>
+                    AI can make mistakes. Please verify important travel information.
+                  </InputHint>
                 </InputContainer>
               </InputArea>
             )}
@@ -234,8 +272,15 @@ const Container: FC = () => {
             <InfoPanelHeader>
               <InfoPanelTitle>Trip Details</InfoPanelTitle>
               <CloseButton onClick={() => setShowInfoPanel(false)}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M18 6L6 18M6 6l12 12"/>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M18 6L6 18M6 6l12 12" />
                 </svg>
               </CloseButton>
             </InfoPanelHeader>
@@ -285,7 +330,9 @@ const ChatSection = styled.div<{ hasMessages: boolean }>`
   background-color: #ffffff;
   position: relative;
   min-height: 0;
-  ${({ hasMessages }) => !hasMessages && `
+  ${({ hasMessages }) =>
+    !hasMessages &&
+    `
     justify-content: flex-start;
   `}
 `;
@@ -332,16 +379,17 @@ const ModelIcon = styled.span`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #651d2a;
+  color: var(--color-tumakr-maroon);
 `;
 
 const IconButton = styled.button<{ active?: boolean }>`
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  border: 1px solid ${({ active }) => active ? '#651d2a' : '#e5e5e5'};
-  background-color: ${({ active }) => active ? 'rgba(101, 29, 42, 0.05)' : 'transparent'};
-  color: ${({ active }) => active ? '#651d2a' : '#666'};
+  border: 1px solid ${({ active }) => (active ? "var(--color-tumakr-maroon)" : "#e5e5e5")};
+  background-color: ${({ active }) =>
+    active ? "rgba(101, 29, 42, 0.05)" : "transparent"};
+  color: ${({ active }) => (active ? "var(--color-tumakr-maroon)" : "#666")};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -349,8 +397,8 @@ const IconButton = styled.button<{ active?: boolean }>`
   transition: all 0.15s;
 
   &:hover {
-    background-color: ${({ active }) => active ? 'rgba(101, 29, 42, 0.1)' : '#f5f5f5'};
-    border-color: ${({ active }) => active ? '#651d2a' : '#ddd'};
+    background-color: ${({ active }) => (active ? "rgba(101, 29, 42, 0.1)" : "#f5f5f5")};
+    border-color: ${({ active }) => (active ? "var(--color-tumakr-maroon)" : "#ddd")};
   }
 `;
 
@@ -398,7 +446,8 @@ const InfoPanelContent = styled.div<{ isVisible: boolean }>`
   width: 320px;
   height: 100%;
   opacity: ${({ isVisible }) => (isVisible ? "1" : "0")};
-  transition: opacity ${({ isVisible }) => (isVisible ? "0.3s 0.15s" : "0.15s")} ease-in-out;
+  transition: opacity ${({ isVisible }) => (isVisible ? "0.3s 0.15s" : "0.15s")}
+    ease-in-out;
   display: flex;
   flex-direction: column;
 `;
@@ -468,12 +517,14 @@ const LoadingSpinner = styled.div`
   width: 32px;
   height: 32px;
   border: 2px solid #f0f0f0;
-  border-top-color: #651d2a;
+  border-top-color: var(--color-tumakr-maroon);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 
   @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+      transform: rotate(360deg);
+    }
   }
 `;
 
@@ -506,7 +557,11 @@ const EmptyStateIconWrapper = styled.div`
   width: 80px;
   height: 80px;
   border-radius: 24px;
-  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-tumakr-maroon) 0%,
+    var(--color-tumakr-maroon) 100%
+  );
   display: flex;
   align-items: center;
   justify-content: center;
@@ -569,8 +624,8 @@ const HintChip = styled.button`
   transition: all 0.15s;
 
   &:hover {
-    border-color: #651d2a;
-    color: #651d2a;
+    border-color: var(--color-tumakr-maroon);
+    color: var(--color-tumakr-maroon);
     background-color: rgba(101, 29, 42, 0.03);
   }
 `;
@@ -599,7 +654,11 @@ const LoginPromptIconWrapper = styled.div`
   width: 80px;
   height: 80px;
   border-radius: 24px;
-  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-tumakr-maroon) 0%,
+    var(--color-tumakr-maroon) 100%
+  );
   display: flex;
   align-items: center;
   justify-content: center;
@@ -646,7 +705,7 @@ const LoginButtonGroup = styled.div`
 const LoginButton = styled.button`
   flex: 1;
   padding: 14px 24px;
-  background-color: #651d2a;
+  background-color: var(--color-tumakr-maroon);
   color: white;
   border: none;
   border-radius: 12px;

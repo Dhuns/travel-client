@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { Loader2, ShoppingCart } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 interface BokunCartWidgetProps {
   bookingChannelUUID: string;
@@ -34,9 +34,10 @@ export default function BokunCartWidget({
 
     const observer = new MutationObserver(() => {
       if (widgetRef.current && widgetRef.current.children.length > 0) {
-        const hasContent = widgetRef.current.querySelector('iframe') ||
-                           widgetRef.current.querySelector('[class*="bokun"]') ||
-                           widgetRef.current.innerHTML.length > 100;
+        const hasContent =
+          widgetRef.current.querySelector("iframe") ||
+          widgetRef.current.querySelector('[class*="bokun"]') ||
+          widgetRef.current.innerHTML.length > 100;
         if (hasContent) {
           setIsLoading(false);
           observer.disconnect();
@@ -82,7 +83,7 @@ export default function BokunCartWidget({
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-gray-50 rounded-lg min-h-[400px]">
           <div className="relative mb-4">
             <ShoppingCart className="w-12 h-12 text-gray-300" />
-            <Loader2 className="w-6 h-6 text-[#651d2a] animate-spin absolute -bottom-1 -right-1" />
+            <Loader2 className="w-6 h-6 text-tumakr-maroon animate-spin absolute -bottom-1 -right-1" />
           </div>
           <p className="text-gray-600 text-sm">Loading cart...</p>
           <div className="mt-6 w-full max-w-md px-8">
@@ -94,7 +95,7 @@ export default function BokunCartWidget({
                 <div className="h-6 w-20 bg-gray-200 rounded animate-pulse" />
                 <div className="h-6 w-24 bg-gray-200 rounded animate-pulse" />
               </div>
-              <div className="h-12 bg-[#651d2a]/20 rounded animate-pulse" />
+              <div className="h-12 bg-tumakr-maroon/20 rounded animate-pulse" />
             </div>
           </div>
         </div>

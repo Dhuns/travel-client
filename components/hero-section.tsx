@@ -1,35 +1,35 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { useState, useEffect, useMemo } from "react"
-import Link from "next/link"
-import { Building, Waves, Mountain, Shield, Calendar, Phone } from "lucide-react"
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Building, Calendar, Mountain, Phone, Shield, Waves } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 
 interface HeroImage {
-  src: string
-  title: string
-  subtitle: string
+  src: string;
+  title: string;
+  subtitle: string;
 }
 
 interface HeroAction {
-  text: string
-  href?: string
-  onClick?: () => void
-  variant?: "default" | "outline"
-  className?: string
+  text: string;
+  href?: string;
+  onClick?: () => void;
+  variant?: "default" | "outline";
+  className?: string;
 }
 
 interface HeroStat {
-  value: string
-  label: string
+  value: string;
+  label: string;
 }
 
 interface HeroBadge {
-  text: string
-  icon?: string
-  className?: string
+  text: string;
+  icon?: string;
+  className?: string;
 }
 
 /**
@@ -56,35 +56,35 @@ interface HeroBadge {
  */
 interface HeroSectionProps {
   // 히어로 타입 결정
-  type: "carousel" | "background" | "overlay"
+  type: "carousel" | "background" | "overlay";
 
   // 기본 콘텐츠
-  title: string
-  titleHighlight?: string
-  subtitle?: string
-  description?: string
+  title: string;
+  titleHighlight?: string;
+  subtitle?: string;
+  description?: string;
 
   // 배경 관련
-  backgroundImage?: string
-  images?: HeroImage[] // carousel 타입용
+  backgroundImage?: string;
+  images?: HeroImage[]; // carousel 타입용
 
   // UI 요소들
-  badge?: HeroBadge
-  actions?: HeroAction[]
-  stats?: HeroStat[]
+  badge?: HeroBadge;
+  actions?: HeroAction[];
+  stats?: HeroStat[];
 
   // 스타일링
-  height?: "screen" | "large" | "medium" | "small"
-  overlay?: "light" | "medium" | "dark" | "none"
-  textColor?: "white" | "dark"
-  className?: string
+  height?: "screen" | "large" | "medium" | "small";
+  overlay?: "light" | "medium" | "dark" | "none";
+  textColor?: "white" | "dark";
+  className?: string;
 
   // 추가 정보 (투어 페이지용)
-  rating?: number
-  reviews?: number
-  duration?: string
-  participants?: string
-  location?: string
+  rating?: number;
+  reviews?: number;
+  duration?: string;
+  participants?: string;
+  location?: string;
 }
 
 /**
@@ -124,7 +124,7 @@ export function HeroSection({
   participants,
   location,
 }: HeroSectionProps) {
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(0)
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
   const iconMap = useMemo(
     () => ({
@@ -135,8 +135,8 @@ export function HeroSection({
       calendar: Calendar,
       phone: Phone,
     }),
-    [],
-  )
+    []
+  );
 
   const heightClasses = useMemo(
     () => ({
@@ -145,8 +145,8 @@ export function HeroSection({
       medium: "h-80",
       small: "h-64",
     }),
-    [],
-  )
+    []
+  );
 
   const overlayClasses = useMemo(
     () => ({
@@ -155,30 +155,30 @@ export function HeroSection({
       dark: "bg-black/60",
       none: "",
     }),
-    [],
-  )
+    []
+  );
 
   useEffect(() => {
     if (type === "carousel" && images.length > 1) {
       const slideInterval = setInterval(() => {
-        setCurrentSlideIndex((prev) => (prev + 1) % images.length)
-      }, 5000)
-      return () => clearInterval(slideInterval)
+        setCurrentSlideIndex((prev) => (prev + 1) % images.length);
+      }, 5000);
+      return () => clearInterval(slideInterval);
     }
-  }, [type, images.length])
+  }, [type, images.length]);
 
   const getIconComponent = useMemo(
     () => (iconName?: string) => {
-      if (!iconName || !(iconName in iconMap)) return null
+      if (!iconName || !(iconName in iconMap)) return null;
 
-      const IconComponent = iconMap[iconName as keyof typeof iconMap]
-      return <IconComponent className="w-4 h-4 mr-1" />
+      const IconComponent = iconMap[iconName as keyof typeof iconMap];
+      return <IconComponent className="w-4 h-4 mr-1" />;
     },
-    [iconMap],
-  )
+    [iconMap]
+  );
 
   // 텍스트 색상 클래스
-  const textColorClass = textColor === "white" ? "text-white" : "text-gray-900"
+  const textColorClass = textColor === "white" ? "text-white" : "text-gray-900";
 
   if (type === "carousel") {
     return (
@@ -191,7 +191,8 @@ export function HeroSection({
               {badge && (
                 <Badge
                   className={
-                    badge.className || "bg-sky-100 text-sky-700 hover:bg-sky-200 px-4 py-2 text-sm font-medium"
+                    badge.className ||
+                    "bg-sky-100 text-sky-700 hover:bg-sky-200 px-4 py-2 text-sm font-medium"
                   }
                 >
                   {getIconComponent(badge.icon)} {badge.text}
@@ -203,13 +204,13 @@ export function HeroSection({
                 <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight text-balance">
                   {title}
                   {titleHighlight && (
-                    <span className="ml-2" style={{ color: "#651d2a" }}>
-                      {titleHighlight}
-                    </span>
+                    <span className="ml-2 text-tumakr-maroon">{titleHighlight}</span>
                   )}
                 </h1>
                 {description && (
-                  <p className="text-lg md:text-xl text-gray-600 leading-relaxed text-pretty">{description}</p>
+                  <p className="text-lg md:text-xl text-gray-600 leading-relaxed text-pretty">
+                    {description}
+                  </p>
                 )}
               </div>
 
@@ -235,7 +236,7 @@ export function HeroSection({
                       >
                         {action.text}
                       </Button>
-                    ),
+                    )
                   )}
                 </div>
               )}
@@ -290,7 +291,9 @@ export function HeroSection({
                       key={index}
                       onClick={() => setCurrentSlideIndex(index)}
                       className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                        index === currentSlideIndex ? "bg-[#c4982a] scale-110" : "bg-gray-300 hover:bg-gray-400"
+                        index === currentSlideIndex
+                          ? "bg-tumakr-mustard scale-110"
+                          : "bg-gray-300 hover:bg-gray-400"
                       }`}
                       aria-label={`슬라이드 ${index + 1}로 이동`}
                     />
@@ -301,12 +304,14 @@ export function HeroSection({
           </div>
         </div>
       </section>
-    )
+    );
   }
 
   return (
     <div
-      className={`relative ${heightClasses[height]} overflow-hidden ${type === "background" ? "pt-28 pb-16" : ""} ${className}`}
+      className={`relative ${heightClasses[height]} overflow-hidden ${
+        type === "background" ? "pt-28 pb-16" : ""
+      } ${className}`}
       style={
         backgroundImage
           ? {
@@ -319,7 +324,9 @@ export function HeroSection({
       }
     >
       {/* 오버레이 레이어 */}
-      {overlay !== "none" && <div className={`absolute inset-0 ${overlayClasses[overlay]}`}></div>}
+      {overlay !== "none" && (
+        <div className={`absolute inset-0 ${overlayClasses[overlay]}`}></div>
+      )}
 
       {/* 그라데이션 오버레이 (텍스트 가독성 향상) */}
       {textColor === "white" && (
@@ -333,7 +340,11 @@ export function HeroSection({
             <Badge
               className={
                 badge.className ||
-                `mb-4 ${textColor === "white" ? "bg-sky-600/90 text-white backdrop-blur-sm" : "bg-sky-100 text-sky-700"}`
+                `mb-4 ${
+                  textColor === "white"
+                    ? "bg-sky-600/90 text-white backdrop-blur-sm"
+                    : "bg-sky-100 text-sky-700"
+                }`
               }
             >
               {getIconComponent(badge.icon)} {badge.text}
@@ -357,18 +368,26 @@ export function HeroSection({
           <h1 className={`text-5xl font-bold mb-6 ${textColorClass} drop-shadow-2xl`}>
             {title}
             {titleHighlight && (
-              <span className="ml-2" style={{ color: "#651d2a" }}>
-                {titleHighlight}
-              </span>
+              <span className="ml-2 text-tumakr-maroon">{titleHighlight}</span>
             )}
           </h1>
 
           {/* 부제목 */}
-          {subtitle && <h2 className={`text-2xl font-semibold mb-4 ${textColorClass} drop-shadow-lg`}>{subtitle}</h2>}
+          {subtitle && (
+            <h2
+              className={`text-2xl font-semibold mb-4 ${textColorClass} drop-shadow-lg`}
+            >
+              {subtitle}
+            </h2>
+          )}
 
           {/* 설명 텍스트 */}
           {description && (
-            <p className={`text-xl mb-8 leading-relaxed max-w-3xl drop-shadow-lg ${textColorClass}`}>{description}</p>
+            <p
+              className={`text-xl mb-8 leading-relaxed max-w-3xl drop-shadow-lg ${textColorClass}`}
+            >
+              {description}
+            </p>
           )}
 
           {/* 투어 메타 정보 */}
@@ -399,7 +418,10 @@ export function HeroSection({
           {stats.length > 0 && (
             <div className={`flex flex-wrap gap-8 ${textColorClass} mb-8`}>
               {stats.map((stat, index) => (
-                <div key={index} className="text-center bg-black/20 backdrop-blur-sm rounded-lg p-3">
+                <div
+                  key={index}
+                  className="text-center bg-black/20 backdrop-blur-sm rounded-lg p-3"
+                >
                   <div className="text-3xl font-bold text-sky-200">{stat.value}</div>
                   <div className="text-sm text-sky-100">{stat.label}</div>
                 </div>
@@ -418,7 +440,11 @@ export function HeroSection({
                       variant={action.variant || "default"}
                       className={
                         action.className ||
-                        `${textColor === "white" ? "bg-sky-600/90 hover:bg-sky-700 backdrop-blur-sm" : "bg-sky-600 hover:bg-sky-700"}`
+                        `${
+                          textColor === "white"
+                            ? "bg-sky-600/90 hover:bg-sky-700 backdrop-blur-sm"
+                            : "bg-sky-600 hover:bg-sky-700"
+                        }`
                       }
                     >
                       {action.text}
@@ -432,17 +458,21 @@ export function HeroSection({
                     variant={action.variant || "default"}
                     className={
                       action.className ||
-                      `${textColor === "white" ? "bg-sky-600/90 hover:bg-sky-700 backdrop-blur-sm" : "bg-sky-600 hover:bg-sky-700"}`
+                      `${
+                        textColor === "white"
+                          ? "bg-sky-600/90 hover:bg-sky-700 backdrop-blur-sm"
+                          : "bg-sky-600 hover:bg-sky-700"
+                      }`
                     }
                   >
                     {action.text}
                   </Button>
-                ),
+                )
               )}
             </div>
           )}
         </div>
       </div>
     </div>
-  )
+  );
 }

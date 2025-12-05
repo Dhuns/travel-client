@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, XCircle } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function EmailVerifiedPage() {
   const router = useRouter();
@@ -38,15 +38,13 @@ export default function EmailVerifiedPage() {
                 <CheckCircle2 className="w-8 h-8 text-green-500" />
               </div>
             </div>
-            <h1 className="text-lg font-medium text-gray-900 mb-2">
-              You're all set
-            </h1>
+            <h1 className="text-lg font-medium text-gray-900 mb-2">You're all set</h1>
             <p className="text-sm text-gray-500 mb-6">
               Redirecting to sign in in {countdown}s...
             </p>
             <button
               onClick={() => router.push("/login")}
-              className="w-full py-3 text-sm font-medium text-white bg-[#651d2a] rounded-lg hover:bg-[#7a2433] transition-colors"
+              className="w-full py-3 text-sm font-medium text-white bg-tumakr-maroon rounded-lg hover:bg-tumakr-maroon/90 transition-colors"
             >
               Continue to sign in
             </button>
@@ -67,7 +65,7 @@ export default function EmailVerifiedPage() {
             <div className="space-y-3">
               <button
                 onClick={() => router.push("/login")}
-                className="w-full py-3 text-sm font-medium text-white bg-[#651d2a] rounded-lg hover:bg-[#7a2433] transition-colors"
+                className="w-full py-3 text-sm font-medium text-white bg-tumakr-maroon rounded-lg hover:bg-tumakr-maroon/90 transition-colors"
               >
                 Go to sign in
               </button>

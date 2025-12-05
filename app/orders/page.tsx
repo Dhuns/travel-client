@@ -1,19 +1,41 @@
 "use client";
 
-import { Calendar, ChevronRight, Package, Users, Loader2, FileText, ShoppingBag, Search, Mail, Hash, RefreshCw, MapPin, Wallet, Check, XCircle, MessageSquarePlus, Send } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
-import { useState, useEffect } from "react";
-import { useAuthStore } from "@/src/shared/store/authStore";
-import { getAllChatSessions } from "@/src/shared/apis/chat";
-import { getQuotationByBatchId, submitCustomerQuoteResponse, type CustomerResponseType } from "@/src/shared/apis/estimate";
-import { ChatSession } from "@/src/shared/types/chat";
 import QuotationModal from "@/src/components/Chat/QuotationModal";
 import MessageSection from "@/src/components/Message/MessageSection";
+import { getAllChatSessions } from "@/src/shared/apis/chat";
+import {
+  getQuotationByBatchId,
+  submitCustomerQuoteResponse,
+  type CustomerResponseType,
+} from "@/src/shared/apis/estimate";
+import { useAuthStore } from "@/src/shared/store/authStore";
+import { ChatSession } from "@/src/shared/types/chat";
 import dayjs from "dayjs";
+import {
+  Calendar,
+  Check,
+  ChevronRight,
+  FileText,
+  Hash,
+  Loader2,
+  Mail,
+  MapPin,
+  MessageSquarePlus,
+  Package,
+  RefreshCw,
+  Search,
+  Send,
+  ShoppingBag,
+  Users,
+  Wallet,
+  XCircle,
+} from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 /**
  * 주문내역 페이지
@@ -116,7 +138,9 @@ export default function OrdersPage() {
   const [bookings, setBookings] = useState<BokunBooking[]>([]);
   const [isLoadingBookings, setIsLoadingBookings] = useState(false);
   const [bookingsError, setBookingsError] = useState<string | null>(null);
-  const [bookingFilter, setBookingFilter] = useState<"all" | "confirmed" | "cancelled">("all");
+  const [bookingFilter, setBookingFilter] = useState<"all" | "confirmed" | "cancelled">(
+    "all"
+  );
 
   // 예약 검색 상태 (비로그인 or 수동 검색용)
   const [searchType, setSearchType] = useState<"email" | "confirmation">("email"); // 검색 유형
@@ -216,7 +240,9 @@ export default function OrdersPage() {
         setIsLoadingBookings(true);
         setBookingsError(null);
 
-        const response = await fetch(`/api/orders?email=${encodeURIComponent(user.email)}`);
+        const response = await fetch(
+          `/api/orders?email=${encodeURIComponent(user.email)}`
+        );
 
         if (!response.ok) {
           throw new Error("Failed to fetch orders");
@@ -254,7 +280,9 @@ export default function OrdersPage() {
 
       try {
         setIsLoadingBookings(true);
-        const response = await fetch(`/api/orders?email=${encodeURIComponent(searchEmail)}`);
+        const response = await fetch(
+          `/api/orders?email=${encodeURIComponent(searchEmail)}`
+        );
 
         if (!response.ok) {
           throw new Error("Failed to fetch orders");
@@ -282,7 +310,11 @@ export default function OrdersPage() {
 
       try {
         setIsLoadingBookings(true);
-        const response = await fetch(`/api/orders?confirmationCode=${encodeURIComponent(searchConfirmationCode.trim())}`);
+        const response = await fetch(
+          `/api/orders?confirmationCode=${encodeURIComponent(
+            searchConfirmationCode.trim()
+          )}`
+        );
 
         if (!response.ok) {
           if (response.status === 404) {
@@ -382,7 +414,8 @@ export default function OrdersPage() {
               // batchInfo에서 quoteStatus 및 타임스탬프 확인
               if (quotation.batchInfo) {
                 // 새로운 quoteStatus 필드 사용
-                quoteStatus = (quotation.batchInfo.quoteStatus as QuoteWorkflowStatus) || "draft";
+                quoteStatus =
+                  (quotation.batchInfo.quoteStatus as QuoteWorkflowStatus) || "draft";
                 viewedAt = quotation.batchInfo.viewedAt || null;
                 sentAt = quotation.batchInfo.sentAt || null;
                 respondedAt = quotation.batchInfo.respondedAt || null;
@@ -411,7 +444,10 @@ export default function OrdersPage() {
                 }, 0);
               }
             } catch (err) {
-              console.warn(`Failed to fetch quotation for batchId ${session.batchId}:`, err);
+              console.warn(
+                `Failed to fetch quotation for batchId ${session.batchId}:`,
+                err
+              );
             }
 
             return {
@@ -429,12 +465,8 @@ export default function OrdersPage() {
               details: {
                 destination: ctx.destination || "Korea",
                 participants: totalParticipants || 1,
-                startDate: ctx.startDate
-                  ? dayjs(ctx.startDate).format("YYYY-MM-DD")
-                  : "",
-                endDate: ctx.endDate
-                  ? dayjs(ctx.endDate).format("YYYY-MM-DD")
-                  : "",
+                startDate: ctx.startDate ? dayjs(ctx.startDate).format("YYYY-MM-DD") : "",
+                endDate: ctx.endDate ? dayjs(ctx.endDate).format("YYYY-MM-DD") : "",
                 duration: days > 0 ? `${nights}N ${days}D` : "",
                 budget: ctx.budget,
                 preferences: ctx.preferences,
@@ -444,7 +476,7 @@ export default function OrdersPage() {
         );
 
         // draft 상태는 고객에게 보이지 않음
-        const visibleQuotes = quotesData.filter(q => q.quoteStatus !== "draft");
+        const visibleQuotes = quotesData.filter((q) => q.quoteStatus !== "draft");
         setQuotes(visibleQuotes);
       } catch (error) {
         console.error("Error fetching quotes:", error);
@@ -470,12 +502,15 @@ export default function OrdersPage() {
   // 예약 상태 뱃지 (영문 라벨)
   const getBookingStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; color: string }> = {
-      CONFIRMED: { label: "Confirmed", color: "bg-[#6d8675] text-white" },
+      CONFIRMED: { label: "Confirmed", color: "bg-tumakr-sage-green text-white" },
       CANCELLED: { label: "Cancelled", color: "bg-[#8b4a52] text-white" },
-      RESERVED: { label: "Reserved", color: "bg-[#c4982a] text-white" },
+      RESERVED: { label: "Reserved", color: "bg-tumakr-mustard text-white" },
       PENDING: { label: "Pending", color: "bg-gray-500 text-white" },
     };
-    const config = statusConfig[status] || { label: status, color: "bg-gray-400 text-white" };
+    const config = statusConfig[status] || {
+      label: status,
+      color: "bg-gray-400 text-white",
+    };
     return <Badge className={`${config.color} px-3 py-1`}>{config.label}</Badge>;
   };
 
@@ -483,15 +518,24 @@ export default function OrdersPage() {
   const getQuoteStatusBadge = (quoteStatus: QuoteWorkflowStatus) => {
     const statusConfig: Record<QuoteWorkflowStatus, { label: string; color: string }> = {
       draft: { label: "Draft", color: "bg-gray-400 text-white" },
-      pending_review: { label: "Under Review", color: "bg-[#6d8675] text-white animate-pulse" },
-      sent: { label: "Quote Ready", color: "bg-[#c4982a] text-white" },
-      viewed: { label: "Quote Viewed", color: "bg-[#c4982a] text-white" },
+      pending_review: {
+        label: "Under Review",
+        color: "bg-tumakr-sage-green text-white animate-pulse",
+      },
+      sent: { label: "Quote Ready", color: "bg-tumakr-mustard text-white" },
+      viewed: { label: "Quote Viewed", color: "bg-tumakr-mustard text-white" },
       approved: { label: "Approved", color: "bg-[#5a7263] text-white" },
       rejected: { label: "Declined", color: "bg-[#8b4a52] text-white" },
-      revision_requested: { label: "Revision Requested", color: "bg-[#d97706] text-white" },
+      revision_requested: {
+        label: "Revision Requested",
+        color: "bg-[#d97706] text-white",
+      },
       expired: { label: "Expired", color: "bg-gray-500 text-white" },
     };
-    const config = statusConfig[quoteStatus] || { label: quoteStatus, color: "bg-gray-400 text-white" };
+    const config = statusConfig[quoteStatus] || {
+      label: quoteStatus,
+      color: "bg-gray-400 text-white",
+    };
     return <Badge className={`${config.color} px-3 py-1`}>{config.label}</Badge>;
   };
 
@@ -499,13 +543,19 @@ export default function OrdersPage() {
   const getQuoteStatusDescription = (quoteStatus: QuoteWorkflowStatus) => {
     const descriptions: Record<QuoteWorkflowStatus, string> = {
       draft: "Your quote is being prepared.",
-      pending_review: "Your AI-generated draft is under review. Our travel experts will finalize the itinerary and pricing within 2-3 business days.",
+      pending_review:
+        "Your AI-generated draft is under review. Our travel experts will finalize the itinerary and pricing within 2-3 business days.",
       sent: "Great news! Your final quote is ready. Review the detailed itinerary and pricing, then approve to proceed with booking.",
-      viewed: "You've viewed the quote. Please review and respond - approve to proceed or request changes if needed.",
-      approved: "Your quote has been approved. Our team will contact you shortly to confirm your booking and arrange payment.",
-      rejected: "This quote was declined. Feel free to start a new chat to request a different itinerary.",
-      revision_requested: "Your revision request has been submitted. Our team will update the quote and get back to you soon.",
-      expired: "This quote has expired. Please start a new chat to request an updated quote.",
+      viewed:
+        "You've viewed the quote. Please review and respond - approve to proceed or request changes if needed.",
+      approved:
+        "Your quote has been approved. Our team will contact you shortly to confirm your booking and arrange payment.",
+      rejected:
+        "This quote was declined. Feel free to start a new chat to request a different itinerary.",
+      revision_requested:
+        "Your revision request has been submitted. Our team will update the quote and get back to you soon.",
+      expired:
+        "This quote has expired. Please start a new chat to request an updated quote.",
     };
     return descriptions[quoteStatus] || "";
   };
@@ -547,7 +597,7 @@ export default function OrdersPage() {
           {/* 검색 카드 */}
           <Card className="p-8 shadow-lg border border-gray-200 bg-white rounded-xl mb-8">
             <div className="flex items-center justify-center gap-2 mb-6">
-              <Search className="w-6 h-6 text-[#651d2a]" />
+              <Search className="w-6 h-6 text-tumakr-maroon" />
               <h2 className="text-xl font-semibold text-gray-900">Find Your Booking</h2>
             </div>
 
@@ -560,7 +610,7 @@ export default function OrdersPage() {
                 }}
                 className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
                   searchType === "email"
-                    ? "bg-[#651d2a] text-white"
+                    ? "bg-tumakr-maroon text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
@@ -574,7 +624,7 @@ export default function OrdersPage() {
                 }}
                 className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
                   searchType === "confirmation"
-                    ? "bg-[#651d2a] text-white"
+                    ? "bg-tumakr-maroon text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
@@ -611,7 +661,9 @@ export default function OrdersPage() {
                       type="text"
                       placeholder="e.g., ABC123"
                       value={searchConfirmationCode}
-                      onChange={(e) => setSearchConfirmationCode(e.target.value.toUpperCase())}
+                      onChange={(e) =>
+                        setSearchConfirmationCode(e.target.value.toUpperCase())
+                      }
                       onKeyDown={(e) => e.key === "Enter" && handleBookingSearch()}
                       className="w-full font-mono"
                     />
@@ -628,7 +680,7 @@ export default function OrdersPage() {
               <Button
                 onClick={handleBookingSearch}
                 disabled={isLoadingBookings}
-                className="w-full mt-6 bg-[#651d2a] hover:bg-[#4a1520] text-white"
+                className="w-full mt-6 bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white"
               >
                 {isLoadingBookings ? (
                   <>
@@ -668,7 +720,12 @@ export default function OrdersPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-2xl font-bold text-gray-900">
-                          {booking.totalPriceFormatted || (booking.totalPrice ? `${booking.currency || ''} ${booking.totalPrice.toLocaleString()}` : '')}
+                          {booking.totalPriceFormatted ||
+                            (booking.totalPrice
+                              ? `${
+                                  booking.currency || ""
+                                } ${booking.totalPrice.toLocaleString()}`
+                              : "")}
                         </p>
                       </div>
                     </div>
@@ -677,7 +734,7 @@ export default function OrdersPage() {
                       {(booking.productBookings || []).map((product) => (
                         <div
                           key={product.id}
-                          className="bg-gray-50 rounded-lg p-4 border-l-4 border-[#651d2a]"
+                          className="bg-gray-50 rounded-lg p-4 border-l-4 border-tumakr-maroon"
                         >
                           <h3 className="text-lg font-semibold text-gray-900 mb-2">
                             {product.productTitle}
@@ -696,7 +753,7 @@ export default function OrdersPage() {
                             </div>
                             <div className="text-right">
                               <span className="font-medium text-gray-900">
-                                {product.totalPriceFormatted || ''}
+                                {product.totalPriceFormatted || ""}
                               </span>
                             </div>
                           </div>
@@ -708,14 +765,17 @@ export default function OrdersPage() {
                       <div className="flex items-center space-x-4">
                         <span>Booked: {formatDate(booking.creationDate)}</span>
                         {booking.customer && (
-                          <span>Guest: {booking.customer.firstName || ''} {booking.customer.lastName || ''}</span>
+                          <span>
+                            Guest: {booking.customer.firstName || ""}{" "}
+                            {booking.customer.lastName || ""}
+                          </span>
                         )}
                       </div>
                       <Link href={`/orders/${booking.confirmationCode}`}>
                         <Button
                           variant="outline"
                           size="sm"
-                          className="border-[#651d2a] text-[#651d2a] hover:bg-[#651d2a] hover:text-white"
+                          className="border-tumakr-maroon text-tumakr-maroon hover:bg-tumakr-maroon hover:text-white"
                         >
                           View Details
                           <ChevronRight className="w-4 h-4 ml-1" />
@@ -729,22 +789,23 @@ export default function OrdersPage() {
           )}
 
           {/* 로그인 유도 */}
-          <Card className="mt-8 bg-gradient-to-r from-[#651d2a]/5 to-[#6d8675]/5 border border-gray-200 shadow-lg rounded-xl">
+          <Card className="mt-8 bg-gradient-to-r from-tumakr-maroon/5 to-tumakr-sage-green/5 border border-gray-200 shadow-lg rounded-xl">
             <CardContent className="p-8 text-center">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                Have an account?
-              </h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Have an account?</h3>
               <p className="text-gray-600 mb-4">
                 Log in to automatically view all bookings linked to your account
               </p>
               <div className="flex justify-center space-x-4">
                 <Link href="/login">
-                  <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white">
+                  <Button className="bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white">
                     Log In
                   </Button>
                 </Link>
                 <Link href="/signup">
-                  <Button variant="outline" className="border-[#651d2a] text-[#651d2a] hover:bg-[#651d2a] hover:text-white">
+                  <Button
+                    variant="outline"
+                    className="border-tumakr-maroon text-tumakr-maroon hover:bg-tumakr-maroon hover:text-white"
+                  >
                     Sign Up
                   </Button>
                 </Link>
@@ -762,9 +823,7 @@ export default function OrdersPage() {
         {/* 헤더 */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Order History</h1>
-          <p className="text-gray-600">
-            View your tour bookings and quote requests
-          </p>
+          <p className="text-gray-600">View your tour bookings and quote requests</p>
         </div>
 
         {/* 탭 버튼 */}
@@ -773,14 +832,14 @@ export default function OrdersPage() {
             onClick={() => setActiveTab("bookings")}
             className={`flex items-center gap-2 px-6 py-3 font-medium transition-all border-b-2 -mb-px ${
               activeTab === "bookings"
-                ? "text-[#651d2a] border-[#651d2a]"
+                ? "text-tumakr-maroon border-tumakr-maroon"
                 : "text-gray-500 border-transparent hover:text-gray-700"
             }`}
           >
             <ShoppingBag className="w-5 h-5" />
             Bookings
             {bookings.length > 0 && (
-              <span className="bg-[#651d2a] text-white text-xs px-2 py-0.5 rounded-full">
+              <span className="bg-tumakr-maroon text-white text-xs px-2 py-0.5 rounded-full">
                 {bookings.length}
               </span>
             )}
@@ -789,14 +848,14 @@ export default function OrdersPage() {
             onClick={() => setActiveTab("quotes")}
             className={`flex items-center gap-2 px-6 py-3 font-medium transition-all border-b-2 -mb-px ${
               activeTab === "quotes"
-                ? "text-[#651d2a] border-[#651d2a]"
+                ? "text-tumakr-maroon border-tumakr-maroon"
                 : "text-gray-500 border-transparent hover:text-gray-700"
             }`}
           >
             <FileText className="w-5 h-5" />
             Quote Requests
             {quotes.length > 0 && (
-              <span className="bg-[#c4982a] text-white text-xs px-2 py-0.5 rounded-full">
+              <span className="bg-tumakr-mustard text-white text-xs px-2 py-0.5 rounded-full">
                 {quotes.length}
               </span>
             )}
@@ -812,11 +871,11 @@ export default function OrdersPage() {
               <div className="flex items-center justify-between mb-4">
                 <div className="text-sm text-gray-500">
                   {!showManualSearch && user?.email && (
-                    <span>Showing bookings for: <strong>{user.email}</strong></span>
+                    <span>
+                      Showing bookings for: <strong>{user.email}</strong>
+                    </span>
                   )}
-                  {showManualSearch && (
-                    <span>Manual search mode</span>
-                  )}
+                  {showManualSearch && <span>Manual search mode</span>}
                 </div>
                 <div className="flex items-center gap-2">
                   {showManualSearch && (
@@ -824,7 +883,7 @@ export default function OrdersPage() {
                       variant="outline"
                       size="sm"
                       onClick={handleRefreshMyBookings}
-                      className="border-[#651d2a] text-[#651d2a] hover:bg-[#651d2a] hover:text-white"
+                      className="border-tumakr-maroon text-tumakr-maroon hover:bg-tumakr-maroon hover:text-white"
                     >
                       <RefreshCw className="w-4 h-4 mr-1" />
                       Back to My Bookings
@@ -846,7 +905,7 @@ export default function OrdersPage() {
               {showManualSearch && (
                 <Card className="p-6 bg-gray-50 border border-gray-200 rounded-xl mb-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <Search className="w-5 h-5 text-[#651d2a]" />
+                    <Search className="w-5 h-5 text-tumakr-maroon" />
                     <h3 className="font-semibold text-gray-900">Search Bookings</h3>
                   </div>
 
@@ -859,7 +918,7 @@ export default function OrdersPage() {
                       }}
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         searchType === "email"
-                          ? "bg-[#651d2a] text-white"
+                          ? "bg-tumakr-maroon text-white"
                           : "bg-white text-gray-600 border border-gray-300 hover:bg-gray-100"
                       }`}
                     >
@@ -873,7 +932,7 @@ export default function OrdersPage() {
                       }}
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         searchType === "confirmation"
-                          ? "bg-[#651d2a] text-white"
+                          ? "bg-tumakr-maroon text-white"
                           : "bg-white text-gray-600 border border-gray-300 hover:bg-gray-100"
                       }`}
                     >
@@ -898,7 +957,9 @@ export default function OrdersPage() {
                         type="text"
                         placeholder="Enter confirmation code (e.g., ABC123)"
                         value={searchConfirmationCode}
-                        onChange={(e) => setSearchConfirmationCode(e.target.value.toUpperCase())}
+                        onChange={(e) =>
+                          setSearchConfirmationCode(e.target.value.toUpperCase())
+                        }
                         onKeyDown={(e) => e.key === "Enter" && handleBookingSearch()}
                         className="flex-1 bg-white font-mono"
                       />
@@ -906,7 +967,7 @@ export default function OrdersPage() {
                     <Button
                       onClick={handleBookingSearch}
                       disabled={isLoadingBookings}
-                      className="bg-[#651d2a] hover:bg-[#4a1520] text-white"
+                      className="bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white"
                     >
                       {isLoadingBookings ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -926,8 +987,8 @@ export default function OrdersPage() {
                 size="sm"
                 className={
                   bookingFilter === "all"
-                    ? "border border-[#651d2a] bg-[#651d2a] hover:bg-[#4a1520] text-white"
-                    : "border border-[#651d2a] text-[#651d2a] bg-white hover:!bg-[#651d2a] hover:!text-white"
+                    ? "border border-tumakr-maroon bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white"
+                    : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white"
                 }
               >
                 All
@@ -937,8 +998,8 @@ export default function OrdersPage() {
                 size="sm"
                 className={
                   bookingFilter === "confirmed"
-                    ? "border border-[#651d2a] bg-[#651d2a] hover:bg-[#4a1520] text-white"
-                    : "border border-[#651d2a] text-[#651d2a] bg-white hover:!bg-[#651d2a] hover:!text-white"
+                    ? "border border-tumakr-maroon bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white"
+                    : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white"
                 }
               >
                 Confirmed
@@ -948,8 +1009,8 @@ export default function OrdersPage() {
                 size="sm"
                 className={
                   bookingFilter === "cancelled"
-                    ? "border border-[#651d2a] bg-[#651d2a] hover:bg-[#4a1520] text-white"
-                    : "border border-[#651d2a] text-[#651d2a] bg-white hover:!bg-[#651d2a] hover:!text-white"
+                    ? "border border-tumakr-maroon bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white"
+                    : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white"
                 }
               >
                 Cancelled
@@ -959,7 +1020,7 @@ export default function OrdersPage() {
             {/* 로딩 / 에러 / 빈 상태 */}
             {isLoadingBookings ? (
               <div className="flex flex-col items-center justify-center py-20">
-                <Loader2 className="w-12 h-12 text-[#651d2a] animate-spin mb-4" />
+                <Loader2 className="w-12 h-12 text-tumakr-maroon animate-spin mb-4" />
                 <p className="text-gray-600">Loading bookings...</p>
               </div>
             ) : bookingsError ? (
@@ -970,11 +1031,13 @@ export default function OrdersPage() {
               <Card className="p-12 text-center shadow-lg border border-gray-200 bg-white rounded-xl">
                 <ShoppingBag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  {bookingFilter === "all" ? "No bookings found" : `No ${bookingFilter} bookings`}
+                  {bookingFilter === "all"
+                    ? "No bookings found"
+                    : `No ${bookingFilter} bookings`}
                 </h3>
                 <p className="text-gray-600 mb-6">Book your first tour to see it here</p>
                 <Link href="/tours">
-                  <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white">
+                  <Button className="bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white">
                     Browse Tours
                   </Button>
                 </Link>
@@ -998,7 +1061,12 @@ export default function OrdersPage() {
                         </div>
                         <div className="text-right">
                           <p className="text-2xl font-bold text-gray-900">
-                            {booking.totalPriceFormatted || (booking.totalPrice ? `${booking.currency || ''} ${booking.totalPrice.toLocaleString()}` : '')}
+                            {booking.totalPriceFormatted ||
+                              (booking.totalPrice
+                                ? `${
+                                    booking.currency || ""
+                                  } ${booking.totalPrice.toLocaleString()}`
+                                : "")}
                           </p>
                         </div>
                       </div>
@@ -1007,7 +1075,7 @@ export default function OrdersPage() {
                         {(booking.productBookings || []).map((product) => (
                           <div
                             key={product.id}
-                            className="bg-gray-50 rounded-lg p-4 border-l-4 border-[#651d2a]"
+                            className="bg-gray-50 rounded-lg p-4 border-l-4 border-tumakr-maroon"
                           >
                             <h3 className="text-lg font-semibold text-gray-900 mb-2">
                               {product.productTitle}
@@ -1017,7 +1085,9 @@ export default function OrdersPage() {
                                 <Calendar className="w-4 h-4" />
                                 <span>{formatDate(product.startDate)}</span>
                                 {product.startTime && (
-                                  <span className="text-gray-500">{product.startTime}</span>
+                                  <span className="text-gray-500">
+                                    {product.startTime}
+                                  </span>
                                 )}
                               </div>
                               <div className="flex items-center space-x-2 text-gray-600">
@@ -1026,7 +1096,7 @@ export default function OrdersPage() {
                               </div>
                               <div className="text-right">
                                 <span className="font-medium text-gray-900">
-                                  {product.totalPriceFormatted || ''}
+                                  {product.totalPriceFormatted || ""}
                                 </span>
                               </div>
                             </div>
@@ -1038,14 +1108,17 @@ export default function OrdersPage() {
                         <div className="flex items-center space-x-4">
                           <span>Booked: {formatDate(booking.creationDate)}</span>
                           {booking.customer && (
-                            <span>Guest: {booking.customer.firstName || ''} {booking.customer.lastName || ''}</span>
+                            <span>
+                              Guest: {booking.customer.firstName || ""}{" "}
+                              {booking.customer.lastName || ""}
+                            </span>
                           )}
                         </div>
                         <Link href={`/orders/${booking.confirmationCode}`}>
                           <Button
                             variant="outline"
                             size="sm"
-                            className="border-[#651d2a] text-[#651d2a] hover:bg-[#651d2a] hover:text-white"
+                            className="border-tumakr-maroon text-tumakr-maroon hover:bg-tumakr-maroon hover:text-white"
                           >
                             View Details
                             <ChevronRight className="w-4 h-4 ml-1" />
@@ -1065,7 +1138,7 @@ export default function OrdersPage() {
           <>
             {isLoadingQuotes ? (
               <div className="flex flex-col items-center justify-center py-20">
-                <Loader2 className="w-12 h-12 text-[#651d2a] animate-spin mb-4" />
+                <Loader2 className="w-12 h-12 text-tumakr-maroon animate-spin mb-4" />
                 <p className="text-gray-600">Loading quotes...</p>
               </div>
             ) : quotes.length === 0 ? (
@@ -1078,7 +1151,7 @@ export default function OrdersPage() {
                   Start a chat with our AI travel assistant to get a personalized quote
                 </p>
                 <Link href="/chat">
-                  <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white">
+                  <Button className="bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white">
                     Start Planning Your Trip
                   </Button>
                 </Link>
@@ -1096,7 +1169,7 @@ export default function OrdersPage() {
                           <div className="flex items-center space-x-3 mb-2">
                             {getQuoteStatusBadge(quote.quoteStatus)}
                             {quote.details.duration && (
-                              <Badge className="bg-[#651d2a] text-white">
+                              <Badge className="bg-tumakr-maroon text-white">
                                 {quote.details.duration}
                               </Badge>
                             )}
@@ -1115,9 +1188,9 @@ export default function OrdersPage() {
                               <p className="text-xs text-gray-500">Estimated Total</p>
                             </div>
                           ) : (
-                            <div className="inline-flex items-center space-x-2 bg-[#6d8675]/10 rounded-lg px-4 py-2">
-                              <div className="w-2 h-2 bg-[#6d8675] rounded-full animate-pulse"></div>
-                              <p className="text-sm font-semibold text-[#6d8675]">
+                            <div className="inline-flex items-center space-x-2 bg-tumakr-sage-green/10 rounded-lg px-4 py-2">
+                              <div className="w-2 h-2 bg-tumakr-sage-green rounded-full animate-pulse"></div>
+                              <p className="text-sm font-semibold text-tumakr-sage-green">
                                 Calculating...
                               </p>
                             </div>
@@ -1126,32 +1199,33 @@ export default function OrdersPage() {
                       </div>
 
                       {/* Trip Details */}
-                      <div className="bg-gray-50 rounded-lg p-4 mb-4 border-l-4 border-[#c4982a]">
+                      <div className="bg-gray-50 rounded-lg p-4 mb-4 border-l-4 border-tumakr-mustard">
                         <div className="grid md:grid-cols-2 gap-4">
                           <div className="flex items-center space-x-2 text-gray-700">
-                            <MapPin className="w-4 h-4 text-[#651d2a]" />
+                            <MapPin className="w-4 h-4 text-tumakr-maroon" />
                             <span className="font-medium">Destination:</span>
                             <span>{quote.details.destination}</span>
                           </div>
                           <div className="flex items-center space-x-2 text-gray-700">
-                            <Users className="w-4 h-4 text-[#651d2a]" />
+                            <Users className="w-4 h-4 text-tumakr-maroon" />
                             <span className="font-medium">Travelers:</span>
                             <span>{quote.details.participants} people</span>
                           </div>
                           {quote.details.budget && (
                             <div className="flex items-center space-x-2 text-gray-700">
-                              <Wallet className="w-4 h-4 text-[#651d2a]" />
+                              <Wallet className="w-4 h-4 text-tumakr-maroon" />
                               <span className="font-medium">Budget:</span>
                               <span>{formatPrice(quote.details.budget)}</span>
                             </div>
                           )}
-                          {quote.details.preferences && quote.details.preferences.length > 0 && (
-                            <div className="flex items-center space-x-2 text-gray-700">
-                              <Package className="w-4 h-4 text-[#651d2a]" />
-                              <span className="font-medium">Preferences:</span>
-                              <span>{quote.details.preferences.join(", ")}</span>
-                            </div>
-                          )}
+                          {quote.details.preferences &&
+                            quote.details.preferences.length > 0 && (
+                              <div className="flex items-center space-x-2 text-gray-700">
+                                <Package className="w-4 h-4 text-tumakr-maroon" />
+                                <span className="font-medium">Preferences:</span>
+                                <span>{quote.details.preferences.join(", ")}</span>
+                              </div>
+                            )}
                         </div>
                       </div>
 
@@ -1165,70 +1239,109 @@ export default function OrdersPage() {
                           <div className="flex items-center space-x-2 text-gray-600">
                             <Calendar className="w-4 h-4" />
                             <span>
-                              Tour Date: {quote.details.startDate} ~ {quote.details.endDate}
+                              Tour Date: {quote.details.startDate} ~{" "}
+                              {quote.details.endDate}
                             </span>
                           </div>
                         )}
                       </div>
 
                       {/* Quote Progress Timeline */}
-                      <div className="bg-gradient-to-r from-[#6d8675]/10 to-[#c4982a]/10 rounded-lg p-4 mb-4">
+                      <div className="bg-gradient-to-r from-tumakr-sage-green/10 to-tumakr-mustard/10 rounded-lg p-4 mb-4">
                         <div className="flex items-center justify-between">
                           {/* Step 1: Created */}
                           <div className="flex flex-col items-center flex-1">
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center mb-1 bg-[#6d8675] text-white">
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center mb-1 bg-tumakr-sage-green text-white">
                               ✓
                             </div>
                             <p className="text-xs font-semibold text-gray-700">Created</p>
                           </div>
                           {/* Progress Bar 1 */}
                           <div className="flex-1 h-1 bg-gray-300 relative">
-                            <div className={`absolute left-0 top-0 h-full transition-all duration-500 ${
-                              ["sent", "viewed", "approved", "rejected", "revision_requested"].includes(quote.quoteStatus)
-                                ? "bg-[#5a7263] w-full"
-                                : "bg-[#6d8675] w-1/2 animate-pulse"
-                            }`}></div>
+                            <div
+                              className={`absolute left-0 top-0 h-full transition-all duration-500 ${
+                                [
+                                  "sent",
+                                  "viewed",
+                                  "approved",
+                                  "rejected",
+                                  "revision_requested",
+                                ].includes(quote.quoteStatus)
+                                  ? "bg-[#5a7263] w-full"
+                                  : "bg-tumakr-sage-green w-1/2 animate-pulse"
+                              }`}
+                            ></div>
                           </div>
                           {/* Step 2: Quote Ready */}
                           <div className="flex flex-col items-center flex-1">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${
-                              ["sent", "viewed", "approved", "rejected", "revision_requested"].includes(quote.quoteStatus)
-                                ? "bg-[#5a7263] text-white"
-                                : "bg-[#c4982a] text-white animate-pulse"
-                            }`}>
-                              {["sent", "viewed", "approved", "rejected", "revision_requested"].includes(quote.quoteStatus) ? "✓" : "2"}
+                            <div
+                              className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${
+                                [
+                                  "sent",
+                                  "viewed",
+                                  "approved",
+                                  "rejected",
+                                  "revision_requested",
+                                ].includes(quote.quoteStatus)
+                                  ? "bg-[#5a7263] text-white"
+                                  : "bg-tumakr-mustard text-white animate-pulse"
+                              }`}
+                            >
+                              {[
+                                "sent",
+                                "viewed",
+                                "approved",
+                                "rejected",
+                                "revision_requested",
+                              ].includes(quote.quoteStatus)
+                                ? "✓"
+                                : "2"}
                             </div>
-                            <p className="text-xs font-semibold text-gray-700">Quote Ready</p>
+                            <p className="text-xs font-semibold text-gray-700">
+                              Quote Ready
+                            </p>
                           </div>
                           {/* Progress Bar 2 */}
                           <div className="flex-1 h-1 bg-gray-300 relative">
-                            <div className={`absolute left-0 top-0 h-full transition-all duration-500 ${
-                              ["approved", "rejected"].includes(quote.quoteStatus)
-                                ? "bg-[#5a7263] w-full"
-                                : quote.quoteStatus === "revision_requested"
-                                ? "bg-[#d97706] w-full"
-                                : ["sent", "viewed"].includes(quote.quoteStatus)
-                                ? "bg-[#c4982a] w-1/2 animate-pulse"
-                                : "bg-gray-300 w-0"
-                            }`}></div>
+                            <div
+                              className={`absolute left-0 top-0 h-full transition-all duration-500 ${
+                                ["approved", "rejected"].includes(quote.quoteStatus)
+                                  ? "bg-[#5a7263] w-full"
+                                  : quote.quoteStatus === "revision_requested"
+                                  ? "bg-[#d97706] w-full"
+                                  : ["sent", "viewed"].includes(quote.quoteStatus)
+                                  ? "bg-tumakr-mustard w-1/2 animate-pulse"
+                                  : "bg-gray-300 w-0"
+                              }`}
+                            ></div>
                           </div>
                           {/* Step 3: Response */}
                           <div className="flex flex-col items-center flex-1">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${
-                              quote.quoteStatus === "approved"
-                                ? "bg-[#5a7263] text-white"
+                            <div
+                              className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${
+                                quote.quoteStatus === "approved"
+                                  ? "bg-[#5a7263] text-white"
+                                  : quote.quoteStatus === "rejected"
+                                  ? "bg-[#8b4a52] text-white"
+                                  : quote.quoteStatus === "revision_requested"
+                                  ? "bg-[#d97706] text-white"
+                                  : ["sent", "viewed"].includes(quote.quoteStatus)
+                                  ? "bg-tumakr-mustard text-white animate-pulse"
+                                  : "bg-gray-300 text-gray-600"
+                              }`}
+                            >
+                              {quote.quoteStatus === "approved"
+                                ? "✓"
                                 : quote.quoteStatus === "rejected"
-                                ? "bg-[#8b4a52] text-white"
-                                : quote.quoteStatus === "revision_requested"
-                                ? "bg-[#d97706] text-white"
-                                : ["sent", "viewed"].includes(quote.quoteStatus)
-                                ? "bg-[#c4982a] text-white animate-pulse"
-                                : "bg-gray-300 text-gray-600"
-                            }`}>
-                              {quote.quoteStatus === "approved" ? "✓" : quote.quoteStatus === "rejected" ? "✕" : "3"}
+                                ? "✕"
+                                : "3"}
                             </div>
                             <p className="text-xs font-semibold text-gray-700">
-                              {quote.quoteStatus === "approved" ? "Approved" : quote.quoteStatus === "rejected" ? "Declined" : "Response"}
+                              {quote.quoteStatus === "approved"
+                                ? "Approved"
+                                : quote.quoteStatus === "rejected"
+                                ? "Declined"
+                                : "Response"}
                             </p>
                           </div>
                         </div>
@@ -1236,7 +1349,7 @@ export default function OrdersPage() {
                           {getQuoteStatusDescription(quote.quoteStatus)}
                         </p>
                         {quote.validDate && canCustomerRespond(quote.quoteStatus) && (
-                          <p className="text-center text-xs text-[#c4982a] mt-1">
+                          <p className="text-center text-xs text-tumakr-mustard mt-1">
                             Valid until: {dayjs(quote.validDate).format("YYYY-MM-DD")}
                           </p>
                         )}
@@ -1244,17 +1357,27 @@ export default function OrdersPage() {
 
                       {/* Action Buttons */}
                       <div className="flex items-center space-x-3 mb-3">
-                        {quote.batchId && ["sent", "viewed", "approved", "rejected", "revision_requested"].includes(quote.quoteStatus) && (
-                          <Button
-                            onClick={() => handleOpenQuoteModal(quote.batchId!)}
-                            className="flex-1 bg-[#651d2a] hover:bg-[#4a1520] text-white"
-                          >
-                            View Quote Details
-                            <ChevronRight className="w-4 h-4 ml-1" />
-                          </Button>
-                        )}
-                        <Link href={`/chat?session=${quote.sessionId}`} className="flex-1">
-                          <Button className="w-full border border-[#651d2a] text-[#651d2a] bg-white hover:!bg-[#651d2a] hover:!text-white">
+                        {quote.batchId &&
+                          [
+                            "sent",
+                            "viewed",
+                            "approved",
+                            "rejected",
+                            "revision_requested",
+                          ].includes(quote.quoteStatus) && (
+                            <Button
+                              onClick={() => handleOpenQuoteModal(quote.batchId!)}
+                              className="flex-1 bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white"
+                            >
+                              View Quote Details
+                              <ChevronRight className="w-4 h-4 ml-1" />
+                            </Button>
+                          )}
+                        <Link
+                          href={`/chat?session=${quote.sessionId}`}
+                          className="flex-1"
+                        >
+                          <Button className="w-full border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white">
                             Continue Chat
                             <ChevronRight className="w-4 h-4 ml-1" />
                           </Button>
@@ -1263,16 +1386,23 @@ export default function OrdersPage() {
 
                       {/* Customer Response Section - Only for sent/viewed status */}
                       {/* Message Section - For quotes with batchId */}
-                      {quote.batchId && ["sent", "viewed", "approved", "rejected", "revision_requested"].includes(quote.quoteStatus) && (
-                        <div className="mt-4">
-                          <MessageSection
-                            batchId={quote.batchId}
-                            quoteTitle={quote.title}
-                            isCollapsible={true}
-                            defaultExpanded={false}
-                          />
-                        </div>
-                      )}
+                      {quote.batchId &&
+                        [
+                          "sent",
+                          "viewed",
+                          "approved",
+                          "rejected",
+                          "revision_requested",
+                        ].includes(quote.quoteStatus) && (
+                          <div className="mt-4">
+                            <MessageSection
+                              batchId={quote.batchId}
+                              quoteTitle={quote.title}
+                              isCollapsible={true}
+                              defaultExpanded={false}
+                            />
+                          </div>
+                        )}
 
                       {canCustomerRespond(quote.quoteStatus) && quote.batchId && (
                         <>
@@ -1294,8 +1424,10 @@ export default function OrdersPage() {
                                 Decline
                               </Button>
                               <Button
-                                onClick={() => handleStartResponse(quote.id, "request_changes")}
-                                className="flex-1 bg-[#c4982a] hover:bg-[#b38a25] text-white"
+                                onClick={() =>
+                                  handleStartResponse(quote.id, "request_changes")
+                                }
+                                className="flex-1 bg-tumakr-mustard hover:bg-tumakr-mustard/90 text-white"
                               >
                                 <MessageSquarePlus className="w-4 h-4 mr-1" />
                                 Request Changes
@@ -1311,7 +1443,9 @@ export default function OrdersPage() {
                                       <div className="w-7 h-7 rounded-full bg-[#5a7263] text-white flex items-center justify-center">
                                         <Check className="w-4 h-4" />
                                       </div>
-                                      <span className="font-semibold text-gray-800 text-sm">Approve this quote</span>
+                                      <span className="font-semibold text-gray-800 text-sm">
+                                        Approve this quote
+                                      </span>
                                     </>
                                   )}
                                   {responseType === "reject" && (
@@ -1319,15 +1453,19 @@ export default function OrdersPage() {
                                       <div className="w-7 h-7 rounded-full bg-[#8b4a52] text-white flex items-center justify-center">
                                         <XCircle className="w-4 h-4" />
                                       </div>
-                                      <span className="font-semibold text-gray-800 text-sm">Decline this quote</span>
+                                      <span className="font-semibold text-gray-800 text-sm">
+                                        Decline this quote
+                                      </span>
                                     </>
                                   )}
                                   {responseType === "request_changes" && (
                                     <>
-                                      <div className="w-7 h-7 rounded-full bg-[#c4982a] text-white flex items-center justify-center">
+                                      <div className="w-7 h-7 rounded-full bg-tumakr-mustard text-white flex items-center justify-center">
                                         <MessageSquarePlus className="w-4 h-4" />
                                       </div>
-                                      <span className="font-semibold text-gray-800 text-sm">Request changes</span>
+                                      <span className="font-semibold text-gray-800 text-sm">
+                                        Request changes
+                                      </span>
                                     </>
                                   )}
                                 </div>
@@ -1341,11 +1479,13 @@ export default function OrdersPage() {
                                   }
                                   value={responseMessage}
                                   onChange={(e) => setResponseMessage(e.target.value)}
-                                  className="w-full p-3 border border-gray-300 rounded-lg text-sm resize-none focus:outline-none focus:border-[#651d2a] focus:ring-1 focus:ring-[#651d2a] bg-white"
+                                  className="w-full p-3 border border-gray-300 rounded-lg text-sm resize-none focus:outline-none focus:border-tumakr-maroon focus:ring-1 focus:ring-tumakr-maroon bg-white"
                                   rows={3}
                                 />
                                 {responseError && (
-                                  <p className="text-red-600 text-sm mt-2">{responseError}</p>
+                                  <p className="text-red-600 text-sm mt-2">
+                                    {responseError}
+                                  </p>
                                 )}
                                 <div className="flex justify-end gap-2 mt-3">
                                   <Button
@@ -1359,14 +1499,16 @@ export default function OrdersPage() {
                                   </Button>
                                   <Button
                                     size="sm"
-                                    onClick={() => handleSubmitInlineResponse(quote.batchId!)}
+                                    onClick={() =>
+                                      handleSubmitInlineResponse(quote.batchId!)
+                                    }
                                     disabled={isSubmittingResponse}
                                     className={`text-white ${
                                       responseType === "approve"
                                         ? "bg-[#5a7263] hover:bg-[#4d6358]"
                                         : responseType === "reject"
                                         ? "bg-[#8b4a52] hover:bg-[#7a4148]"
-                                        : "bg-[#c4982a] hover:bg-[#b38a25]"
+                                        : "bg-tumakr-mustard hover:bg-tumakr-mustard/90"
                                     }`}
                                   >
                                     {isSubmittingResponse ? (
@@ -1396,7 +1538,7 @@ export default function OrdersPage() {
         )}
 
         {/* 도움말 섹션 */}
-        <Card className="mt-12 bg-gradient-to-r from-[#651d2a]/5 to-[#6d8675]/5 border border-gray-200 shadow-lg rounded-xl">
+        <Card className="mt-12 bg-gradient-to-r from-tumakr-maroon/5 to-tumakr-sage-green/5 border border-gray-200 shadow-lg rounded-xl">
           <CardContent className="p-8 text-center">
             <h3 className="text-xl font-bold text-gray-900 mb-2">
               Need help with your order?
@@ -1406,12 +1548,12 @@ export default function OrdersPage() {
             </p>
             <div className="flex justify-center space-x-4">
               <Link href="/contact">
-                <Button className="border border-[#651d2a] text-[#651d2a] bg-white hover:!bg-[#651d2a] hover:!text-white">
+                <Button className="border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white">
                   Contact Us
                 </Button>
               </Link>
               <Link href="/tours">
-                <Button className="bg-[#651d2a] hover:bg-[#4a1520] text-white">
+                <Button className="bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white">
                   Book New Tour
                 </Button>
               </Link>

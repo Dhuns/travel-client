@@ -1,9 +1,9 @@
-import React, { FC } from "react";
-import dayjs from "dayjs";
 import styled from "@emotion/styled";
+import { MESSAGES } from "@shared/constants/chat";
 import useChatStore from "@shared/store/chatStore";
+import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
-import { MAX_CHAT_SESSIONS, MESSAGES, UI_TEXT } from "@shared/constants/chat";
+import React, { FC } from "react";
 
 interface Props {
   onNewChat: () => void;
@@ -11,8 +11,7 @@ interface Props {
 
 const ChatSidebar: FC<Props> = ({ onNewChat }) => {
   const router = useRouter();
-  const { sessions, getCurrentSession, loadSession, deleteSession } =
-    useChatStore();
+  const { sessions, getCurrentSession, loadSession, deleteSession } = useChatStore();
   const currentSession = getCurrentSession();
 
   const handleDeleteSession = (e: React.MouseEvent, sessionId: string) => {
@@ -29,8 +28,12 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
         <LogoWrapper onClick={() => router.push("/")}>
           <LogoIcon>
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
-              <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" strokeWidth="1.5"/>
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
+              <path
+                d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              />
             </svg>
           </LogoIcon>
           <LogoText>Tumakr</LogoText>
@@ -40,8 +43,15 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
       {/* New Chat Button */}
       <NewChatButton onClick={onNewChat}>
         <NewChatIconWrapper>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 5v14M5 12h14"/>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M12 5v14M5 12h14" />
           </svg>
         </NewChatIconWrapper>
         <span>New Conversation</span>
@@ -57,8 +67,15 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
           {sessions.length === 0 ? (
             <EmptyState>
               <EmptyIcon>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                >
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
               </EmptyIcon>
               <EmptyText>Start your first conversation</EmptyText>
@@ -77,22 +94,38 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
                   onClick={() => loadSession(session.sessionId)}
                 >
                   <ChatItemIcon active={currentSession?.sessionId === session.sessionId}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                     </svg>
                   </ChatItemIcon>
                   <ChatItemContent>
                     <ChatItemTitle>{session.title || "New Chat"}</ChatItemTitle>
                     <ChatItemMeta>
-                      {dayjs(session.lastMessageAt || session.createdAt).format("MMM D, HH:mm")}
+                      {dayjs(session.lastMessageAt || session.createdAt).format(
+                        "MMM D, HH:mm"
+                      )}
                     </ChatItemMeta>
                   </ChatItemContent>
                   <DeleteButton
                     onClick={(e) => handleDeleteSession(e, session.sessionId)}
                     title="Delete"
                   >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" />
                     </svg>
                   </DeleteButton>
                 </ChatItem>
@@ -104,17 +137,31 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
       {/* Bottom Navigation */}
       <BottomNav>
         <NavItem onClick={() => router.push("/")}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-            <polyline points="9 22 9 12 15 12 15 22"/>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
           </svg>
           <span>Home</span>
         </NavItem>
         <NavItem onClick={() => router.push("/orders")}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
-            <rect x="9" y="3" width="6" height="4" rx="1"/>
-            <path d="M9 12h6M9 16h6"/>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+            <rect x="9" y="3" width="6" height="4" rx="1" />
+            <path d="M9 12h6M9 16h6" />
           </svg>
           <span>Orders</span>
         </NavItem>
@@ -160,7 +207,7 @@ const LogoWrapper = styled.div`
 `;
 
 const LogoIcon = styled.div`
-  color: #651d2a;
+  color: var(--color-tumakr-maroon);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -169,7 +216,11 @@ const LogoIcon = styled.div`
 const LogoText = styled.span`
   font-size: 20px;
   font-weight: 700;
-  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-tumakr-maroon) 0%,
+    var(--color-tumakr-maroon) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -178,7 +229,11 @@ const LogoText = styled.span`
 const NewChatButton = styled.button`
   margin: 0 16px 20px 16px;
   padding: 14px 18px;
-  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-tumakr-maroon) 0%,
+    var(--color-tumakr-maroon) 100%
+  );
   border: none;
   border-radius: 14px;
   font-size: 14px;
@@ -250,7 +305,7 @@ const SectionLabel = styled.div`
 const SessionCount = styled.span`
   font-size: 11px;
   font-weight: 600;
-  color: #651d2a;
+  color: var(--color-tumakr-maroon);
   background: rgba(101, 29, 42, 0.1);
   padding: 2px 8px;
   border-radius: 10px;
@@ -284,8 +339,10 @@ const EmptyText = styled.div`
 const ChatItem = styled.div<{ active?: boolean }>`
   padding: 12px 14px;
   border-radius: 12px;
-  background-color: ${({ active }) => (active ? "rgba(101, 29, 42, 0.08)" : "transparent")};
-  border: 1px solid ${({ active }) => (active ? "rgba(101, 29, 42, 0.15)" : "transparent")};
+  background-color: ${({ active }) =>
+    active ? "rgba(101, 29, 42, 0.08)" : "transparent"};
+  border: 1px solid
+    ${({ active }) => (active ? "rgba(101, 29, 42, 0.15)" : "transparent")};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -293,7 +350,8 @@ const ChatItem = styled.div<{ active?: boolean }>`
   transition: all 0.15s ease;
 
   &:hover {
-    background-color: ${({ active }) => (active ? "rgba(101, 29, 42, 0.1)" : "rgba(0, 0, 0, 0.03)")};
+    background-color: ${({ active }) =>
+      active ? "rgba(101, 29, 42, 0.1)" : "rgba(0, 0, 0, 0.03)"};
   }
 
   &:hover button {
@@ -305,7 +363,10 @@ const ChatItemIcon = styled.div<{ active?: boolean }>`
   width: 32px;
   height: 32px;
   border-radius: 10px;
-  background: ${({ active }) => (active ? "linear-gradient(135deg, #651d2a 0%, #8b3a47 100%)" : "#f0f0f0")};
+  background: ${({ active }) =>
+    active
+      ? "linear-gradient(135deg, var(--color-tumakr-maroon) 0%, var(--color-tumakr-maroon) 100%)"
+      : "#f0f0f0"};
   color: ${({ active }) => (active ? "white" : "#888")};
   display: flex;
   align-items: center;
@@ -383,7 +444,7 @@ const NavItem = styled.button`
 
   &:hover {
     background-color: rgba(101, 29, 42, 0.08);
-    color: #651d2a;
+    color: var(--color-tumakr-maroon);
   }
 
   span {

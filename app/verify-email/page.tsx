@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { verifyEmail } from "@/src/shared/apis/user";
 import { CheckCircle2, XCircle } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function VerifyEmailPage() {
   const router = useRouter();
@@ -33,7 +33,10 @@ export default function VerifyEmailPage() {
       } catch (err) {
         console.error("Email verification failed:", err);
         const axiosError = err as { response?: { data?: { message?: string } } };
-        setError(axiosError.response?.data?.message || "Verification failed. The link may have expired.");
+        setError(
+          axiosError.response?.data?.message ||
+            "Verification failed. The link may have expired."
+        );
         setSuccess(false);
       } finally {
         setLoading(false);
@@ -49,14 +52,12 @@ export default function VerifyEmailPage() {
         {loading && (
           <>
             <div className="flex justify-center mb-6">
-              <div className="w-12 h-12 border-2 border-gray-200 border-t-[#651d2a] rounded-full animate-spin" />
+              <div className="w-12 h-12 border-2 border-gray-200 border-t-tumakr-maroon rounded-full animate-spin" />
             </div>
             <h1 className="text-lg font-medium text-gray-900 mb-2">
               Verifying your email
             </h1>
-            <p className="text-sm text-gray-500">
-              Please wait...
-            </p>
+            <p className="text-sm text-gray-500">Please wait...</p>
           </>
         )}
 
@@ -67,15 +68,13 @@ export default function VerifyEmailPage() {
                 <CheckCircle2 className="w-8 h-8 text-green-500" />
               </div>
             </div>
-            <h1 className="text-lg font-medium text-gray-900 mb-2">
-              Email verified
-            </h1>
+            <h1 className="text-lg font-medium text-gray-900 mb-2">Email verified</h1>
             <p className="text-sm text-gray-500 mb-6">
               Your account is now active. Redirecting to sign in...
             </p>
             <button
               onClick={() => router.push("/login")}
-              className="w-full py-3 text-sm font-medium text-white bg-[#651d2a] rounded-lg hover:bg-[#7a2433] transition-colors"
+              className="w-full py-3 text-sm font-medium text-white bg-tumakr-maroon rounded-lg hover:bg-tumakr-maroon/90 transition-colors"
             >
               Continue to sign in
             </button>
@@ -92,13 +91,11 @@ export default function VerifyEmailPage() {
             <h1 className="text-lg font-medium text-gray-900 mb-2">
               Verification failed
             </h1>
-            <p className="text-sm text-gray-500 mb-6">
-              {error}
-            </p>
+            <p className="text-sm text-gray-500 mb-6">{error}</p>
             <div className="space-y-3">
               <button
                 onClick={() => router.push("/login")}
-                className="w-full py-3 text-sm font-medium text-white bg-[#651d2a] rounded-lg hover:bg-[#7a2433] transition-colors"
+                className="w-full py-3 text-sm font-medium text-white bg-tumakr-maroon rounded-lg hover:bg-tumakr-maroon/90 transition-colors"
               >
                 Go to sign in
               </button>

@@ -1,14 +1,4 @@
-import {
-  Award,
-  Calendar,
-  Globe,
-  Heart,
-  MapPin,
-  MessageCircle,
-  Quote,
-  Star,
-  Users,
-} from "lucide-react";
+import { Award, Globe, Heart, MessageCircle, Quote, Star, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -122,21 +112,19 @@ export default function AboutPage() {
             About OnedayKorea Tours
           </h1>
           <p className="text-xl text-white/90 max-w-3xl mx-auto drop-shadow-md">
-            For over a decade, we've been creating unforgettable Korean
-            experiences for travelers from around the world.
+            For over a decade, we've been creating unforgettable Korean experiences for
+            travelers from around the world.
           </p>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-12 bg-[#651d2a]">
+      <section className="py-12 bg-tumakr-maroon">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="text-4xl font-bold text-white mb-2">
-                  {stat.value}
-                </div>
+                <div className="text-4xl font-bold text-white mb-2">{stat.value}</div>
                 <div className="text-white/80 text-sm">{stat.label}</div>
               </div>
             ))}
@@ -149,30 +137,27 @@ export default function AboutPage() {
         <div className="container mx-auto max-w-6xl">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                Our Story
-              </h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
               <div className="space-y-4 text-gray-600 leading-relaxed">
                 <p>
-                  OnedayKorea Tours was founded with a simple mission: to share
-                  the authentic beauty of Korea with travelers who seek more
-                  than just tourist attractions.
+                  OnedayKorea Tours was founded with a simple mission: to share the
+                  authentic beauty of Korea with travelers who seek more than just tourist
+                  attractions.
                 </p>
                 <p>
-                  What started as a small team of passionate local guides has
-                  grown into one of Korea's most trusted tour companies, serving
-                  over 50,000 happy travelers from more than 100 countries.
+                  What started as a small team of passionate local guides has grown into
+                  one of Korea's most trusted tour companies, serving over 50,000 happy
+                  travelers from more than 100 countries.
                 </p>
                 <p>
-                  We believe that the best way to experience Korea is through
-                  the eyes of locals who genuinely love their country. Our
-                  guides don't just show you places - they share stories,
-                  traditions, and hidden gems that you won't find in any
-                  guidebook.
+                  We believe that the best way to experience Korea is through the eyes of
+                  locals who genuinely love their country. Our guides don't just show you
+                  places - they share stories, traditions, and hidden gems that you won't
+                  find in any guidebook.
                 </p>
               </div>
               <Link href="/tours">
-                <Button className="mt-8 bg-[#651d2a] hover:bg-[#4a1520] text-white px-8">
+                <Button className="mt-8 bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white px-8">
                   Explore Our Tours
                 </Button>
               </Link>
@@ -193,12 +178,10 @@ export default function AboutPage() {
       <section className="py-20 px-6 bg-[#f5f3f0]">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              What We Stand For
-            </h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">What We Stand For</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Our values guide everything we do, from designing tours to
-              training our guides.
+              Our values guide everything we do, from designing tours to training our
+              guides.
             </p>
           </div>
 
@@ -208,12 +191,10 @@ export default function AboutPage() {
                 key={index}
                 className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
               >
-                <div className="w-12 h-12 bg-[#651d2a]/10 rounded-full flex items-center justify-center mb-4">
-                  <value.icon className="w-6 h-6 text-[#651d2a]" />
+                <div className="w-12 h-12 bg-tumakr-maroon/10 rounded-full flex items-center justify-center mb-4">
+                  <value.icon className="w-6 h-6 text-tumakr-maroon" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                  {value.title}
-                </h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">{value.title}</h3>
                 <p className="text-gray-600 text-sm">{value.description}</p>
               </div>
             ))}
@@ -236,24 +217,17 @@ export default function AboutPage() {
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
                 </svg>
               </div>
-              <h2 className="text-3xl font-bold text-gray-900">
-                What Our Travelers Say
-              </h2>
+              <h2 className="text-3xl font-bold text-gray-900">What Our Travelers Say</h2>
             </div>
             <div className="flex items-center justify-center gap-2 mb-2">
               <div className="flex">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    className="w-6 h-6 text-[#00AA6C] fill-[#00AA6C]"
-                  />
+                  <Star key={star} className="w-6 h-6 text-[#00AA6C] fill-[#00AA6C]" />
                 ))}
               </div>
               <span className="text-2xl font-bold text-gray-900">5.0</span>
             </div>
-            <p className="text-gray-600">
-              Based on 716 reviews on TripAdvisor
-            </p>
+            <p className="text-gray-600">Based on 716 reviews on TripAdvisor</p>
           </div>
 
           {/* Reviews Grid */}
@@ -266,13 +240,9 @@ export default function AboutPage() {
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-bold text-gray-900">
-                        {review.author}
-                      </span>
+                      <span className="font-bold text-gray-900">{review.author}</span>
                       <span className="text-gray-400">•</span>
-                      <span className="text-gray-500 text-sm">
-                        {review.location}
-                      </span>
+                      <span className="text-gray-500 text-sm">{review.location}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="flex">
@@ -287,21 +257,17 @@ export default function AboutPage() {
                           />
                         ))}
                       </div>
-                      <span className="text-gray-400 text-xs">
-                        {review.date}
-                      </span>
+                      <span className="text-gray-400 text-xs">{review.date}</span>
                     </div>
                   </div>
                   <Quote className="w-8 h-8 text-[#00AA6C]/20" />
                 </div>
 
-                <h4 className="font-semibold text-gray-900 mb-2">
-                  {review.title}
-                </h4>
+                <h4 className="font-semibold text-gray-900 mb-2">{review.title}</h4>
                 <p className="text-gray-600 text-sm leading-relaxed mb-3">
                   "{review.content}"
                 </p>
-                <div className="text-xs text-[#651d2a] font-medium">
+                <div className="text-xs text-tumakr-maroon font-medium">
                   {review.tourName}
                 </div>
               </div>
@@ -336,20 +302,18 @@ export default function AboutPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 px-6 bg-[#651d2a]">
+      <section className="py-16 px-6 bg-tumakr-maroon">
         <div className="container mx-auto max-w-4xl text-center text-white">
-          <h2 className="text-3xl font-bold mb-4">
-            Ready to Explore Korea With Us?
-          </h2>
+          <h2 className="text-3xl font-bold mb-4">Ready to Explore Korea With Us?</h2>
           <p className="text-white/90 mb-8 max-w-2xl mx-auto">
-            Join thousands of happy travelers who have discovered the authentic
-            beauty of Korea with OnedayKorea Tours.
+            Join thousands of happy travelers who have discovered the authentic beauty of
+            Korea with OnedayKorea Tours.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link href="/tours">
               <Button
                 size="lg"
-                className="bg-white text-[#651d2a] hover:bg-gray-100 font-semibold"
+                className="bg-white text-tumakr-maroon hover:bg-gray-100 font-semibold"
               >
                 Browse Tours
               </Button>

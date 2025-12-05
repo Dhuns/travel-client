@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import styled from '@emotion/styled';
-import { QuotationResponse, EstimateDetail } from '@/src/shared/apis/estimate';
-import { getItemImg } from '@/src/shared/utils/base';
-import { draftToHtml } from '@/src/shared/utils/draftjs';
-import { sanitizeHtml } from '@/src/shared/utils/sanitize';
-import dayjs from 'dayjs';
-import DayMap from '@/src/components/Chat/DayMap';
+import DayMap from "@/src/components/Chat/DayMap";
+import { EstimateDetail, QuotationResponse } from "@/src/shared/apis/estimate";
+import { getItemImg } from "@/src/shared/utils/base";
+import { draftToHtml } from "@/src/shared/utils/draftjs";
+import { sanitizeHtml } from "@/src/shared/utils/sanitize";
+import styled from "@emotion/styled";
+import dayjs from "dayjs";
+import React, { useEffect, useState } from "react";
 
 // Korean to English type mapping
 const typeMapping: Record<string, string> = {
-  '여행지': 'Place',
-  '이동수단': 'Transportation',
-  '컨텐츠': 'Activity',
-  '숙박': 'Accommodation',
+  여행지: "Place",
+  이동수단: "Transportation",
+  컨텐츠: "Activity",
+  숙박: "Accommodation",
 };
 
 interface FinalQuotationProps {
@@ -58,13 +58,13 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
     if (!estimateInfo.timeline) return {};
 
     // If already an object, return as-is
-    if (typeof estimateInfo.timeline === 'object') {
+    if (typeof estimateInfo.timeline === "object") {
       return estimateInfo.timeline;
     }
 
     // If string, parse it (format: "day1#@#day2#@#day3...")
-    if (typeof estimateInfo.timeline === 'string') {
-      const days = (estimateInfo.timeline as string).split('#@#');
+    if (typeof estimateInfo.timeline === "string") {
+      const days = (estimateInfo.timeline as string).split("#@#");
       const result: Record<string, string> = {};
       days.forEach((content, index) => {
         if (content.trim()) {
@@ -83,21 +83,25 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
     try {
       return JSON.parse(batchInfo.adjustmentReason);
     } catch (e) {
-      console.error('Failed to parse adjustment reason:', e);
+      console.error("Failed to parse adjustment reason:", e);
       return [];
     }
   }, [batchInfo.adjustmentReason]);
 
   // Calculate totals
-  const itemsSubtotal = estimateDetails.reduce((sum, detail) => sum + (Number(detail.price) || 0), 0);
+  const itemsSubtotal = estimateDetails.reduce(
+    (sum, detail) => sum + (Number(detail.price) || 0),
+    0
+  );
   const manualAdjustment = Number(batchInfo.manualAdjustment) || 0;
   const totalPrice = itemsSubtotal + manualAdjustment;
-  const totalTravelers = batchInfo.adultsCount + batchInfo.childrenCount + batchInfo.infantsCount;
+  const totalTravelers =
+    batchInfo.adultsCount + batchInfo.childrenCount + batchInfo.infantsCount;
   const pricePerPerson = totalTravelers > 0 ? totalPrice / totalTravelers : 0;
-  const tripDays = dayjs(batchInfo.endDate).diff(dayjs(batchInfo.startDate), 'day') + 1;
+  const tripDays = dayjs(batchInfo.endDate).diff(dayjs(batchInfo.startDate), "day") + 1;
 
   // Separate common services (transportation and contents) from day-specific items
-  const commonServiceTypes = ['이동수단', '컨텐츠'];
+  const commonServiceTypes = ["이동수단", "컨텐츠"];
 
   // Apply item filter based on selected types
   const filteredDetails = React.useMemo(() => {
@@ -107,18 +111,18 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
       try {
         selectedTypes = JSON.parse(batchInfo.itemFilter);
       } catch (e) {
-        console.error('Failed to parse itemFilter:', e);
+        console.error("Failed to parse itemFilter:", e);
       }
     }
 
     // If itemFilter has selections, use it
     if (selectedTypes.length > 0) {
-      return estimateDetails.filter(detail => selectedTypes.includes(detail.item.type));
+      return estimateDetails.filter((detail) => selectedTypes.includes(detail.item.type));
     }
 
     // Fall back to onlyPlace for backward compatibility
     if (batchInfo.onlyPlace) {
-      return estimateDetails.filter(detail => detail.item.type === '여행지');
+      return estimateDetails.filter((detail) => detail.item.type === "여행지");
     }
 
     // Show nothing if no filter is selected
@@ -126,11 +130,11 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
   }, [batchInfo.itemFilter, batchInfo.onlyPlace, estimateDetails]);
 
   const daySpecificDetails = filteredDetails.filter(
-    detail => !commonServiceTypes.includes(detail.item.type) && detail.days !== 0
+    (detail) => !commonServiceTypes.includes(detail.item.type) && detail.days !== 0
   );
 
   const commonServices = filteredDetails.filter(
-    detail => commonServiceTypes.includes(detail.item.type) && detail.days !== 0
+    (detail) => commonServiceTypes.includes(detail.item.type) && detail.days !== 0
   );
 
   // Group day-specific items by day
@@ -174,7 +178,7 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
         const data = await response.json();
         setMapData(data);
       } catch (err) {
-        console.error('[FinalQuotation] Failed to load map data:', err);
+        console.error("[FinalQuotation] Failed to load map data:", err);
       } finally {
         setLoadingMap(false);
       }
@@ -192,8 +196,10 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
 
       <FinalContent>
         <FinalCard>
-          <FinalTitle>{batchInfo.title || 'Travel Plan'}</FinalTitle>
-          <ValidUntilFinal>Valid until: {dayjs(batchInfo.validDate).format('YYYY-MM-DD')}</ValidUntilFinal>
+          <FinalTitle>{batchInfo.title || "Travel Plan"}</FinalTitle>
+          <ValidUntilFinal>
+            Valid until: {dayjs(batchInfo.validDate).format("YYYY-MM-DD")}
+          </ValidUntilFinal>
 
           <FinalSection>
             <FinalSectionTitle>Travel Information</FinalSectionTitle>
@@ -201,17 +207,18 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
               <FinalInfoItem>
                 <FinalLabel>Travel Period</FinalLabel>
                 <FinalValue>
-                  {dayjs(batchInfo.startDate).format('YYYY-MM-DD')} ~ {dayjs(batchInfo.endDate).format('YYYY-MM-DD')}
-                  {' '}({tripDays} days)
+                  {dayjs(batchInfo.startDate).format("YYYY-MM-DD")} ~{" "}
+                  {dayjs(batchInfo.endDate).format("YYYY-MM-DD")} ({tripDays} days)
                 </FinalValue>
               </FinalInfoItem>
               <FinalInfoItem>
                 <FinalLabel>Travelers</FinalLabel>
                 <FinalValue>
                   {batchInfo.adultsCount > 0 && `Adults: ${batchInfo.adultsCount}`}
-                  {batchInfo.childrenCount > 0 && `, Children: ${batchInfo.childrenCount}`}
-                  {batchInfo.infantsCount > 0 && `, Infants: ${batchInfo.infantsCount}`}
-                  {' '}(Total: {totalTravelers})
+                  {batchInfo.childrenCount > 0 &&
+                    `, Children: ${batchInfo.childrenCount}`}
+                  {batchInfo.infantsCount > 0 && `, Infants: ${batchInfo.infantsCount}`}{" "}
+                  (Total: {totalTravelers})
                 </FinalValue>
               </FinalInfoItem>
               {batchInfo.recipient && (
@@ -234,12 +241,18 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
                       <CommonServiceName>{service.item.nameEng}</CommonServiceName>
                     </CommonServiceHeader>
                     <CommonServiceDetails>
-                      <CommonServiceRow style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
-                        <CommonServiceLabel style={{ width: '100%', marginBottom: '0.25rem' }}>Used on:</CommonServiceLabel>
+                      <CommonServiceRow style={{ flexWrap: "wrap", gap: "0.5rem" }}>
+                        <CommonServiceLabel
+                          style={{ width: "100%", marginBottom: "0.25rem" }}
+                        >
+                          Used on:
+                        </CommonServiceLabel>
                         <DayBadgesContainer>
-                          {service.days.sort((a: number, b: number) => a - b).map((d: number) => (
-                            <DayBadge key={d}>Day {d}</DayBadge>
-                          ))}
+                          {service.days
+                            .sort((a: number, b: number) => a - b)
+                            .map((d: number) => (
+                              <DayBadge key={d}>Day {d}</DayBadge>
+                            ))}
                         </DayBadgesContainer>
                       </CommonServiceRow>
                       <CommonServiceRow>
@@ -249,13 +262,17 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
                       {!batchInfo.hidePrice && service.originPrice > 0 && (
                         <CommonServiceRow>
                           <CommonServiceLabel>Unit Price:</CommonServiceLabel>
-                          <CommonServiceValue>${Number(service.originPrice).toLocaleString()}</CommonServiceValue>
+                          <CommonServiceValue>
+                            ${Number(service.originPrice).toLocaleString()}
+                          </CommonServiceValue>
                         </CommonServiceRow>
                       )}
                       {!batchInfo.hidePrice && (
                         <CommonServiceRow>
                           <CommonServiceLabel>Total:</CommonServiceLabel>
-                          <CommonServiceTotal>${Number(service.price).toLocaleString()}</CommonServiceTotal>
+                          <CommonServiceTotal>
+                            ${Number(service.price).toLocaleString()}
+                          </CommonServiceTotal>
                         </CommonServiceRow>
                       )}
                     </CommonServiceDetails>
@@ -272,46 +289,59 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
               .map((day) => {
                 const dayNumber = Number(day);
                 const items = itemsByDay[dayNumber];
-                const dayDate = dayjs(batchInfo.startDate).add(dayNumber - 1, 'day');
+                const dayDate = dayjs(batchInfo.startDate).add(dayNumber - 1, "day");
 
                 return (
                   <FinalDaySection key={day}>
                     <FinalDayHeader>
                       <FinalDayTitle>Day {day}</FinalDayTitle>
-                      <FinalDayDate>{dayDate.format('YYYY-MM-DD (ddd)')}</FinalDayDate>
+                      <FinalDayDate>{dayDate.format("YYYY-MM-DD (ddd)")}</FinalDayDate>
                     </FinalDayHeader>
                     <FinalItemList>
                       {items.map((detail, idx) => {
-                        const thumbnail = detail.item.files?.find((f) => f.type === '썸네일');
+                        const thumbnail = detail.item.files?.find(
+                          (f) => f.type === "썸네일"
+                        );
                         const showPrice = !batchInfo.hidePrice;
 
                         return (
                           <FinalItemCard key={detail.id}>
                             <FinalItemNumber>{idx + 1}</FinalItemNumber>
                             {thumbnail && (
-                              <FinalItemImage src={getItemImg(thumbnail.itemSrc)} alt={detail.item.nameEng} />
+                              <FinalItemImage
+                                src={getItemImg(thumbnail.itemSrc)}
+                                alt={detail.item.nameEng}
+                              />
                             )}
                             <FinalItemContent>
                               <FinalItemHeader>
-                                <FinalItemType>{typeMapping[detail.item.type] || detail.item.type}</FinalItemType>
+                                <FinalItemType>
+                                  {typeMapping[detail.item.type] || detail.item.type}
+                                </FinalItemType>
                                 <FinalItemName>{detail.item.nameEng}</FinalItemName>
                               </FinalItemHeader>
                               {detail.item.description && (
                                 <FinalItemDescription
-                                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(draftToHtml(detail.item.description)) }}
+                                  dangerouslySetInnerHTML={{
+                                    __html: sanitizeHtml(
+                                      draftToHtml(detail.item.description)
+                                    ),
+                                  }}
                                 />
                               )}
                               <FinalItemFooter>
                                 <FinalItemQuantity>
                                   Quantity: {detail.quantity}
                                   {showPrice && detail.originPrice && (
-                                    <span style={{ marginLeft: '8px', color: '#999' }}>
+                                    <span style={{ marginLeft: "8px", color: "#999" }}>
                                       @ ${Number(detail.originPrice).toLocaleString()}
                                     </span>
                                   )}
                                 </FinalItemQuantity>
                                 {showPrice && (
-                                  <FinalItemPrice>${Number(detail.price).toLocaleString()}</FinalItemPrice>
+                                  <FinalItemPrice>
+                                    ${Number(detail.price).toLocaleString()}
+                                  </FinalItemPrice>
                                 )}
                               </FinalItemFooter>
                             </FinalItemContent>
@@ -354,7 +384,9 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
                 <PriceBreakdownBox>
                   <PriceBreakdownRow>
                     <PriceBreakdownLabel>Items Subtotal</PriceBreakdownLabel>
-                    <PriceBreakdownValue>${itemsSubtotal.toLocaleString()}</PriceBreakdownValue>
+                    <PriceBreakdownValue>
+                      ${itemsSubtotal.toLocaleString()}
+                    </PriceBreakdownValue>
                   </PriceBreakdownRow>
 
                   {adjustmentItems.length > 0 && (
@@ -363,9 +395,11 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
                       <AdjustmentsHeader>Adjustments</AdjustmentsHeader>
                       {(adjustmentItems as AdjustmentItem[]).map((item, index) => (
                         <AdjustmentRow key={index}>
-                          <AdjustmentDescription>{item.description || 'Adjustment'}</AdjustmentDescription>
+                          <AdjustmentDescription>
+                            {item.description || "Adjustment"}
+                          </AdjustmentDescription>
                           <AdjustmentAmount isPositive={item.amount >= 0}>
-                            {item.amount >= 0 ? '+' : ''}${item.amount.toLocaleString()}
+                            {item.amount >= 0 ? "+" : ""}${item.amount.toLocaleString()}
                           </AdjustmentAmount>
                         </AdjustmentRow>
                       ))}
@@ -383,7 +417,9 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
                 {totalTravelers > 0 && (
                   <FinalPerPersonRow>
                     <FinalPerPersonLabel>Per Person</FinalPerPersonLabel>
-                    <FinalPerPersonAmount>${Math.round(pricePerPerson).toLocaleString()}</FinalPerPersonAmount>
+                    <FinalPerPersonAmount>
+                      ${Math.round(pricePerPerson).toLocaleString()}
+                    </FinalPerPersonAmount>
                   </FinalPerPersonRow>
                 )}
               </FinalTotalSection>
@@ -393,7 +429,11 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
           {estimateInfo.comment && (
             <FinalSection>
               <FinalSectionTitle>Additional Information</FinalSectionTitle>
-              <FinalCommentBox dangerouslySetInnerHTML={{ __html: sanitizeHtml(draftToHtml(estimateInfo.comment)) }} />
+              <FinalCommentBox
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(draftToHtml(estimateInfo.comment)),
+                }}
+              />
             </FinalSection>
           )}
 
@@ -451,7 +491,11 @@ export default FinalQuotation;
 // Styled Components
 const FinalContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-tumakr-maroon) 0%,
+    var(--color-tumakr-maroon) 100%
+  );
   padding: 0;
 `;
 
@@ -470,7 +514,11 @@ const FinalHeader = styled.header`
 const FinalLogo = styled.div`
   font-size: 1.5rem;
   font-weight: bold;
-  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-tumakr-maroon) 0%,
+    var(--color-tumakr-maroon) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -478,7 +526,11 @@ const FinalLogo = styled.div`
 
 const QuotationBadge = styled.div`
   padding: 0.5rem 1.5rem;
-  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-tumakr-maroon) 0%,
+    var(--color-tumakr-maroon) 100%
+  );
   color: white;
   border-radius: 20px;
   font-weight: 700;
@@ -504,7 +556,11 @@ const FinalTitle = styled.h1`
   font-weight: 700;
   color: #1a1a1a;
   margin: 0 0 0.5rem 0;
-  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-tumakr-maroon) 0%,
+    var(--color-tumakr-maroon) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -529,10 +585,10 @@ const FinalSection = styled.section`
 const FinalSectionTitle = styled.h2`
   font-size: 1.5rem;
   font-weight: 700;
-  color: #651d2a;
+  color: var(--color-tumakr-maroon);
   margin: 0 0 1.5rem 0;
   padding-bottom: 0.75rem;
-  border-bottom: 2px solid #651d2a;
+  border-bottom: 2px solid var(--color-tumakr-maroon);
 `;
 
 const FinalInfoGrid = styled.div`
@@ -584,7 +640,7 @@ const FinalDayHeader = styled.div`
 const FinalDayTitle = styled.h3`
   font-size: 1.4rem;
   font-weight: 700;
-  color: #651d2a;
+  color: var(--color-tumakr-maroon);
   margin: 0;
 `;
 
@@ -611,7 +667,7 @@ const FinalItemCard = styled.div`
   transition: all 0.3s ease;
 
   &:hover {
-    border-color: #651d2a;
+    border-color: var(--color-tumakr-maroon);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
   }
 `;
@@ -623,7 +679,11 @@ const FinalItemNumber = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-tumakr-maroon) 0%,
+    var(--color-tumakr-maroon) 100%
+  );
   color: white;
   border-radius: 50%;
   font-weight: 700;
@@ -655,7 +715,7 @@ const FinalItemType = styled.span`
   font-size: 0.75rem;
   font-weight: 700;
   color: white;
-  background: #651d2a;
+  background: var(--color-tumakr-maroon);
   padding: 4px 10px;
   border-radius: 12px;
   text-transform: uppercase;
@@ -676,15 +736,26 @@ const FinalItemDescription = styled.div`
   line-height: 1.6;
 
   /* HTML tags styling */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     margin: 0.5em 0;
     font-weight: 600;
     color: #1a1a1a;
   }
 
-  h1 { font-size: 1.5em; }
-  h2 { font-size: 1.3em; }
-  h3 { font-size: 1.1em; }
+  h1 {
+    font-size: 1.5em;
+  }
+  h2 {
+    font-size: 1.3em;
+  }
+  h3 {
+    font-size: 1.1em;
+  }
 
   p {
     margin: 0.5em 0;
@@ -703,7 +774,8 @@ const FinalItemDescription = styled.div`
     text-decoration: underline;
   }
 
-  ul, ol {
+  ul,
+  ol {
     margin: 0.5em 0;
     padding-left: 1.5em;
   }
@@ -771,7 +843,7 @@ const FinalItemQuantity = styled.span`
 const FinalItemPrice = styled.span`
   font-size: 1.4rem;
   font-weight: 700;
-  color: #651d2a;
+  color: var(--color-tumakr-maroon);
 `;
 
 const FinalTimelineSection = styled.div`
@@ -779,7 +851,7 @@ const FinalTimelineSection = styled.div`
   padding: 1.25rem;
   background: white;
   border-radius: 8px;
-  border-left: 4px solid #651d2a;
+  border-left: 4px solid var(--color-tumakr-maroon);
 `;
 
 const FinalTimelineContent = styled.p`
@@ -791,7 +863,11 @@ const FinalTimelineContent = styled.p`
 `;
 
 const FinalTotalSection = styled.div`
-  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-tumakr-maroon) 0%,
+    var(--color-tumakr-maroon) 100%
+  );
   padding: 2rem;
   border-radius: 16px;
   box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
@@ -857,7 +933,8 @@ const FinalCommentBox = styled.div`
   }
 
   /* Lists */
-  ul, ol {
+  ul,
+  ol {
     margin: 0 0 1rem 0;
     padding-left: 1.5rem;
 
@@ -875,12 +952,14 @@ const FinalCommentBox = styled.div`
   }
 
   /* Text formatting */
-  strong, b {
+  strong,
+  b {
     font-weight: 700;
     color: #1f2937;
   }
 
-  em, i {
+  em,
+  i {
     font-style: italic;
   }
 
@@ -889,7 +968,12 @@ const FinalCommentBox = styled.div`
   }
 
   /* Headings */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     margin: 1.5rem 0 1rem 0;
     font-weight: 700;
     color: #1f2937;
@@ -904,18 +988,30 @@ const FinalCommentBox = styled.div`
     }
   }
 
-  h1 { font-size: 1.5rem; }
-  h2 { font-size: 1.3rem; }
-  h3 { font-size: 1.15rem; }
-  h4 { font-size: 1.05rem; }
-  h5 { font-size: 1rem; }
-  h6 { font-size: 0.95rem; }
+  h1 {
+    font-size: 1.5rem;
+  }
+  h2 {
+    font-size: 1.3rem;
+  }
+  h3 {
+    font-size: 1.15rem;
+  }
+  h4 {
+    font-size: 1.05rem;
+  }
+  h5 {
+    font-size: 1rem;
+  }
+  h6 {
+    font-size: 0.95rem;
+  }
 
   /* Blockquotes */
   blockquote {
     margin: 1rem 0;
     padding-left: 1rem;
-    border-left: 4px solid #651d2a;
+    border-left: 4px solid var(--color-tumakr-maroon);
     color: #6b7280;
     font-style: italic;
 
@@ -926,12 +1022,12 @@ const FinalCommentBox = styled.div`
 
   /* Links */
   a {
-    color: #651d2a;
+    color: var(--color-tumakr-maroon);
     text-decoration: underline;
     transition: color 0.2s;
 
     &:hover {
-      color: #8b3a47;
+      color: var(--color-tumakr-maroon);
     }
   }
 
@@ -940,7 +1036,7 @@ const FinalCommentBox = styled.div`
     padding: 0.2rem 0.4rem;
     background: #e5e7eb;
     border-radius: 4px;
-    font-family: 'Courier New', monospace;
+    font-family: "Courier New", monospace;
     font-size: 0.9em;
   }
 
@@ -1051,7 +1147,7 @@ const CommonServiceValue = styled.span`
 
 const CommonServiceTotal = styled.span`
   font-size: 1.1rem;
-  color: #651d2a;
+  color: var(--color-tumakr-maroon);
   font-weight: 700;
 `;
 
@@ -1115,5 +1211,5 @@ const AdjustmentDescription = styled.span`
 const AdjustmentAmount = styled.span<{ isPositive: boolean }>`
   font-size: 0.95rem;
   font-weight: 600;
-  color: ${props => props.isPositive ? '#059669' : '#dc2626'};
+  color: ${(props) => (props.isPositive ? "#059669" : "#dc2626")};
 `;

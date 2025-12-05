@@ -4,11 +4,11 @@ import { EstimateDetail, QuotationResponse } from "@/src/shared/apis/estimate";
 import React, { useEffect, useState } from "react";
 
 import DayMap from "@/src/components/Chat/DayMap";
-import dayjs from "dayjs";
 import { getItemImg } from "@/src/shared/utils/base";
 import { draftToHtml } from "@/src/shared/utils/draftjs";
 import { sanitizeHtml } from "@/src/shared/utils/sanitize";
 import styled from "@emotion/styled";
+import dayjs from "dayjs";
 
 // Korean to English type mapping
 const typeMapping: Record<string, string> = {
@@ -53,13 +53,13 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
     if (!estimateInfo.timeline) return {};
 
     // If already an object, return as-is
-    if (typeof estimateInfo.timeline === 'object') {
+    if (typeof estimateInfo.timeline === "object") {
       return estimateInfo.timeline;
     }
 
     // If string, parse it (format: "day1#@#day2#@#day3...")
-    if (typeof estimateInfo.timeline === 'string') {
-      const days = (estimateInfo.timeline as string).split('#@#');
+    if (typeof estimateInfo.timeline === "string") {
+      const days = (estimateInfo.timeline as string).split("#@#");
       const result: Record<string, string> = {};
       days.forEach((content, index) => {
         if (content.trim()) {
@@ -80,11 +80,10 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
   const totalTravelers =
     batchInfo.adultsCount + batchInfo.childrenCount + batchInfo.infantsCount;
   const pricePerPerson = totalTravelers > 0 ? totalPrice / totalTravelers : 0;
-  const tripDays =
-    dayjs(batchInfo.endDate).diff(dayjs(batchInfo.startDate), "day") + 1;
+  const tripDays = dayjs(batchInfo.endDate).diff(dayjs(batchInfo.startDate), "day") + 1;
 
   // Separate common services (transportation and contents) from day-specific items
-  const commonServiceTypes = ['이동수단', '컨텐츠'];
+  const commonServiceTypes = ["이동수단", "컨텐츠"];
 
   // Apply item filter based on selected types
   const filteredDetails = React.useMemo(() => {
@@ -94,18 +93,18 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
       try {
         selectedTypes = JSON.parse(batchInfo.itemFilter);
       } catch (e) {
-        console.error('Failed to parse itemFilter:', e);
+        console.error("Failed to parse itemFilter:", e);
       }
     }
 
     // If itemFilter has selections, use it
     if (selectedTypes.length > 0) {
-      return estimateDetails.filter(detail => selectedTypes.includes(detail.item.type));
+      return estimateDetails.filter((detail) => selectedTypes.includes(detail.item.type));
     }
 
     // Fall back to onlyPlace for backward compatibility
     if (batchInfo.onlyPlace) {
-      return estimateDetails.filter(detail => detail.item.type === '여행지');
+      return estimateDetails.filter((detail) => detail.item.type === "여행지");
     }
 
     // Show all items if no filter is set
@@ -113,11 +112,11 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
   }, [batchInfo.itemFilter, batchInfo.onlyPlace, estimateDetails]);
 
   const daySpecificDetails = filteredDetails.filter(
-    detail => !commonServiceTypes.includes(detail.item.type) && detail.days !== 0
+    (detail) => !commonServiceTypes.includes(detail.item.type) && detail.days !== 0
   );
 
   const commonServices = filteredDetails.filter(
-    detail => commonServiceTypes.includes(detail.item.type) && detail.days !== 0
+    (detail) => commonServiceTypes.includes(detail.item.type) && detail.days !== 0
   );
 
   // Group day-specific items by day
@@ -150,14 +149,12 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
   const commonServicesArray = Object.values(groupedCommonServices);
 
   // Initialize all days as collapsed
-  const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>(
-    () => {
-      return Object.keys(itemsByDay).reduce((acc, day) => {
-        acc[day] = false;
-        return acc;
-      }, {} as Record<string, boolean>);
-    }
-  );
+  const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>(() => {
+    return Object.keys(itemsByDay).reduce((acc, day) => {
+      acc[day] = false;
+      return acc;
+    }, {} as Record<string, boolean>);
+  });
 
   // Toggle day expansion
   const toggleDay = (day: string) => {
@@ -211,10 +208,8 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
             <Label>Travelers</Label>
             <Value>
               {batchInfo.adultsCount > 0 && `Adults: ${batchInfo.adultsCount}`}
-              {batchInfo.childrenCount > 0 &&
-                `, Children: ${batchInfo.childrenCount}`}
-              {batchInfo.infantsCount > 0 &&
-                `, Infants: ${batchInfo.infantsCount}`}{" "}
+              {batchInfo.childrenCount > 0 && `, Children: ${batchInfo.childrenCount}`}
+              {batchInfo.infantsCount > 0 && `, Infants: ${batchInfo.infantsCount}`}{" "}
               (Total: {totalTravelers})
             </Value>
           </InfoItem>
@@ -238,12 +233,18 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
                   <CommonServiceName>{service.item.nameEng}</CommonServiceName>
                 </CommonServiceHeader>
                 <CommonServiceDetails>
-                  <CommonServiceRow style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
-                    <CommonServiceLabel style={{ width: '100%', marginBottom: '0.25rem' }}>Used on:</CommonServiceLabel>
+                  <CommonServiceRow style={{ flexWrap: "wrap", gap: "0.5rem" }}>
+                    <CommonServiceLabel
+                      style={{ width: "100%", marginBottom: "0.25rem" }}
+                    >
+                      Used on:
+                    </CommonServiceLabel>
                     <DayBadgesContainer>
-                      {service.days.sort((a: number, b: number) => a - b).map((d: number) => (
-                        <DayBadge key={d}>Day {d}</DayBadge>
-                      ))}
+                      {service.days
+                        .sort((a: number, b: number) => a - b)
+                        .map((d: number) => (
+                          <DayBadge key={d}>Day {d}</DayBadge>
+                        ))}
                     </DayBadgesContainer>
                   </CommonServiceRow>
                   <CommonServiceRow>
@@ -253,13 +254,17 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
                   {!batchInfo.hidePrice && service.originPrice > 0 && (
                     <CommonServiceRow>
                       <CommonServiceLabel>Unit Price:</CommonServiceLabel>
-                      <CommonServiceValue>${Number(service.originPrice).toLocaleString()}</CommonServiceValue>
+                      <CommonServiceValue>
+                        ${Number(service.originPrice).toLocaleString()}
+                      </CommonServiceValue>
                     </CommonServiceRow>
                   )}
                   {!batchInfo.hidePrice && (
                     <CommonServiceRow>
                       <CommonServiceLabel>Total:</CommonServiceLabel>
-                      <CommonServiceTotal>${Number(service.price).toLocaleString()}</CommonServiceTotal>
+                      <CommonServiceTotal>
+                        ${Number(service.price).toLocaleString()}
+                      </CommonServiceTotal>
                     </CommonServiceRow>
                   )}
                 </CommonServiceDetails>
@@ -276,10 +281,7 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
           .map((day) => {
             const dayNumber = Number(day);
             const items = itemsByDay[dayNumber];
-            const dayDate = dayjs(batchInfo.startDate).add(
-              dayNumber - 1,
-              "day"
-            );
+            const dayDate = dayjs(batchInfo.startDate).add(dayNumber - 1, "day");
 
             const isExpanded = expandedDays[day];
 
@@ -334,14 +336,17 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
                             <ItemContent>
                               <ItemHeader>
                                 <ItemType>
-                                  {typeMapping[detail.item.type] ||
-                                    detail.item.type}
+                                  {typeMapping[detail.item.type] || detail.item.type}
                                 </ItemType>
                                 <ItemName>{detail.item.nameEng}</ItemName>
                               </ItemHeader>
                               {detail.item.description && (
                                 <ItemDescription
-                                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(draftToHtml(detail.item.description)) }}
+                                  dangerouslySetInnerHTML={{
+                                    __html: sanitizeHtml(
+                                      draftToHtml(detail.item.description)
+                                    ),
+                                  }}
                                 />
                               )}
                               <ItemFooter>
@@ -354,10 +359,7 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
                                         color: "#666",
                                       }}
                                     >
-                                      @ $
-                                      {Number(
-                                        detail.originPrice
-                                      ).toLocaleString()}
+                                      @ ${Number(detail.originPrice).toLocaleString()}
                                     </span>
                                   )}
                                 </ItemQuantity>
@@ -382,9 +384,7 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
                         {items.map((detail, index) => (
                           <RouteSummaryItem key={detail.id}>
                             <RouteSummaryNumber>{index + 1}</RouteSummaryNumber>
-                            <RouteSummaryName>
-                              {detail.item.nameEng}
-                            </RouteSummaryName>
+                            <RouteSummaryName>{detail.item.nameEng}</RouteSummaryName>
                           </RouteSummaryItem>
                         ))}
                       </RouteSummaryList>
@@ -440,14 +440,14 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
         <Section>
           <SectionTitle>Additional Information</SectionTitle>
           <CommentBox
-            dangerouslySetInnerHTML={{ __html: sanitizeHtml(draftToHtml(estimateInfo.comment)) }}
+            dangerouslySetInnerHTML={{
+              __html: sanitizeHtml(draftToHtml(estimateInfo.comment)),
+            }}
           />
         </Section>
       )}
 
-      {(batchInfo.email ||
-        batchInfo.officeNumber ||
-        batchInfo.emergencyNumber) && (
+      {(batchInfo.email || batchInfo.officeNumber || batchInfo.emergencyNumber) && (
         <Section>
           <SectionTitle>Contact Information</SectionTitle>
           <InfoGrid>
@@ -601,7 +601,7 @@ const DayHeaderLeft = styled.div`
 
 const ToggleIcon = styled.span<{ isExpanded: boolean }>`
   font-size: 14px;
-  color: #651d2a;
+  color: var(--color-tumakr-maroon);
   transition: transform 0.2s ease;
   user-select: none;
 `;
@@ -639,7 +639,7 @@ const ItemCard = styled.div`
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 
     h4 {
-      color: #651d2a;
+      color: var(--color-tumakr-maroon);
     }
   }
 `;
@@ -690,15 +690,26 @@ const ItemDescription = styled.div`
   line-height: 1.5;
 
   /* HTML tags styling */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     margin: 0.5em 0;
     font-weight: 600;
     color: #1a1a1a;
   }
 
-  h1 { font-size: 1.5em; }
-  h2 { font-size: 1.3em; }
-  h3 { font-size: 1.1em; }
+  h1 {
+    font-size: 1.5em;
+  }
+  h2 {
+    font-size: 1.3em;
+  }
+  h3 {
+    font-size: 1.1em;
+  }
 
   p {
     margin: 0.5em 0;
@@ -717,7 +728,8 @@ const ItemDescription = styled.div`
     text-decoration: underline;
   }
 
-  ul, ol {
+  ul,
+  ol {
     margin: 0.5em 0;
     padding-left: 1.5em;
   }
@@ -841,7 +853,7 @@ const RouteSummaryNumber = styled.div`
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #651d2a;
+  background: var(--color-tumakr-maroon);
   color: white;
   font-size: 12px;
   font-weight: 700;
@@ -854,7 +866,11 @@ const RouteSummaryName = styled.span`
 `;
 
 const TotalSection = styled.div`
-  background: linear-gradient(135deg, #651d2a 0%, #8b3a47 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-tumakr-maroon) 0%,
+    var(--color-tumakr-maroon) 100%
+  );
   padding: 24px 32px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -938,12 +954,14 @@ const CommentBox = styled.div`
   }
 
   /* Text formatting */
-  strong, b {
+  strong,
+  b {
     font-weight: 700;
     color: #1f2937;
   }
 
-  em, i {
+  em,
+  i {
     font-style: italic;
   }
 
@@ -952,7 +970,12 @@ const CommentBox = styled.div`
   }
 
   /* Headings */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     margin: 20px 0 12px 0;
     font-weight: 700;
     color: #1f2937;
@@ -967,12 +990,24 @@ const CommentBox = styled.div`
     }
   }
 
-  h1 { font-size: 1.5rem; }
-  h2 { font-size: 1.3rem; }
-  h3 { font-size: 1.15rem; }
-  h4 { font-size: 1.05rem; }
-  h5 { font-size: 1rem; }
-  h6 { font-size: 0.95rem; }
+  h1 {
+    font-size: 1.5rem;
+  }
+  h2 {
+    font-size: 1.3rem;
+  }
+  h3 {
+    font-size: 1.15rem;
+  }
+  h4 {
+    font-size: 1.05rem;
+  }
+  h5 {
+    font-size: 1rem;
+  }
+  h6 {
+    font-size: 0.95rem;
+  }
 
   /* Blockquotes */
   blockquote {
@@ -1003,7 +1038,7 @@ const CommentBox = styled.div`
     padding: 2px 6px;
     background: #e5e7eb;
     border-radius: 4px;
-    font-family: 'Courier New', monospace;
+    font-family: "Courier New", monospace;
     font-size: 0.9em;
   }
 
@@ -1097,7 +1132,7 @@ const CommonServiceValue = styled.span`
 
 const CommonServiceTotal = styled.span`
   font-size: 1.1rem;
-  color: #651d2a;
+  color: var(--color-tumakr-maroon);
   font-weight: 700;
 `;
 

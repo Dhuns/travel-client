@@ -1,6 +1,13 @@
 "use client";
 
 import {
+  checkUsername,
+  getAppleAuthUrl,
+  getGoogleAuthUrl,
+  signup,
+} from "@/src/shared/apis/user";
+import { isValidPassword, ValidationMessages } from "@/src/shared/utils/validation";
+import {
   CheckCircle2,
   Eye,
   EyeOff,
@@ -10,19 +17,12 @@ import {
   User,
   XCircle,
 } from "lucide-react";
-import {
-  checkUsername,
-  getAppleAuthUrl,
-  getGoogleAuthUrl,
-  signup,
-} from "@/src/shared/apis/user";
-import { isValidPassword, ValidationMessages } from "@/src/shared/utils/validation";
 
 import { Button } from "@/components/ui/button";
-import type React from "react";
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
 import { useAuthStore } from "@/src/shared/store/authStore";
+import { useRouter } from "next/navigation";
+import type React from "react";
+import { useEffect, useState } from "react";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -154,9 +154,7 @@ export default function SignupPage() {
     } catch (error) {
       console.error("Signup failed:", error);
       const axiosError = error as { response?: { data?: { message?: string } } };
-      alert(
-        axiosError.response?.data?.message || "Signup failed. Please try again."
-      );
+      alert(axiosError.response?.data?.message || "Signup failed. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -284,7 +282,8 @@ export default function SignupPage() {
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   className={`w-full pl-10 pr-10 py-3 bg-white border rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-0 transition-colors ${
-                    formData.confirmPassword && formData.password !== formData.confirmPassword
+                    formData.confirmPassword &&
+                    formData.password !== formData.confirmPassword
                       ? "border-red-400 focus:border-red-400"
                       : "border-gray-200 focus:border-gray-400"
                   }`}
@@ -304,11 +303,10 @@ export default function SignupPage() {
                   )}
                 </button>
               </div>
-              {formData.confirmPassword && formData.password !== formData.confirmPassword && (
-                <p className="mt-1.5 text-xs text-red-500">
-                  Passwords do not match
-                </p>
-              )}
+              {formData.confirmPassword &&
+                formData.password !== formData.confirmPassword && (
+                  <p className="mt-1.5 text-xs text-red-500">Passwords do not match</p>
+                )}
             </div>
 
             {/* Phone (Optional) */}
@@ -334,7 +332,7 @@ export default function SignupPage() {
                   type="checkbox"
                   checked={agreements.allAgree}
                   onChange={() => handleAgreementChange("allAgree")}
-                  className="mt-0.5 w-4 h-4 rounded border-gray-300 text-[#651d2a] focus:ring-[#651d2a] focus:ring-offset-0"
+                  className="mt-0.5 w-4 h-4 rounded border-gray-300 text-tumakr-maroon focus:ring-tumakr-maroon focus:ring-offset-0"
                 />
                 <span className="text-sm text-gray-700">
                   I agree to all terms and conditions
@@ -348,7 +346,7 @@ export default function SignupPage() {
                       type="checkbox"
                       checked={agreements.terms}
                       onChange={() => handleAgreementChange("terms")}
-                      className="w-4 h-4 rounded border-gray-300 text-[#651d2a] focus:ring-[#651d2a] focus:ring-offset-0"
+                      className="w-4 h-4 rounded border-gray-300 text-tumakr-maroon focus:ring-tumakr-maroon focus:ring-offset-0"
                     />
                     <span className="text-sm text-gray-600">
                       Terms of Service
@@ -369,7 +367,7 @@ export default function SignupPage() {
                       type="checkbox"
                       checked={agreements.privacy}
                       onChange={() => handleAgreementChange("privacy")}
-                      className="w-4 h-4 rounded border-gray-300 text-[#651d2a] focus:ring-[#651d2a] focus:ring-offset-0"
+                      className="w-4 h-4 rounded border-gray-300 text-tumakr-maroon focus:ring-tumakr-maroon focus:ring-offset-0"
                     />
                     <span className="text-sm text-gray-600">
                       Privacy Policy
@@ -390,7 +388,7 @@ export default function SignupPage() {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 bg-[#651d2a] hover:bg-[#7a2433] text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+              className="w-full py-3 bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
             >
               {isSubmitting ? "Creating account..." : "Create account"}
             </Button>
@@ -402,9 +400,7 @@ export default function SignupPage() {
               <div className="w-full border-t border-gray-200" />
             </div>
             <div className="relative flex justify-center">
-              <span className="px-4 bg-[#faf9f7] text-sm text-gray-400">
-                or
-              </span>
+              <span className="px-4 bg-[#faf9f7] text-sm text-gray-400">or</span>
             </div>
           </div>
 
@@ -453,7 +449,7 @@ export default function SignupPage() {
             Already have an account?{" "}
             <a
               href="/login"
-              className="text-[#651d2a] hover:text-[#7a2433] font-medium"
+              className="text-tumakr-maroon hover:text-tumakr-maroon/90 font-medium"
             >
               Sign in
             </a>
