@@ -44,7 +44,7 @@ export async function TourGrid() {
                 alt={tour.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+              <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent"></div>
               <Badge className="absolute top-3 left-3 bg-tumakr-maroon/90 text-white font-medium px-3 py-1 text-xs">
                 {categoryDisplayNames[category] || "Tour"}
               </Badge>

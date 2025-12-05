@@ -157,7 +157,7 @@ export default function MyEstimatesPage() {
   // Not authenticated case
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
         <div className="container mx-auto px-6 max-w-7xl">
           <Card className="p-12 text-center shadow-lg border border-gray-200 bg-white rounded-xl">
             <div className="text-6xl mb-4">🔐</div>
@@ -175,7 +175,7 @@ export default function MyEstimatesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
       <div className="container mx-auto px-6 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
@@ -359,7 +359,7 @@ export default function MyEstimatesPage() {
 
         {/* Help Section */}
         {filteredEstimates.length > 0 && (
-          <Card className="mt-12 bg-gradient-to-r from-tumakr-maroon/5 to-tumakr-sage-green/5 border border-gray-200 shadow-lg rounded-xl">
+          <Card className="mt-12 bg-linear-to-r from-tumakr-maroon/5 to-tumakr-sage-green/5 border border-gray-200 shadow-lg rounded-xl">
             <CardContent className="p-8 text-center">
               <h3 className="text-xl font-bold text-gray-900 mb-2">
                 Have Questions About Your Estimate?

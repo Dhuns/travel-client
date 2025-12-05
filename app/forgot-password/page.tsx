@@ -50,7 +50,7 @@ export default function ForgotPasswordPage() {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#f5f3f0] to-[#faf8f5] flex items-center justify-center pt-32 pb-16">
+      <div className="min-h-screen bg-linear-to-br from-[#f5f3f0] to-[#faf8f5] flex items-center justify-center pt-32 pb-16">
         <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center">
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
@@ -65,7 +65,7 @@ export default function ForgotPasswordPage() {
             </p>
             <Button
               onClick={() => router.push("/login")}
-              className="w-full bg-gradient-to-r from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white"
+              className="w-full bg-linear-to-r from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white"
             >
               Back to Login
             </Button>
@@ -76,11 +76,11 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f5f3f0] to-[#faf8f5] pt-32 pb-16">
+    <div className="min-h-screen bg-linear-to-br from-[#f5f3f0] to-[#faf8f5] pt-32 pb-16">
       <div className="container mx-auto px-6">
         <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* 헤더 */}
-          <div className="bg-gradient-to-r from-tumakr-maroon to-tumakr-maroon/90 text-white p-8 text-center">
+          <div className="bg-linear-to-r from-tumakr-maroon to-tumakr-maroon/90 text-white p-8 text-center">
             <h1 className="text-3xl font-bold mb-2">Forgot Password?</h1>
             <p className="text-[#f5f3f0]">Enter your email to reset your password</p>
           </div>
@@ -122,7 +122,7 @@ export default function ForgotPasswordPage() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white py-3 rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-linear-to-r from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white py-3 rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? "Sending..." : "Send Reset Link"}
               </Button>

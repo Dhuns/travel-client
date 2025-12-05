@@ -244,7 +244,7 @@ export default function Footer() {
                 href="https://www.instagram.com/onedaykorea"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 bg-white/10 hover:bg-gradient-to-br hover:from-[#f09433] hover:via-[#e6683c] hover:to-[#bc1888] rounded-full flex items-center justify-center transition-all"
+                className="w-10 h-10 bg-white/10 hover:bg-linear-to-br hover:from-[#f09433] hover:via-[#e6683c] hover:to-[#bc1888] rounded-full flex items-center justify-center transition-all"
                 title="Instagram"
               >
                 <svg

@@ -38,7 +38,7 @@ export default async function MultidayTourPage() {
             fill
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-r from-black/70 via-black/50 to-transparent" />
         </div>
 
         <div className="relative container mx-auto px-6 py-32 lg:py-40">
@@ -156,7 +156,7 @@ export default async function MultidayTourPage() {
       </section>
 
       {/* Customer Reviews Section */}
-      <section className="py-20 px-6 bg-gradient-to-br from-tumakr-sage-green/5 to-tumakr-maroon/5">
+      <section className="py-20 px-6 bg-linear-to-br from-tumakr-sage-green/5 to-tumakr-maroon/5">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-tumakr-maroon text-white px-4 py-2 rounded-full text-sm font-medium mb-4">
@@ -177,7 +177,10 @@ export default async function MultidayTourPage() {
               <Quote className="absolute top-6 right-6 w-10 h-10 text-tumakr-maroon/10" />
               <div className="flex items-center gap-1 mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 fill-tumakr-mustard text-tumakr-mustard" />
+                  <Star
+                    key={i}
+                    className="w-5 h-5 fill-tumakr-mustard text-tumakr-mustard"
+                  />
                 ))}
               </div>
               <p className="text-gray-700 mb-6 leading-relaxed">
@@ -202,7 +205,10 @@ export default async function MultidayTourPage() {
               <Quote className="absolute top-6 right-6 w-10 h-10 text-tumakr-maroon/10" />
               <div className="flex items-center gap-1 mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 fill-tumakr-mustard text-tumakr-mustard" />
+                  <Star
+                    key={i}
+                    className="w-5 h-5 fill-tumakr-mustard text-tumakr-mustard"
+                  />
                 ))}
               </div>
               <p className="text-gray-700 mb-6 leading-relaxed">
@@ -226,7 +232,10 @@ export default async function MultidayTourPage() {
               <Quote className="absolute top-6 right-6 w-10 h-10 text-tumakr-maroon/10" />
               <div className="flex items-center gap-1 mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 fill-tumakr-mustard text-tumakr-mustard" />
+                  <Star
+                    key={i}
+                    className="w-5 h-5 fill-tumakr-mustard text-tumakr-mustard"
+                  />
                 ))}
               </div>
               <p className="text-gray-700 mb-6 leading-relaxed">
@@ -269,7 +278,7 @@ export default async function MultidayTourPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-6 bg-gradient-to-br from-tumakr-maroon to-tumakr-maroon/90">
+      <section className="py-20 px-6 bg-linear-to-br from-tumakr-maroon to-tumakr-maroon/90">
         <div className="container mx-auto max-w-4xl text-center text-white">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             Ready to explore Korea in depth?
@@ -438,7 +447,7 @@ export default async function MultidayTourPage() {
       </section>
 
       {/* AI Chatbot Customization CTA */}
-      <section className="py-20 px-6 bg-gradient-to-br from-tumakr-sage-green/5 to-tumakr-maroon/5 min-h-screen flex items-center">
+      <section className="py-20 px-6 bg-linear-to-br from-tumakr-sage-green/5 to-tumakr-maroon/5 min-h-screen flex items-center">
         <div className="container mx-auto max-w-5xl">
           <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
             <div className="grid md:grid-cols-2 gap-0">
@@ -450,7 +459,7 @@ export default async function MultidayTourPage() {
                   fill
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-tumakr-maroon/20 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-r from-tumakr-maroon/20 to-transparent" />
               </div>
 
               {/* Right: Content */}
@@ -496,7 +505,7 @@ export default async function MultidayTourPage() {
                 </div>
 
                 <Link href="/chat" className="w-full">
-                  <Button className="bg-gradient-to-r from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white px-8 py-6 text-lg rounded-full w-full group flex items-center justify-center">
+                  <Button className="bg-linear-to-r from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white px-8 py-6 text-lg rounded-full w-full group flex items-center justify-center">
                     <span>Chat with Travel AI</span>
                     <Compass className="w-5 h-5 ml-2 group-hover:rotate-90 transition-transform" />
                   </Button>

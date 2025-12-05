@@ -51,7 +51,7 @@ export default function PrivateTourInquiryForm() {
   return (
     <section
       id="inquiry-section"
-      className="py-28 px-6 min-h-screen flex items-center bg-gradient-to-br from-gray-50 to-white"
+      className="py-28 px-6 min-h-screen flex items-center bg-linear-to-br from-gray-50 to-white"
     >
       <div className="container mx-auto max-w-7xl w-full">
         <div className="grid lg:grid-cols-2 gap-8 items-stretch">
@@ -64,7 +64,7 @@ export default function PrivateTourInquiryForm() {
                 alt="Seoul Adventure"
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-tumakr-maroon/95 via-tumakr-maroon/70 to-transparent"></div>
+              <div className="absolute inset-0 bg-linear-to-t from-tumakr-maroon/95 via-tumakr-maroon/70 to-transparent"></div>
             </div>
 
             {/* 콘텐츠 */}

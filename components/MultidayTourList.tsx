@@ -56,7 +56,7 @@ export default function MultidayTourList({
                     alt={tour.title}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                  <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent"></div>
                   {tour.price && (
                     <div className="absolute top-4 right-4 bg-white text-tumakr-maroon font-bold px-3 py-1 rounded-full text-sm shadow-lg">
                       {tour.price}

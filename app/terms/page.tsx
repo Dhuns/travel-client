@@ -8,11 +8,11 @@ export default function TermsPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f5f3f0] to-[#faf8f5] pt-32 pb-16">
+    <div className="min-h-screen bg-linear-to-br from-[#f5f3f0] to-[#faf8f5] pt-32 pb-16">
       <div className="container mx-auto px-6">
         <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* 헤더 */}
-          <div className="bg-gradient-to-r from-tumakr-maroon to-tumakr-maroon/90 text-white p-8">
+          <div className="bg-linear-to-r from-tumakr-maroon to-tumakr-maroon/90 text-white p-8">
             <Button
               onClick={() => router.back()}
               variant="ghost"

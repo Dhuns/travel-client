@@ -180,7 +180,7 @@ export default function OrderDetailPage() {
   // 비로그인 상태
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
         <div className="container mx-auto px-6 max-w-4xl">
           <Card className="p-12 text-center shadow-lg border border-gray-200 bg-white rounded-xl">
             <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
@@ -204,7 +204,7 @@ export default function OrderDetailPage() {
   // 로딩 상태
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
         <div className="container mx-auto px-6 max-w-4xl">
           <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="w-12 h-12 text-tumakr-maroon animate-spin mb-4" />
@@ -218,7 +218,7 @@ export default function OrderDetailPage() {
   // 에러 상태
   if (error || !booking) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
         <div className="container mx-auto px-6 max-w-4xl">
           <Card className="p-12 text-center shadow-lg border border-gray-200 bg-white rounded-xl">
             <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
@@ -240,7 +240,7 @@ export default function OrderDetailPage() {
   const canCancel = booking.status === "CONFIRMED";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
       <div className="container mx-auto px-6 max-w-4xl">
         {/* 뒤로가기 */}
         <Link
@@ -253,7 +253,7 @@ export default function OrderDetailPage() {
 
         {/* 예약 상태 헤더 */}
         <Card className="mb-6 overflow-hidden shadow-lg border border-gray-200 bg-white rounded-xl">
-          <div className="bg-gradient-to-r from-tumakr-maroon to-tumakr-maroon/90 p-6">
+          <div className="bg-linear-to-r from-tumakr-maroon to-tumakr-maroon/90 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white/80 text-sm mb-1">예약번호</p>
@@ -427,7 +427,7 @@ export default function OrderDetailPage() {
         )}
 
         {/* 도움말 */}
-        <Card className="bg-gradient-to-r from-tumakr-maroon/5 to-tumakr-sage-green/5 border border-gray-200 shadow-lg rounded-xl">
+        <Card className="bg-linear-to-r from-tumakr-maroon/5 to-tumakr-sage-green/5 border border-gray-200 shadow-lg rounded-xl">
           <CardContent className="p-6 text-center">
             <h3 className="text-lg font-bold text-gray-900 mb-2">도움이 필요하신가요?</h3>
             <p className="text-gray-600 mb-4">

@@ -73,7 +73,7 @@ export default function ResetPasswordPage() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#f5f3f0] to-[#faf8f5] flex items-center justify-center pt-32 pb-16">
+      <div className="min-h-screen bg-linear-to-br from-[#f5f3f0] to-[#faf8f5] flex items-center justify-center pt-32 pb-16">
         <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center">
             <CheckCircle2 className="w-16 h-16 mx-auto text-green-500 mb-4" />
@@ -86,7 +86,7 @@ export default function ResetPasswordPage() {
             </p>
             <Button
               onClick={() => router.push("/login")}
-              className="w-full bg-gradient-to-r from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white"
+              className="w-full bg-linear-to-r from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white"
             >
               Go to Login
             </Button>
@@ -97,11 +97,11 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f5f3f0] to-[#faf8f5] pt-32 pb-16">
+    <div className="min-h-screen bg-linear-to-br from-[#f5f3f0] to-[#faf8f5] pt-32 pb-16">
       <div className="container mx-auto px-6">
         <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* 헤더 */}
-          <div className="bg-gradient-to-r from-tumakr-maroon to-tumakr-maroon/90 text-white p-8 text-center">
+          <div className="bg-linear-to-r from-tumakr-maroon to-tumakr-maroon/90 text-white p-8 text-center">
             <h1 className="text-3xl font-bold mb-2">Reset Password</h1>
             <p className="text-[#f5f3f0]">Enter your new password</p>
           </div>
@@ -195,7 +195,7 @@ export default function ResetPasswordPage() {
               <Button
                 type="submit"
                 disabled={isLoading || !token}
-                className="w-full bg-gradient-to-r from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white py-3 rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-linear-to-r from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white py-3 rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? "Resetting..." : "Reset Password"}
               </Button>
