@@ -1,14 +1,5 @@
-import {
-  Check,
-  Clock,
-  Compass,
-  MapPin,
-  Mountain,
-  Quote,
-  Shield,
-  Sunrise,
-} from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Clock, Compass, MapPin, Mountain, Quote, Shield, Sunrise } from "lucide-react";
 
 export default function MultidayTourLoading() {
   return (
@@ -40,18 +31,18 @@ export default function MultidayTourLoading() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-6">
               <div className="w-48 h-8 bg-gray-200 rounded-full animate-pulse"></div>
-              
+
               <div className="space-y-3">
                 <div className="w-full h-12 bg-gray-200 rounded animate-pulse"></div>
                 <div className="w-5/6 h-12 bg-gray-200 rounded animate-pulse"></div>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="w-full h-5 bg-gray-200 rounded animate-pulse"></div>
                 <div className="w-full h-5 bg-gray-200 rounded animate-pulse"></div>
                 <div className="w-4/5 h-5 bg-gray-200 rounded animate-pulse"></div>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="w-full h-5 bg-gray-200 rounded animate-pulse"></div>
                 <div className="w-3/4 h-5 bg-gray-200 rounded animate-pulse"></div>
@@ -178,7 +169,10 @@ export default function MultidayTourLoading() {
                 <Quote className="absolute top-6 right-6 w-10 h-10 text-gray-100" />
                 <div className="flex gap-1 mb-4">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <div key={star} className="w-6 h-6 bg-gray-200 rounded animate-pulse"></div>
+                    <div
+                      key={star}
+                      className="w-6 h-6 bg-gray-200 rounded animate-pulse"
+                    ></div>
                   ))}
                 </div>
                 <div className="space-y-2 mb-6">
