@@ -104,7 +104,7 @@ export default function AboutPage() {
             fill
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
+          <div className="absolute inset-0 bg-linear-to-b from-black/60 via-black/50 to-black/70" />
         </div>
 
         <div className="container mx-auto px-6 relative z-10 text-center text-white pt-20">

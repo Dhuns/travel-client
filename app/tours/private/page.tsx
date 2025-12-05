@@ -33,7 +33,7 @@ export default async function PrivateTourPage() {
             className="w-full h-full object-cover"
           />
           {/* 어두운 오버레이로 텍스트 가독성 확보 */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70"></div>
+          <div className="absolute inset-0 bg-linear-to-b from-black/60 via-black/50 to-black/70"></div>
         </div>
 
         {/* 콘텐츠 */}
@@ -186,7 +186,7 @@ export default async function PrivateTourPage() {
       {/* Popular Tours Section - 4.png */}
       <section
         id="tour-list"
-        className="py-16 px-6 min-h-screen flex items-center bg-gradient-to-br from-tumakr-dusty-pink/10 to-tumakr-sage-green/10"
+        className="py-16 px-6 min-h-screen flex items-center bg-linear-to-br from-tumakr-dusty-pink/10 to-tumakr-sage-green/10"
       >
         <div className="container mx-auto max-w-6xl w-full">
           <div className="text-center mb-12">

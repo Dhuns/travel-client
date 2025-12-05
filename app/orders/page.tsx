@@ -584,7 +584,7 @@ export default function OrdersPage() {
   // ==================== 비로그인 상태: 검색 폼 표시 ====================
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
         <div className="container mx-auto px-6 max-w-4xl">
           {/* 헤더 */}
           <div className="mb-8 text-center">
@@ -789,7 +789,7 @@ export default function OrdersPage() {
           )}
 
           {/* 로그인 유도 */}
-          <Card className="mt-8 bg-gradient-to-r from-tumakr-maroon/5 to-tumakr-sage-green/5 border border-gray-200 shadow-lg rounded-xl">
+          <Card className="mt-8 bg-linear-to-r from-tumakr-maroon/5 to-tumakr-sage-green/5 border border-gray-200 shadow-lg rounded-xl">
             <CardContent className="p-8 text-center">
               <h3 className="text-xl font-bold text-gray-900 mb-2">Have an account?</h3>
               <p className="text-gray-600 mb-4">
@@ -818,7 +818,7 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-[#faf9f7] to-gray-50 pt-24 pb-16">
       <div className="container mx-auto px-6 max-w-7xl">
         {/* 헤더 */}
         <div className="mb-8">
@@ -1247,7 +1247,7 @@ export default function OrdersPage() {
                       </div>
 
                       {/* Quote Progress Timeline */}
-                      <div className="bg-gradient-to-r from-tumakr-sage-green/10 to-tumakr-mustard/10 rounded-lg p-4 mb-4">
+                      <div className="bg-linear-to-r from-tumakr-sage-green/10 to-tumakr-mustard/10 rounded-lg p-4 mb-4">
                         <div className="flex items-center justify-between">
                           {/* Step 1: Created */}
                           <div className="flex flex-col items-center flex-1">
@@ -1538,7 +1538,7 @@ export default function OrdersPage() {
         )}
 
         {/* 도움말 섹션 */}
-        <Card className="mt-12 bg-gradient-to-r from-tumakr-maroon/5 to-tumakr-sage-green/5 border border-gray-200 shadow-lg rounded-xl">
+        <Card className="mt-12 bg-linear-to-r from-tumakr-maroon/5 to-tumakr-sage-green/5 border border-gray-200 shadow-lg rounded-xl">
           <CardContent className="p-8 text-center">
             <h3 className="text-xl font-bold text-gray-900 mb-2">
               Need help with your order?

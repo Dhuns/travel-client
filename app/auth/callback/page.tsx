@@ -49,7 +49,7 @@ export default function AuthCallbackPage() {
   }, [searchParams, router, setTokens, fetchUser]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f5f3f0] to-[#faf8f5] flex items-center justify-center">
+    <div className="min-h-screen bg-linear-to-br from-[#f5f3f0] to-[#faf8f5] flex items-center justify-center">
       <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8">
         {!error ? (
           <div className="text-center">

@@ -124,7 +124,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-tumakr-maroon/70 via-tumakr-maroon/60 to-tumakr-maroon/90" />
+          <div className="absolute inset-0 bg-linear-to-b from-tumakr-maroon/70 via-tumakr-maroon/60 to-tumakr-maroon/90" />
         </div>
 
         {/* Animated Elements */}
@@ -362,7 +362,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
                   fill
                   className="object-cover transition-transform duration-1000 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-tumakr-maroon via-tumakr-maroon/40 to-transparent opacity-90 group-hover:opacity-95 transition-opacity" />
+                <div className="absolute inset-0 bg-linear-to-t from-tumakr-maroon via-tumakr-maroon/40 to-transparent opacity-90 group-hover:opacity-95 transition-opacity" />
 
                 <div className="absolute bottom-0 left-0 right-0 p-10">
                   <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6">
@@ -400,7 +400,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
                         className="object-cover transition-transform duration-1000 group-hover:scale-110"
                       />
                       <div
-                        className={`absolute inset-0 bg-gradient-to-br ${
+                        className={`absolute inset-0 bg-linear-to-br ${
                           index === 0
                             ? "from-tumakr-mustard/80 to-tumakr-mustard"
                             : "from-tumakr-sage-green/80 to-tumakr-sage-green"
@@ -445,7 +445,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
       {/* 5. AI Chatbot Promotion - Diagonal Layout */}
       <section className="relative py-32 overflow-hidden bg-white">
         {/* Diagonal Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-tumakr-maroon via-tumakr-maroon to-tumakr-maroon/90 transform -skew-y-3 origin-top-left" />
+        <div className="absolute inset-0 bg-linear-to-br from-tumakr-maroon via-tumakr-maroon to-tumakr-maroon/90 transform -skew-y-3 origin-top-left" />
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 right-20 w-96 h-96 bg-tumakr-mustard rounded-full blur-3xl" />
           <div className="absolute bottom-20 left-20 w-96 h-96 bg-tumakr-sage-green rounded-full blur-3xl" />

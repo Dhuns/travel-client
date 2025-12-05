@@ -93,7 +93,7 @@ export default async function HistoryTourPage() {
       </section>
 
       {/* Why is Korean History Special Section */}
-      <section className="min-h-screen flex items-center px-6 bg-gradient-to-br from-tumakr-dusty-pink/10 to-tumakr-sage-green/10">
+      <section className="min-h-screen flex items-center px-6 bg-linear-to-br from-tumakr-dusty-pink/10 to-tumakr-sage-green/10">
         <div className="container mx-auto max-w-6xl py-20">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-16">
             Why is Korean History Special?
@@ -162,7 +162,7 @@ export default async function HistoryTourPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-6 bg-gradient-to-r from-tumakr-maroon via-tumakr-mustard to-tumakr-sage-green">
+      <section className="py-20 px-6 bg-linear-to-r from-tumakr-maroon via-tumakr-mustard to-tumakr-sage-green">
         <div className="container mx-auto max-w-4xl text-center text-white">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Now, it's your turn to begin your story.
@@ -210,7 +210,7 @@ export default async function HistoryTourPage() {
                             alt={tour.title}
                             className="w-full h-full object-cover"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/20"></div>
+                          <div className="absolute inset-0 bg-linear-to-r from-transparent to-black/20"></div>
                           <Badge className="absolute top-4 left-4 bg-tumakr-maroon text-white font-medium px-3 py-1.5">
                             {tour.badge}
                           </Badge>
@@ -358,7 +358,7 @@ export default async function HistoryTourPage() {
       </section>
 
       {/* Products & Souvenirs Section */}
-      <section className="py-16 px-6 flex items-center bg-gradient-to-br from-tumakr-dusty-pink/10 to-tumakr-sage-green/10">
+      <section className="py-16 px-6 flex items-center bg-linear-to-br from-tumakr-dusty-pink/10 to-tumakr-sage-green/10">
         <div className="container mx-auto max-w-6xl w-full">
           <div className="text-center mb-12">
             <div className="flex items-center justify-center gap-2 mb-4">

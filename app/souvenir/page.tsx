@@ -10,7 +10,7 @@ export default function ShopPage() {
   return (
     <div className="min-h-screen bg-[#f5f3f0]">
       {/* Hero Section */}
-      <div className="relative pt-20 pb-20 bg-gradient-to-r from-tumakr-mustard to-tumakr-sage-green overflow-hidden">
+      <div className="relative pt-20 pb-20 bg-linear-to-r from-tumakr-mustard to-tumakr-sage-green overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center opacity-20"
           style={{

@@ -8,7 +8,7 @@ export default async function ToursPage() {
   return (
     <div className="min-h-screen bg-[#f5f3f0]">
       {/* Hero Section */}
-      <div className="relative pt-20 pb-20 bg-gradient-to-r from-tumakr-maroon to-tumakr-mustard overflow-hidden">
+      <div className="relative pt-20 pb-20 bg-linear-to-r from-tumakr-maroon to-tumakr-mustard overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center opacity-20"
           style={{

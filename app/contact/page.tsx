@@ -68,7 +68,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-50">
+    <div className="min-h-screen bg-linear-to-b from-gray-100 to-gray-50">
       {/* Header */}
       <div className="pt-32 pb-12 bg-tumakr-maroon text-white">
         <div className="container mx-auto px-6">

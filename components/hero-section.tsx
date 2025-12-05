@@ -262,7 +262,7 @@ export function HeroSection({
                     />
                     {/* 이미지 오버레이 */}
                     <div className="absolute inset-0 bg-black/30" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent" />
 
                     {/* 이미지 캡션 */}
                     <div className="absolute bottom-6 left-6 text-white z-10">
@@ -330,7 +330,7 @@ export function HeroSection({
 
       {/* 그라데이션 오버레이 (텍스트 가독성 향상) */}
       {textColor === "white" && (
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+        <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent"></div>
       )}
 
       <div className="container mx-auto px-6 relative z-10 h-full flex items-center">
