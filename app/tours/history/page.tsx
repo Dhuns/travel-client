@@ -17,7 +17,7 @@ export default async function HistoryTourPage() {
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center px-6">
-        <div className="container mx-auto max-w-6xl">
+        <div className="container mx-auto max-w-7xl">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* 왼쪽: 텍스트 콘텐츠 */}
             <div>
@@ -85,7 +85,7 @@ export default async function HistoryTourPage() {
 
       {/* Why is Korean History Special Section */}
       <section className="min-h-screen flex items-center px-6 bg-linear-to-br from-tumakr-dusty-pink/10 to-tumakr-sage-green/10">
-        <div className="container mx-auto max-w-6xl py-20">
+        <div className="container mx-auto max-w-7xl py-20">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-16">
             Why is Korean History Special?
           </h2>
@@ -174,7 +174,7 @@ export default async function HistoryTourPage() {
 
       {/* Historical Destinations Section */}
       <section id="tour-list" className="min-h-screen flex items-center px-6 bg-white">
-        <div className="container mx-auto max-w-6xl py-20">
+        <div className="container mx-auto max-w-7xl py-20">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4">
             Historical Destinations Come Alive
           </h2>
@@ -423,7 +423,7 @@ export default async function HistoryTourPage() {
 
       {/* Feel the Breath of History Section */}
       <section className="flex items-center px-6 bg-gray-50">
-        <div className="container mx-auto max-w-6xl py-32">
+        <div className="container mx-auto max-w-7xl py-32">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4">
             Feel the Breath of History
           </h2>
