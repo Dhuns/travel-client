@@ -1,4 +1,4 @@
-import { Award, Globe, Heart, MessageCircle, Quote, Star, Users } from "lucide-react";
+import { Award, Globe, Heart, Quote, Star, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -99,7 +99,7 @@ export default function AboutPage() {
       <section className="relative min-h-[60vh] flex items-center">
         <div className="absolute inset-0">
           <Image
-            src="/images/design-mode/castle3.png"
+            src="/korea-palace-2.jpg"
             alt="Korean landscape"
             fill
             className="object-cover"
@@ -318,7 +318,9 @@ export default function AboutPage() {
                 Browse Tours
               </Button>
             </Link>
-            <Link href="/chat">
+
+            {/* TODO: Chat with Us - 개발 후 활성화 예정 */}
+            {/* <Link href="/chat">
               <Button
                 size="lg"
                 variant="outline"
@@ -327,7 +329,7 @@ export default function AboutPage() {
                 <MessageCircle className="w-5 h-5 mr-2" />
                 Chat With Us
               </Button>
-            </Link>
+            </Link> */}
           </div>
         </div>
       </section>

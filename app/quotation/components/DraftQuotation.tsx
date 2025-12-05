@@ -310,14 +310,14 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
                         const getFallbackImage = () => {
                           const type = detail.item.type;
                           if (type === "여행지" || type === "Place")
-                            return "/beautiful-korean-traditional-palace-with-tourists-.jpg";
+                            return "/beautiful-korean-traditional-palace-with-tourists.jpg";
                           if (type === "숙박" || type === "Accommodation")
                             return "/beautiful-korean-traditional-hanbok-dress.jpg";
                           if (type === "이동수단" || type === "Transportation")
                             return "/busan-coastal-temple.jpg";
                           if (type === "컨텐츠" || type === "Activity")
                             return "/korean-skincare-beauty-products-set.jpg";
-                          return "/beautiful-korean-traditional-palace-with-tourists-.jpg";
+                          return "/beautiful-korean-traditional-palace-with-tourists.jpg";
                         };
 
                         const imageSrc = thumbnail

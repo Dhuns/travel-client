@@ -18,7 +18,7 @@ export default async function PrivateTourPage() {
         {/* 배경 이미지 */}
         <div className="absolute inset-0 z-0">
           <img
-            src="/korea-place-3.jpg"
+            src="/korea-palace-3.jpg"
             alt="Korean Palace Background"
             className="w-full h-full object-cover"
           />

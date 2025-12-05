@@ -107,14 +107,15 @@ export default function Footer() {
                   Terms & Conditions
                 </Link>
               </li>
-              <li>
+              {/* TODO: Plan Your Trip - 개발 후 활성화 예정 */}
+              {/* <li>
                 <Link
                   href="/chat"
                   className="text-gray-300 hover:text-white transition-colors text-sm"
                 >
                   Plan Your Trip
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
 
