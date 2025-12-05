@@ -1,11 +1,11 @@
 "use client";
 
-import { Lock, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { resetPassword } from "@/src/shared/apis/user";
 import { isValidPassword, ValidationMessages } from "@/src/shared/utils/validation";
+import { CheckCircle2, Eye, EyeOff, Lock } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 /**
  * 비밀번호 재설정 페이지
@@ -81,11 +81,12 @@ export default function ResetPasswordPage() {
               Password Reset Successful!
             </h2>
             <p className="text-gray-600 mb-6">
-              Your password has been successfully reset. You can now sign in with your new password.
+              Your password has been successfully reset. You can now sign in with your new
+              password.
             </p>
             <Button
               onClick={() => router.push("/login")}
-              className="w-full bg-gradient-to-r from-[#651d2a] to-[#7a2433] hover:from-[#7a2433] hover:to-[#8b2a3d] text-white"
+              className="w-full bg-gradient-to-r from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white"
             >
               Go to Login
             </Button>
@@ -100,7 +101,7 @@ export default function ResetPasswordPage() {
       <div className="container mx-auto px-6">
         <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* 헤더 */}
-          <div className="bg-gradient-to-r from-[#651d2a] to-[#7a2433] text-white p-8 text-center">
+          <div className="bg-gradient-to-r from-tumakr-maroon to-tumakr-maroon/90 text-white p-8 text-center">
             <h1 className="text-3xl font-bold mb-2">Reset Password</h1>
             <p className="text-[#f5f3f0]">Enter your new password</p>
           </div>
@@ -126,7 +127,7 @@ export default function ResetPasswordPage() {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] transition-all duration-300 text-gray-900 bg-white"
+                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-tumakr-maroon transition-all duration-300 text-gray-900 bg-white"
                     style={{
                       WebkitBoxShadow: "0 0 0 1000px white inset",
                       WebkitTextFillColor: "#111827",
@@ -164,7 +165,7 @@ export default function ResetPasswordPage() {
                     type={showConfirmPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] transition-all duration-300 text-gray-900 bg-white"
+                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-tumakr-maroon transition-all duration-300 text-gray-900 bg-white"
                     style={{
                       WebkitBoxShadow: "0 0 0 1000px white inset",
                       WebkitTextFillColor: "#111827",
@@ -186,9 +187,7 @@ export default function ResetPasswordPage() {
                   </button>
                 </div>
                 {confirmPassword && password !== confirmPassword && (
-                  <p className="mt-2 text-sm text-red-600">
-                    Passwords do not match
-                  </p>
+                  <p className="mt-2 text-sm text-red-600">Passwords do not match</p>
                 )}
               </div>
 
@@ -196,7 +195,7 @@ export default function ResetPasswordPage() {
               <Button
                 type="submit"
                 disabled={isLoading || !token}
-                className="w-full bg-gradient-to-r from-[#651d2a] to-[#7a2433] hover:from-[#7a2433] hover:to-[#8b2a3d] text-white py-3 rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-gradient-to-r from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white py-3 rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? "Resetting..." : "Reset Password"}
               </Button>

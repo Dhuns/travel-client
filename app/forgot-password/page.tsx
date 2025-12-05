@@ -1,10 +1,10 @@
 "use client";
 
-import { Mail, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { requestPasswordReset } from "@/src/shared/apis/user";
+import { ArrowLeft, Mail } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 /**
  * 비밀번호 찾기 페이지
@@ -39,7 +39,10 @@ export default function ForgotPasswordPage() {
     } catch (error) {
       console.error("Password reset request failed:", error);
       const axiosError = error as { response?: { data?: { message?: string } } };
-      setError(axiosError.response?.data?.message || "Failed to send reset email. Please try again.");
+      setError(
+        axiosError.response?.data?.message ||
+          "Failed to send reset email. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -53,21 +56,16 @@ export default function ForgotPasswordPage() {
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
               <Mail className="w-8 h-8 text-green-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              Check Your Email
-            </h2>
-            <p className="text-gray-600 mb-4">
-              We've sent a password reset link to
-            </p>
-            <p className="text-[#651d2a] font-semibold mb-6 break-all">
-              {email}
-            </p>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Check Your Email</h2>
+            <p className="text-gray-600 mb-4">We've sent a password reset link to</p>
+            <p className="text-tumakr-maroon font-semibold mb-6 break-all">{email}</p>
             <p className="text-sm text-gray-500 mb-6">
-              Click the link in the email to reset your password. The link will expire in 1 hour.
+              Click the link in the email to reset your password. The link will expire in
+              1 hour.
             </p>
             <Button
               onClick={() => router.push("/login")}
-              className="w-full bg-gradient-to-r from-[#651d2a] to-[#7a2433] hover:from-[#7a2433] hover:to-[#8b2a3d] text-white"
+              className="w-full bg-gradient-to-r from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white"
             >
               Back to Login
             </Button>
@@ -82,11 +80,9 @@ export default function ForgotPasswordPage() {
       <div className="container mx-auto px-6">
         <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* 헤더 */}
-          <div className="bg-gradient-to-r from-[#651d2a] to-[#7a2433] text-white p-8 text-center">
+          <div className="bg-gradient-to-r from-tumakr-maroon to-tumakr-maroon/90 text-white p-8 text-center">
             <h1 className="text-3xl font-bold mb-2">Forgot Password?</h1>
-            <p className="text-[#f5f3f0]">
-              Enter your email to reset your password
-            </p>
+            <p className="text-[#f5f3f0]">Enter your email to reset your password</p>
           </div>
 
           {/* 폼 */}
@@ -110,7 +106,7 @@ export default function ForgotPasswordPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#651d2a] transition-all duration-300 text-gray-900 bg-white"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-tumakr-maroon transition-all duration-300 text-gray-900 bg-white"
                     style={{
                       WebkitBoxShadow: "0 0 0 1000px white inset",
                       WebkitTextFillColor: "#111827",
@@ -126,7 +122,7 @@ export default function ForgotPasswordPage() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-[#651d2a] to-[#7a2433] hover:from-[#7a2433] hover:to-[#8b2a3d] text-white py-3 rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-gradient-to-r from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white py-3 rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? "Sending..." : "Send Reset Link"}
               </Button>
@@ -136,7 +132,7 @@ export default function ForgotPasswordPage() {
             <div className="mt-6 text-center">
               <button
                 onClick={() => router.push("/login")}
-                className="text-[#651d2a] hover:text-[#7a2433] font-medium transition-colors duration-300 inline-flex items-center"
+                className="text-tumakr-maroon hover:text-tumakr-maroon/90 font-medium transition-colors duration-300 inline-flex items-center"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Login

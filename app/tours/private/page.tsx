@@ -9,11 +9,11 @@ import {
   Users,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/favorite-button";
-import Link from "next/link";
-import { getToursFromBackend } from "@/lib/bokun";
 import PrivateTourInquiryForm from "@/components/PrivateTourInquiryForm";
+import { Button } from "@/components/ui/button";
+import { getToursFromBackend } from "@/lib/bokun";
+import Link from "next/link";
 
 export const revalidate = 3600; // 1시간마다 재생성
 
@@ -44,7 +44,7 @@ export default async function PrivateTourPage() {
           </h1>
 
           {/* 배지 */}
-          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full mb-8 bg-[#651d2a]/90 backdrop-blur-sm shadow-lg">
+          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full mb-8 bg-tumakr-maroon/90 backdrop-blur-sm shadow-lg">
             <span className="text-sm font-medium text-white">
               Dedicated Guide · Your Own Pace · Perfect Customization
             </span>
@@ -59,11 +59,11 @@ export default async function PrivateTourPage() {
 
           {/* 설명 */}
           <p className="text-white/90 text-black md:text-lg mb-12 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
-            Have you felt disappointed by tours that follow rigid schedules with
-            large groups?
+            Have you felt disappointed by tours that follow rigid schedules with large
+            groups?
             <br />
-            Do you dream of a journey where every question receives full
-            attention, and you can
+            Do you dream of a journey where every question receives full attention, and
+            you can
             <br />
             linger wherever your curiosity leads?
           </p>
@@ -73,7 +73,7 @@ export default async function PrivateTourPage() {
             <a href="#inquiry-section">
               <Button
                 size="lg"
-                className="bg-[#651d2a] hover:bg-[#4a1520] text-white font-semibold shadow-lg cursor-pointer transition-colors"
+                className="bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white font-semibold shadow-lg cursor-pointer transition-colors"
               >
                 Book Your Journey Now
               </Button>
@@ -100,29 +100,27 @@ export default async function PrivateTourPage() {
               <h2 className="text-4xl font-bold text-gray-900 mb-4">
                 What Makes Private Tours
                 <br />
-                <span className="text-[#651d2a]">Truly Special</span>
+                <span className="text-tumakr-maroon">Truly Special</span>
               </h2>
 
               <p className="text-gray-700 mb-6 leading-relaxed">
-                <strong>Tumakr Private Tours</strong> offer a perfectly
-                customized journey through time, designed exclusively for you
-                and your loved ones.
+                <strong>Tumakr Private Tours</strong> offer a perfectly customized journey
+                through time, designed exclusively for you and your loved ones.
               </p>
 
               <p className="text-gray-600 mb-6 leading-relaxed">
-                Your dedicated guide accompanies you throughout, redesigning
-                every aspect of the itinerary to match your interests.
+                Your dedicated guide accompanies you throughout, redesigning every aspect
+                of the itinerary to match your interests.
               </p>
 
               <p className="text-gray-900 font-semibold mb-8">
-                Your smallest curiosity becomes the beginning of a new
-                exploration.
+                Your smallest curiosity becomes the beginning of a new exploration.
               </p>
 
               {/* 체크리스트 */}
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-1 bg-[#651d2a]">
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-1 bg-tumakr-maroon">
                     <Check className="text-white" size={16} />
                   </div>
                   <div>
@@ -130,14 +128,14 @@ export default async function PrivateTourPage() {
                       Perfectly Customized Itinerary:
                     </p>
                     <p className="text-gray-600">
-                      Delve deeper into eras that fascinate you, or spend extra
-                      time at places that unexpectedly win your heart.
+                      Delve deeper into eras that fascinate you, or spend extra time at
+                      places that unexpectedly win your heart.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-1 bg-[#651d2a]">
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-1 bg-tumakr-maroon">
                     <Check className="text-white" size={16} />
                   </div>
                   <div>
@@ -145,23 +143,20 @@ export default async function PrivateTourPage() {
                       Your Personal Expert Storyteller:
                     </p>
                     <p className="text-gray-600">
-                      Your guide exists solely to satisfy your intellectual
-                      curiosity.
+                      Your guide exists solely to satisfy your intellectual curiosity.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-1 bg-[#651d2a]">
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-1 bg-tumakr-maroon">
                     <Check className="text-white" size={16} />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">
-                      Incomparable Freedom:
-                    </p>
+                    <p className="font-semibold text-gray-900">Incomparable Freedom:</p>
                     <p className="text-gray-600">
-                      Walk, rest, and explore at your own pace while
-                      experiencing the most comfortable atmosphere.
+                      Walk, rest, and explore at your own pace while experiencing the most
+                      comfortable atmosphere.
                     </p>
                   </div>
                 </div>
@@ -176,7 +171,7 @@ export default async function PrivateTourPage() {
                 className="w-full h-[600px] object-cover rounded-2xl shadow-xl"
               />
               {/* 평점 배지 */}
-              <div className="absolute bottom-6 left-6 bg-[#651d2a] rounded-xl p-4 shadow-lg">
+              <div className="absolute bottom-6 left-6 bg-tumakr-maroon rounded-xl p-4 shadow-lg">
                 <div className="flex items-center gap-2 mb-1">
                   <Star className="text-yellow-400 fill-yellow-400" size={24} />
                   <span className="text-2xl font-bold text-white">4.9/5</span>
@@ -191,7 +186,7 @@ export default async function PrivateTourPage() {
       {/* Popular Tours Section - 4.png */}
       <section
         id="tour-list"
-        className="py-16 px-6 min-h-screen flex items-center bg-gradient-to-br from-[#eda89b]/10 to-[#6d8675]/10"
+        className="py-16 px-6 min-h-screen flex items-center bg-gradient-to-br from-tumakr-dusty-pink/10 to-tumakr-sage-green/10"
       >
         <div className="container mx-auto max-w-6xl w-full">
           <div className="text-center mb-12">
@@ -199,8 +194,7 @@ export default async function PrivateTourPage() {
               Popular Private Tours
             </h2>
             <p className="text-gray-600 text-lg">
-              Discover extraordinary historical journeys with your dedicated
-              expert guide
+              Discover extraordinary historical journeys with your dedicated expert guide
             </p>
           </div>
 
@@ -215,14 +209,14 @@ export default async function PrivateTourPage() {
                 {tours.slice(0, 2).map((tour, index) => {
                   const colorThemes = [
                     {
-                      badge: "bg-[#651d2a]",
-                      text: "text-[#651d2a]",
-                      button: "bg-[#651d2a] hover:bg-[#651d2a]/90",
+                      badge: "bg-tumakr-maroon",
+                      text: "text-tumakr-maroon",
+                      button: "bg-tumakr-maroon hover:bg-tumakr-maroon/90",
                     },
                     {
-                      badge: "bg-[#c4982a]",
-                      text: "text-[#c4982a]",
-                      button: "bg-[#c4982a] hover:bg-[#c4982a]/90",
+                      badge: "bg-tumakr-mustard",
+                      text: "text-tumakr-mustard",
+                      button: "bg-tumakr-mustard hover:bg-tumakr-mustard/90",
                     },
                   ];
                   const theme = colorThemes[index % 2];
@@ -285,16 +279,12 @@ export default async function PrivateTourPage() {
                           )}
                           {tour.price && (
                             <div className="mb-4">
-                              <span
-                                className={`text-2xl font-bold ${theme.text}`}
-                              >
+                              <span className={`text-2xl font-bold ${theme.text}`}>
                                 {tour.price}
                               </span>
                             </div>
                           )}
-                          <Button
-                            className={`${theme.button} text-white w-full`}
-                          >
+                          <Button className={`${theme.button} text-white w-full`}>
                             Book Now
                           </Button>
                         </div>
@@ -309,19 +299,19 @@ export default async function PrivateTourPage() {
                 {tours.slice(2, 5).map((tour, index) => {
                   const colorThemes = [
                     {
-                      badge: "bg-[#6d8675]",
-                      text: "text-[#6d8675]",
-                      button: "bg-[#6d8675] hover:bg-[#6d8675]/90",
+                      badge: "bg-tumakr-sage-green",
+                      text: "text-tumakr-sage-green",
+                      button: "bg-tumakr-sage-green hover:bg-tumakr-sage-green/90",
                     },
                     {
-                      badge: "bg-[#651d2a]",
-                      text: "text-[#651d2a]",
-                      button: "bg-[#651d2a] hover:bg-[#651d2a]/90",
+                      badge: "bg-tumakr-maroon",
+                      text: "text-tumakr-maroon",
+                      button: "bg-tumakr-maroon hover:bg-tumakr-maroon/90",
                     },
                     {
-                      badge: "bg-[#c4982a]",
-                      text: "text-[#c4982a]",
-                      button: "bg-[#c4982a] hover:bg-[#c4982a]/90",
+                      badge: "bg-tumakr-mustard",
+                      text: "text-tumakr-mustard",
+                      button: "bg-tumakr-mustard hover:bg-tumakr-mustard/90",
                     },
                   ];
                   const theme = colorThemes[index % 3];
@@ -384,16 +374,12 @@ export default async function PrivateTourPage() {
                           )}
                           {tour.price && (
                             <div className="mb-3">
-                              <span
-                                className={`text-xl font-bold ${theme.text}`}
-                              >
+                              <span className={`text-xl font-bold ${theme.text}`}>
                                 {tour.price}
                               </span>
                             </div>
                           )}
-                          <Button
-                            className={`${theme.button} text-white w-full text-sm`}
-                          >
+                          <Button className={`${theme.button} text-white w-full text-sm`}>
                             Book Now
                           </Button>
                         </div>
@@ -406,15 +392,13 @@ export default async function PrivateTourPage() {
           )}
 
           {/* Chatbot CTA */}
-          <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-6 bg-[#651d2a] rounded-2xl p-8">
+          <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-6 bg-tumakr-maroon rounded-2xl p-8">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center">
                 <MessageCircle className="text-white" size={28} />
               </div>
               <div className="text-white">
-                <h3 className="text-xl font-bold mb-1">
-                  Need Help Planning Your Tour?
-                </h3>
+                <h3 className="text-xl font-bold mb-1">Need Help Planning Your Tour?</h3>
                 <p className="text-white/80 text-sm">
                   Chat with our AI assistant to create your perfect private tour
                 </p>
@@ -423,7 +407,7 @@ export default async function PrivateTourPage() {
             <Link href="/chat">
               <Button
                 size="lg"
-                className="bg-white text-[#651d2a] hover:bg-white/90 font-semibold"
+                className="bg-white text-tumakr-maroon hover:bg-white/90 font-semibold"
               >
                 Start Chatting
               </Button>
@@ -438,44 +422,44 @@ export default async function PrivateTourPage() {
           <div className="grid md:grid-cols-3 gap-8">
             {/* Feature 1 */}
             <div className="bg-white rounded-2xl p-8 text-center shadow-sm hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-[#6d8675]">
+              <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-tumakr-sage-green">
                 <Users className="text-white" size={28} />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">
                 Your Personal Expert Storyteller
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                No need to miss your chance to ask questions in a crowd. Your
-                guide exists solely to satisfy your intellectual curiosity.
+                No need to miss your chance to ask questions in a crowd. Your guide exists
+                solely to satisfy your intellectual curiosity.
               </p>
             </div>
 
             {/* Feature 2 */}
             <div className="bg-white rounded-2xl p-8 text-center shadow-sm hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-[#c4982a]">
+              <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-tumakr-mustard">
                 <MapPin className="text-white" size={28} />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">
                 Unparalleled Freedom
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                Walk, rest, and explore at your own pace while experiencing the
-                essence of history in the most comfortable atmosphere.
+                Walk, rest, and explore at your own pace while experiencing the essence of
+                history in the most comfortable atmosphere.
               </p>
             </div>
 
             {/* Feature 3 */}
             <div className="bg-white rounded-2xl p-8 text-center shadow-sm hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-[#eda89b]">
+              <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-tumakr-dusty-pink">
                 <Calendar className="text-white" size={28} />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">
                 Perfectly Customized Itinerary
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                Dive deeper into periods that interest you, or spend more time
-                at places that unexpectedly capture your heart. Everything
-                unfolds according to your wishes.
+                Dive deeper into periods that interest you, or spend more time at places
+                that unexpectedly capture your heart. Everything unfolds according to your
+                wishes.
               </p>
             </div>
           </div>
@@ -490,8 +474,8 @@ export default async function PrivateTourPage() {
               Your Journey Through Seoul
             </h2>
             <p className="text-gray-600 text-lg">
-              Unforgettable moments exploring the perfect harmony of tradition
-              and modernity
+              Unforgettable moments exploring the perfect harmony of tradition and
+              modernity
             </p>
           </div>
 
@@ -505,22 +489,20 @@ export default async function PrivateTourPage() {
               />
             </div>
             <div>
-              <div className="inline-block px-4 py-1 rounded-full text-sm font-semibold text-white mb-4 bg-[#6d8675]">
+              <div className="inline-block px-4 py-1 rounded-full text-sm font-semibold text-white mb-4 bg-tumakr-sage-green">
                 Storytelling 1
               </div>
               <h3 className="text-3xl font-bold text-gray-900 mb-4">
                 Step Into History, Deepen Through Conversation
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                "How accurate is this palace scene I saw in that drama?" From
-                your simple question, our journey enters an entirely different
-                dimension. Your guide goes beyond simply saying 'right' or
-                'wrong'—they unveil the political circumstances of the era and
-                the hidden relationships between historical figures,
-                transforming the space before you into a living stage of
-                history. This deep conversation, impossible in a crowded group
-                tour, becomes not just a tour but a personal humanities concert
-                crafted exclusively for you.
+                "How accurate is this palace scene I saw in that drama?" From your simple
+                question, our journey enters an entirely different dimension. Your guide
+                goes beyond simply saying 'right' or 'wrong'—they unveil the political
+                circumstances of the era and the hidden relationships between historical
+                figures, transforming the space before you into a living stage of history.
+                This deep conversation, impossible in a crowded group tour, becomes not
+                just a tour but a personal humanities concert crafted exclusively for you.
               </p>
             </div>
           </div>
@@ -528,21 +510,20 @@ export default async function PrivateTourPage() {
           {/* Storytelling 2 */}
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="order-2 md:order-1">
-              <div className="inline-block px-4 py-1 rounded-full text-sm font-semibold text-white mb-4 bg-[#6d8675]">
+              <div className="inline-block px-4 py-1 rounded-full text-sm font-semibold text-white mb-4 bg-tumakr-sage-green">
                 Storytelling 2
               </div>
               <h3 className="text-3xl font-bold text-gray-900 mb-4">
                 The Joy of Unexpected Discovery, Time That's Truly Ours
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                Walking beneath the palace eaves, you pause at a beautiful path
-                where light pours through. In a group tour, you would have had
-                to hurry along with regret, but your guide instead points to a
-                quiet bench and suggests taking a rest. There, they quietly
-                share secrets about the architectural style visible only from
-                this spot. These unplanned pauses and unexpected discoveries are
-                the greatest gift that a private tour, moving at our own pace,
-                can offer.
+                Walking beneath the palace eaves, you pause at a beautiful path where
+                light pours through. In a group tour, you would have had to hurry along
+                with regret, but your guide instead points to a quiet bench and suggests
+                taking a rest. There, they quietly share secrets about the architectural
+                style visible only from this spot. These unplanned pauses and unexpected
+                discoveries are the greatest gift that a private tour, moving at our own
+                pace, can offer.
               </p>
             </div>
             <div className="relative order-1 md:order-2">
@@ -564,18 +545,16 @@ export default async function PrivateTourPage() {
       </section>
 
       {/* Products Section - 6.png */}
-      <section className="py-16 px-6 flex items-center bg-[#272b38]">
+      <section className="py-16 px-6 flex items-center bg-tumakr-dark-blue">
         <div className="container mx-auto max-w-6xl w-full">
           <div className="text-center mb-12">
             <div className="flex items-center justify-center gap-2 mb-4">
-              <Gift className="text-[#c4982a]" size={32} />
-              <h2 className="text-4xl font-bold text-white">
-                Products & Souvenirs
-              </h2>
+              <Gift className="text-tumakr-mustard" size={32} />
+              <h2 className="text-4xl font-bold text-white">Products & Souvenirs</h2>
             </div>
             <p className="text-gray-300 text-lg">
-              Take home beautiful memories of Korea with our curated selection
-              of traditional products and special souvenirs
+              Take home beautiful memories of Korea with our curated selection of
+              traditional products and special souvenirs
             </p>
           </div>
 
@@ -588,7 +567,7 @@ export default async function PrivateTourPage() {
                   alt="Traditional Hanbok"
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#651d2a]">
+                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-tumakr-maroon">
                   Traditional
                 </div>
               </div>
@@ -607,7 +586,7 @@ export default async function PrivateTourPage() {
                   alt="K-Beauty Skincare"
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#c4982a]">
+                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-tumakr-mustard">
                   Beauty
                 </div>
               </div>
@@ -626,7 +605,7 @@ export default async function PrivateTourPage() {
                   alt="Korean Tea Collection"
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#6d8675]">
+                <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white bg-tumakr-sage-green">
                   Food
                 </div>
               </div>

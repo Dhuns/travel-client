@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/src/shared/store/authStore";
 import { Loader2, XCircle } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -53,14 +53,16 @@ export default function AuthCallbackPage() {
       <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8">
         {!error ? (
           <div className="text-center">
-            <Loader2 className="w-16 h-16 mx-auto text-[#651d2a] animate-spin mb-4" />
+            <Loader2 className="w-16 h-16 mx-auto text-tumakr-maroon animate-spin mb-4" />
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Signing you in...</h2>
             <p className="text-gray-600">Please wait a moment</p>
           </div>
         ) : (
           <div className="text-center">
             <XCircle className="w-16 h-16 mx-auto text-red-500 mb-4" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Authentication Failed</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              Authentication Failed
+            </h2>
             <p className="text-gray-600 mb-4">{error}</p>
             <p className="text-sm text-gray-500">Redirecting to login page...</p>
           </div>

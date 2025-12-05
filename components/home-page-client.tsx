@@ -37,7 +37,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
       image: "/beautiful-korean-traditional-palace-with-tourists-.jpg",
       link: "/tours/history",
       icon: MapPin,
-      color: "#651d2a", // tumakr-maroon
+      color: "var(--color-tumakr-maroon)", // tumakr-maroon
     },
     {
       title: "Multiday Tours",
@@ -45,7 +45,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
       image: "/beautiful-jeju-island-hallasan-mountain-and-nature.jpg",
       link: "/tours/multiday",
       icon: Calendar,
-      color: "#c4982a", // tumakr-mustard
+      color: "var(--color-tumakr-mustard)", // tumakr-mustard
     },
     {
       title: "Private Tours",
@@ -53,7 +53,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
       image: "/korean-dmz-border-historical-site-and-observation-.jpg",
       link: "/tours/private",
       icon: Users,
-      color: "#6d8675", // tumakr-sage-green
+      color: "var(--color-tumakr-sage-green)", // tumakr-sage-green
     },
   ];
 
@@ -124,13 +124,13 @@ export default function HomePageClient({ children }: HomePageClientProps) {
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#651d2a]/70 via-[#651d2a]/60 to-[#651d2a]/90" />
+          <div className="absolute inset-0 bg-gradient-to-b from-tumakr-maroon/70 via-tumakr-maroon/60 to-tumakr-maroon/90" />
         </div>
 
         {/* Animated Elements */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 left-20 w-96 h-96 bg-[#c4982a]/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-[#6d8675]/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute top-20 left-20 w-96 h-96 bg-tumakr-mustard/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-20 right-20 w-96 h-96 bg-tumakr-sage-green/20 rounded-full blur-3xl animate-pulse" />
         </div>
 
         {/* Content Container */}
@@ -151,19 +151,19 @@ export default function HomePageClient({ children }: HomePageClientProps) {
               <br />
               Korea History Tour
               <br />
-              <span className="text-[#c4982a] text-2xl">
+              <span className="text-tumakr-mustard text-2xl">
                 Curated by AI, Guided by Experts.
               </span>
             </h1>
 
             <p className="text-xl lg:text-2xl text-white/90 mb-8 leading-relaxed opacity-0 animate-[fadeIn_1s_ease-in_1.5s_forwards]">
-              Design your perfect trip with our intelligent assistant or explore
-              our premium tour collections.
+              Design your perfect trip with our intelligent assistant or explore our
+              premium tour collections.
             </p>
             <div className="flex flex-col sm:flex-row items-start gap-4 opacity-0 animate-[fadeIn_1s_ease-in_2s_forwards]">
               <Button
                 size="lg"
-                className="bg-[#651d2a] text-white hover:bg-[#651d2a]/90 px-8 py-6 text-lg rounded-full shadow-2xl group"
+                className="bg-tumakr-maroon text-white hover:bg-tumakr-maroon/90 px-8 py-6 text-lg rounded-full shadow-2xl group"
                 onClick={() =>
                   document
                     .getElementById("main-services")
@@ -178,9 +178,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
                 variant="outline"
                 className="bg-white/10 backdrop-blur-sm text-white border-white/30 hover:bg-white/20 px-8 py-6 text-lg rounded-full"
                 onClick={() =>
-                  document
-                    .getElementById("tours")
-                    ?.scrollIntoView({ behavior: "smooth" })
+                  document.getElementById("tours")?.scrollIntoView({ behavior: "smooth" })
                 }
               >
                 Explore Tours
@@ -193,7 +191,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
           <div className="hidden lg:flex flex-col gap-4 opacity-0 animate-[fadeIn_1s_ease-in_2.5s_forwards]">
             {/* AI Bot Message */}
             <div className="flex items-start gap-3 mr-auto max-w-md">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#c4982a] flex items-center justify-center">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-tumakr-mustard flex items-center justify-center">
                 <MessageCircle className="w-5 h-5 text-white" />
               </div>
               <div className="bg-white/95 backdrop-blur-sm rounded-2xl rounded-tl-none px-6 py-4 shadow-lg">
@@ -208,7 +206,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
 
             {/* User Message */}
             <div className="flex items-start gap-3 ml-auto max-w-md">
-              <div className="bg-[#c4982a] text-white rounded-2xl rounded-tr-none px-6 py-4 shadow-lg">
+              <div className="bg-tumakr-mustard text-white rounded-2xl rounded-tr-none px-6 py-4 shadow-lg">
                 <p className="text-sm leading-relaxed">
                   I want to visit Gyeongbokgung and have a Hanbok experience!
                 </p>
@@ -234,7 +232,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
         className="relative min-h-screen lg:h-screen flex flex-col lg:flex-row"
       >
         {/* Left: AI Chatbot */}
-        <div className="relative w-full lg:w-1/2 bg-[#c4982a] flex items-center justify-center py-16 px-6 md:py-20 md:px-12 lg:p-16 overflow-hidden">
+        <div className="relative w-full lg:w-1/2 bg-tumakr-mustard flex items-center justify-center py-16 px-6 md:py-20 md:px-12 lg:p-16 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1),transparent)]" />
           <div className="absolute top-10 right-10 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse hidden lg:block" />
 
@@ -251,8 +249,8 @@ export default function HomePageClient({ children }: HomePageClientProps) {
             </h2>
 
             <p className="text-base md:text-lg lg:text-xl text-white/90 mb-6 lg:mb-8 leading-relaxed">
-              Get instant itinerary suggestions, real-time advice, and seamless
-              booking with our intelligent travel assistant.
+              Get instant itinerary suggestions, real-time advice, and seamless booking
+              with our intelligent travel assistant.
             </p>
 
             <ul className="space-y-3 lg:space-y-4 mb-6 lg:mb-10">
@@ -272,7 +270,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
 
             <Button
               size="lg"
-              className="bg-white text-[#c4982a] hover:bg-white/90 px-6 py-5 md:px-8 md:py-6 lg:px-10 lg:py-7 text-base lg:text-lg rounded-full shadow-2xl group/btn"
+              className="bg-white text-tumakr-mustard hover:bg-white/90 px-6 py-5 md:px-8 md:py-6 lg:px-10 lg:py-7 text-base lg:text-lg rounded-full shadow-2xl group/btn"
             >
               <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
               Start Chat Now
@@ -282,7 +280,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
         </div>
 
         {/* Right: Oneday Legacy */}
-        <div className="relative w-full lg:w-1/2 bg-[#651d2a] flex items-center justify-center py-16 px-6 md:py-20 md:px-12 lg:p-16 overflow-hidden">
+        <div className="relative w-full lg:w-1/2 bg-tumakr-maroon flex items-center justify-center py-16 px-6 md:py-20 md:px-12 lg:p-16 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(255,255,255,0.05),transparent)]" />
           <div className="absolute bottom-10 left-10 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse hidden lg:block" />
 
@@ -299,30 +297,25 @@ export default function HomePageClient({ children }: HomePageClientProps) {
             </h2>
 
             <p className="text-base md:text-lg lg:text-xl text-white/90 mb-6 lg:mb-8 leading-relaxed">
-              Join thousands of travelers on our beloved daily group tours to
-              Nami Island, DMZ, and iconic Korean destinations.
+              Join thousands of travelers on our beloved daily group tours to Nami Island,
+              DMZ, and iconic Korean destinations.
             </p>
 
             <ul className="space-y-3 lg:space-y-4 mb-6 lg:mb-10">
-              {["Daily Departures", "Small Groups", "Expert Guides"].map(
-                (item, i) => (
-                  <li
-                    key={i}
-                    className="flex items-center text-base lg:text-lg"
-                  >
-                    <div className="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-white/20 flex items-center justify-center mr-3">
-                      <ChevronRight className="w-3 h-3 lg:w-4 lg:h-4" />
-                    </div>
-                    {item}
-                  </li>
-                )
-              )}
+              {["Daily Departures", "Small Groups", "Expert Guides"].map((item, i) => (
+                <li key={i} className="flex items-center text-base lg:text-lg">
+                  <div className="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-white/20 flex items-center justify-center mr-3">
+                    <ChevronRight className="w-3 h-3 lg:w-4 lg:h-4" />
+                  </div>
+                  {item}
+                </li>
+              ))}
             </ul>
 
             <Link href="https://www.onedaykorea.com" target="_blank">
               <Button
                 size="lg"
-                className="bg-white text-[#651d2a] hover:bg-white/90 px-6 py-5 md:px-8 md:py-6 lg:px-10 lg:py-7 text-base lg:text-lg rounded-full shadow-2xl group/btn"
+                className="bg-white text-tumakr-maroon hover:bg-white/90 px-6 py-5 md:px-8 md:py-6 lg:px-10 lg:py-7 text-base lg:text-lg rounded-full shadow-2xl group/btn"
               >
                 <Calendar className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
                 Explore Tours
@@ -347,7 +340,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
       <section id="tours" className="py-32 bg-white relative">
         <div className="container mx-auto px-6">
           <div className="text-center mb-20">
-            <span className="inline-block text-[#c4982a] font-bold text-sm tracking-wider uppercase mb-4 bg-[#c4982a]/10 px-4 py-2 rounded-full">
+            <span className="inline-block text-tumakr-mustard font-bold text-sm tracking-wider uppercase mb-4 bg-tumakr-mustard/10 px-4 py-2 rounded-full">
               Curated Experiences
             </span>
             <h2 className="text-5xl lg:text-6xl font-bold text-black mb-6">
@@ -369,11 +362,11 @@ export default function HomePageClient({ children }: HomePageClientProps) {
                   fill
                   className="object-cover transition-transform duration-1000 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#651d2a] via-[#651d2a]/40 to-transparent opacity-90 group-hover:opacity-95 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-t from-tumakr-maroon via-tumakr-maroon/40 to-transparent opacity-90 group-hover:opacity-95 transition-opacity" />
 
                 <div className="absolute bottom-0 left-0 right-0 p-10">
                   <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6">
-                    <Users className="w-8 h-8 text-[#651d2a]" />
+                    <Users className="w-8 h-8 text-tumakr-maroon" />
                   </div>
                   <h3 className="text-4xl lg:text-5xl font-bold text-white mb-4">
                     {tourCategories[0].title}
@@ -409,8 +402,8 @@ export default function HomePageClient({ children }: HomePageClientProps) {
                       <div
                         className={`absolute inset-0 bg-gradient-to-br ${
                           index === 0
-                            ? "from-[#c4982a]/80 to-[#c4982a]"
-                            : "from-[#6d8675]/80 to-[#6d8675]"
+                            ? "from-tumakr-mustard/80 to-tumakr-mustard"
+                            : "from-tumakr-sage-green/80 to-tumakr-sage-green"
                         } opacity-85 group-hover:opacity-90 transition-opacity`}
                       />
 
@@ -430,9 +423,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
                           >
                             {category.title}
                           </h3>
-                          <p className="text-white/90 mb-4">
-                            {category.description}
-                          </p>
+                          <p className="text-white/90 mb-4">{category.description}</p>
                           <span className="inline-flex items-center text-white font-semibold group-hover:text-white/80 transition-colors">
                             Learn More{" "}
                             <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform" />
@@ -454,10 +445,10 @@ export default function HomePageClient({ children }: HomePageClientProps) {
       {/* 5. AI Chatbot Promotion - Diagonal Layout */}
       <section className="relative py-32 overflow-hidden bg-white">
         {/* Diagonal Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#651d2a] via-[#651d2a] to-[#651d2a]/90 transform -skew-y-3 origin-top-left" />
+        <div className="absolute inset-0 bg-gradient-to-br from-tumakr-maroon via-tumakr-maroon to-tumakr-maroon/90 transform -skew-y-3 origin-top-left" />
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 right-20 w-96 h-96 bg-[#c4982a] rounded-full blur-3xl" />
-          <div className="absolute bottom-20 left-20 w-96 h-96 bg-[#6d8675] rounded-full blur-3xl" />
+          <div className="absolute top-20 right-20 w-96 h-96 bg-tumakr-mustard rounded-full blur-3xl" />
+          <div className="absolute bottom-20 left-20 w-96 h-96 bg-tumakr-sage-green rounded-full blur-3xl" />
         </div>
 
         <div className="container mx-auto px-6 relative z-10">
@@ -465,7 +456,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
             {/* Left: Content */}
             <div className="text-white space-y-8">
               <div className="inline-flex items-center gap-3 bg-white/20 backdrop-blur-sm px-5 py-3 rounded-full">
-                <Sparkles className="w-5 h-5 text-[#c4982a]" />
+                <Sparkles className="w-5 h-5 text-tumakr-mustard" />
                 <span className="font-bold">Powered by AI</span>
               </div>
 
@@ -476,8 +467,8 @@ export default function HomePageClient({ children }: HomePageClientProps) {
               </h2>
 
               <p className="text-2xl text-white/90 leading-relaxed">
-                Our AI assistant connects you to everything: from classic Oneday
-                tours to custom private adventures.
+                Our AI assistant connects you to everything: from classic Oneday tours to
+                custom private adventures.
               </p>
 
               <div className="grid sm:grid-cols-2 gap-6 pt-4">
@@ -491,7 +482,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
                     key={i}
                     className="flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-2xl p-5 hover:bg-white/20 transition-colors"
                   >
-                    <div className="w-12 h-12 rounded-xl bg-[#c4982a] flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-tumakr-mustard flex items-center justify-center flex-shrink-0">
                       <item.icon className="w-6 h-6 text-white" />
                     </div>
                     <span className="font-semibold text-lg">{item.text}</span>
@@ -502,7 +493,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
               <Link href="/chat">
                 <Button
                   size="lg"
-                  className="bg-[#c4982a] text-white hover:bg-[#c4982a]/90 px-12 py-8 text-xl rounded-full shadow-2xl mt-8 group"
+                  className="bg-tumakr-mustard text-white hover:bg-tumakr-mustard/90 px-12 py-8 text-xl rounded-full shadow-2xl mt-8 group"
                 >
                   Launch AI Chat
                   <MessageCircle className="w-6 h-6 ml-3 group-hover:scale-110 transition-transform" />
@@ -514,13 +505,11 @@ export default function HomePageClient({ children }: HomePageClientProps) {
             <div className="relative">
               <div className="bg-white rounded-3xl p-8 shadow-2xl transform rotate-3 hover:rotate-0 transition-all duration-500 border border-white/20">
                 <div className="flex items-center gap-4 border-b border-black pb-6 mb-6">
-                  <div className="w-14 h-14 bg-[#c4982a] rounded-2xl flex items-center justify-center">
+                  <div className="w-14 h-14 bg-tumakr-mustard rounded-2xl flex items-center justify-center">
                     <MessageCircle className="w-7 h-7 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-xl text-black">
-                      AI Travel Assistant
-                    </h3>
+                    <h3 className="font-bold text-xl text-black">AI Travel Assistant</h3>
                     <p className="text-sm text-gray-900 flex items-center gap-2">
                       <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                       Online now
@@ -534,25 +523,25 @@ export default function HomePageClient({ children }: HomePageClientProps) {
                       I want to visit Nami Island tomorrow. Any tours available?
                     </p>
                   </div>
-                  <div className="bg-[#c4982a]/15 rounded-2xl rounded-tr-sm p-5 max-w-[90%] ml-auto shadow-sm border border-[#c4982a]/20">
-                    <p className="text-[#651d2a] leading-relaxed">
-                      Perfect! That's one of our popular Oneday Legacy tours. I
-                      can show you availability or suggest a private custom
-                      tour. Which interests you?
+                  <div className="bg-tumakr-mustard/15 rounded-2xl rounded-tr-sm p-5 max-w-[90%] ml-auto shadow-sm border border-tumakr-mustard/20">
+                    <p className="text-tumakr-maroon leading-relaxed">
+                      Perfect! That's one of our popular Oneday Legacy tours. I can show
+                      you availability or suggest a private custom tour. Which interests
+                      you?
                     </p>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-900 pl-2">
                     <div className="flex gap-1">
                       <span
-                        className="w-2 h-2 bg-[#c4982a]/50 rounded-full animate-bounce"
+                        className="w-2 h-2 bg-tumakr-mustard/50 rounded-full animate-bounce"
                         style={{ animationDelay: "0ms" }}
                       />
                       <span
-                        className="w-2 h-2 bg-[#c4982a]/50 rounded-full animate-bounce"
+                        className="w-2 h-2 bg-tumakr-mustard/50 rounded-full animate-bounce"
                         style={{ animationDelay: "150ms" }}
                       />
                       <span
-                        className="w-2 h-2 bg-[#c4982a]/50 rounded-full animate-bounce"
+                        className="w-2 h-2 bg-tumakr-mustard/50 rounded-full animate-bounce"
                         style={{ animationDelay: "300ms" }}
                       />
                     </div>
@@ -562,7 +551,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
               </div>
 
               {/* Floating Badge */}
-              <div className="absolute -top-6 -right-6 bg-[#6d8675] text-white px-6 py-3 rounded-full shadow-xl transform rotate-12 font-bold">
+              <div className="absolute -top-6 -right-6 bg-tumakr-sage-green text-white px-6 py-3 rounded-full shadow-xl transform rotate-12 font-bold">
                 Free to Use! ✨
               </div>
             </div>
@@ -574,7 +563,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
       <section className="py-24 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-[#6d8675]/10 text-[#6d8675] px-5 py-2 rounded-full mb-4">
+            <div className="inline-flex items-center gap-2 bg-tumakr-sage-green/10 text-tumakr-sage-green px-5 py-2 rounded-full mb-4">
               <Gift className="w-5 h-5" />
               <span className="font-semibold text-sm tracking-wide">
                 Exclusive Benefits
@@ -601,13 +590,13 @@ export default function HomePageClient({ children }: HomePageClientProps) {
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                       <div className="absolute top-4 right-4">
-                        <span className="bg-[#6d8675] text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">
+                        <span className="bg-tumakr-sage-green text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">
                           FREE
                         </span>
                       </div>
                     </div>
                     <div className="p-6 text-center flex-1 flex flex-col justify-center">
-                      <h3 className="font-bold text-xl text-black mb-2 group-hover:text-[#6d8675] transition-colors">
+                      <h3 className="font-bold text-xl text-black mb-2 group-hover:text-tumakr-sage-green transition-colors">
                         {item.name}
                       </h3>
                       <p className="text-sm text-gray-900 mb-4">
@@ -641,7 +630,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
                 value={`item-${index}`}
                 className="bg-card border-0 rounded-2xl px-6 shadow-md hover:shadow-lg transition-shadow"
               >
-                <AccordionTrigger className="text-left text-lg font-semibold text-black hover:text-[#651d2a] transition-colors py-6">
+                <AccordionTrigger className="text-left text-lg font-semibold text-black hover:text-tumakr-maroon transition-colors py-6">
                   {faq.question}
                 </AccordionTrigger>
                 <AccordionContent className="text-gray-900 leading-relaxed pb-6">

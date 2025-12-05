@@ -1,5 +1,4 @@
 import {
-  Calendar,
   Check,
   Clock,
   Compass,
@@ -9,15 +8,14 @@ import {
   Shield,
   Star,
   Sunrise,
-  Users,
 } from "lucide-react";
 
+import MultidayTourList from "@/components/MultidayTourList";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { getToursFromBackend } from "@/lib/bokun";
 import Image from "next/image";
 import Link from "next/link";
-import { getToursFromBackend } from "@/lib/bokun";
-import MultidayTourList from "@/components/MultidayTourList";
 
 export const revalidate = 3600; // 1시간마다 재생성
 
@@ -49,13 +47,11 @@ export default async function MultidayTourPage() {
               Multi-day Tours
             </h1>
             <p className="text-xl md:text-2xl text-white/90 leading-relaxed">
-              The deepest and most expansive historical exploration that time
-              allows
+              The deepest and most expansive historical exploration that time allows
             </p>
             <p className="text-lg text-white/80">
-              Complete a historical narrative that a single day simply cannot
-              tell, discovering the intricate connections between each region
-              over several days.
+              Complete a historical narrative that a single day simply cannot tell,
+              discovering the intricate connections between each region over several days.
             </p>
           </div>
         </div>
@@ -67,7 +63,7 @@ export default async function MultidayTourPage() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-6">
               <div className="inline-block">
-                <span className="bg-[#651d2a] text-white px-4 py-2 rounded-full text-sm font-medium">
+                <span className="bg-tumakr-maroon text-white px-4 py-2 rounded-full text-sm font-medium">
                   MULTI-DAY EXPERIENCE
                 </span>
               </div>
@@ -75,20 +71,20 @@ export default async function MultidayTourPage() {
                 What makes our Multi-day Tours special?
               </h2>
               <p className="text-lg text-gray-700 leading-relaxed">
-                There is a depth and flow to history that cannot be captured in
-                a single day. From the ancient capital of Gyeongju to Seoul, the
-                heart of the Joseon Dynasty, experience the scattered pieces of
-                history coming together to form a complete picture.
+                There is a depth and flow to history that cannot be captured in a single
+                day. From the ancient capital of Gyeongju to Seoul, the heart of the
+                Joseon Dynasty, experience the scattered pieces of history coming together
+                to form a complete picture.
               </p>
-              <p className="text-lg text-[#651d2a] font-semibold">
-                The Tumakr Multi-Day Tour is the most in-depth and expansive
-                historical exploration that time allows.
+              <p className="text-lg text-tumakr-maroon font-semibold">
+                The Tumakr Multi-Day Tour is the most in-depth and expansive historical
+                exploration that time allows.
               </p>
 
               <div className="pt-6 space-y-4">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-[#651d2a]/10 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Compass className="w-6 h-6 text-[#651d2a]" />
+                  <div className="w-12 h-12 bg-tumakr-maroon/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Compass className="w-6 h-6 text-tumakr-maroon" />
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 mb-1">
@@ -101,23 +97,22 @@ export default async function MultidayTourPage() {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-[#6d8675]/10 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Mountain className="w-6 h-6 text-[#6d8675]" />
+                  <div className="w-12 h-12 bg-tumakr-sage-green/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Mountain className="w-6 h-6 text-tumakr-sage-green" />
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 mb-1">
                       Relaxed Itinerary, Deeper Understanding
                     </h3>
                     <p className="text-gray-600">
-                      Stay long enough to fully absorb the culture and
-                      atmosphere
+                      Stay long enough to fully absorb the culture and atmosphere
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-[#c4982a]/10 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Sunrise className="w-6 h-6 text-[#c4982a]" />
+                  <div className="w-12 h-12 bg-tumakr-mustard/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Sunrise className="w-6 h-6 text-tumakr-mustard" />
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 mb-1">
@@ -151,8 +146,8 @@ export default async function MultidayTourPage() {
               Available Multiday Tours
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Experience the full spectrum of Korean history and culture across
-              multiple days
+              Experience the full spectrum of Korean history and culture across multiple
+              days
             </p>
           </div>
 
@@ -161,10 +156,10 @@ export default async function MultidayTourPage() {
       </section>
 
       {/* Customer Reviews Section */}
-      <section className="py-20 px-6 bg-gradient-to-br from-[#6d8675]/5 to-[#651d2a]/5">
+      <section className="py-20 px-6 bg-gradient-to-br from-tumakr-sage-green/5 to-tumakr-maroon/5">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-[#651d2a] text-white px-4 py-2 rounded-full text-sm font-medium mb-4">
+            <div className="inline-flex items-center gap-2 bg-tumakr-maroon text-white px-4 py-2 rounded-full text-sm font-medium mb-4">
               <Star className="w-4 h-4 fill-current" />
               <span>4.9/5 from 300+ reviews</span>
             </div>
@@ -172,62 +167,52 @@ export default async function MultidayTourPage() {
               What Our Travelers Say
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Real experiences from travelers who explored Korea's history with
-              us
+              Real experiences from travelers who explored Korea's history with us
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {/* Review 1 */}
             <Card className="p-8 border-0 shadow-lg bg-white relative">
-              <Quote className="absolute top-6 right-6 w-10 h-10 text-[#651d2a]/10" />
+              <Quote className="absolute top-6 right-6 w-10 h-10 text-tumakr-maroon/10" />
               <div className="flex items-center gap-1 mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className="w-5 h-5 fill-[#c4982a] text-[#c4982a]"
-                  />
+                  <Star key={i} className="w-5 h-5 fill-tumakr-mustard text-tumakr-mustard" />
                 ))}
               </div>
               <p className="text-gray-700 mb-6 leading-relaxed">
-                "The 5-day tour from Gyeongju to Seoul was absolutely
-                incredible. Our guide's knowledge of Korean history brought
-                every site to life. The pace was perfect - enough time to really
-                absorb each location without feeling rushed."
+                "The 5-day tour from Gyeongju to Seoul was absolutely incredible. Our
+                guide's knowledge of Korean history brought every site to life. The pace
+                was perfect - enough time to really absorb each location without feeling
+                rushed."
               </p>
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-[#651d2a]/10 rounded-full flex items-center justify-center">
-                  <span className="text-[#651d2a] font-bold">SK</span>
+                <div className="w-12 h-12 bg-tumakr-maroon/10 rounded-full flex items-center justify-center">
+                  <span className="text-tumakr-maroon font-bold">SK</span>
                 </div>
                 <div>
                   <p className="font-bold text-gray-900">Sarah K.</p>
-                  <p className="text-sm text-gray-600">
-                    Australia • March 2024
-                  </p>
+                  <p className="text-sm text-gray-600">Australia • March 2024</p>
                 </div>
               </div>
             </Card>
 
             {/* Review 2 */}
             <Card className="p-8 border-0 shadow-lg bg-white relative">
-              <Quote className="absolute top-6 right-6 w-10 h-10 text-[#651d2a]/10" />
+              <Quote className="absolute top-6 right-6 w-10 h-10 text-tumakr-maroon/10" />
               <div className="flex items-center gap-1 mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className="w-5 h-5 fill-[#c4982a] text-[#c4982a]"
-                  />
+                  <Star key={i} className="w-5 h-5 fill-tumakr-mustard text-tumakr-mustard" />
                 ))}
               </div>
               <p className="text-gray-700 mb-6 leading-relaxed">
-                "Temple stay experience was a highlight! Small group size meant
-                we got personal attention. The hotels were excellent, and the
-                regional food experiences were unforgettable. Worth every
-                penny."
+                "Temple stay experience was a highlight! Small group size meant we got
+                personal attention. The hotels were excellent, and the regional food
+                experiences were unforgettable. Worth every penny."
               </p>
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-[#651d2a]/10 rounded-full flex items-center justify-center">
-                  <span className="text-[#651d2a] font-bold">MJ</span>
+                <div className="w-12 h-12 bg-tumakr-maroon/10 rounded-full flex items-center justify-center">
+                  <span className="text-tumakr-maroon font-bold">MJ</span>
                 </div>
                 <div>
                   <p className="font-bold text-gray-900">Michael J.</p>
@@ -238,23 +223,20 @@ export default async function MultidayTourPage() {
 
             {/* Review 3 */}
             <Card className="p-8 border-0 shadow-lg bg-white relative">
-              <Quote className="absolute top-6 right-6 w-10 h-10 text-[#651d2a]/10" />
+              <Quote className="absolute top-6 right-6 w-10 h-10 text-tumakr-maroon/10" />
               <div className="flex items-center gap-1 mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className="w-5 h-5 fill-[#c4982a] text-[#c4982a]"
-                  />
+                  <Star key={i} className="w-5 h-5 fill-tumakr-mustard text-tumakr-mustard" />
                 ))}
               </div>
               <p className="text-gray-700 mb-6 leading-relaxed">
-                "As a history teacher, I was impressed by the depth of
-                information. The tour connected dots I never knew existed.
-                Perfect balance of guided tours and free exploration time."
+                "As a history teacher, I was impressed by the depth of information. The
+                tour connected dots I never knew existed. Perfect balance of guided tours
+                and free exploration time."
               </p>
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-[#651d2a]/10 rounded-full flex items-center justify-center">
-                  <span className="text-[#651d2a] font-bold">EC</span>
+                <div className="w-12 h-12 bg-tumakr-maroon/10 rounded-full flex items-center justify-center">
+                  <span className="text-tumakr-maroon font-bold">EC</span>
                 </div>
                 <div>
                   <p className="font-bold text-gray-900">Emma C.</p>
@@ -267,21 +249,19 @@ export default async function MultidayTourPage() {
           {/* Stats */}
           <div className="mt-16 grid md:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="text-4xl font-bold text-[#651d2a] mb-2">300+</div>
+              <div className="text-4xl font-bold text-tumakr-maroon mb-2">300+</div>
               <p className="text-gray-600">Happy Travelers</p>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-[#651d2a] mb-2">
-                4.9/5
-              </div>
+              <div className="text-4xl font-bold text-tumakr-maroon mb-2">4.9/5</div>
               <p className="text-gray-600">Average Rating</p>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-[#651d2a] mb-2">98%</div>
+              <div className="text-4xl font-bold text-tumakr-maroon mb-2">98%</div>
               <p className="text-gray-600">Would Recommend</p>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-[#651d2a] mb-2">50+</div>
+              <div className="text-4xl font-bold text-tumakr-maroon mb-2">50+</div>
               <p className="text-gray-600">Tours This Year</p>
             </div>
           </div>
@@ -289,19 +269,19 @@ export default async function MultidayTourPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-6 bg-gradient-to-br from-[#651d2a] to-[#4a1620]">
+      <section className="py-20 px-6 bg-gradient-to-br from-tumakr-maroon to-tumakr-maroon/90">
         <div className="container mx-auto max-w-4xl text-center text-white">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             Ready to explore Korea in depth?
           </h2>
           <p className="text-xl mb-10 text-white/90">
-            Join us for an unforgettable multi-day journey through Korean
-            history and culture
+            Join us for an unforgettable multi-day journey through Korean history and
+            culture
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-16">
             <a href="#tour-highlights">
-              <Button className="bg-white text-[#651d2a] hover:bg-white/90 px-8 py-6 text-lg rounded-full">
+              <Button className="bg-white text-tumakr-maroon hover:bg-white/90 px-8 py-6 text-lg rounded-full">
                 View Available Tours
               </Button>
             </a>
@@ -359,7 +339,7 @@ export default async function MultidayTourPage() {
       <section className="py-20 px-6 bg-white">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-[#651d2a] text-white px-4 py-2 rounded-full text-sm font-medium mb-4">
+            <div className="inline-flex items-center gap-2 bg-tumakr-maroon text-white px-4 py-2 rounded-full text-sm font-medium mb-4">
               <Star className="w-4 h-4" />
               <span>COMPLIMENTARY GIFTS</span>
             </div>
@@ -367,8 +347,8 @@ export default async function MultidayTourPage() {
               Special Gifts Included with Your Tour
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Every participant receives exclusive souvenirs to commemorate your
-              journey through Korean history
+              Every participant receives exclusive souvenirs to commemorate your journey
+              through Korean history
             </p>
           </div>
 
@@ -382,7 +362,7 @@ export default async function MultidayTourPage() {
                   fill
                   className="object-cover"
                 />
-                <div className="absolute top-4 right-4 bg-[#651d2a] text-white px-3 py-1 rounded-full text-sm font-medium">
+                <div className="absolute top-4 right-4 bg-tumakr-maroon text-white px-3 py-1 rounded-full text-sm font-medium">
                   Included with Tour
                 </div>
               </div>
@@ -391,8 +371,8 @@ export default async function MultidayTourPage() {
                   Historical Journey Gift Set
                 </h3>
                 <p className="text-gray-600">
-                  Curated collection featuring traditional crafts and historical
-                  replicas as a special memento of your journey
+                  Curated collection featuring traditional crafts and historical replicas
+                  as a special memento of your journey
                 </p>
               </div>
             </Card>
@@ -406,7 +386,7 @@ export default async function MultidayTourPage() {
                   fill
                   className="object-cover"
                 />
-                <div className="absolute top-4 right-4 bg-[#6d8675] text-white px-3 py-1 rounded-full text-sm font-medium">
+                <div className="absolute top-4 right-4 bg-tumakr-sage-green text-white px-3 py-1 rounded-full text-sm font-medium">
                   Included with Tour
                 </div>
               </div>
@@ -415,8 +395,8 @@ export default async function MultidayTourPage() {
                   Traditional Accessories Set
                 </h3>
                 <p className="text-gray-600">
-                  Handcrafted accessories inspired by Joseon Dynasty designs,
-                  yours to keep after the tour
+                  Handcrafted accessories inspired by Joseon Dynasty designs, yours to
+                  keep after the tour
                 </p>
               </div>
             </Card>
@@ -430,7 +410,7 @@ export default async function MultidayTourPage() {
                   fill
                   className="object-cover"
                 />
-                <div className="absolute top-4 right-4 bg-[#c4982a] text-white px-3 py-1 rounded-full text-sm font-medium">
+                <div className="absolute top-4 right-4 bg-tumakr-mustard text-white px-3 py-1 rounded-full text-sm font-medium">
                   Included with Tour
                 </div>
               </div>
@@ -439,8 +419,8 @@ export default async function MultidayTourPage() {
                   Illustrated History Journal
                 </h3>
                 <p className="text-gray-600">
-                  Beautiful illustrated journal with historical insights -
-                  perfect for documenting your travel memories
+                  Beautiful illustrated journal with historical insights - perfect for
+                  documenting your travel memories
                 </p>
               </div>
             </Card>
@@ -448,7 +428,7 @@ export default async function MultidayTourPage() {
 
           <div className="text-center">
             <p className="text-lg text-gray-700">
-              <span className="font-semibold text-[#651d2a]">
+              <span className="font-semibold text-tumakr-maroon">
                 All items are complimentary
               </span>{" "}
               and will be presented to you during the tour
@@ -458,7 +438,7 @@ export default async function MultidayTourPage() {
       </section>
 
       {/* AI Chatbot Customization CTA */}
-      <section className="py-20 px-6 bg-gradient-to-br from-[#6d8675]/5 to-[#651d2a]/5 min-h-screen flex items-center">
+      <section className="py-20 px-6 bg-gradient-to-br from-tumakr-sage-green/5 to-tumakr-maroon/5 min-h-screen flex items-center">
         <div className="container mx-auto max-w-5xl">
           <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
             <div className="grid md:grid-cols-2 gap-0">
@@ -470,12 +450,12 @@ export default async function MultidayTourPage() {
                   fill
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#651d2a]/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-tumakr-maroon/20 to-transparent" />
               </div>
 
               {/* Right: Content */}
               <div className="p-10 md:p-12 flex flex-col justify-center">
-                <div className="inline-flex items-center gap-2 bg-[#651d2a]/10 text-[#651d2a] px-4 py-2 rounded-full text-sm font-medium mb-4 w-fit">
+                <div className="inline-flex items-center gap-2 bg-tumakr-maroon/10 text-tumakr-maroon px-4 py-2 rounded-full text-sm font-medium mb-4 w-fit">
                   <Compass className="w-4 h-4" />
                   <span>PERSONALIZED EXPERIENCE</span>
                 </div>
@@ -485,14 +465,14 @@ export default async function MultidayTourPage() {
                 </h2>
 
                 <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                  Every traveler is unique. Let our AI travel assistant help you
-                  craft a personalized itinerary that perfectly matches your
-                  interests, pace, and preferences.
+                  Every traveler is unique. Let our AI travel assistant help you craft a
+                  personalized itinerary that perfectly matches your interests, pace, and
+                  preferences.
                 </p>
 
                 <div className="space-y-3 mb-8">
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-[#651d2a] rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-6 h-6 bg-tumakr-maroon rounded-full flex items-center justify-center flex-shrink-0">
                       <Check className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-gray-700">
@@ -500,15 +480,13 @@ export default async function MultidayTourPage() {
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-[#651d2a] rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-6 h-6 bg-tumakr-maroon rounded-full flex items-center justify-center flex-shrink-0">
                       <Check className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-gray-700">
-                      Flexible schedule adjustments
-                    </span>
+                    <span className="text-gray-700">Flexible schedule adjustments</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-[#651d2a] rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-6 h-6 bg-tumakr-maroon rounded-full flex items-center justify-center flex-shrink-0">
                       <Check className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-gray-700">
@@ -518,7 +496,7 @@ export default async function MultidayTourPage() {
                 </div>
 
                 <Link href="/chat" className="w-full">
-                  <Button className="bg-gradient-to-r from-[#651d2a] to-[#4a1620] hover:from-[#4a1620] hover:to-[#651d2a] text-white px-8 py-6 text-lg rounded-full w-full group flex items-center justify-center">
+                  <Button className="bg-gradient-to-r from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white px-8 py-6 text-lg rounded-full w-full group flex items-center justify-center">
                     <span>Chat with Travel AI</span>
                     <Compass className="w-5 h-5 ml-2 group-hover:rotate-90 transition-transform" />
                   </Button>

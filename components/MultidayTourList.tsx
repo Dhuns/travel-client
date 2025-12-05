@@ -2,9 +2,9 @@
 
 import { ChevronDown, Clock, MapPin } from "lucide-react";
 
+import { FavoriteButton } from "@/components/favorite-button";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { FavoriteButton } from "@/components/favorite-button";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -58,7 +58,7 @@ export default function MultidayTourList({
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                   {tour.price && (
-                    <div className="absolute top-4 right-4 bg-white text-[#651d2a] font-bold px-3 py-1 rounded-full text-sm shadow-lg">
+                    <div className="absolute top-4 right-4 bg-white text-tumakr-maroon font-bold px-3 py-1 rounded-full text-sm shadow-lg">
                       {tour.price}
                     </div>
                   )}
@@ -79,14 +79,14 @@ export default function MultidayTourList({
                   </div>
                 </div>
                 <div className="p-6 flex flex-col flex-1">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-[#651d2a] transition-colors">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-tumakr-maroon transition-colors">
                     {tour.title}
                   </h3>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {tour.duration && (
-                      <div className="flex items-center gap-1 bg-[#651d2a]/10 px-2 py-1 rounded-full">
-                        <Clock className="w-3 h-3 text-[#651d2a]" />
-                        <span className="text-xs text-[#651d2a] font-medium">
+                      <div className="flex items-center gap-1 bg-tumakr-maroon/10 px-2 py-1 rounded-full">
+                        <Clock className="w-3 h-3 text-tumakr-maroon" />
+                        <span className="text-xs text-tumakr-maroon font-medium">
                           {tour.duration}
                         </span>
                       </div>
@@ -94,9 +94,7 @@ export default function MultidayTourList({
                     {tour.location && (
                       <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-full">
                         <MapPin className="w-3 h-3 text-gray-600" />
-                        <span className="text-xs text-gray-600">
-                          {tour.location}
-                        </span>
+                        <span className="text-xs text-gray-600">{tour.location}</span>
                       </div>
                     )}
                   </div>
@@ -104,7 +102,7 @@ export default function MultidayTourList({
                     {tour.description}
                   </p>
                   <div className="mt-auto pt-4 border-t border-gray-100">
-                    <Button className="w-full bg-[#651d2a] hover:bg-[#651d2a]/90 text-white font-semibold">
+                    <Button className="w-full bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white font-semibold">
                       View Details & Book
                     </Button>
                   </div>
@@ -119,7 +117,7 @@ export default function MultidayTourList({
         <div className="text-center mt-12">
           <Button
             onClick={showMore}
-            className="bg-white hover:bg-gray-50 text-[#651d2a] font-semibold px-8 py-3 rounded-full text-lg flex items-center gap-2 mx-auto shadow-lg border border-gray-200 transition-all"
+            className="bg-white hover:bg-gray-50 text-tumakr-maroon font-semibold px-8 py-3 rounded-full text-lg flex items-center gap-2 mx-auto shadow-lg border border-gray-200 transition-all"
           >
             <ChevronDown className="w-5 h-5" />
           </Button>
