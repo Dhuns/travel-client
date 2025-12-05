@@ -321,7 +321,7 @@ export default function ContactPage() {
                 </p>
                 <Button
                   variant="outline"
-                  className="border-tumakr-maroon text-tumakr-maroon hover:!bg-tumakr-maroon hover:!text-white bg-transparent"
+                  className="border-tumakr-maroon text-tumakr-maroon hover:bg-tumakr-maroon! hover:text-white! bg-transparent"
                 >
                   View FAQ
                 </Button>
