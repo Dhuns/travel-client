@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ClipboardList, LogIn, Menu, Search, User, X } from "lucide-react";
+import { ChevronDown, LogIn, Menu, Search, User, X } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 
@@ -165,9 +165,9 @@ export default function Header() {
   const navigationItems = useMemo(
     () => [
       { href: "/", label: "Home" },
-      { href: "/souvenir", label: "Souvenir" },
+      // { href: "/souvenir", label: "Souvenir" }, 개발 후 추가
       { href: "/tours", label: "Tours", hasDropdown: true },
-      { href: "#", label: "Contact", hasDropdown: true, isContact: true },
+      { href: "/contact", label: "Contact", isContact: true }, // 개발 후 hasDropdown: true로 변경
     ],
     []
   );
@@ -297,6 +297,8 @@ export default function Header() {
                       onMouseEnter={() => setContactDropdown(true)}
                       onMouseLeave={() => setContactDropdown(false)}
                     >
+                      {/* 
+                      개발 후 추가
                       <div className="bg-white rounded-lg shadow-xl border border-gray-200 py-2">
                         <Link
                           href="/chat"
@@ -322,7 +324,7 @@ export default function Header() {
                             Fill out our contact form
                           </div>
                         </Link>
-                      </div>
+                      </div> */}
                     </div>
                   )}
                 </div>
@@ -351,15 +353,15 @@ export default function Header() {
               <Search className="w-5 h-5 stroke-2" />
             </button>
 
-            {/* 예약 조회 - 로그인 상태와 무관하게 항상 표시 */}
-            <Link
+            {/* 예약 조회 - 로그인 상태와 무관하게 항상 표시, 개발 후 추가*/}
+            {/* <Link
               href="/orders"
               className="hover:text-tumakr-maroon transition-colors duration-300 p-2 flex items-center space-x-1 rounded-full hover:bg-tumakr-dusty-pink/10"
               title="예약 조회"
             >
               <ClipboardList className="w-5 h-5 stroke-2" />
               <span className="hidden md:inline text-xs">Orders</span>
-            </Link>
+            </Link> */}
 
             {!isAuthenticated ? (
               // 로그인 전: 로그인 버튼 표시
@@ -492,17 +494,25 @@ export default function Header() {
                 </div>
               </div>
 
-              {/* Souvenir 메뉴 */}
-              <Link
+              {/* Souvenir 메뉴 - 개발 후 추가*/}
+              {/* <Link
                 href="/souvenir"
                 className="hover:text-tumakr-maroon transition-colors duration-300 py-2"
                 onClick={() => closeMobileMenu()}
               >
                 Souvenir
-              </Link>
+              </Link> */}
 
               {/* Contact 카테고리 */}
-              <div className="border-b border-gray-100 pb-2">
+              <Link
+                href="/contact"
+                className="hover:text-tumakr-maroon transition-colors duration-300 py-2"
+                onClick={() => closeMobileMenu()}
+              >
+                Contact
+              </Link>
+
+              {/* <div className="border-b border-gray-100 pb-2">
                 <div className="py-2 font-medium text-gray-900">Contact</div>
                 <div className="pl-4 space-y-2 mt-2">
                   <Link
@@ -520,16 +530,16 @@ export default function Header() {
                     Email Us
                   </Link>
                 </div>
-              </div>
+              </div> */}
 
-              {/* Orders - 로그인 상태와 무관하게 항상 표시 */}
-              <Link
+              {/* Orders - 로그인 상태와 무관하게 항상 표시 - 개발 후 추가 */}
+              {/* <Link
                 href="/orders"
                 className="hover:text-tumakr-maroon transition-colors duration-300 py-2"
                 onClick={() => closeMobileMenu()}
               >
                 Orders
-              </Link>
+              </Link> */}
 
               {!isAuthenticated ? (
                 // 비로그인: 로그인 링크만 표시
