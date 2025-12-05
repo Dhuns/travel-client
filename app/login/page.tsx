@@ -131,10 +131,6 @@ export default function LoginPage() {
                 value={formData.username}
                 onChange={handleInputChange}
                 className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-tumakr-maroon transition-colors"
-                style={{
-                  WebkitBoxShadow: "0 0 0 1000px white inset",
-                  WebkitTextFillColor: "#111827",
-                }}
                 autoComplete="username"
                 placeholder="Email"
                 required
@@ -151,10 +147,6 @@ export default function LoginPage() {
                 value={formData.password}
                 onChange={handleInputChange}
                 className="w-full pl-10 pr-12 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-tumakr-maroon transition-colors"
-                style={{
-                  WebkitBoxShadow: "0 0 0 1000px white inset",
-                  WebkitTextFillColor: "#111827",
-                }}
                 autoComplete="current-password"
                 placeholder="Password"
                 required
