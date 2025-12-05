@@ -237,7 +237,10 @@ export default function Header() {
               priority
               className="h-16 w-auto"
             />
-            <span className="text-2xl font-bold text-gray-900">tumakr</span>
+            <div className="flex flex-col items-start">
+              <span className="text-2xl font-bold text-gray-900">tumakr</span>
+              <span className="text-xs text-gray-400">Tumakr by OnedayKorea</span>
+            </div>
           </Link>
 
           {/* 데스크톱 메뉴 */}
