@@ -59,7 +59,9 @@ export default async function PrivateTourPage() {
           </p>
 
           {/* CTA 버튼들 */}
-          <div className="flex flex-wrap justify-center gap-4">
+
+          {/* 
+            TODO: 예약 폼 추가 후 주석 해제
             <a href="#inquiry-section">
               <Button
                 size="lg"
@@ -67,17 +69,16 @@ export default async function PrivateTourPage() {
               >
                 Book Your Journey Now
               </Button>
-            </a>
-            <a href="#tour-list">
-              <Button
-                size="lg"
-                variant="outline"
-                className="font-semibold border-2 border-white text-white hover:bg-white/20 bg-white/5 backdrop-blur-sm shadow-lg cursor-pointer transition-colors"
-              >
-                Explore Tours
-              </Button>
-            </a>
-          </div>
+            </a> */}
+          <a href="#tour-list">
+            <Button
+              size="lg"
+              variant="outline"
+              className="font-semibold border-2 border-white text-white hover:bg-white/20 bg-white/5 backdrop-blur-sm shadow-lg transition-colors"
+            >
+              Explore Tours
+            </Button>
+          </a>
         </div>
       </section>
 

@@ -207,11 +207,13 @@ export default function WishlistPage() {
                 Book now and start your special journey to Korea
               </p>
               <div className="flex justify-center space-x-4">
+                {/* 
+                TODO: 챗봇 추가 후 주석 해제
                 <Link href="/chat">
                   <Button className="border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white transition-all shadow-sm cursor-pointer">
                     Chat with AI
                   </Button>
-                </Link>
+                </Link> */}
                 <Link href="/tours">
                   <Button className="bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white">
                     Explore More Tours
