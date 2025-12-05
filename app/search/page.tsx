@@ -107,7 +107,7 @@ function SearchContent() {
             onClick={() => handleCategoryFilter("all")}
             className={
               selectedCategory === "all"
-                ? "bg-tumakr-maroon hover:bg-tumakr-maroon/90"
+                ? "bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white"
                 : ""
             }
           >
@@ -119,7 +119,7 @@ function SearchContent() {
             onClick={() => handleCategoryFilter("tours")}
             className={
               selectedCategory === "tours"
-                ? "bg-tumakr-maroon hover:bg-tumakr-maroon/90"
+                ? "bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white"
                 : ""
             }
           >
@@ -150,7 +150,7 @@ function SearchContent() {
                   key={i}
                   className="bg-white rounded-lg overflow-hidden shadow animate-pulse"
                 >
-                  <div className="aspect-[4/3] bg-gray-200" />
+                  <div className="aspect-4/3 bg-gray-200" />
                   <div className="p-4 space-y-3">
                     <div className="h-4 bg-gray-200 rounded w-3/4" />
                     <div className="h-3 bg-gray-200 rounded w-full" />
@@ -172,7 +172,7 @@ function SearchContent() {
             <p className="text-red-500 text-lg">{error}</p>
             <Button
               onClick={performSearch}
-              className="mt-4 bg-tumakr-maroon hover:bg-tumakr-maroon/90"
+              className="mt-4 bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white"
             >
               Try Again
             </Button>
@@ -239,7 +239,7 @@ function ResultCard({ item }: { item: SearchResult }) {
   return (
     <Link href={item.link}>
       <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group h-full">
-        <div className="aspect-[4/3] relative overflow-hidden bg-gray-100">
+        <div className="aspect-4/3 relative overflow-hidden bg-gray-100">
           {item.thumbnailUrl ? (
             <Image
               src={item.thumbnailUrl}
