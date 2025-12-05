@@ -349,7 +349,7 @@ export default function Header() {
             {/* 검색 아이콘 */}
             <button
               onClick={toggleSearch}
-              className="hover:text-tumakr-maroon transition-colors duration-300 p-2 rounded-full hover:bg-tumakr-dusty-pink/10"
+              className="hover:text-tumakr-maroon cursor-pointer transition-colors duration-300 p-2 rounded-full hover:bg-tumakr-dusty-pink/10"
               title="검색"
               aria-label="검색 열기"
             >
@@ -373,7 +373,7 @@ export default function Header() {
                 className="hover:text-tumakr-maroon transition-colors duration-300 p-2 flex items-center space-x-1 rounded-full hover:bg-tumakr-dusty-pink/10"
                 title="로그인"
               >
-                <LogIn className="w-5 h-5 stroke-2" />
+                <LogIn className="w-5 h-5 stroke-2 cursor-pointer" />
                 <span className="hidden md:inline text-xs">Login</span>
               </Link>
             ) : (
@@ -381,7 +381,7 @@ export default function Header() {
               <div className="relative" ref={userDropdownRef}>
                 <button
                   onClick={toggleUserDropdown}
-                  className="hover:text-tumakr-maroon transition-colors duration-300 p-2 flex items-center space-x-1 rounded-full hover:bg-tumakr-dusty-pink/10"
+                  className="cursor-pointer hover:text-tumakr-maroon transition-colors duration-300 p-2 flex items-center space-x-1 rounded-full hover:bg-tumakr-dusty-pink/10"
                   title="사용자 메뉴"
                 >
                   <User className="w-5 h-5 stroke-2" />
@@ -425,7 +425,7 @@ export default function Header() {
                     <hr className="my-1" />
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                      className="cursor-pointer block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                     >
                       Logout
                     </button>

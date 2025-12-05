@@ -1,16 +1,6 @@
-import {
-  Calendar,
-  Check,
-  Clock,
-  Gift,
-  MapPin,
-  MessageCircle,
-  Star,
-  Users,
-} from "lucide-react";
+import { Calendar, Check, Clock, Compass, MapPin, Star, Users } from "lucide-react";
 
 import { FavoriteButton } from "@/components/favorite-button";
-import PrivateTourInquiryForm from "@/components/PrivateTourInquiryForm";
 import { Button } from "@/components/ui/button";
 import { getToursFromBackend } from "@/lib/bokun";
 import Link from "next/link";
@@ -28,7 +18,7 @@ export default async function PrivateTourPage() {
         {/* 배경 이미지 */}
         <div className="absolute inset-0 z-0">
           <img
-            src="/images/design-mode/castle3.png"
+            src="/korea-place-3.jpg"
             alt="Korean Palace Background"
             className="w-full h-full object-cover"
           />
@@ -166,7 +156,7 @@ export default async function PrivateTourPage() {
             {/* 오른쪽: 이미지 */}
             <div className="relative">
               <img
-                src="/korean-tour-guide-with-tourists-by-the-ocean.jpg"
+                src="/walk-palace.jpg"
                 alt="Tour Guide"
                 className="w-full h-[600px] object-cover rounded-2xl shadow-xl"
               />
@@ -395,21 +385,21 @@ export default async function PrivateTourPage() {
           <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-6 bg-tumakr-maroon rounded-2xl p-8">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center">
-                <MessageCircle className="text-white" size={28} />
+                <Compass className="text-white" size={28} />
               </div>
               <div className="text-white">
-                <h3 className="text-xl font-bold mb-1">Need Help Planning Your Tour?</h3>
+                <h3 className="text-xl font-bold mb-1">Interested in Other Tours?</h3>
                 <p className="text-white/80 text-sm">
-                  Chat with our AI assistant to create your perfect private tour
+                  Explore our full collection of History, Multiday, and Private Tours
                 </p>
               </div>
             </div>
-            <Link href="/chat">
+            <Link href="/tours">
               <Button
                 size="lg"
                 className="bg-white text-tumakr-maroon hover:bg-white/90 font-semibold"
               >
-                Start Chatting
+                View All Tours
               </Button>
             </Link>
           </div>
@@ -534,7 +524,7 @@ export default async function PrivateTourPage() {
                   className="w-full h-[250px] object-cover rounded-2xl shadow-xl"
                 />
                 <img
-                  src="/group-of-tourists-in-hanbok-at-korean-palace.jpg"
+                  src="/hanbok-at-korean.jpg"
                   alt="Group Tour"
                   className="w-full h-[250px] object-cover rounded-2xl shadow-xl"
                 />
@@ -545,7 +535,8 @@ export default async function PrivateTourPage() {
       </section>
 
       {/* Products Section - 6.png */}
-      <section className="py-16 px-6 flex items-center bg-tumakr-dark-blue">
+      {/* TODO: Products & Souvenirs - 개발 후 활성화 예정 */}
+      {/* <section className="py-16 px-6 flex items-center bg-tumakr-dark-blue">
         <div className="container mx-auto max-w-6xl w-full">
           <div className="text-center mb-12">
             <div className="flex items-center justify-center gap-2 mb-4">
@@ -559,7 +550,6 @@ export default async function PrivateTourPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Product 1 */}
             <div className="bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-shadow">
               <div className="relative h-64">
                 <img
@@ -578,7 +568,6 @@ export default async function PrivateTourPage() {
               </div>
             </div>
 
-            {/* Product 2 */}
             <div className="bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-shadow">
               <div className="relative h-64">
                 <img
@@ -597,7 +586,6 @@ export default async function PrivateTourPage() {
               </div>
             </div>
 
-            {/* Product 3 */}
             <div className="bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-shadow">
               <div className="relative h-64">
                 <img
@@ -617,10 +605,10 @@ export default async function PrivateTourPage() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
-      {/* Pricing Section - 7.png */}
-      <PrivateTourInquiryForm />
+      {/* Pricing Section - 개발 후 활성화 예정 */}
+      {/* <PrivateTourInquiryForm /> */}
     </div>
   );
 }
