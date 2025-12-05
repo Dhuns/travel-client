@@ -22,7 +22,7 @@ export default function Footer() {
           <div className="space-y-4">
             <div>
               <h3 className="font-bold text-xl text-white mb-2">OnedayKorea</h3>
-              <div className="w-12 h-0.5 bg-tumakr-maroon mb-4"></div>
+              <div className="w-12 h-0.5 bg-white mb-4"></div>
             </div>
             <ul className="space-y-2">
               <li>
@@ -72,7 +72,7 @@ export default function Footer() {
           <div className="space-y-4">
             <div>
               <h3 className="font-bold text-lg text-white mb-2">Help</h3>
-              <div className="w-12 h-0.5 bg-tumakr-maroon mb-4"></div>
+              <div className="w-12 h-0.5 bg-white mb-4"></div>
             </div>
             <ul className="space-y-2">
               <li>
@@ -122,11 +122,11 @@ export default function Footer() {
           <div className="space-y-4">
             <div>
               <h3 className="font-bold text-lg text-white mb-2">Contact</h3>
-              <div className="w-12 h-0.5 bg-tumakr-maroon mb-4"></div>
+              <div className="w-12 h-0.5 bg-white mb-4"></div>
             </div>
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-tumakr-maroon mt-1 shrink-0" />
+                <MapPin className="w-4 h-4 text-white mt-1 shrink-0" />
                 <span className="text-gray-300 text-sm leading-relaxed">
                   2F, Bukhansan TheSharp Sang-ga,
                   <br />
@@ -135,8 +135,8 @@ export default function Footer() {
                   Seoul, Korea
                 </span>
               </li>
-              <li className="flex items-center gap-3">
-                <Phone className="w-4 h-4 text-tumakr-maroon shrink-0" />
+              <li className="flex items-start gap-3">
+                <Phone className="w-4 h-4 text-white mt-1 shrink-0" />
                 <div className="text-gray-300 text-sm">
                   <a
                     href="tel:+82707556355"
@@ -153,8 +153,8 @@ export default function Footer() {
                   </a>
                 </div>
               </li>
-              <li className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-tumakr-maroon shrink-0" />
+              <li className="flex items-start gap-3">
+                <Mail className="w-4 h-4 text-white mt-1 shrink-0" />
                 <a
                   href="mailto:info@onedaykorea.com"
                   className="text-gray-300 hover:text-white transition-colors text-sm"
@@ -166,7 +166,7 @@ export default function Footer() {
           </div>
 
           {/* 네 번째 컬럼 - TripAdvisor + 소셜 */}
-          <div className="space-y-4">
+          <div className="space-y-6">
             {/* TripAdvisor 위젯 */}
             <a
               href="https://www.tripadvisor.com/Attraction_Review-g294197-d7264223-Reviews-OnedayKorea_Tours-Seoul.html"
