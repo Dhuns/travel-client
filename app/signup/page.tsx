@@ -18,6 +18,7 @@ import {
   XCircle,
 } from "lucide-react";
 
+import { PolicyDialog } from "@/components/policy-dialog";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/src/shared/store/authStore";
 import { useRouter } from "next/navigation";
@@ -55,6 +56,10 @@ export default function SignupPage() {
     privacy: false,
     allAgree: false,
   });
+
+  const [policyDialogType, setPolicyDialogType] = useState<"terms" | "privacy" | null>(
+    null
+  );
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -353,12 +358,13 @@ export default function SignupPage() {
                       <span className="text-red-500 ml-0.5">*</span>
                     </span>
                   </div>
-                  <a
-                    href="/terms"
-                    className="text-xs text-gray-400 hover:text-gray-600 underline"
+                  <button
+                    type="button"
+                    onClick={() => setPolicyDialogType("terms")}
+                    className="text-xs text-gray-400 hover:text-gray-600 underline cursor-pointer"
                   >
                     View
-                  </a>
+                  </button>
                 </label>
 
                 <label className="flex items-center justify-between cursor-pointer">
@@ -374,12 +380,13 @@ export default function SignupPage() {
                       <span className="text-red-500 ml-0.5">*</span>
                     </span>
                   </div>
-                  <a
-                    href="/privacy"
-                    className="text-xs text-gray-400 hover:text-gray-600 underline"
+                  <button
+                    type="button"
+                    onClick={() => setPolicyDialogType("privacy")}
+                    className="text-xs text-gray-400 hover:text-gray-600 underline cursor-pointer"
                   >
                     View
-                  </a>
+                  </button>
                 </label>
               </div>
             </div>
@@ -388,7 +395,7 @@ export default function SignupPage() {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+              className="w-full py-3 h-[44px] bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
             >
               {isSubmitting ? "Creating account..." : "Create account"}
             </Button>
@@ -456,6 +463,13 @@ export default function SignupPage() {
           </p>
         </div>
       </div>
+
+      {/* Policy Dialog */}
+      <PolicyDialog
+        type={policyDialogType}
+        open={policyDialogType !== null}
+        onOpenChange={(open) => !open && setPolicyDialogType(null)}
+      />
     </div>
   );
 }

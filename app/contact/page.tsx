@@ -207,7 +207,7 @@ export default function ContactPage() {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-tumakr-maroon hover:bg-tumakr-maroon/90 flex items-center justify-center space-x-2"
+                    className="w-full bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white flex items-center justify-center space-x-2"
                   >
                     <Send className="w-4 h-4" />
                     <span>{isSubmitting ? "Sending..." : "Send Message"}</span>
