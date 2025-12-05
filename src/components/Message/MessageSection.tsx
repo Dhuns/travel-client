@@ -1,12 +1,18 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Send, X, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { getMessages, sendMessage, markAsRead, getUnreadCount, Message } from '@/src/shared/apis/message';
-import dayjs from 'dayjs';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  getMessages,
+  getUnreadCount,
+  markAsRead,
+  Message,
+  sendMessage,
+} from "@/src/shared/apis/message";
+import dayjs from "dayjs";
+import { ChevronDown, ChevronUp, MessageCircle, Send } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 
 interface MessageSectionProps {
   batchId: number;
@@ -24,7 +30,7 @@ export default function MessageSection({
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [messageInput, setMessageInput] = useState('');
+  const [messageInput, setMessageInput] = useState("");
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [unreadCount, setUnreadCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -46,8 +52,8 @@ export default function MessageSection({
         setUnreadCount(0);
       }
     } catch (err) {
-      console.error('Failed to fetch messages:', err);
-      setError('Failed to load messages');
+      console.error("Failed to fetch messages:", err);
+      setError("Failed to load messages");
     } finally {
       setIsLoading(false);
     }
@@ -61,7 +67,7 @@ export default function MessageSection({
       const response = await getUnreadCount(batchId);
       setUnreadCount(response.unreadCount);
     } catch (err) {
-      console.error('Failed to fetch unread count:', err);
+      console.error("Failed to fetch unread count:", err);
     }
   };
 
@@ -85,7 +91,7 @@ export default function MessageSection({
   // 메시지 스크롤
   useEffect(() => {
     if (isExpanded) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isExpanded]);
 
@@ -97,11 +103,11 @@ export default function MessageSection({
       setIsSending(true);
       setError(null);
       await sendMessage({ batchId, content: messageInput.trim() });
-      setMessageInput('');
+      setMessageInput("");
       await fetchMessages();
     } catch (err) {
-      console.error('Failed to send message:', err);
-      setError('Failed to send message. Please try again.');
+      console.error("Failed to send message:", err);
+      setError("Failed to send message. Please try again.");
     } finally {
       setIsSending(false);
     }
@@ -109,18 +115,18 @@ export default function MessageSection({
 
   // Enter 키로 전송
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
 
-  const formatTime = (dateString: string) => dayjs(dateString).format('HH:mm');
-  const formatDate = (dateString: string) => dayjs(dateString).format('MMM D, YYYY');
+  const formatTime = (dateString: string) => dayjs(dateString).format("HH:mm");
+  const formatDate = (dateString: string) => dayjs(dateString).format("MMM D, YYYY");
 
   // 날짜별 메시지 그룹화
   const groupedMessages: { date: string; messages: Message[] }[] = [];
-  let currentDate = '';
+  let currentDate = "";
   messages.forEach((msg) => {
     const msgDate = formatDate(msg.createdAt);
     if (msgDate !== currentDate) {
@@ -136,7 +142,7 @@ export default function MessageSection({
       {/* Header */}
       <div
         className={`flex items-center justify-between p-4 bg-gray-50 ${
-          isCollapsible ? 'cursor-pointer hover:bg-gray-100' : ''
+          isCollapsible ? "cursor-pointer hover:bg-gray-100" : ""
         } transition-colors`}
         onClick={() => isCollapsible && setIsExpanded(!isExpanded)}
       >
@@ -154,7 +160,11 @@ export default function MessageSection({
         </div>
         {isCollapsible && (
           <div className="text-gray-400">
-            {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+            {isExpanded ? (
+              <ChevronUp className="w-5 h-5" />
+            ) : (
+              <ChevronDown className="w-5 h-5" />
+            )}
           </div>
         )}
       </div>
@@ -186,26 +196,36 @@ export default function MessageSection({
 
                   {/* Messages */}
                   {group.messages.map((msg) => {
-                    const isCustomer = msg.senderType === 'customer';
+                    const isCustomer = msg.senderType === "customer";
                     return (
                       <div
                         key={msg.id}
-                        className={`flex flex-col mb-3 ${isCustomer ? 'items-end' : 'items-start'}`}
+                        className={`flex flex-col mb-3 ${
+                          isCustomer ? "items-end" : "items-start"
+                        }`}
                       >
                         <div className="flex items-center gap-2 mb-1 px-2">
-                          <span className={`text-xs font-medium ${isCustomer ? 'text-blue-600' : 'text-green-600'}`}>
-                            {isCustomer ? 'You' : msg.sender.name}
+                          <span
+                            className={`text-xs font-medium ${
+                              isCustomer ? "text-blue-600" : "text-green-600"
+                            }`}
+                          >
+                            {isCustomer ? "You" : msg.sender.name}
                           </span>
-                          <span className="text-xs text-gray-400">{formatTime(msg.createdAt)}</span>
+                          <span className="text-xs text-gray-400">
+                            {formatTime(msg.createdAt)}
+                          </span>
                         </div>
                         <div
                           className={`max-w-[80%] px-4 py-2 rounded-2xl ${
                             isCustomer
-                              ? 'bg-blue-600 text-white rounded-br-sm'
-                              : 'bg-white text-gray-900 border rounded-bl-sm shadow-sm'
+                              ? "bg-blue-600 text-white rounded-br-sm"
+                              : "bg-white text-gray-900 border rounded-bl-sm shadow-sm"
                           }`}
                         >
-                          <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
+                          <p className="text-sm whitespace-pre-wrap break-words">
+                            {msg.content}
+                          </p>
                         </div>
                       </div>
                     );
@@ -237,7 +257,7 @@ export default function MessageSection({
               <Button
                 onClick={handleSendMessage}
                 disabled={!messageInput.trim() || isSending}
-                className="h-[44px] w-[44px] p-0 flex-shrink-0"
+                className="h-[44px] w-[44px] p-0 shrink-0"
               >
                 <Send className="w-5 h-5" />
               </Button>

@@ -126,7 +126,7 @@ export default function Footer() {
             </div>
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-tumakr-maroon mt-1 flex-shrink-0" />
+                <MapPin className="w-4 h-4 text-tumakr-maroon mt-1 shrink-0" />
                 <span className="text-gray-300 text-sm leading-relaxed">
                   2F, Bukhansan TheSharp Sang-ga,
                   <br />
@@ -136,7 +136,7 @@ export default function Footer() {
                 </span>
               </li>
               <li className="flex items-center gap-3">
-                <Phone className="w-4 h-4 text-tumakr-maroon flex-shrink-0" />
+                <Phone className="w-4 h-4 text-tumakr-maroon shrink-0" />
                 <div className="text-gray-300 text-sm">
                   <a
                     href="tel:+82707556355"
@@ -154,7 +154,7 @@ export default function Footer() {
                 </div>
               </li>
               <li className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-tumakr-maroon flex-shrink-0" />
+                <Mail className="w-4 h-4 text-tumakr-maroon shrink-0" />
                 <a
                   href="mailto:info@onedaykorea.com"
                   className="text-gray-300 hover:text-white transition-colors text-sm"
@@ -175,7 +175,7 @@ export default function Footer() {
               className="block bg-white rounded-lg p-4 hover:shadow-lg transition-shadow"
             >
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-[#00AA6C] rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-[#00AA6C] rounded-full flex items-center justify-center shrink-0">
                   <svg
                     className="w-6 h-6 text-white"
                     viewBox="0 0 24 24"

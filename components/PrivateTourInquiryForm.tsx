@@ -134,19 +134,19 @@ export default function PrivateTourInquiryForm() {
               </h3>
               <ul className="space-y-1 text-xs text-gray-700">
                 <li className="flex items-start gap-2">
-                  <Check className="w-3 h-3 text-tumakr-maroon mt-0.5 flex-shrink-0" />
+                  <Check className="w-3 h-3 text-tumakr-maroon mt-0.5 shrink-0" />
                   <span>Your preferred travel dates</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-3 h-3 text-tumakr-maroon mt-0.5 flex-shrink-0" />
+                  <Check className="w-3 h-3 text-tumakr-maroon mt-0.5 shrink-0" />
                   <span>Number of travelers in your group</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-3 h-3 text-tumakr-maroon mt-0.5 flex-shrink-0" />
+                  <Check className="w-3 h-3 text-tumakr-maroon mt-0.5 shrink-0" />
                   <span>Your interests and tour preferences</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-3 h-3 text-tumakr-maroon mt-0.5 flex-shrink-0" />
+                  <Check className="w-3 h-3 text-tumakr-maroon mt-0.5 shrink-0" />
                   <span>Desired tour duration (half-day, full-day, or multi-day)</span>
                 </li>
               </ul>

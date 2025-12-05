@@ -79,7 +79,7 @@ export default async function HistoryTourPage() {
 
               {/* 왼쪽 하단 모달 */}
               <div className="absolute bottom-6 left-6 bg-white rounded-lg shadow-lg p-4 flex items-center gap-3">
-                <div className="w-10 h-10 bg-tumakr-maroon rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-tumakr-maroon rounded-full flex items-center justify-center shrink-0">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -285,7 +285,7 @@ export default async function HistoryTourPage() {
                                         key={index}
                                         className="flex items-start space-x-2"
                                       >
-                                        <Check className="w-4 h-4 text-tumakr-maroon mt-0.5 flex-shrink-0" />
+                                        <Check className="w-4 h-4 text-tumakr-maroon mt-0.5 shrink-0" />
                                         <span className="text-gray-600 text-sm">
                                           {item}
                                         </span>
@@ -308,7 +308,7 @@ export default async function HistoryTourPage() {
                                         key={index}
                                         className="flex items-start space-x-2"
                                       >
-                                        <X className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <X className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
                                         <span className="text-gray-600 text-sm">
                                           {item}
                                         </span>
@@ -332,7 +332,7 @@ export default async function HistoryTourPage() {
                                         key={index}
                                         className="flex items-center space-x-2"
                                       >
-                                        <div className="w-2 h-2 bg-tumakr-maroon rounded-full flex-shrink-0"></div>
+                                        <div className="w-2 h-2 bg-tumakr-maroon rounded-full shrink-0"></div>
                                         <span className="text-gray-600 text-sm">
                                           {highlight}
                                         </span>

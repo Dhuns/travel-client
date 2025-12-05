@@ -261,7 +261,7 @@ export default function MyEstimatesPage() {
               >
                 <div className="flex flex-col md:flex-row md:h-80">
                   {/* Image */}
-                  <div className="relative w-full md:w-96 h-64 md:h-full flex-shrink-0">
+                  <div className="relative w-full md:w-96 h-64 md:h-full shrink-0">
                     <Image
                       src={estimate.image}
                       alt={estimate.title}

@@ -125,7 +125,7 @@ export default function WishlistPage() {
                 className="overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 bg-white rounded-xl group p-0 flex flex-col h-full"
               >
                 {/* Image */}
-                <div className="relative h-48 overflow-hidden flex-shrink-0">
+                <div className="relative h-48 overflow-hidden shrink-0">
                   {item.image ? (
                     <Image
                       src={item.image}
