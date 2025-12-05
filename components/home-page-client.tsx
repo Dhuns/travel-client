@@ -191,7 +191,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
           <div className="hidden lg:flex flex-col gap-4 opacity-0 animate-[fadeIn_1s_ease-in_2.5s_forwards]">
             {/* AI Bot Message */}
             <div className="flex items-start gap-3 mr-auto max-w-md">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-tumakr-mustard flex items-center justify-center">
+              <div className="shrink-0 w-10 h-10 rounded-full bg-tumakr-mustard flex items-center justify-center">
                 <MessageCircle className="w-5 h-5 text-white" />
               </div>
               <div className="bg-white/95 backdrop-blur-sm rounded-2xl rounded-tl-none px-6 py-4 shadow-lg">
@@ -482,7 +482,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
                     key={i}
                     className="flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-2xl p-5 hover:bg-white/20 transition-colors"
                   >
-                    <div className="w-12 h-12 rounded-xl bg-tumakr-mustard flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-tumakr-mustard flex items-center justify-center shrink-0">
                       <item.icon className="w-6 h-6 text-white" />
                     </div>
                     <span className="font-semibold text-lg">{item.text}</span>

@@ -199,7 +199,7 @@ export default function FAQPage() {
                               {faq.question}
                             </span>
                             <ChevronDown
-                              className={`w-5 h-5 text-tumakr-maroon flex-shrink-0 transition-transform ${
+                              className={`w-5 h-5 text-tumakr-maroon shrink-0 transition-transform ${
                                 isOpen ? "transform rotate-180" : ""
                               }`}
                             />
@@ -233,7 +233,9 @@ export default function FAQPage() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link href="/contact">
-              <Button className="bg-tumakr-maroon hover:bg-tumakr-maroon/90">Contact Us</Button>
+              <Button className="bg-tumakr-maroon hover:bg-tumakr-maroon/90">
+                Contact Us
+              </Button>
             </Link>
             <Link href="/chat">
               <Button

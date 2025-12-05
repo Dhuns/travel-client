@@ -83,7 +83,7 @@ export default async function MultidayTourPage() {
 
               <div className="pt-6 space-y-4">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-tumakr-maroon/10 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-tumakr-maroon/10 rounded-full flex items-center justify-center shrink-0">
                     <Compass className="w-6 h-6 text-tumakr-maroon" />
                   </div>
                   <div>
@@ -97,7 +97,7 @@ export default async function MultidayTourPage() {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-tumakr-sage-green/10 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-tumakr-sage-green/10 rounded-full flex items-center justify-center shrink-0">
                     <Mountain className="w-6 h-6 text-tumakr-sage-green" />
                   </div>
                   <div>
@@ -111,7 +111,7 @@ export default async function MultidayTourPage() {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-tumakr-mustard/10 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-tumakr-mustard/10 rounded-full flex items-center justify-center shrink-0">
                     <Sunrise className="w-6 h-6 text-tumakr-mustard" />
                   </div>
                   <div>
@@ -306,7 +306,7 @@ export default async function MultidayTourPage() {
 
           <div className="grid md:grid-cols-3 gap-8 text-left">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center shrink-0">
                 <MapPin className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -318,7 +318,7 @@ export default async function MultidayTourPage() {
             </div>
 
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center shrink-0">
                 <Clock className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -330,7 +330,7 @@ export default async function MultidayTourPage() {
             </div>
 
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center shrink-0">
                 <Shield className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -481,7 +481,7 @@ export default async function MultidayTourPage() {
 
                 <div className="space-y-3 mb-8">
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-tumakr-maroon rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-6 h-6 bg-tumakr-maroon rounded-full flex items-center justify-center shrink-0">
                       <Check className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-gray-700">
@@ -489,13 +489,13 @@ export default async function MultidayTourPage() {
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-tumakr-maroon rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-6 h-6 bg-tumakr-maroon rounded-full flex items-center justify-center shrink-0">
                       <Check className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-gray-700">Flexible schedule adjustments</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-tumakr-maroon rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-6 h-6 bg-tumakr-maroon rounded-full flex items-center justify-center shrink-0">
                       <Check className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-gray-700">

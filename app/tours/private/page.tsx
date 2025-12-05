@@ -120,7 +120,7 @@ export default async function PrivateTourPage() {
               {/* 체크리스트 */}
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-1 bg-tumakr-maroon">
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 bg-tumakr-maroon">
                     <Check className="text-white" size={16} />
                   </div>
                   <div>
@@ -135,7 +135,7 @@ export default async function PrivateTourPage() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-1 bg-tumakr-maroon">
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 bg-tumakr-maroon">
                     <Check className="text-white" size={16} />
                   </div>
                   <div>
@@ -149,7 +149,7 @@ export default async function PrivateTourPage() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-1 bg-tumakr-maroon">
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 bg-tumakr-maroon">
                     <Check className="text-white" size={16} />
                   </div>
                   <div>
