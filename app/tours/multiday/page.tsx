@@ -6,13 +6,14 @@ import {
   Mountain,
   Quote,
   Shield,
-  Star,
   Sunrise,
 } from "lucide-react";
 
 import MultidayTourList from "@/components/MultidayTourList";
+import StarRating from "@/components/star-rating";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import tripAdvisorReviews from "@/data/trip-advisor";
 import { getToursFromBackend } from "@/lib/bokun";
 import Image from "next/image";
 import Link from "next/link";
@@ -160,8 +161,8 @@ export default async function MultidayTourPage() {
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-tumakr-maroon text-white px-4 py-2 rounded-full text-sm font-medium mb-4">
-              <Star className="w-4 h-4 fill-current" />
-              <span>4.9/5 from 300+ reviews</span>
+              <StarRating rating={4.9} size={16} />
+              <span>4.9/5 from 700+ reviews</span>
             </div>
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
               What Our Travelers Say
@@ -172,93 +173,32 @@ export default async function MultidayTourPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Review 1 */}
-            <Card className="p-8 border-0 shadow-lg bg-white relative">
-              <Quote className="absolute top-6 right-6 w-10 h-10 text-tumakr-maroon/10" />
-              <div className="flex items-center gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className="w-5 h-5 fill-tumakr-mustard text-tumakr-mustard"
-                  />
-                ))}
-              </div>
-              <p className="text-gray-700 mb-6 leading-relaxed">
-                "The 5-day tour from Gyeongju to Seoul was absolutely incredible. Our
-                guide's knowledge of Korean history brought every site to life. The pace
-                was perfect - enough time to really absorb each location without feeling
-                rushed."
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-tumakr-maroon/10 rounded-full flex items-center justify-center">
-                  <span className="text-tumakr-maroon font-bold">SK</span>
+            {tripAdvisorReviews.slice(0, 3).map((review) => (
+              <Card className="p-8 border-0 shadow-lg bg-white relative">
+                <Quote className="absolute top-6 right-6 w-10 h-10 text-tumakr-maroon/10" />
+                <StarRating rating={review.rating} size={24} className="mb-4" />
+                <p className="text-gray-700 mb-6 leading-relaxed">"{review.content}"</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-tumakr-maroon/10 rounded-full flex items-center justify-center">
+                    <span className="text-tumakr-maroon font-bold">
+                      {review.author[0]}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-bold text-gray-900">{review.author}</p>
+                    <p className="text-sm text-gray-600">
+                      {review.location} • {review.date}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-bold text-gray-900">Sarah K.</p>
-                  <p className="text-sm text-gray-600">Australia • March 2024</p>
-                </div>
-              </div>
-            </Card>
-
-            {/* Review 2 */}
-            <Card className="p-8 border-0 shadow-lg bg-white relative">
-              <Quote className="absolute top-6 right-6 w-10 h-10 text-tumakr-maroon/10" />
-              <div className="flex items-center gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className="w-5 h-5 fill-tumakr-mustard text-tumakr-mustard"
-                  />
-                ))}
-              </div>
-              <p className="text-gray-700 mb-6 leading-relaxed">
-                "Temple stay experience was a highlight! Small group size meant we got
-                personal attention. The hotels were excellent, and the regional food
-                experiences were unforgettable. Worth every penny."
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-tumakr-maroon/10 rounded-full flex items-center justify-center">
-                  <span className="text-tumakr-maroon font-bold">MJ</span>
-                </div>
-                <div>
-                  <p className="font-bold text-gray-900">Michael J.</p>
-                  <p className="text-sm text-gray-600">USA • February 2024</p>
-                </div>
-              </div>
-            </Card>
-
-            {/* Review 3 */}
-            <Card className="p-8 border-0 shadow-lg bg-white relative">
-              <Quote className="absolute top-6 right-6 w-10 h-10 text-tumakr-maroon/10" />
-              <div className="flex items-center gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className="w-5 h-5 fill-tumakr-mustard text-tumakr-mustard"
-                  />
-                ))}
-              </div>
-              <p className="text-gray-700 mb-6 leading-relaxed">
-                "As a history teacher, I was impressed by the depth of information. The
-                tour connected dots I never knew existed. Perfect balance of guided tours
-                and free exploration time."
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-tumakr-maroon/10 rounded-full flex items-center justify-center">
-                  <span className="text-tumakr-maroon font-bold">EC</span>
-                </div>
-                <div>
-                  <p className="font-bold text-gray-900">Emma C.</p>
-                  <p className="text-sm text-gray-600">UK • January 2024</p>
-                </div>
-              </div>
-            </Card>
+              </Card>
+            ))}
           </div>
 
           {/* Stats */}
           <div className="mt-16 grid md:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="text-4xl font-bold text-tumakr-maroon mb-2">300+</div>
+              <div className="text-4xl font-bold text-tumakr-maroon mb-2">700+</div>
               <p className="text-gray-600">Happy Travelers</p>
             </div>
             <div className="text-center">
@@ -352,7 +292,7 @@ export default async function MultidayTourPage() {
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-tumakr-maroon text-white px-4 py-2 rounded-full text-sm font-medium mb-4">
-              <Star className="w-4 h-4" />
+              <StarRating rating={4.9} size={16} />
               <span>COMPLIMENTARY GIFTS</span>
             </div>
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
