@@ -244,7 +244,7 @@ export function HeroSection({
 
             {/* 우측 캐러셀 영역 */}
             <div className="relative">
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
+              <div className="relative aspect-4/3 rounded-2xl overflow-hidden shadow-2xl">
                 {images.map((image, index) => (
                   <div
                     key={index}
