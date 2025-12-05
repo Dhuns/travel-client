@@ -69,7 +69,7 @@ class ErrorBoundary extends Component<Props, State> {
               </Button>
               <Button
                 onClick={() => window.location.reload()}
-                className="bg-tumakr-maroon hover:bg-tumakr-maroon/90"
+                className="bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white"
               >
                 Refresh Page
               </Button>

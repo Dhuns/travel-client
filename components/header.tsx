@@ -456,7 +456,7 @@ export default function Header() {
                   dispatch({ type: "SET_SEARCH_QUERY", payload: e.target.value })
                 }
                 placeholder="Search for tours, destinations, and products..."
-                className="flex-1 px-4 py-2 border border-tumakr-sage-green rounded-full focus:outline-none focus:ring-2 focus:ring-tumakr-maroon"
+                className="flex-1 text-gray-900 px-4 py-2 border border-tumakr-sage-green rounded-full focus:outline-none  focus:ring-2 focus:ring-tumakr-maroon"
                 autoFocus
               />
               <Button
