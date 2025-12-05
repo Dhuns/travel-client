@@ -9,6 +9,7 @@ import {
 import {
   ArrowRight,
   Calendar,
+  ChevronDown,
   ChevronRight,
   ExternalLink,
   MapPin,
@@ -220,7 +221,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
             Scroll Down
           </span>
           <button onClick={scrollToTours} className="focus:outline-none">
-            <ChevronRight className="w-6 h-6 rotate-90 animate-bounce" />
+            <ChevronDown className="w-6 h-6 animate-bounce" />
           </button>
         </div>
       </section>
@@ -325,12 +326,12 @@ export default function HomePageClient({ children }: HomePageClientProps) {
         </div>
 
         {/* Scroll Indicator */}
-        <div className="absolute bottom-4 lg:bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/70 z-20">
-          <span className="text-xs lg:text-sm font-semibold tracking-wider uppercase">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/70">
+          <span className="text-sm font-semibold tracking-wider uppercase">
             Scroll Down
           </span>
           <button onClick={scrollToTours} className="focus:outline-none">
-            <ChevronRight className="w-5 h-5 lg:w-6 lg:h-6 rotate-90 animate-bounce" />
+            <ChevronDown className="w-6 h-6 animate-bounce" />
           </button>
         </div>
       </section>
