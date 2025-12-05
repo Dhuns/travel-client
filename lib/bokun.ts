@@ -55,7 +55,7 @@ export async function getBokunActivity(experienceId: string) {
         ...getAuthHeaders("GET", path),
         "Content-Type": "application/json",
       },
-      next: { revalidate: 3600 }, // 1시간마다 캐시 갱신
+      next: { revalidate: 60, tags: ['tours'] },
     });
 
     if (!response.ok) {
@@ -233,31 +233,6 @@ export function transformBokunActivityToTour(
   };
 }
 
-/**
- * TourConfig 배열로부터 투어 데이터를 가져옵니다 (서버 사이드용)
- */
-export async function getToursFromConfig(
-  configs: Array<{
-    bokunExperienceId: string;
-    category: string;
-    badge: string;
-  }>
-) {
-  const tourPromises = configs.map(async (config) => {
-    const activity = await getBokunActivity(config.bokunExperienceId);
-    if (!activity) return null;
-
-    return transformBokunActivityToTour(
-      activity,
-      config.category,
-      config.badge
-    );
-  });
-
-  const tours = await Promise.all(tourPromises);
-  return tours.filter((tour) => tour !== null);
-}
-
 // ==================== Backend API (Dev Server) ====================
 
 /**
@@ -287,7 +262,7 @@ export async function getToursByCategory(category: string): Promise<BackendTour[
 
   try {
     const response = await fetch(`${apiUrl}/tour/category?category=${category}`, {
-      next: { revalidate: 3600 }, // 1시간마다 캐시 갱신
+      next: { revalidate: 60, tags: ['tours'] },
     });
 
     if (!response.ok) {
@@ -319,7 +294,7 @@ export async function getPopularTours(): Promise<BackendTour[]> {
 
   try {
     const response = await fetch(`${apiUrl}/tour/popular`, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 60, tags: ['tours'] },
     });
 
     if (!response.ok) {

@@ -5,8 +5,6 @@ import { Button } from "@/components/ui/button";
 import { getToursFromBackend } from "@/lib/bokun";
 import Link from "next/link";
 
-export const revalidate = 3600; // 1시간마다 재생성
-
 export default async function PrivateTourPage() {
   // 백엔드 API에서 투어 데이터 가져오기 (안정적)
   const tours = await getToursFromBackend("private", "Private Tour");
