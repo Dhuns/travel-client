@@ -1,5 +1,4 @@
-import { Calendar, Check, Clock, Compass, MapPin, Star, Users } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Calendar, MapPin, Users } from "lucide-react";
 
 export default function PrivateTourLoading() {
   return (
