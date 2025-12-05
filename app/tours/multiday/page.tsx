@@ -33,7 +33,7 @@ export default async function MultidayTourPage() {
       <section className="relative bg-white overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src="/images/design-mode/castle2.png"
+            src="/korea-palace-night.jpg"
             alt="Korean landscape"
             fill
             className="object-cover"
@@ -128,7 +128,7 @@ export default async function MultidayTourPage() {
 
             <div className="relative h-[600px] rounded-2xl overflow-hidden shadow-2xl">
               <Image
-                src="/images/design-mode/castle1.png"
+                src="/korea-palace-2.jpg"
                 alt="Traditional Korean architecture"
                 fill
                 className="object-cover"
@@ -294,6 +294,8 @@ export default async function MultidayTourPage() {
                 View Available Tours
               </Button>
             </a>
+            {/* 
+            TODO: Custom Tour Request - 개발 후 활성화 예정
             <Link href="/chat">
               <Button
                 variant="outline"
@@ -301,7 +303,7 @@ export default async function MultidayTourPage() {
               >
                 Request Custom Tour
               </Button>
-            </Link>
+            </Link> */}
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 text-left">
@@ -345,7 +347,8 @@ export default async function MultidayTourPage() {
       </section>
 
       {/* Tour Exclusive Goods Section */}
-      <section className="py-20 px-6 bg-white">
+      {/* TODO: Gifts Section - 개발 후 활성화 예정 */}
+      {/* <section className="py-20 px-6 bg-white">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-tumakr-maroon text-white px-4 py-2 rounded-full text-sm font-medium mb-4">
@@ -362,7 +365,6 @@ export default async function MultidayTourPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 mb-12">
-            {/* Product 1 */}
             <Card className="overflow-hidden border-0 shadow-lg p-0 bg-white rounded-xl">
               <div className="relative aspect-square">
                 <Image
@@ -386,7 +388,6 @@ export default async function MultidayTourPage() {
               </div>
             </Card>
 
-            {/* Product 2 */}
             <Card className="overflow-hidden border-0 shadow-lg p-0 bg-white rounded-xl">
               <div className="relative aspect-square">
                 <Image
@@ -410,7 +411,6 @@ export default async function MultidayTourPage() {
               </div>
             </Card>
 
-            {/* Product 3 */}
             <Card className="overflow-hidden border-0 shadow-lg p-0 bg-white rounded-xl">
               <div className="relative aspect-square">
                 <Image
@@ -444,9 +444,9 @@ export default async function MultidayTourPage() {
             </p>
           </div>
         </div>
-      </section>
+      </section> */}
 
-      {/* AI Chatbot Customization CTA */}
+      {/* Todo: 현재, 다른 투어로 이동하는 링크, 챗봇 개발 후 변경 예정 */}
       <section className="py-20 px-6 bg-linear-to-br from-tumakr-sage-green/5 to-tumakr-maroon/5 min-h-screen flex items-center">
         <div className="container mx-auto max-w-5xl">
           <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
@@ -454,7 +454,7 @@ export default async function MultidayTourPage() {
               {/* Left: Image */}
               <div className="relative h-64 md:h-auto">
                 <Image
-                  src="/images/design-mode/castle1.png"
+                  src="/korea-palace.jpg"
                   alt="Customize your journey"
                   fill
                   className="object-cover"
@@ -466,17 +466,16 @@ export default async function MultidayTourPage() {
               <div className="p-10 md:p-12 flex flex-col justify-center">
                 <div className="inline-flex items-center gap-2 bg-tumakr-maroon/10 text-tumakr-maroon px-4 py-2 rounded-full text-sm font-medium mb-4 w-fit">
                   <Compass className="w-4 h-4" />
-                  <span>PERSONALIZED EXPERIENCE</span>
+                  <span>EXPLORE MORE</span>
                 </div>
 
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                  Customize Your Perfect Journey
+                  Interested in Other Tours?
                 </h2>
 
                 <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                  Every traveler is unique. Let our AI travel assistant help you craft a
-                  personalized itinerary that perfectly matches your interests, pace, and
-                  preferences.
+                  Explore our full collection of History, Multiday, and Private Tours to
+                  find the perfect experience for your Korean adventure.
                 </p>
 
                 <div className="space-y-3 mb-8">
@@ -485,28 +484,30 @@ export default async function MultidayTourPage() {
                       <Check className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-gray-700">
-                      Personalized route recommendations
+                      History Tours - Deep dive into Korea's heritage
                     </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-tumakr-maroon rounded-full flex items-center justify-center shrink-0">
-                      <Check className="w-4 h-4 text-white" />
-                    </div>
-                    <span className="text-gray-700">Flexible schedule adjustments</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-6 h-6 bg-tumakr-maroon rounded-full flex items-center justify-center shrink-0">
                       <Check className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-gray-700">
-                      Real-time answers to your questions
+                      Multiday Tours - Immersive journeys
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 bg-tumakr-maroon rounded-full flex items-center justify-center shrink-0">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-gray-700">
+                      Private Tours - Exclusive experiences
                     </span>
                   </div>
                 </div>
 
-                <Link href="/chat" className="w-full">
+                <Link href="/#tours" className="w-full">
                   <Button className="bg-linear-to-r from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white px-8 py-6 text-lg rounded-full w-full group flex items-center justify-center">
-                    <span>Chat with Travel AI</span>
+                    <span>View All Tours</span>
                     <Compass className="w-5 h-5 ml-2 group-hover:rotate-90 transition-transform" />
                   </Button>
                 </Link>
