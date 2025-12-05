@@ -1,40 +1,41 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { User, Mail, Phone, LogOut, ChevronRight } from "lucide-react"
-import { useAuthStore } from "@/src/shared/store/authStore"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
+import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/src/shared/store/authStore";
+import { ChevronRight, LogOut, Mail, Phone, User } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function MyPage() {
-  const router = useRouter()
-  const { user, isAuthenticated, logout, fetchUser } = useAuthStore()
-  const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter();
+  const { user, isAuthenticated, logout, fetchUser } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push("/login")
-      return
+      router.push("/login");
+      return;
     }
 
     const loadUser = async () => {
       try {
-        await fetchUser()
+        await fetchUser();
       } catch (error) {
-        console.error("Failed to load user:", error)
-        router.push("/login")
+        console.error("Failed to load user:", error);
+        router.push("/login");
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    loadUser()
-  }, [isAuthenticated, fetchUser, router])
+    loadUser();
+  }, [isAuthenticated, fetchUser, router]);
 
   const handleLogout = async () => {
-    await logout()
-    router.push("/")
-  }
+    await logout();
+    router.push("/");
+  };
 
   if (isLoading || !user) {
     return (
@@ -43,7 +44,7 @@ export default function MyPage() {
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-gray-600 mx-auto" />
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -64,9 +65,9 @@ export default function MyPage() {
           )}
           <h1 className="text-xl font-semibold text-gray-900">{user.name}</h1>
           <p className="text-sm text-gray-500 mt-1">{user.email}</p>
-          {user.provider !== 'local' && (
+          {user.provider !== "local" && (
             <span className="inline-block mt-2 text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">
-              {user.provider === 'google' ? 'Google Account' : 'Apple Account'}
+              {user.provider === "google" ? "Google Account" : "Apple Account"}
             </span>
           )}
         </div>
@@ -91,7 +92,7 @@ export default function MyPage() {
                 <Mail className="w-4 h-4 text-gray-400" />
                 <span className="text-sm text-gray-600">Email</span>
               </div>
-              <span className="text-sm text-gray-900">{user.email || '-'}</span>
+              <span className="text-sm text-gray-900">{user.email || "-"}</span>
             </div>
 
             <div className="px-5 py-4 flex items-center justify-between">
@@ -99,7 +100,7 @@ export default function MyPage() {
                 <Phone className="w-4 h-4 text-gray-400" />
                 <span className="text-sm text-gray-600">Phone</span>
               </div>
-              <span className="text-sm text-gray-900">{user.phone || '-'}</span>
+              <span className="text-sm text-gray-900">{user.phone || "-"}</span>
             </div>
           </div>
         </div>
@@ -114,7 +115,7 @@ export default function MyPage() {
             <ChevronRight className="w-4 h-4 text-gray-400" />
           </Link>
 
-          {user.provider === 'local' && (
+          {user.provider === "local" && (
             <Link
               href="/mypage/change-password"
               className="flex items-center justify-between px-5 py-4 border-t border-gray-100 hover:bg-gray-50 transition-colors"
@@ -135,32 +136,44 @@ export default function MyPage() {
             <div className="px-5 py-4 flex items-center justify-between">
               <span className="text-sm text-gray-600">Account Type</span>
               <span className="text-sm text-gray-900">
-                {user.provider === 'google' ? 'Google' : user.provider === 'apple' ? 'Apple' : 'Email'}
+                {user.provider === "google"
+                  ? "Google"
+                  : user.provider === "apple"
+                  ? "Apple"
+                  : "Email"}
               </span>
             </div>
 
             <div className="px-5 py-4 flex items-center justify-between">
               <span className="text-sm text-gray-600">Member Grade</span>
-              <span className="text-sm text-gray-900">{user.userGrade || '일반'}</span>
+              <span className="text-sm text-gray-900">{user.userGrade || "일반"}</span>
             </div>
 
             <div className="px-5 py-4 flex items-center justify-between">
               <span className="text-sm text-gray-600">Email Verified</span>
-              <span className={`text-sm ${user.emailVerified || user.provider !== 'local' ? 'text-green-600' : 'text-gray-400'}`}>
-                {user.emailVerified || user.provider !== 'local' ? 'Verified' : 'Not Verified'}
+              <span
+                className={`text-sm ${
+                  user.emailVerified || user.provider !== "local"
+                    ? "text-green-600"
+                    : "text-gray-400"
+                }`}
+              >
+                {user.emailVerified || user.provider !== "local"
+                  ? "Verified"
+                  : "Not Verified"}
               </span>
             </div>
           </div>
         </div>
 
         {/* Sign Out */}
-        <button
+        <Button
           onClick={handleLogout}
-          className="w-full bg-white rounded-xl border border-gray-200 px-5 py-4 flex items-center justify-center gap-2 text-red-500 hover:bg-red-50 transition-colors"
+          className="w-full h-13 bg-white rounded-xl border border-gray-200 px-5 py-4 flex items-center justify-center gap-2 text-red-500 hover:bg-red-50 transition-colors"
         >
           <LogOut className="w-4 h-4" />
           <span className="text-sm font-medium">Sign Out</span>
-        </button>
+        </Button>
 
         {/* Footer */}
         <p className="text-center text-xs text-gray-400 mt-6">
@@ -168,5 +181,5 @@ export default function MyPage() {
         </p>
       </div>
     </div>
-  )
+  );
 }

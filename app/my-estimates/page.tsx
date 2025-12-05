@@ -84,7 +84,7 @@ export default function MyEstimatesPage() {
               batchId: session.batchId!,
               title: session.title || session.context.destination || "Travel Estimate",
               destination: session.context.destination || "TBD",
-              image: "/beautiful-korean-traditional-palace-with-tourists-.jpg", // Default image
+              image: "/beautiful-korean-traditional-palace-with-tourists.jpg", // Default image
               status: "quote-pending", // Default status
               requestDate: dayjs(session.createdAt).format("YYYY-MM-DD"),
               details: {
@@ -192,7 +192,7 @@ export default function MyEstimatesPage() {
             className={
               filter === "all"
                 ? "border border-tumakr-maroon bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white transition-all shadow-sm"
-                : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white transition-all shadow-sm cursor-pointer"
+                : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:bg-tumakr-maroon hover:text-white transition-all shadow-sm cursor-pointer"
             }
           >
             All
@@ -202,7 +202,7 @@ export default function MyEstimatesPage() {
             className={
               filter === "quote-pending"
                 ? "border border-tumakr-maroon bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white transition-all shadow-sm"
-                : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white transition-all shadow-sm cursor-pointer"
+                : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:bg-tumakr-maroon hover:text-white transition-all shadow-sm cursor-pointer"
             }
           >
             Under Review
@@ -212,7 +212,7 @@ export default function MyEstimatesPage() {
             className={
               filter === "quote-received"
                 ? "border border-tumakr-maroon bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white transition-all shadow-sm"
-                : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white transition-all shadow-sm cursor-pointer"
+                : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:bg-tumakr-maroon hover:text-white transition-all shadow-sm cursor-pointer"
             }
           >
             Received
@@ -222,7 +222,7 @@ export default function MyEstimatesPage() {
             className={
               filter === "quote-approved"
                 ? "border border-tumakr-maroon bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white transition-all shadow-sm"
-                : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white transition-all shadow-sm cursor-pointer"
+                : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:bg-tumakr-maroon hover:text-white transition-all shadow-sm cursor-pointer"
             }
           >
             Approved
@@ -344,7 +344,7 @@ export default function MyEstimatesPage() {
                     <div className="mt-auto flex justify-end space-x-3">
                       <Button
                         onClick={() => handleViewQuotation(estimate.batchId)}
-                        className="border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white transition-all shadow-sm cursor-pointer"
+                        className="border border-tumakr-maroon text-tumakr-maroon bg-white hover:bg-tumakr-maroon hover:text-white transition-all shadow-sm cursor-pointer"
                       >
                         View Details
                         <ChevronRight className="w-4 h-4 ml-1" />

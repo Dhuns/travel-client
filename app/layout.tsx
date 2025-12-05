@@ -1,16 +1,16 @@
 import "./globals.css";
 
-import { Analytics } from "@vercel/analytics/next";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Footer from "@/components/footer";
+import Header from "@/components/header";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Analytics } from "@vercel/analytics/next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
-import Header from "@/components/header";
 import type { Metadata } from "next";
+import Script from "next/script";
 import type React from "react";
 import { Suspense } from "react";
-import { ThemeProvider } from "@/components/theme-provider";
-import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "OneDay Korea - Authentic Korean Tours & Experiences",
@@ -25,26 +25,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${GeistSans.variable} ${GeistMono.variable} h-full`}
+    >
       <head>
         {/* Bokun 위젯 프리로드 - 로딩 속도 개선 */}
         <link rel="preconnect" href="https://widgets.bokun.io" />
         <link rel="dns-prefetch" href="https://widgets.bokun.io" />
         <link rel="preconnect" href="https://api.bokun.io" />
         <link rel="dns-prefetch" href="https://api.bokun.io" />
-
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-html {
-  font-family: ${GeistSans.style.fontFamily};
-  --font-sans: ${GeistSans.variable};
-  --font-mono: ${GeistMono.variable};
-}`,
-          }}
-        />
       </head>
-      <body>
+      <body className="h-full m-0 p-0 flex flex-col font-sans">
         {/* Bokun 위젯 스크립트 - Next.js Script 컴포넌트 사용 */}
         <Script
           src="https://widgets.bokun.io/assets/javascripts/apps/build/BokunWidgetsLoader.js?bookingChannelUUID=0a1af831-37c4-40d2-8aa7-2a8b7b985ea2"
@@ -57,13 +50,23 @@ html {
           enableSystem
           disableTransitionOnChange
         >
-          <Header />
-          <main className="pt-8">
-            <ErrorBoundary>
-              <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
-            </ErrorBoundary>
-          </main>
-          <Footer />
+          <div className="flex flex-col min-h-screen flex-1">
+            <Header />
+            <main className="w-full pt-20 flex-1">
+              <ErrorBoundary>
+                <Suspense
+                  fallback={
+                    <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center">
+                      Loading...
+                    </div>
+                  }
+                >
+                  <div className="min-h-[calc(100vh-5rem)]">{children}</div>
+                </Suspense>
+              </ErrorBoundary>
+            </main>
+            <Footer />
+          </div>
         </ThemeProvider>
 
         <Analytics />

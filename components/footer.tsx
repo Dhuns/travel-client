@@ -4,6 +4,7 @@ import { Mail, MapPin, Phone } from "lucide-react";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import StarRating from "./star-rating";
 
 export default function Footer() {
   const pathname = usePathname();
@@ -17,12 +18,12 @@ export default function Footer() {
     <footer className="bg-tumakr-dark-blue text-white">
       {/* 메인 푸터 */}
       <div className="container mx-auto px-6 py-12">
-        <div className="grid md:grid-cols-4 gap-8 mb-8">
+        <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-8 mb-8">
           {/* 첫 번째 컬럼 - 회사 정보 */}
           <div className="space-y-4">
             <div>
               <h3 className="font-bold text-xl text-white mb-2">OnedayKorea</h3>
-              <div className="w-12 h-0.5 bg-tumakr-maroon mb-4"></div>
+              <div className="w-12 h-0.5 bg-white mb-4"></div>
             </div>
             <ul className="space-y-2">
               <li>
@@ -72,7 +73,7 @@ export default function Footer() {
           <div className="space-y-4">
             <div>
               <h3 className="font-bold text-lg text-white mb-2">Help</h3>
-              <div className="w-12 h-0.5 bg-tumakr-maroon mb-4"></div>
+              <div className="w-12 h-0.5 bg-white mb-4"></div>
             </div>
             <ul className="space-y-2">
               <li>
@@ -107,14 +108,15 @@ export default function Footer() {
                   Terms & Conditions
                 </Link>
               </li>
-              <li>
+              {/* TODO: Plan Your Trip - 개발 후 활성화 예정 */}
+              {/* <li>
                 <Link
                   href="/chat"
                   className="text-gray-300 hover:text-white transition-colors text-sm"
                 >
                   Plan Your Trip
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
 
@@ -122,11 +124,11 @@ export default function Footer() {
           <div className="space-y-4">
             <div>
               <h3 className="font-bold text-lg text-white mb-2">Contact</h3>
-              <div className="w-12 h-0.5 bg-tumakr-maroon mb-4"></div>
+              <div className="w-12 h-0.5 bg-white mb-4"></div>
             </div>
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-tumakr-maroon mt-1 shrink-0" />
+                <MapPin className="w-4 h-4 text-white mt-1 shrink-0" />
                 <span className="text-gray-300 text-sm leading-relaxed">
                   2F, Bukhansan TheSharp Sang-ga,
                   <br />
@@ -135,8 +137,8 @@ export default function Footer() {
                   Seoul, Korea
                 </span>
               </li>
-              <li className="flex items-center gap-3">
-                <Phone className="w-4 h-4 text-tumakr-maroon shrink-0" />
+              <li className="flex items-start gap-3">
+                <Phone className="w-4 h-4 text-white mt-1 shrink-0" />
                 <div className="text-gray-300 text-sm">
                   <a
                     href="tel:+82707556355"
@@ -153,8 +155,8 @@ export default function Footer() {
                   </a>
                 </div>
               </li>
-              <li className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-tumakr-maroon shrink-0" />
+              <li className="flex items-start gap-3">
+                <Mail className="w-4 h-4 text-white mt-1 shrink-0" />
                 <a
                   href="mailto:info@onedaykorea.com"
                   className="text-gray-300 hover:text-white transition-colors text-sm"
@@ -166,13 +168,13 @@ export default function Footer() {
           </div>
 
           {/* 네 번째 컬럼 - TripAdvisor + 소셜 */}
-          <div className="space-y-4">
+          <div className="flex flex-col gap-6">
             {/* TripAdvisor 위젯 */}
             <a
               href="https://www.tripadvisor.com/Attraction_Review-g294197-d7264223-Reviews-OnedayKorea_Tours-Seoul.html"
               target="_blank"
               rel="noopener noreferrer"
-              className="block bg-white rounded-lg p-4 hover:shadow-lg transition-shadow"
+              className="block bg-white rounded-lg p-4 hover:shadow-lg transition-shadow w-full"
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 bg-[#00AA6C] rounded-full flex items-center justify-center shrink-0">
@@ -189,21 +191,12 @@ export default function Footer() {
                   <p className="text-gray-500 text-xs">Seoul, South Korea</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="flex">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <svg
-                      key={star}
-                      className="w-4 h-4 text-[#00AA6C]"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
+              <div className="space-y-1 mb-2">
+                <div className="flex items-center gap-2">
+                  <StarRating rating={4.9} size={16} />
+                  <span className="text-gray-900 font-bold text-sm">4.9</span>
                 </div>
-                <span className="text-gray-900 font-bold text-sm">5.0</span>
-                <span className="text-gray-500 text-xs">(716 reviews)</span>
+                <p className="text-gray-500 text-xs">(700+ reviews)</p>
               </div>
               <p className="text-[#00AA6C] text-xs font-medium flex items-center gap-1">
                 Read reviews on TripAdvisor
@@ -224,7 +217,7 @@ export default function Footer() {
             </a>
 
             {/* 소셜 미디어 아이콘 */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 shrink-0">
               <a
                 href="https://www.facebook.com/traveltokorea"
                 target="_blank"

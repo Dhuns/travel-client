@@ -40,6 +40,7 @@ export interface Batch {
   id: number;
   title: string;
   source: 'manual' | 'ai';
+  status?: string;
   startDate: string;
   endDate: string;
   validDate: string;
@@ -59,6 +60,10 @@ export interface Batch {
   emergencyNumber?: string;
   manualAdjustment?: number;
   adjustmentReason?: string;
+  quoteStatus?: string;
+  viewedAt?: string | null;
+  sentAt?: string | null;
+  respondedAt?: string | null;
 }
 
 export interface QuotationResponse {

@@ -151,7 +151,7 @@ https://www.onedaykorea.com
 {
   title: "History Tour",
   description: "Deep dive into Korea's rich heritage",
-  image: "/beautiful-korean-traditional-palace-with-tourists-.jpg",
+  image: "/beautiful-korean-traditional-palace-with-tourists.jpg",
   link: "/tours/history",
   color: "#651d2a" // maroon
 }

@@ -7,11 +7,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Clock, Mail, MapPin, MessageCircle, Phone, Send } from "lucide-react";
+import { Clock, Mail, MapPin, Phone } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import Link from "next/link";
 import { useState } from "react";
 
 export default function ContactPage() {
@@ -80,9 +78,9 @@ export default function ContactPage() {
       </div>
 
       <div className="container mx-auto px-6 py-12">
-        <div className="grid lg:grid-cols-2 gap-12">
-          {/* Contact Form */}
-          <div>
+        <div className="grid lg:grid-cols-1 gap-12">
+          {/* Contact Form : 구현 후 적용 */}
+          {/* <div>
             <Card className="shadow-xl bg-white">
               <CardHeader>
                 <CardTitle className="text-2xl flex items-center space-x-2">
@@ -217,7 +215,7 @@ export default function ContactPage() {
                 </form>
               </CardContent>
             </Card>
-          </div>
+          </div> */}
 
           {/* Contact Information */}
           <div className="space-y-8">
@@ -229,7 +227,7 @@ export default function ContactPage() {
                   Multiple ways to reach our friendly team
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex items-start space-x-4">
                   <MapPin className="w-6 h-6 text-tumakr-maroon mt-1" />
                   <div>
@@ -289,44 +287,54 @@ export default function ContactPage() {
               </CardContent>
             </Card>
 
-            {/* Emergency Contact */}
-            <Card className="bg-red-50 border-red-300 border-2 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-xl text-red-800">Emergency Contact</CardTitle>
-                <CardDescription className="text-red-600">
-                  24/7 support for travelers in Korea
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <p className="font-semibold text-red-800">Emergency Hotline:</p>
-                  <p className="text-red-700 text-lg font-bold">
-                    <a href="tel:+821024791242">+82 10 2479 1242</a>
-                  </p>
-                  <p className="text-sm text-red-600">
-                    Available 24/7 for urgent assistance during your tour
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Emergency Contact & FAQ Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Emergency Contact */}
+              <Card className="bg-red-50 border-red-300 border-2 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-xl text-red-800">
+                    Emergency Contact
+                  </CardTitle>
+                  <CardDescription className="text-red-600">
+                    24/7 support for travelers in Korea
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="font-semibold text-red-800">Emergency Hotline:</p>
+                    <p className="text-red-700 text-lg font-bold">
+                      <a href="tel:+821024791242">+82 10 2479 1242</a>
+                    </p>
+                    <p className="text-sm text-red-600">
+                      Available 24/7 for urgent assistance during your tour
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
 
-            {/* FAQ Link */}
-            <Card className="bg-tumakr-dusty-pink/10 border-tumakr-maroon/30 border-2 shadow-lg">
-              <CardContent className="pt-6">
-                <h3 className="font-semibold text-tumakr-maroon mb-2">
-                  Frequently Asked Questions
-                </h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  Find quick answers to common questions about our tours and services.
-                </p>
-                <Button
-                  variant="outline"
-                  className="border-tumakr-maroon text-tumakr-maroon hover:!bg-tumakr-maroon hover:!text-white bg-transparent"
-                >
-                  View FAQ
-                </Button>
-              </CardContent>
-            </Card>
+              {/* FAQ Link */}
+              <Card className="bg-tumakr-dusty-pink/10 border-tumakr-maroon/30 border-2 shadow-lg flex flex-col">
+                <CardHeader>
+                  <CardTitle className="text-xl text-tumakr-maroon">
+                    Frequently Asked Questions
+                  </CardTitle>
+                  <CardDescription className="text-tumakr-maroon/70">
+                    Quick answers to common questions
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1 flex flex-col justify-between">
+                  <p className="text-gray-600 text-sm">
+                    Find quick answers to common questions about our tours and services.
+                  </p>
+                  <Link
+                    href="/faq"
+                    className="inline-flex items-center justify-center px-4 py-2 border-2 border-tumakr-maroon text-tumakr-maroon hover:bg-tumakr-maroon hover:text-white bg-transparent rounded-md transition-colors mt-4 w-[200px]"
+                  >
+                    View FAQ
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </div>
