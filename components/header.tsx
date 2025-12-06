@@ -444,12 +444,10 @@ export default function Header() {
             </button>
           </div>
         </div>
-      </div>
 
-      {/* 검색창 */}
-      {searchOpen && (
-        <div className="w-full py-4 border-t border-gray-200 bg-white">
-          <div className="container mx-auto px-6 max-w-7xl">
+        {/* 검색창 */}
+        {searchOpen && (
+          <div className="py-4 border-t border-gray-200">
             <form onSubmit={handleSearch} className="flex items-center space-x-2">
               <input
                 type="text"
@@ -470,13 +468,11 @@ export default function Header() {
               </Button>
             </form>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* 모바일 메뉴 */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden w-full py-4 border-t border-gray-200 bg-white">
-          <div className="container mx-auto px-6 max-w-7xl">
+        {/* 모바일 메뉴 */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden py-4 border-t border-gray-200">
             <div className="flex flex-col space-y-4 text-sm text-gray-600">
               {/* Tours 카테고리 */}
               <div className="border-b border-gray-100 pb-2">
@@ -587,8 +583,8 @@ export default function Header() {
               )}
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </nav>
   );
 }
