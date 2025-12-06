@@ -1,4 +1,4 @@
-import { revalidateTag } from 'next/cache';
+import { revalidateTag, revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 
 // CORS 헤더 설정
@@ -18,6 +18,9 @@ export async function POST() {
   try {
     // 'tours' 태그가 붙은 모든 fetch 캐시 무효화
     revalidateTag('tours');
+
+    // 메인 페이지 (인기투어 포함) 재생성
+    revalidatePath('/');
 
     return NextResponse.json(
       {
