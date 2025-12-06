@@ -1,4 +1,4 @@
-import { TourGridSkeleton } from "@/components/tours/tour-card-skeleton";
+import { TourCardGridSkeleton } from "@/components/tours/tour-card-skeleton";
 
 export default function ToursLoading() {
   return (
@@ -59,7 +59,7 @@ export default function ToursLoading() {
           <div className="w-16 h-1 bg-tumakr-maroon mx-auto mt-4 rounded-full"></div>
         </div>
 
-        <TourGridSkeleton count={8} />
+        <TourCardGridSkeleton count={8} />
       </div>
 
       {/* CTA Section */}

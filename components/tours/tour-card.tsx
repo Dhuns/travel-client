@@ -1,10 +1,10 @@
-import Link from "next/link";
-import { Clock, MapPin } from "lucide-react";
 import { FavoriteButton } from "@/components/favorite-button";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { Clock, MapPin } from "lucide-react";
+import Link from "next/link";
 
 interface TourCardProps {
   tour: {
@@ -72,7 +72,10 @@ const themeClasses = {
 
 // HTML 태그 제거 함수
 const stripHtml = (html: string) => {
-  return html.replace(/<[^>]*>/g, "").replace(/&[^;]+;/g, " ").trim();
+  return html
+    .replace(/<[^>]*>/g, "")
+    .replace(/&[^;]+;/g, " ")
+    .trim();
 };
 
 export function TourCard({
@@ -127,10 +130,7 @@ export function TourCard({
 
       <CardHeader className="pb-2 px-6">
         <CardTitle
-          className={cn(
-            "text-lg text-gray-900 transition-colors",
-            theme.titleHover
-          )}
+          className={cn("text-lg text-gray-900 transition-colors", theme.titleHover)}
         >
           {tour.title}
         </CardTitle>
@@ -151,9 +151,7 @@ export function TourCard({
           {tour.location && (
             <div className="flex items-center space-x-1 bg-gray-100 px-2 py-1 rounded-full">
               <MapPin className="w-3 h-3 text-gray-600" />
-              <span className="font-medium text-xs text-gray-600">
-                {tour.location}
-              </span>
+              <span className="font-medium text-xs text-gray-600">{tour.location}</span>
             </div>
           )}
         </div>
@@ -178,4 +176,3 @@ export function TourCard({
     </Card>
   );
 }
-
