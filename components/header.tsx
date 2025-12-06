@@ -142,20 +142,25 @@ export default function Header() {
 
   const tourCategories = useMemo(
     () => [
+      // {
+      //   href: "/tours/history",
+      //   label: "History Tour",
+      //   description: "Explore Korea's rich historical heritage",
+      // },
       {
-        href: "/tours/history",
-        label: "History Tour",
-        description: "Explore Korea's rich historical heritage",
+        href: "/tours/themed-private",
+        label: "Themed Private Tour",
+        description: "Themed private tours tailored to your story",
       },
+      // {
+      //   href: "/tours/multiday",
+      //   label: "Multiday Tour",
+      //   description: "Extended adventures across Korea",
+      // },
       {
-        href: "/tours/private",
-        label: "Private Tour",
-        description: "Personalized tours for your group",
-      },
-      {
-        href: "/tours/multiday",
-        label: "Multiday Tour",
-        description: "Extended adventures across Korea",
+        href: "/tours",
+        label: "All Tours",
+        description: "Explore all tours",
       },
     ],
     []
@@ -166,7 +171,7 @@ export default function Header() {
     () => [
       { href: "/", label: "Home" },
       // { href: "/souvenir", label: "Souvenir" }, 개발 후 추가
-      { href: "/tours", label: "Tours", hasDropdown: true },
+      { href: "/tours/themed-private", label: "Tours", hasDropdown: true },
       { href: "/contact", label: "Contact", isContact: true }, // 개발 후 hasDropdown: true로 변경
     ],
     []

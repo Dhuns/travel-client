@@ -44,13 +44,13 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/tours/private"
+                  href="/tours/themed-private"
                   className="text-gray-300 hover:text-white transition-colors text-sm"
                 >
-                  Private Tours
+                  Themed Private Tour
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link
                   href="/tours/history"
                   className="text-gray-300 hover:text-white transition-colors text-sm"
@@ -65,7 +65,7 @@ export default function Footer() {
                 >
                   Multi-day Tours
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
 
