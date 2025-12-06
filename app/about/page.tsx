@@ -221,7 +221,7 @@ export default function AboutPage() {
               <h2 className="text-3xl font-bold text-gray-900">What Our Travelers Say</h2>
             </div>
             <div className="flex items-center justify-center gap-2 mb-2">
-              <StarRating rating={4.9} size={24} />
+              <StarRating rating={4.9} size={24} fillColor="fill-tumakr-green" />
               <span className="text-2xl font-bold text-gray-900">4.9</span>
             </div>
             <p className="text-gray-600">Based on 700+ reviews on TripAdvisor</p>
@@ -273,7 +273,7 @@ export default function AboutPage() {
               href="https://www.tripadvisor.com/Attraction_Review-g294197-d7264223-Reviews-OnedayKorea_Tours-Seoul.html"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-[#00AA6C] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#008f5b] transition-colors"
+              className="inline-flex items-center gap-2 bg-tumakr-green text-white px-6 py-3 rounded-lg font-semibold hover:bg-tumakr-green/90 transition-colors"
             >
               Read All Reviews on TripAdvisor
               <svg
