@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { BookOpen, Calendar, Check, MapPin, Sparkles, Users, X } from "lucide-react";
 
 import { FavoriteButton } from "@/components/favorite-button";

@@ -1,5 +1,7 @@
 import { TourGrid } from "@/components/tours/tour-grid";
 
+export const dynamic = "force-dynamic";
+
 export default async function ToursPage() {
   return (
     <div className="min-h-screen bg-[#f5f3f0]">
