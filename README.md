@@ -1,6 +1,6 @@
 # DIY Client
 
-Next.js 14 기반 DIY 여행 플랫폼 사용자 클라이언트.
+Next.js 14 기반 DIY 여행 플랫폼 사용자 클라이언트..
 
 ## 기술 스택
 
