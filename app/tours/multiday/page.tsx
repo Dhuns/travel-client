@@ -159,7 +159,7 @@ export default async function MultidayTourPage() {
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-tumakr-maroon text-white px-4 py-2 rounded-full text-sm font-medium mb-4">
-              <StarRating rating={4.4} size={16} fill="white" />
+              <StarRating rating={4.9} size={16} fillColor="fill-white" />
               <span>4.9 / 5 from 700+ reviews</span>
             </div>
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
@@ -178,7 +178,7 @@ export default async function MultidayTourPage() {
                   rating={review.rating}
                   size={24}
                   className="mb-4"
-                  fill="tumakr-maroon"
+                  fillColor="fill-tumakr-maroon"
                 />
                 <p className="text-gray-700 mb-6 leading-relaxed">"{review.content}"</p>
                 <div className="flex items-center gap-3">
@@ -295,7 +295,7 @@ export default async function MultidayTourPage() {
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-tumakr-maroon text-white px-4 py-2 rounded-full text-sm font-medium mb-4">
-              <StarRating rating={4.9} size={16} />
+              <StarRating rating={4.9} size={16} fillColor="fill-tumakr-maroon" />
               <span>COMPLIMENTARY GIFTS</span>
             </div>
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
