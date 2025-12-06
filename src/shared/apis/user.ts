@@ -1,58 +1,159 @@
-import { postRequest, getRequest, putRequest } from "./apiActions";
+import axios from 'axios';
 
-// Types
-export interface SignUpPayload {
-  username: string;
-  password: string;
-  name: string;
-  email?: string;
-  phone?: string;
-  birthDate?: string; // YYYY-MM-DD format
-  gender?: 'male' | 'female' | 'other';
-  profileImage?: string;
-  termsAgreedAt?: string; // ISO datetime string
-  privacyAgreedAt?: string; // ISO datetime string
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9191/api';
+
+export interface SignupData {
+	username: string;
+	password: string;
+	name: string;
+	email?: string;
+	phone?: string;
+	birthDate?: string;
+	gender?: 'male' | 'female' | 'other';
+	profileImage?: string;
+	termsAgreed: boolean;
+	privacyAgreed: boolean;
 }
 
-export interface SignInPayload {
-  username: string;
-  password: string;
-}
-
-export interface ValidateUsernamePayload {
-  username: string;
+export interface SigninData {
+	username: string;
+	password: string;
 }
 
 export interface TokenResponse {
-  accessToken: string;
-  accessTokenExpiresIn: number;
-  refreshToken: string;
-  refreshTokenExpiresIn: number;
+	accessToken: string;
+	accessTokenExpiresIn: number;
+	refreshToken: string;
+	refreshTokenExpiresIn: number;
 }
 
-export interface UserInfo {
-  id: number;
-  username: string;
-  name: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
+export interface User {
+	id: number;
+	username: string;
+	name: string;
+	email: string;
+	phone: string;
+	birthDate: string;
+	gender: string;
+	profileImage: string;
+	emailVerified: boolean;
+	status: string;
+	userGrade: string;
+	provider: string;
+	providerId: string;
+	createdAt: string;
+	updatedAt: string;
 }
 
-// APIs
-export const signUp = (payload: SignUpPayload): Promise<any> =>
-  postRequest("/user/signup", payload);
+// 회원가입
+export const signup = async (data: SignupData): Promise<{ success: boolean }> => {
+	const response = await axios.post(`${API_URL}/user/signup`, data);
+	return response.data;
+};
 
-export const signIn = (payload: SignInPayload): Promise<TokenResponse> =>
-  postRequest("/user/signin", payload);
+// 로그인
+export const signin = async (data: SigninData): Promise<TokenResponse> => {
+	const response = await axios.post(`${API_URL}/user/signin`, data);
+	return response.data;
+};
 
-export const validateUsername = (
-  payload: ValidateUsernamePayload
-): Promise<boolean> => postRequest("/user/validate/username", payload);
+// 로그아웃
+export const logout = async (accessToken: string): Promise<boolean> => {
+	const response = await axios.get(`${API_URL}/user/logout`, {
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+		},
+	});
+	return response.data;
+};
 
-export const getUserMe = (): Promise<UserInfo> => getRequest("/user/me");
+// 내 정보 조회
+export const getMe = async (accessToken: string): Promise<User> => {
+	const response = await axios.get(`${API_URL}/user/me`, {
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+		},
+	});
+	return response.data;
+};
 
-export const logout = (): Promise<any> => getRequest("/user/logout");
+// 토큰 갱신
+export const renewToken = async (accessToken: string): Promise<TokenResponse> => {
+	const response = await axios.get(`${API_URL}/user/renewal/token`, {
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+		},
+	});
+	return response.data;
+};
 
-export const renewalToken = (): Promise<TokenResponse> =>
-  getRequest("/user/renewal/token");
+// 아이디 중복 체크
+export const checkUsername = async (username: string): Promise<boolean> => {
+	const response = await axios.post(`${API_URL}/user/validate/username`, { username });
+	return response.data;
+};
+
+// 이메일 인증
+export const verifyEmail = async (token: string): Promise<{ success: boolean; message: string }> => {
+	const response = await axios.get(`${API_URL}/user/verify-email?token=${token}`);
+	return response.data;
+};
+
+// 이메일 인증 메일 재발송
+export const resendVerificationEmail = async (email: string): Promise<{ success: boolean; message: string }> => {
+	const response = await axios.post(`${API_URL}/user/resend-verification`, { email });
+	return response.data;
+};
+
+// 비밀번호 재설정 요청
+export const requestPasswordReset = async (email: string): Promise<{ success: boolean; message: string }> => {
+	const response = await axios.post(`${API_URL}/user/request-password-reset`, { email });
+	return response.data;
+};
+
+// 비밀번호 재설정
+export const resetPassword = async (token: string, newPassword: string): Promise<{ success: boolean; message: string }> => {
+	const response = await axios.post(`${API_URL}/user/reset-password`, { token, newPassword });
+	return response.data;
+};
+
+// Google OAuth
+export const getGoogleAuthUrl = (): string => {
+	return `${API_URL}/user/auth/google`;
+};
+
+// Apple OAuth
+export const getAppleAuthUrl = (): string => {
+	return `${API_URL}/user/auth/apple`;
+};
+
+// 프로필 수정
+export interface UpdateProfileData {
+	id: number;
+	name?: string;
+	phone?: string;
+}
+
+export const updateProfile = async (accessToken: string, data: UpdateProfileData): Promise<{ affected: number }> => {
+	const response = await axios.put(`${API_URL}/user/edit`, data, {
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+		},
+	});
+	return response.data;
+};
+
+// 비밀번호 변경
+export interface ChangePasswordData {
+	id: number;
+	password: string;
+}
+
+export const changePassword = async (accessToken: string, data: ChangePasswordData): Promise<{ affected: number }> => {
+	const response = await axios.put(`${API_URL}/user/edit`, data, {
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+		},
+	});
+	return response.data;
+};

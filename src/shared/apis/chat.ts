@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ChatSession, ChatMessage, ChatContext } from '../types/chat';
+import { ChatSession, ChatMessage, ChatContext, MessageMetadata } from '../types/chat';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9191/api';
 
@@ -37,7 +37,7 @@ export const sendChatMessage = async (data: {
   content: string;
   role?: 'user' | 'assistant' | 'system';
   type?: 'text' | 'estimate' | 'quick-reply' | 'system';
-  metadata?: any;
+  metadata?: MessageMetadata;
 }): Promise<ChatMessage> => {
   const response = await axios.post(`${API_URL}/chat/messages`, data);
   return response.data;
@@ -66,4 +66,41 @@ export const generateAIResponse = async (
     useStreaming,
   });
   return response.data;
+};
+
+// AI Estimate Generation API
+export const generateEstimate = async (
+  sessionId: string,
+  userId?: number
+): Promise<{
+  batchId: number;
+  estimateId: number;
+  totalAmount: number;
+  itemCount: number;
+  timeline: string;
+  message: string;
+}> => {
+  const response = await axios.post(`${API_URL}/chat/ai/estimate/generate`, {
+    sessionId,
+    userId,
+  });
+  return response.data;
+};
+
+// Get All Sessions API (with filters)
+export const getAllChatSessions = async (params?: {
+  page?: number;
+  countPerPage?: number;
+  status?: 'active' | 'converted' | 'abandoned' | 'all';
+  keyword?: string;
+  userId?: number;
+}): Promise<{
+  sessions: ChatSession[];
+  total: number;
+}> => {
+  const response = await axios.get(`${API_URL}/chat/admin/sessions`, {
+    params,
+  });
+  const [sessions, total] = response.data;
+  return { sessions, total };
 };

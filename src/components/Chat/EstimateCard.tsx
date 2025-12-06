@@ -1,87 +1,75 @@
-import React, { FC } from 'react';
-import styled from '@emotion/styled';
-import { EstimatePreview } from '@/shared/types/chat';
-import dayjs from 'dayjs';
+import styled from "@emotion/styled";
+import { EstimatePreview } from "@shared/types/chat";
+import CryptoJS from "crypto-js";
+import { FC } from "react";
 
 interface Props {
   estimate: EstimatePreview;
-  onViewDetail?: () => void;
+  batchId?: number;
+  onViewQuote?: (hash: string) => void;
 }
 
-const EstimateCard: FC<Props> = ({ estimate, onViewDetail }) => {
-  const {
-    title,
-    startDate,
-    endDate,
-    totalAmount,
-    adults,
-    children,
-    infants,
-    items = []
-  } = estimate;
+const EstimateCard: FC<Props> = ({ estimate, batchId, onViewQuote }) => {
+  const { title, totalAmount, adults, children, infants, items } = estimate;
+  const totalPeople = adults + children + infants;
 
-  // 총 일수 계산
-  const days = dayjs(endDate).diff(dayjs(startDate), 'day') + 1;
+  const handleViewDetails = () => {
+    if (!batchId) {
+      console.error("[EstimateCard] No batchId provided");
+      return;
+    }
 
-  // 인원 표시
-  const travelers = [
-    adults > 0 && `성인 ${adults}명`,
-    children > 0 && `소아 ${children}명`,
-    infants > 0 && `유아 ${infants}명`
-  ].filter(Boolean).join(', ');
+    // Encrypt batchId using same method as backend (SHA256 key derivation)
+    const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || "";
+    const key = CryptoJS.SHA256(ENCRYPTION_KEY);
+    const iv = CryptoJS.MD5(ENCRYPTION_KEY + "_IV_SALT");
+
+    const cipher = CryptoJS.AES.encrypt(batchId.toString(), key, {
+      iv: iv,
+      padding: CryptoJS.pad.Pkcs7,
+      mode: CryptoJS.mode.CBC,
+    });
+    const hash = cipher.toString();
+    const encodedHash = encodeURIComponent(hash);
+
+    console.log("[EstimateCard] Opening quotation modal:", {
+      batchId,
+      hash,
+      encodedHash,
+    });
+
+    // Open modal instead of navigating
+    if (onViewQuote) {
+      onViewQuote(encodedHash);
+    }
+  };
 
   return (
     <Card>
       <Header>
-        <Title>📋 {title}</Title>
+        <Title>{title}</Title>
+        <Amount>${totalAmount.toLocaleString()}</Amount>
       </Header>
+      <Summary>
+        <SummaryItem>
+          <strong>Travelers:</strong> Total {totalPeople} people (Adults {adults},
+          Children {children}, Infants {infants})
+        </SummaryItem>
+      </Summary>
+      <ItemList>
+        {items.slice(0, 3).map((item, index) => (
+          <Item key={index}>
+            <ItemDay>Day {item.day}</ItemDay>
+            <ItemName>{item.name}</ItemName>
+            <ItemPrice>${item.price.toLocaleString()}</ItemPrice>
+          </Item>
+        ))}
+        {items.length > 3 && <MoreItems>...and {items.length - 3} more items</MoreItems>}
+      </ItemList>
 
-      <Content>
-        <InfoRow>
-          <Label>📅 여행 기간</Label>
-          <Value>
-            {dayjs(startDate).format('YYYY.MM.DD')} ~ {dayjs(endDate).format('MM.DD')} ({days}일)
-          </Value>
-        </InfoRow>
-
-        <InfoRow>
-          <Label>👥 인원</Label>
-          <Value>{travelers}</Value>
-        </InfoRow>
-
-        <Divider />
-
-        <InfoRow>
-          <Label>💰 총 금액</Label>
-          <TotalAmount>{totalAmount.toLocaleString()}원</TotalAmount>
-        </InfoRow>
-
-        {items.length > 0 && (
-          <>
-            <Divider />
-            <ItemsPreview>
-              <ItemsTitle>포함 내역 ({items.length}개 항목)</ItemsTitle>
-              {items.slice(0, 3).map((item, index) => (
-                <Item key={index}>
-                  <ItemName>• {item.name}</ItemName>
-                  <ItemPrice>{item.price.toLocaleString()}원</ItemPrice>
-                </Item>
-              ))}
-              {items.length > 3 && (
-                <MoreItems>외 {items.length - 3}개 항목...</MoreItems>
-              )}
-            </ItemsPreview>
-          </>
-        )}
-      </Content>
-
-      {onViewDetail && (
-        <Footer>
-          <ViewDetailButton onClick={onViewDetail}>
-            상세보기
-          </ViewDetailButton>
-        </Footer>
-      )}
+      <Footer>
+        <DetailsButton onClick={handleViewDetails}>View My Quote</DetailsButton>
+      </Footer>
     </Card>
   );
 };
@@ -91,16 +79,20 @@ export default EstimateCard;
 // Styled Components
 const Card = styled.div`
   background-color: #ffffff;
+  border: 1px solid #e0e0e0;
   border-radius: 12px;
-  border: 1px solid #e8e8e8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin: 8px 0;
 `;
 
 const Header = styled.div`
-  padding: 14px 16px;
-  background-color: #007AFF;
-  color: #ffffff;
+  padding: 16px 20px;
+  background-color: var(--color-tumakr-maroon);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;
 
 const Title = styled.h3`
@@ -109,96 +101,75 @@ const Title = styled.h3`
   font-weight: 600;
 `;
 
-const Content = styled.div`
-  padding: 16px;
+const Amount = styled.div`
+  font-size: 16px;
+  font-weight: bold;
 `;
 
-const InfoRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-
-  &:last-of-type {
-    margin-bottom: 0;
-  }
+const Summary = styled.div`
+  padding: 12px 20px;
+  background-color: #f8f8f8;
+  border-bottom: 1px solid #e8e8e8;
 `;
 
-const Label = styled.span`
-  font-size: 14px;
-  color: #888;
-`;
-
-const Value = styled.span`
-  font-size: 14px;
-  color: #1a1a1a;
-  font-weight: 500;
-`;
-
-const TotalAmount = styled.span`
-  font-size: 18px;
-  color: #007AFF;
-  font-weight: 700;
-`;
-
-const Divider = styled.hr`
-  margin: 10px 0;
-  border: none;
-  border-top: 1px solid #e8e8e8;
-`;
-
-const ItemsPreview = styled.div`
-  margin-top: 6px;
-`;
-
-const ItemsTitle = styled.div`
+const SummaryItem = styled.div`
   font-size: 13px;
-  color: #888;
-  margin-bottom: 6px;
-  font-weight: 500;
+  color: #555;
+`;
+
+const ItemList = styled.div`
+  padding: 8px 20px;
 `;
 
 const Item = styled.div`
   display: flex;
-  justify-content: space-between;
-  padding: 4px 0;
-  font-size: 13px;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 14px;
+`;
+
+const ItemDay = styled.span`
+  color: #888;
+  margin-right: 12px;
+  font-size: 12px;
 `;
 
 const ItemName = styled.span`
-  color: #1a1a1a;
+  flex: 1;
 `;
 
 const ItemPrice = styled.span`
-  color: #888;
+  font-weight: 500;
+  color: #333;
 `;
 
 const MoreItems = styled.div`
-  padding: 4px 0;
-  font-size: 13px;
-  color: #aaa;
   text-align: center;
+  font-size: 12px;
+  color: #888;
+  padding: 8px 0;
 `;
 
 const Footer = styled.div`
-  padding: 12px 16px;
+  padding: 12px 20px;
+  text-align: center;
   background-color: #f8f8f8;
   border-top: 1px solid #e8e8e8;
 `;
 
-const ViewDetailButton = styled.button`
-  width: 100%;
-  padding: 10px;
+const DetailsButton = styled.button`
+  background-color: var(--color-tumakr-maroon);
+  color: white;
   border: none;
-  border-radius: 8px;
-  background-color: #007AFF;
-  color: #ffffff;
+  padding: 10px 24px;
+  border-radius: 6px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.15s;
+  transition: background-color 0.2s;
+  width: 100%;
 
   &:hover {
-    background-color: #0051D5;
+    background-color: #4a1520;
   }
 `;

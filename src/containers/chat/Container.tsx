@@ -1,10 +1,13 @@
-import React, { FC, useEffect, useState } from 'react';
-import styled from '@emotion/styled';
-import useChatStore from '@/shared/store/chatStore';
-import ChatMessageList from '@/components/Chat/ChatMessageList';
-import ChatInput from '@/components/Chat/ChatInput';
-import ChatInfoPanel from '@/components/Chat/ChatInfoPanel';
-import ChatSidebar from '@/components/Chat/ChatSidebar';
+import { FC, useCallback, useEffect, useState } from "react";
+
+import ChatInfoPanel from "@components/Chat/ChatInfoPanel";
+import ChatInput from "@components/Chat/ChatInput";
+import ChatMessageList from "@components/Chat/ChatMessageList";
+import ChatSidebar from "@components/Chat/ChatSidebar";
+import styled from "@emotion/styled";
+import { useAuthStore } from "@shared/store/authStore";
+import useChatStore from "@shared/store/chatStore";
+import { useRouter } from "next/navigation";
 
 const Container: FC = () => {
   const {
@@ -14,11 +17,15 @@ const Container: FC = () => {
     isLoading,
     initSession,
     loadSession,
+    loadUserSessions,
     sendUserMessage,
-    updateContext,
     clearSession,
     loadFromStorage,
+    clearAllSessions,
   } = useChatStore();
+
+  const { isAuthenticated, user } = useAuthStore();
+  const router = useRouter();
 
   const [showInfoPanel, setShowInfoPanel] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -26,119 +33,153 @@ const Container: FC = () => {
   const session = getCurrentSession();
   const context = session?.context || {};
 
-  // localStorage에서 세션 로드 (최초 1회만)
+  // 비로그인 사용자 체크 (데이터는 유지, localStorage만 초기화)
   useEffect(() => {
-    if (!isInitialized) {
-      loadFromStorage();
-      setIsInitialized(true);
+    if (!isAuthenticated) {
+      // localStorage 캐시만 초기화 (서버 데이터는 유지)
+      const CHAT_STORAGE_KEY = "chat-sessions-storage";
+      if (typeof window !== "undefined") {
+        localStorage.removeItem(CHAT_STORAGE_KEY);
+      }
     }
-  }, [isInitialized, loadFromStorage]);
+  }, [isAuthenticated]);
 
-  // 세션이 없으면 자동으로 새 세션 생성 또는 기존 세션 로드
+  // 로그인 시 서버에서 사용자 세션 불러오기 (최초 1회만)
   useEffect(() => {
-    if (isInitialized && !session) {
+    if (!isInitialized && isAuthenticated && user?.id) {
+      loadUserSessions(user.id).then(() => {
+        setIsInitialized(true);
+      });
+    }
+  }, [isInitialized, isAuthenticated, user, loadUserSessions]);
+
+  // 세션이 없으면 자동으로 새 세션 생성 또는 기존 세션 로드 (로그인한 사용자만)
+  useEffect(() => {
+    if (isInitialized && !session && isAuthenticated) {
       // 세션이 없는 경우
       if (sessions.length === 0) {
         // 저장된 세션이 없으면 새로 생성
         initSession();
       } else {
         // 저장된 세션이 있으면 가장 최근 세션 로드
-        const latestSession = sessions.sort((a, b) =>
-          new Date(b.lastMessageAt || b.createdAt).getTime() -
-          new Date(a.lastMessageAt || a.createdAt).getTime()
+        const latestSession = [...sessions].sort(
+          (a, b) =>
+            new Date(b.lastMessageAt || b.createdAt).getTime() -
+            new Date(a.lastMessageAt || a.createdAt).getTime()
         )[0];
         if (latestSession) {
           loadSession(latestSession.sessionId);
         }
       }
     }
-  }, [isInitialized, session, sessions.length]);
+  }, [isInitialized, session, sessions.length, isAuthenticated]);
 
   // 새 채팅 시작
-  const handleNewChat = () => {
+  const handleNewChat = useCallback(() => {
     initSession();
-  };
+  }, [initSession]);
 
   // 메시지 전송 핸들러
-  const handleSendMessage = async (content: string) => {
-    if (!session) return;
+  const handleSendMessage = useCallback(
+    async (content: string) => {
+      if (!session) return;
 
-    // 컨텍스트 추출 (간단한 키워드 매칭 - UI 즉시 업데이트용)
-    const lowerContent = content.toLowerCase();
+      // 백엔드 API로 메시지 전송 및 AI 응답 받기 (Gemini AI)
+      // 컨텍스트 추출은 백엔드에서 자동으로 수행됨
+      await sendUserMessage(content);
+    },
+    [session, sendUserMessage]
+  );
 
-    // 목적지 추출
-    if (lowerContent.includes('제주')) {
-      updateContext({ destination: '제주도' });
-    } else if (lowerContent.includes('부산')) {
-      updateContext({ destination: '부산' });
-    } else if (lowerContent.includes('서울')) {
-      updateContext({ destination: '서울' });
-    }
-
-    // 기간 추출
-    const dayMatch = lowerContent.match(/(\d+)박\s*(\d+)일/);
-    if (dayMatch) {
-      const days = parseInt(dayMatch[2]);
-      // 임시로 오늘부터 계산
-      const today = new Date();
-      const endDate = new Date(today);
-      endDate.setDate(today.getDate() + days - 1);
-      updateContext({
-        startDate: today.toISOString().split('T')[0],
-        endDate: endDate.toISOString().split('T')[0]
-      });
-    }
-
-    // 인원 추출
-    const adultMatch = lowerContent.match(/성인\s*(\d+)/);
-    const childMatch = lowerContent.match(/소아|아이\s*(\d+)/);
-    const infantMatch = lowerContent.match(/유아\s*(\d+)/);
-
-    if (adultMatch) updateContext({ adults: parseInt(adultMatch[1]) });
-    if (childMatch) updateContext({ children: parseInt(childMatch[1]) });
-    if (infantMatch) updateContext({ infants: parseInt(infantMatch[1]) });
-
-    // 선호도 추출
-    if (lowerContent.includes('관광')) {
-      updateContext({ preferences: [...(context.preferences || []), '관광형'] });
-    } else if (lowerContent.includes('휴양')) {
-      updateContext({ preferences: [...(context.preferences || []), '휴양형'] });
-    } else if (lowerContent.includes('체험')) {
-      updateContext({ preferences: [...(context.preferences || []), '체험형'] });
-    }
-
-    // 백엔드 API로 메시지 전송 및 AI 응답 받기 (Gemini AI)
-    await sendUserMessage(content);
-  };
+  // 비로그인 사용자 로그인 유도
+  if (!isAuthenticated) {
+    return (
+      <PageContainer>
+        <LoginPromptContainer>
+          <LoginPromptContent>
+            <LoginPromptIconWrapper>
+              <LoginPromptIcon>
+                <svg
+                  width="48"
+                  height="48"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                >
+                  <path
+                    d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </LoginPromptIcon>
+            </LoginPromptIconWrapper>
+            <LoginPromptTitle>Plan Your Korea Trip with AI</LoginPromptTitle>
+            <LoginPromptSubtitle>
+              Sign in to chat with our AI travel assistant and get personalized
+              recommendations for your Korean adventure.
+            </LoginPromptSubtitle>
+            <LoginButtonGroup>
+              <LoginButton onClick={() => router.push("/login")}>Sign In</LoginButton>
+              <SignUpButton onClick={() => router.push("/signup")}>
+                Create Account
+              </SignUpButton>
+            </LoginButtonGroup>
+          </LoginPromptContent>
+        </LoginPromptContainer>
+      </PageContainer>
+    );
+  }
 
   if (!session) {
     return (
       <LoadingContainer>
-        <LoadingText>채팅을 시작하는 중...</LoadingText>
+        <LoadingSpinner />
+        <LoadingText>Preparing your AI travel planner...</LoadingText>
       </LoadingContainer>
     );
   }
 
-  // 메시지가 없으면 EmptyState 표시
+  // 메시지가 없고 세션도 없으면 EmptyState 표시 (최초 방문자)
   const hasMessages = session.messages.length > 0;
+  const isFirstVisit = sessions.length === 0 && !hasMessages;
 
-  if (!hasMessages) {
+  if (isFirstVisit) {
     return (
       <EmptyStateContainer>
         <EmptyStateContent>
-          <EmptyStateTitle>✈️ AI 여행 플래너</EmptyStateTitle>
-          <EmptyStateSubtitle>어떤 여행을 계획중이세요?</EmptyStateSubtitle>
+          <EmptyStateIconWrapper>
+            <EmptyStateIcon>
+              <svg
+                width="56"
+                height="56"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+              </svg>
+            </EmptyStateIcon>
+          </EmptyStateIconWrapper>
+          <EmptyStateTitle>Where would you like to go in Korea?</EmptyStateTitle>
+          <EmptyStateSubtitle>
+            I can help you plan the perfect trip - just tell me about your travel dreams.
+          </EmptyStateSubtitle>
           <EmptyStateInputWrapper>
             <ChatInput
               onSend={handleSendMessage}
               disabled={isTyping}
-              placeholder="예: 제주도 2박 3일 여행 계획 부탁해"
+              placeholder="e.g., I want to explore Seoul and Busan for 5 days..."
             />
           </EmptyStateInputWrapper>
           <EmptyStateHints>
-            <HintItem>💬 자연어로 편하게 말씀해주세요</HintItem>
-            <HintItem>📅 날짜와 인원을 알려주시면 더 정확해요</HintItem>
-            <HintItem>💰 예산이 있다면 함께 말씀해주세요</HintItem>
+            <HintChip>Seoul in December</HintChip>
+            <HintChip>Traditional temples tour</HintChip>
+            <HintChip>K-food experience</HintChip>
+            <HintChip>DMZ visit</HintChip>
           </EmptyStateHints>
         </EmptyStateContent>
       </EmptyStateContainer>
@@ -154,18 +195,44 @@ const Container: FC = () => {
       <MainArea>
         {/* 중앙 채팅 영역 */}
         <ChatWrapper>
-          <ChatSection>
-            {/* 상단 툴바 */}
+          <ChatSection hasMessages={hasMessages}>
+            {/* Top Bar */}
             <TopBar>
-              <TopBarLeft>
-                <ModelBadge>🤖 AI 여행 플래너</ModelBadge>
-              </TopBarLeft>
+              <TopBarCenter>
+                <ModelBadge>
+                  <ModelIcon>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                    </svg>
+                  </ModelIcon>
+                  Korea Travel AI
+                </ModelBadge>
+              </TopBarCenter>
               <TopBarRight>
                 <IconButton
                   onClick={() => setShowInfoPanel(!showInfoPanel)}
-                  title="정보 패널 토글"
+                  title="Trip details"
+                  active={showInfoPanel}
                 >
-                  {showInfoPanel ? '›' : '‹'}
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 16v-4M12 8h.01" />
+                  </svg>
                 </IconButton>
               </TopBarRight>
             </TopBar>
@@ -174,28 +241,56 @@ const Container: FC = () => {
             <ChatMessageList
               messages={session.messages}
               isTyping={isTyping}
+              hasMessages={hasMessages}
+              onSend={handleSendMessage}
             />
 
-            {/* 입력창 */}
-            <InputArea>
-              <ChatInput
-                onSend={handleSendMessage}
-                disabled={isTyping}
-                placeholder={isTyping ? 'AI가 답변 중입니다...' : '메시지를 입력하세요...'}
-              />
-            </InputArea>
+            {/* Input Area - shown at bottom when messages exist */}
+            {hasMessages && (
+              <InputArea>
+                <InputContainer>
+                  <ChatInput
+                    onSend={handleSendMessage}
+                    disabled={isTyping}
+                    placeholder={
+                      isTyping ? "AI is thinking..." : "Message Korea Travel AI..."
+                    }
+                  />
+                  <InputHint>
+                    AI can make mistakes. Please verify important travel information.
+                  </InputHint>
+                </InputContainer>
+              </InputArea>
+            )}
           </ChatSection>
         </ChatWrapper>
 
-        {/* 우측 정보 패널 (토글 가능) */}
-        {showInfoPanel && (
-          <InfoPanel>
+        {/* Right Info Panel (toggleable) */}
+        {showInfoPanel && <InfoPanelBackdrop onClick={() => setShowInfoPanel(false)} />}
+        <InfoPanel isVisible={showInfoPanel}>
+          <InfoPanelContent isVisible={showInfoPanel}>
+            <InfoPanelHeader>
+              <InfoPanelTitle>Trip Details</InfoPanelTitle>
+              <CloseButton onClick={() => setShowInfoPanel(false)}>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </CloseButton>
+            </InfoPanelHeader>
             <ChatInfoPanel
               context={context}
               messageCount={session.messages.length}
+              batchId={session.batchId}
             />
-          </InfoPanel>
-        )}
+          </InfoPanelContent>
+        </InfoPanel>
       </MainArea>
     </PageContainer>
   );
@@ -206,7 +301,8 @@ export default Container;
 // Styled Components
 const PageContainer = styled.div`
   display: flex;
-  height: 100vh;
+  flex: 1;
+  min-height: 0;
   background-color: #ffffff;
   overflow: hidden;
 `;
@@ -216,7 +312,7 @@ const MainArea = styled.div`
   display: flex;
   overflow: hidden;
   position: relative;
-  background-color: #fafafa;
+  background-color: #ffffff;
 `;
 
 const ChatWrapper = styled.div`
@@ -224,59 +320,176 @@ const ChatWrapper = styled.div`
   display: flex;
   justify-content: center;
   overflow: hidden;
-  background-color: #fafafa;
+  background-color: #ffffff;
 `;
 
-const ChatSection = styled.div`
+const ChatSection = styled.div<{ hasMessages: boolean }>`
   width: 100%;
-  max-width: 800px;
   display: flex;
   flex-direction: column;
   background-color: #ffffff;
   position: relative;
-  box-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
+  min-height: 0;
+  ${({ hasMessages }) =>
+    !hasMessages &&
+    `
+    justify-content: flex-start;
+  `}
 `;
 
 const TopBar = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 14px 24px;
-  border-bottom: 1px solid #e8e8e8;
+  padding: 12px 24px;
   background-color: #ffffff;
+  border-bottom: 1px solid #f0f0f0;
   z-index: 10;
   flex-shrink: 0;
+  position: relative;
 `;
 
-const TopBarLeft = styled.div`
+const TopBarCenter = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
 `;
 
 const TopBarRight = styled.div`
+  position: absolute;
+  right: 24px;
   display: flex;
   align-items: center;
   gap: 8px;
 `;
 
 const ModelBadge = styled.div`
-  padding: 6px 14px;
-  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background-color: #fafafa;
+  border: 1px solid #e5e5e5;
   border-radius: 20px;
   font-size: 13px;
   font-weight: 500;
-  color: #444;
+  color: #333;
 `;
 
-const IconButton = styled.button`
+const ModelIcon = styled.span`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-tumakr-maroon);
+`;
+
+const IconButton = styled.button<{ active?: boolean }>`
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid ${({ active }) => (active ? "var(--color-tumakr-maroon)" : "#e5e5e5")};
+  background-color: ${({ active }) =>
+    active ? "rgba(101, 29, 42, 0.05)" : "transparent"};
+  color: ${({ active }) => (active ? "var(--color-tumakr-maroon)" : "#666")};
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+
+  &:hover {
+    background-color: ${({ active }) => (active ? "rgba(101, 29, 42, 0.1)" : "#f5f5f5")};
+    border-color: ${({ active }) => (active ? "var(--color-tumakr-maroon)" : "#ddd")};
+  }
+`;
+
+const InputArea = styled.div`
+  padding: 0 24px 24px 24px;
+  background: linear-gradient(to bottom, transparent, #ffffff 20%);
+  flex-shrink: 0;
+`;
+
+const InputContainer = styled.div`
+  max-width: 768px;
+  margin: 0 auto;
+  width: 100%;
+`;
+
+const InputHint = styled.div`
+  text-align: center;
+  font-size: 11px;
+  color: #999;
+  margin-top: 8px;
+`;
+
+const InfoPanel = styled.div<{ isVisible: boolean }>`
+  width: ${({ isVisible }) => (isVisible ? "320px" : "0")};
+  background-color: #fafafa;
+  border-left: 1px solid #f0f0f0;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: width 0.3s ease-in-out;
+
+  @media (max-width: 1280px) {
+    position: fixed;
+    right: ${({ isVisible }) => (isVisible ? "0" : "-320px")};
+    top: 80px;
+    bottom: 0;
+    width: 320px;
+    max-width: 85vw;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.08);
+    z-index: 1001;
+    transition: right 0.3s ease-in-out;
+  }
+`;
+
+const InfoPanelContent = styled.div<{ isVisible: boolean }>`
+  width: 320px;
+  height: 100%;
+  opacity: ${({ isVisible }) => (isVisible ? "1" : "0")};
+  transition: opacity ${({ isVisible }) => (isVisible ? "0.3s 0.15s" : "0.15s")}
+    ease-in-out;
+  display: flex;
+  flex-direction: column;
+`;
+
+const InfoPanelBackdrop = styled.div`
+  display: none;
+
+  @media (max-width: 1280px) {
+    display: block;
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+  }
+`;
+
+const InfoPanelHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e8e8e8;
+  background-color: #ffffff;
+`;
+
+const InfoPanelTitle = styled.h3`
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+`;
+
+const CloseButton = styled.button`
   width: 32px;
   height: 32px;
   border-radius: 6px;
   border: none;
   background-color: transparent;
   color: #888;
-  font-size: 20px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -285,84 +498,105 @@ const IconButton = styled.button`
 
   &:hover {
     background-color: #f0f0f0;
-    color: #000;
-  }
-`;
-
-const InputArea = styled.div`
-  padding: 16px 24px 24px 24px;
-  background-color: #ffffff;
-  border-top: 1px solid #e8e8e8;
-  flex-shrink: 0;
-`;
-
-const InfoPanel = styled.div`
-  width: 340px;
-  background-color: #fafafa;
-  overflow-y: auto;
-  flex-shrink: 0;
-
-  @media (max-width: 1280px) {
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.08);
-    z-index: 20;
+    color: #333;
   }
 `;
 
 const LoadingContainer = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  background-color: #fafafa;
+  flex: 1;
+  min-height: 0;
+  background-color: #ffffff;
+  gap: 16px;
+`;
+
+const LoadingSpinner = styled.div`
+  width: 32px;
+  height: 32px;
+  border: 2px solid #f0f0f0;
+  border-top-color: var(--color-tumakr-maroon);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
 `;
 
 const LoadingText = styled.p`
-  font-size: 15px;
-  color: #888;
+  font-size: 14px;
+  color: #666;
 `;
 
 const EmptyStateContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  flex: 1;
+  min-height: 0;
   background-color: #ffffff;
   padding: 24px;
+  overflow-y: auto;
 `;
 
 const EmptyStateContent = styled.div`
   width: 100%;
-  max-width: 700px;
+  max-width: 640px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
+`;
+
+const EmptyStateIconWrapper = styled.div`
+  width: 80px;
+  height: 80px;
+  border-radius: 24px;
+  background: linear-gradient(
+    135deg,
+    var(--color-tumakr-maroon) 0%,
+    var(--color-tumakr-maroon) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+`;
+
+const EmptyStateIcon = styled.div`
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const EmptyStateTitle = styled.h1`
-  font-size: 48px;
+  font-size: 28px;
   font-weight: 600;
   color: #1a1a1a;
   margin: 0;
   text-align: center;
 
   @media (max-width: 768px) {
-    font-size: 36px;
+    font-size: 24px;
   }
 `;
 
 const EmptyStateSubtitle = styled.p`
-  font-size: 20px;
-  color: #888;
+  font-size: 16px;
+  color: #666;
   margin: 0;
   text-align: center;
+  max-width: 480px;
+  line-height: 1.5;
 
   @media (max-width: 768px) {
-    font-size: 16px;
+    font-size: 14px;
   }
 `;
 
@@ -373,17 +607,132 @@ const EmptyStateInputWrapper = styled.div`
 
 const EmptyStateHints = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
   margin-top: 8px;
 `;
 
-const HintItem = styled.div`
-  font-size: 14px;
-  color: #aaa;
+const HintChip = styled.button`
+  padding: 8px 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 20px;
+  background-color: #ffffff;
+  font-size: 13px;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    border-color: var(--color-tumakr-maroon);
+    color: var(--color-tumakr-maroon);
+    background-color: rgba(101, 29, 42, 0.03);
+  }
+`;
+
+const LoginPromptContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
+  background-color: #ffffff;
+  padding: 24px;
+`;
+
+const LoginPromptContent = styled.div`
+  max-width: 420px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
   text-align: center;
+`;
+
+const LoginPromptIconWrapper = styled.div`
+  width: 80px;
+  height: 80px;
+  border-radius: 24px;
+  background: linear-gradient(
+    135deg,
+    var(--color-tumakr-maroon) 0%,
+    var(--color-tumakr-maroon) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+`;
+
+const LoginPromptIcon = styled.div`
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const LoginPromptTitle = styled.h2`
+  font-size: 26px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
 
   @media (max-width: 768px) {
-    font-size: 13px;
+    font-size: 22px;
+  }
+`;
+
+const LoginPromptSubtitle = styled.p`
+  font-size: 15px;
+  color: #666;
+  margin: 0;
+  line-height: 1.6;
+
+  @media (max-width: 768px) {
+    font-size: 14px;
+  }
+`;
+
+const LoginButtonGroup = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  width: 100%;
+  max-width: 320px;
+`;
+
+const LoginButton = styled.button`
+  flex: 1;
+  padding: 14px 24px;
+  background-color: var(--color-tumakr-maroon);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #4a1520;
+  }
+`;
+
+const SignUpButton = styled.button`
+  flex: 1;
+  padding: 14px 24px;
+  background-color: #ffffff;
+  color: #333;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #f5f5f5;
+    border-color: #ddd;
   }
 `;

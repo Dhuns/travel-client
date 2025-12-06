@@ -1,58 +1,98 @@
-import React, { FC } from 'react';
-import styled from '@emotion/styled';
-import { keyframes } from '@emotion/react';
+import { keyframes } from "@emotion/react";
+import styled from "@emotion/styled";
+import React from "react";
 
-const TypingIndicator: FC = () => {
+const bounce = keyframes`
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1.0);
+  }
+`;
+
+const Container = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 24px;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    padding: 12px 16px;
+  }
+`;
+
+const Avatar = styled.div`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    var(--color-tumakr-maroon) 0%,
+    var(--color-tumakr-maroon) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+`;
+
+const DotsWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 14px 18px;
+  background-color: #f3f4f6;
+  border-radius: 20px;
+`;
+
+const Dot = styled.div`
+  width: 8px;
+  height: 8px;
+  margin: 0 3px;
+  background-color: #9ca3af;
+  border-radius: 50%;
+  animation: ${bounce} 1.4s infinite ease-in-out both;
+
+  &:nth-of-type(1) {
+    animation-delay: -0.32s;
+  }
+
+  &:nth-of-type(2) {
+    animation-delay: -0.16s;
+  }
+
+  &:nth-of-type(3) {
+    animation-delay: 0s;
+  }
+`;
+
+const TypingIndicator: React.FC = () => {
   return (
     <Container>
-      <Bubble>
-        <Dot delay="0s" />
-        <Dot delay="0.2s" />
-        <Dot delay="0.4s" />
-      </Bubble>
+      <Avatar>
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+        </svg>
+      </Avatar>
+      <DotsWrapper>
+        <Dot />
+        <Dot />
+        <Dot />
+      </DotsWrapper>
     </Container>
   );
 };
 
 export default TypingIndicator;
-
-// Animations
-const bounce = keyframes`
-  0%, 60%, 100% {
-    transform: translateY(0);
-  }
-  30% {
-    transform: translateY(-8px);
-  }
-`;
-
-// Styled Components
-const Container = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  padding: 12px 24px;
-  background-color: #fafafa;
-  transition: background-color 0.15s;
-
-  &:hover {
-    background-color: #f5f5f5;
-  }
-`;
-
-const Bubble = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 10px 14px;
-  border-radius: 8px;
-  background-color: #f0f0f0;
-`;
-
-const Dot = styled.div<{ delay: string }>`
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #aaa;
-  animation: ${bounce} 1.4s infinite ease-in-out;
-  animation-delay: ${({ delay }) => delay};
-`;
