@@ -31,10 +31,10 @@ interface HomePageClientProps {
 export default function HomePageClient({ children }: HomePageClientProps) {
   const tourCategories = [
     {
-      title: "History Tours",
-      description: "Deep dive into Korea's rich heritage",
+      title: "Themed Private Tour",
+      description: "Themed private tours tailored to your story",
       image: "/korea-palace-4.jpg",
-      link: "/tours/history",
+      link: "/tours/themed-private",
       icon: MapPin,
       color: "var(--color-tumakr-maroon)", // tumakr-maroon
     },
@@ -47,10 +47,10 @@ export default function HomePageClient({ children }: HomePageClientProps) {
       color: "var(--color-tumakr-mustard)", // tumakr-mustard
     },
     {
-      title: "Private Tours",
-      description: "Exclusive experiences tailored just for you",
-      image: "/korean-dmz-border-historical-site-and-observation-.jpg",
-      link: "/tours/private",
+      title: "History Tours",
+      description: "Deep dive into Korea's rich heritage",
+      image: "/korea-palace.jpg",
+      link: "/tours/history",
       icon: Users,
       color: "var(--color-tumakr-sage-green)", // tumakr-sage-green
     },
@@ -387,51 +387,45 @@ export default function HomePageClient({ children }: HomePageClientProps) {
               {tourCategories.slice(1).map((category, index) => {
                 const IconComponent = category.icon;
                 return (
-                  <Link
-                    href={category.link}
-                    key={index + 1}
-                    className="block group flex-1"
-                  >
-                    <div className="relative h-full min-h-[300px] rounded-3xl overflow-hidden shadow-xl hover:shadow-3xl transition-all duration-700 transform hover:-translate-y-2 hover:-rotate-1">
-                      <Image
-                        src={category.image || "/placeholder.svg"}
-                        alt={category.title}
-                        fill
-                        className="object-cover transition-transform duration-1000 group-hover:scale-110"
-                      />
-                      <div
-                        className={`absolute inset-0 bg-linear-to-br ${
-                          index === 0
-                            ? "from-tumakr-mustard/80 to-tumakr-mustard"
-                            : "from-tumakr-sage-green/80 to-tumakr-sage-green"
-                        } opacity-85 group-hover:opacity-90 transition-opacity`}
-                      />
+                  <div className="relative h-full min-h-[300px] rounded-3xl overflow-hidden shadow-xl hover:shadow-3xl transition-all duration-700 transform hover:-translate-y-2 hover:-rotate-1">
+                    <Image
+                      src={category.image || "/placeholder.svg"}
+                      alt={category.title}
+                      fill
+                      className="object-cover transition-transform duration-1000 group-hover:scale-110"
+                    />
+                    <div
+                      className={`absolute inset-0 bg-linear-to-br ${
+                        index === 0
+                          ? "from-tumakr-mustard/80 to-tumakr-mustard"
+                          : "from-tumakr-sage-green/80 to-tumakr-sage-green"
+                      } opacity-85 group-hover:opacity-90 transition-opacity`}
+                    />
 
-                      <div className="absolute inset-0 p-8 flex flex-col justify-between">
-                        <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center self-start">
-                          <IconComponent
-                            className="w-6 h-6"
-                            style={{ color: category.color }}
-                          />
-                        </div>
+                    <div className="absolute inset-0 p-8 flex flex-col justify-between">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center self-start">
+                        <IconComponent
+                          className="w-6 h-6"
+                          style={{ color: category.color }}
+                        />
+                      </div>
 
-                        <div>
-                          <h3
-                            className={`${
-                              index === 1 ? "text-3xl lg:text-4xl" : "text-3xl"
-                            } font-bold text-white mb-3`}
-                          >
-                            {category.title}
-                          </h3>
-                          <p className="text-white/90 mb-4">{category.description}</p>
-                          <span className="inline-flex items-center text-white font-semibold group-hover:text-white/80 transition-colors">
-                            Learn More{" "}
-                            <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform" />
-                          </span>
-                        </div>
+                      <div>
+                        <h3
+                          className={`${
+                            index === 1 ? "text-3xl lg:text-4xl" : "text-3xl"
+                          } font-bold text-white mb-3`}
+                        >
+                          {category.title}
+                        </h3>
+                        <p className="text-white/90 mb-4">{category.description}</p>
+                        <span className="inline-flex items-center text-white font-semibold group-hover:text-white/80 transition-colors">
+                          Cooming Soon{" "}
+                          <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform" />
+                        </span>
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 );
               })}
             </div>
