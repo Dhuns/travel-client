@@ -193,7 +193,7 @@ export default function Footer() {
               </div>
               <div className="space-y-1 mb-2">
                 <div className="flex items-center gap-2">
-                  <StarRating rating={4.9} size={16} />
+                  <StarRating rating={4.9} size={16} fillColor="fill-tumakr-green" />
                   <span className="text-gray-900 font-bold text-sm">4.9</span>
                 </div>
                 <p className="text-gray-500 text-xs">(700+ reviews)</p>
