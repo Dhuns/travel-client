@@ -16,7 +16,9 @@ export const metadata: Metadata = {
   title: "OneDay Korea - Authentic Korean Tours & Experiences",
   description:
     "Discover Korea with local experts. Premium tours, cultural experiences, and authentic Korean products for international travelers.",
-  generator: "v0.app",
+  icons: {
+    icon: "/tumakr-logo(no-text).png",
+  },
 };
 
 export default function RootLayout({

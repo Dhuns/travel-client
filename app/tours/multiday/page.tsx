@@ -159,8 +159,8 @@ export default async function MultidayTourPage() {
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-tumakr-maroon text-white px-4 py-2 rounded-full text-sm font-medium mb-4">
-              <StarRating rating={4.9} size={16} />
-              <span>4.9/5 from 700+ reviews</span>
+              <StarRating rating={4.4} size={16} fill="white" />
+              <span>4.9 / 5 from 700+ reviews</span>
             </div>
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
               What Our Travelers Say
@@ -174,7 +174,12 @@ export default async function MultidayTourPage() {
             {tripAdvisorReviews.slice(0, 3).map((review) => (
               <Card className="p-8 border-0 shadow-lg bg-white relative">
                 <Quote className="absolute top-6 right-6 w-10 h-10 text-tumakr-maroon/10" />
-                <StarRating rating={review.rating} size={24} className="mb-4" />
+                <StarRating
+                  rating={review.rating}
+                  size={24}
+                  className="mb-4"
+                  fill="tumakr-maroon"
+                />
                 <p className="text-gray-700 mb-6 leading-relaxed">"{review.content}"</p>
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-tumakr-maroon/10 rounded-full flex items-center justify-center">
