@@ -5,7 +5,7 @@ interface StarRatingProps {
   maxRating?: number;
   size?: number;
   className?: string;
-  fill?: string;
+  fillColor?: string;
 }
 
 export default function StarRating({
@@ -13,7 +13,7 @@ export default function StarRating({
   maxRating = 5,
   size = 24,
   className = "",
-  fill = "[#00AA6C]",
+  fillColor = "fill-tumakr-maroon",
 }: StarRatingProps) {
   const percentage = Math.floor((rating / maxRating) * 100);
 
@@ -38,7 +38,7 @@ export default function StarRating({
           <Star
             key={`filled-${index}`}
             size={size}
-            className={`shrink-0 text-${fill} fill-${fill}`}
+            className={`shrink-0 랴 ${fillColor}`}
             strokeWidth={0}
           />
         ))}
