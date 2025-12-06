@@ -5,6 +5,7 @@ interface StarRatingProps {
   maxRating?: number;
   size?: number;
   className?: string;
+  fill?: string;
 }
 
 export default function StarRating({
@@ -12,8 +13,9 @@ export default function StarRating({
   maxRating = 5,
   size = 24,
   className = "",
+  fill = "[#00AA6C]",
 }: StarRatingProps) {
-  const percentage = (rating / maxRating) * 100;
+  const percentage = Math.floor((rating / maxRating) * 100);
 
   return (
     <div className={`relative inline-flex ${className}`}>
@@ -29,14 +31,14 @@ export default function StarRating({
       </div>
 
       <div
-        className="absolute top-0 left-0 flex overflow-hidden -space-x-[0.5px]"
+        className={`absolute top-0 left-0 flex overflow-hidden -space-x-[0.5px] w-[${percentage}%]`}
         style={{ width: `${percentage}%` }}
       >
         {Array.from({ length: maxRating }).map((_, index) => (
           <Star
             key={`filled-${index}`}
             size={size}
-            className="text-[#00AA6C] fill-[#00AA6C] shrink-0"
+            className={`shrink-0 text-${fill} fill-${fill}`}
             strokeWidth={0}
           />
         ))}

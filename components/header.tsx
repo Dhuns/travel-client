@@ -221,13 +221,13 @@ export default function Header() {
   }, []);
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 transition-all duration-300">
-      <div className="container mx-auto px-6">
-        <div className="flex items-center justify-between py-2">
+    <nav className="fixed top-0 w-full h-20 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 transition-all duration-300">
+      <div className="container mx-auto px-6 h-full max-w-7xl">
+        <div className="flex items-center justify-between h-full">
           {/* 로고 섹션 */}
           <Link
             href="/"
-            className="hover:opacity-80 transition-opacity duration-300 cursor-pointer flex items-center"
+            className="hover:opacity-80 transition-opacity duration-300 cursor-pointer flex items-center gap-3"
           >
             <Image
               src="/tumakr-logo(no-text).png"
@@ -235,7 +235,7 @@ export default function Header() {
               width={120}
               height={120}
               priority
-              className="h-16 w-auto"
+              className="h-12 w-auto"
             />
             <div className="flex flex-col items-start">
               <span className="text-2xl font-bold text-gray-900">tumakr</span>

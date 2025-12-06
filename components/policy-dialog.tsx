@@ -31,7 +31,9 @@ export function PolicyDialog({ type, open, onOpenChange }: PolicyDialogProps) {
     },
   };
 
-  const currentConfig = type ? config[type] : config.terms;
+  if (!type) return null;
+
+  const currentConfig = config[type];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
