@@ -244,7 +244,7 @@ export default function Header() {
             />
             <div className="flex flex-col items-start">
               <span className="text-2xl font-bold text-gray-900">tumakr</span>
-              <span className="text-xs text-gray-400">Tumakr by OnedayKorea</span>
+              <span className="text-xs text-gray-400">by OnedayKorea</span>
             </div>
           </Link>
 
