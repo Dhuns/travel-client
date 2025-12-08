@@ -40,6 +40,20 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://api.bokun.io" />
       </head>
       <body className="h-full m-0 p-0 flex flex-col font-sans">
+        {/* Google Analytics 4 */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-0PTSZ0KGMP"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-0PTSZ0KGMP');
+          `}
+        </Script>
+
         {/* Bokun 위젯 스크립트 - Next.js Script 컴포넌트 사용 */}
         <Script
           src="https://widgets.bokun.io/assets/javascripts/apps/build/BokunWidgetsLoader.js?bookingChannelUUID=0a1af831-37c4-40d2-8aa7-2a8b7b985ea2"
