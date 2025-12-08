@@ -94,7 +94,7 @@ export default async function PrivateTourPage() {
           </div>
         </div>
       </section>
-      <div className="max-w-7xl w-full mx-auto px-4">
+      <div className="max-w-7xl w-full mx-auto md:px-8 px-4">
         {/* What Makes Special Section */}
         <section id="about" className="py-24 bg-white">
           <div className="text-center">
