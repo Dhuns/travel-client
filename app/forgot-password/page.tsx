@@ -106,11 +106,7 @@ export default function ForgotPasswordPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-tumakr-maroon transition-all duration-300 text-gray-900 bg-white"
-                    style={{
-                      WebkitBoxShadow: "0 0 0 1000px white inset",
-                      WebkitTextFillColor: "#111827",
-                    }}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-tumakr-maroon transition-all duration-300 text-gray-900 placeholder:text-gray-400 bg-white"
                     autoComplete="email"
                     placeholder="Enter your email"
                     required
@@ -122,7 +118,7 @@ export default function ForgotPasswordPage() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-linear-to-r from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white py-3 rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-linear-to-r py-5 from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? "Sending..." : "Send Reset Link"}
               </Button>
