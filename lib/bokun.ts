@@ -55,7 +55,7 @@ export async function getBokunActivity(experienceId: string) {
         ...getAuthHeaders("GET", path),
         "Content-Type": "application/json",
       },
-      next: { revalidate: 60, tags: ['tours'] },
+      next: { revalidate: 60, tags: ["tours"] },
     });
 
     if (!response.ok) {
@@ -81,20 +81,18 @@ export async function getBokunActivity(experienceId: string) {
  * Bokun API에서 여러 activities 정보 가져오기
  */
 export async function getBokunActivities(experienceIds: string[]) {
-  const activities = await Promise.all(
-    experienceIds.map((id) => getBokunActivity(id))
-  );
+  const activities = await Promise.all(experienceIds.map((id) => getBokunActivity(id)));
 
   return activities.filter((activity) => activity !== null);
 }
 
 // HTML 태그 제거 함수
-const stripHtmlTags = (html: string): string => {
+export const stripHtmlTags = (html: string): string => {
   return html.replace(/<[^>]*>/g, "").trim();
 };
 
 // HTML을 배열로 파싱하는 함수
-const parseHtmlToArray = (html: string | string[]): string[] => {
+export const parseHtmlToArray = (html: string | string[]): string[] => {
   if (Array.isArray(html)) return html;
   if (!html || typeof html !== "string") return [];
 
@@ -111,7 +109,7 @@ const parseHtmlToArray = (html: string | string[]): string[] => {
 };
 
 // knowBeforeYouGoItems 코드를 텍스트로 변환
-const parseKnowBeforeYouGo = (items: string[] | null): string[] => {
+export const parseKnowBeforeYouGo = (items: string[] | null): string[] => {
   if (!Array.isArray(items)) return [];
 
   const translations: Record<string, string> = {
@@ -222,8 +220,9 @@ export function transformBokunActivityToTour(
     exclusions: parseHtmlToArray(activity.excluded || []),
     duration: durationDisplay,
     durationText: activity.durationText || "",
-    price: activity.nextDefaultPriceAsText ||
-           (activity.pricing?.from ? `$${activity.pricing.from}` : ""),
+    price:
+      activity.nextDefaultPriceAsText ||
+      (activity.pricing?.from ? `$${activity.pricing.from}` : ""),
     activityCategories: Array.isArray(activity.activityCategories)
       ? activity.activityCategories
       : [],
@@ -262,7 +261,7 @@ export async function getToursByCategory(category: string): Promise<BackendTour[
 
   try {
     const response = await fetch(`${apiUrl}/tour/category?category=${category}`, {
-      next: { revalidate: 60, tags: ['tours'] },
+      next: { revalidate: 60, tags: ["tours"] },
     });
 
     if (!response.ok) {
@@ -283,7 +282,7 @@ export async function getToursByCategory(category: string): Promise<BackendTour[
  */
 export async function getBokunIdsByCategory(category: string): Promise<string[]> {
   const backendTours = await getToursByCategory(category);
-  return backendTours.map(tour => tour.bokunExperienceId);
+  return backendTours.map((tour) => tour.bokunExperienceId);
 }
 
 /**
@@ -294,7 +293,7 @@ export async function getPopularTours(): Promise<BackendTour[]> {
 
   try {
     const response = await fetch(`${apiUrl}/tour/popular`, {
-      next: { revalidate: 60, tags: ['tours'] },
+      next: { revalidate: 60, tags: ["tours"] },
     });
 
     if (!response.ok) {
@@ -335,7 +334,9 @@ export function transformBackendTourToFrontend(tour: BackendTour, badge?: string
     exclusions: [],
     duration: tour.duration || "",
     durationText: tour.duration || "",
-    price: tour.price ? `${tour.currency === "USD" ? "$" : tour.currency}${tour.price}` : "",
+    price: tour.price
+      ? `${tour.currency === "USD" ? "$" : tour.currency}${tour.price}`
+      : "",
     activityCategories: [],
     knowBeforeYouGo: [],
     minAge: 0,
@@ -349,7 +350,7 @@ export function transformBackendTourToFrontend(tour: BackendTour, badge?: string
  */
 export async function getToursFromBackend(category: string, badge?: string) {
   const backendTours = await getToursByCategory(category);
-  return backendTours.map(tour => transformBackendTourToFrontend(tour, badge));
+  return backendTours.map((tour) => transformBackendTourToFrontend(tour, badge));
 }
 
 /**
@@ -600,9 +601,7 @@ export async function cancelBooking(
 /**
  * 취소 정책 및 환불 금액 조회
  */
-export async function getCancellationInfo(
-  confirmationCode: string
-): Promise<{
+export async function getCancellationInfo(confirmationCode: string): Promise<{
   canCancel: boolean;
   refundAmount?: number;
   refundAmountFormatted?: string;
