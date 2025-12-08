@@ -3,6 +3,7 @@
 import { getAppleAuthUrl, getGoogleAuthUrl } from "@/src/shared/apis/user";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/src/shared/store/authStore";
 import { useRouter } from "next/navigation";
 import type React from "react";
@@ -151,17 +152,19 @@ export default function LoginPage() {
                 placeholder="Password"
                 required
               />
-              <button
+              <Button
+                variant="ghost"
                 type="button"
+                size="icon"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="w-8 h-8 absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-600"
               >
                 {showPassword ? (
-                  <EyeOff className="w-5 h-5" />
+                  <EyeOff className="size-5" />
                 ) : (
-                  <Eye className="w-5 h-5" />
+                  <Eye className="size-5" />
                 )}
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -174,13 +177,13 @@ export default function LoginPage() {
             </a>
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 text-sm font-medium text-white bg-tumakr-maroon rounded-lg hover:bg-tumakr-maroon/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full py-5 text-sm font-medium text-white bg-tumakr-maroon rounded-lg hover:bg-tumakr-maroon/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? "Signing in..." : "Sign in"}
-          </button>
+          </Button>
         </form>
 
         {/* Divider */}
@@ -195,10 +198,10 @@ export default function LoginPage() {
 
         {/* Social login buttons */}
         <div className="space-y-3">
-          <button
+          <Button
             type="button"
             onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center gap-3 py-3 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            className="w-full  flex cursor-pointer items-center justify-center gap-3 py-5 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
@@ -219,18 +222,7 @@ export default function LoginPage() {
               />
             </svg>
             Continue with Google
-          </button>
-
-          <button
-            type="button"
-            onClick={handleAppleLogin}
-            className="w-full flex items-center justify-center gap-3 py-3 bg-black rounded-lg text-sm font-medium text-white hover:bg-gray-900 transition-colors"
-          >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-            </svg>
-            Continue with Apple
-          </button>
+          </Button>
         </div>
 
         <p className="mt-6 text-center text-sm text-gray-500">
