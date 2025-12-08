@@ -165,7 +165,7 @@ export function TourCard({
         <Link href={href} className="mt-auto">
           <Button
             className={cn(
-              "w-full text-white font-semibold py-2 rounded-lg transition-all duration-300",
+              "w-full py-6 text-white font-semibold rounded-lg transition-all duration-300",
               theme.buttonBg
             )}
           >
