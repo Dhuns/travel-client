@@ -9,25 +9,19 @@ import {
   SearchResponse,
   SearchResult,
 } from "@shared/apis/search";
-import { Clock, Gift, Loader2, MapPin, Search as SearchIcon } from "lucide-react";
+import { Clock, Loader2, MapPin, Search as SearchIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 
-// 카테고리별 설정
+// 카테고리별 설정 (투어 전용)
 const categoryConfig = {
   tours: {
     icon: MapPin,
     color: "text-tumakr-maroon",
     bgColor: "bg-tumakr-maroon",
     label: "Tour",
-  },
-  souvenirs: {
-    icon: Gift,
-    color: "text-tumakr-sage-green",
-    bgColor: "bg-tumakr-sage-green",
-    label: "Souvenir",
   },
 };
 
@@ -87,14 +81,7 @@ function SearchContent() {
           {searchResults && (
             <p className="text-gray-600">
               Found {searchResults.total} result{searchResults.total !== 1 ? "s" : ""}
-              {searchResults.tours.length > 0 && ` (${searchResults.tours.length} tours`}
-              {searchResults.tours.length > 0 &&
-                searchResults.souvenirs.length > 0 &&
-                ", "}
-              {searchResults.souvenirs.length > 0 &&
-                `${searchResults.souvenirs.length} souvenirs`}
-              {(searchResults.tours.length > 0 || searchResults.souvenirs.length > 0) &&
-                ")"}
+              {searchResults.tours.length > 0 && ` (${searchResults.tours.length} tours)`}
             </p>
           )}
         </div>
@@ -125,19 +112,6 @@ function SearchContent() {
           >
             <MapPin className="w-4 h-4 mr-1" />
             Tours
-          </Button>
-          <Button
-            variant={selectedCategory === "souvenirs" ? "default" : "outline"}
-            size="sm"
-            onClick={() => handleCategoryFilter("souvenirs")}
-            className={
-              selectedCategory === "souvenirs"
-                ? "bg-tumakr-sage-green hover:bg-tumakr-sage-green/90"
-                : ""
-            }
-          >
-            <Gift className="w-4 h-4 mr-1" />
-            Souvenirs
           </Button>
         </div>
 
@@ -209,21 +183,6 @@ function SearchContent() {
                 </div>
               </section>
             )}
-
-            {/* Souvenirs Section */}
-            {searchResults.souvenirs.length > 0 && (
-              <section className="mb-10">
-                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                  <Gift className="w-5 h-5 mr-2 text-tumakr-sage-green" />
-                  Souvenirs ({searchResults.souvenirs.length})
-                </h2>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {searchResults.souvenirs.map((item) => (
-                    <ResultCard key={item.id} item={item} />
-                  ))}
-                </div>
-              </section>
-            )}
           </>
         )}
       </div>
@@ -233,7 +192,7 @@ function SearchContent() {
 
 // Result Card Component
 function ResultCard({ item }: { item: SearchResult }) {
-  const config = item.type === "tour" ? categoryConfig.tours : categoryConfig.souvenirs;
+  const config = categoryConfig.tours;
   const Icon = config.icon;
 
   return (
