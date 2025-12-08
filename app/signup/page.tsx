@@ -263,17 +263,19 @@ export default function SignupPage() {
                   required
                   autoComplete="new-password"
                 />
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
                   {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
+                    <EyeOff className="size-5" />
                   ) : (
-                    <Eye className="w-5 h-5" />
+                    <Eye className="size-5" />
                   )}
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -296,17 +298,19 @@ export default function SignupPage() {
                   required
                   autoComplete="new-password"
                 />
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
                   {showConfirmPassword ? (
-                    <EyeOff className="w-5 h-5" />
+                    <EyeOff className="size-5" />
                   ) : (
-                    <Eye className="w-5 h-5" />
+                    <Eye className="size-5" />
                   )}
-                </button>
+                </Button>
               </div>
               {formData.confirmPassword &&
                 formData.password !== formData.confirmPassword && (
@@ -344,7 +348,7 @@ export default function SignupPage() {
                 </span>
               </label>
 
-              <div className="pl-7 space-y-2">
+              <div className="pl-7">
                 <label className="flex items-center justify-between cursor-pointer">
                   <div className="flex items-center gap-2">
                     <input
@@ -358,13 +362,14 @@ export default function SignupPage() {
                       <span className="text-red-500 ml-0.5">*</span>
                     </span>
                   </div>
-                  <button
+                  <Button
+                    variant="ghost"
                     type="button"
                     onClick={() => setPolicyDialogType("terms")}
                     className="text-xs text-gray-400 hover:text-gray-600 underline cursor-pointer"
                   >
                     View
-                  </button>
+                  </Button>
                 </label>
 
                 <label className="flex items-center justify-between cursor-pointer">
@@ -380,13 +385,14 @@ export default function SignupPage() {
                       <span className="text-red-500 ml-0.5">*</span>
                     </span>
                   </div>
-                  <button
+                  <Button
+                    variant="ghost"
                     type="button"
                     onClick={() => setPolicyDialogType("privacy")}
                     className="text-xs text-gray-400 hover:text-gray-600 underline cursor-pointer"
                   >
                     View
-                  </button>
+                  </Button>
                 </label>
               </div>
             </div>
@@ -413,10 +419,10 @@ export default function SignupPage() {
 
           {/* Social Signup */}
           <div className="space-y-3">
-            <button
+            <Button
               type="button"
               onClick={handleGoogleSignup}
-              className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors"
+              className="w-full flex items-center justify-center gap-3 py-5 px-4 bg-white border cursor-pointer border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -437,18 +443,7 @@ export default function SignupPage() {
                 />
               </svg>
               Continue with Google
-            </button>
-
-            <button
-              type="button"
-              onClick={handleAppleSignup}
-              className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-black border border-black rounded-lg text-sm font-medium text-white hover:bg-gray-900 transition-colors"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-              </svg>
-              Continue with Apple
-            </button>
+            </Button>
           </div>
 
           {/* Login Link */}

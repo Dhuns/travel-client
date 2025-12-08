@@ -1,33 +1,19 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
+import { TourCard } from "@/components/tours/tour-card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  searchAll,
-  SearchCategory,
-  SearchResponse,
-  SearchResult,
-} from "@shared/apis/search";
-import { Clock, Gift, Loader2, MapPin, Search as SearchIcon } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import { searchAll, SearchCategory, SearchResponse } from "@shared/apis/search";
+import { Loader2, MapPin, Search as SearchIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 
-// 카테고리별 설정
+// 카테고리별 설정 (투어 전용)
 const categoryConfig = {
   tours: {
     icon: MapPin,
     color: "text-tumakr-maroon",
     bgColor: "bg-tumakr-maroon",
     label: "Tour",
-  },
-  souvenirs: {
-    icon: Gift,
-    color: "text-tumakr-sage-green",
-    bgColor: "bg-tumakr-sage-green",
-    label: "Souvenir",
   },
 };
 
@@ -87,14 +73,7 @@ function SearchContent() {
           {searchResults && (
             <p className="text-gray-600">
               Found {searchResults.total} result{searchResults.total !== 1 ? "s" : ""}
-              {searchResults.tours.length > 0 && ` (${searchResults.tours.length} tours`}
-              {searchResults.tours.length > 0 &&
-                searchResults.souvenirs.length > 0 &&
-                ", "}
-              {searchResults.souvenirs.length > 0 &&
-                `${searchResults.souvenirs.length} souvenirs`}
-              {(searchResults.tours.length > 0 || searchResults.souvenirs.length > 0) &&
-                ")"}
+              {searchResults.tours.length > 0 && ` (${searchResults.tours.length} tours)`}
             </p>
           )}
         </div>
@@ -125,19 +104,6 @@ function SearchContent() {
           >
             <MapPin className="w-4 h-4 mr-1" />
             Tours
-          </Button>
-          <Button
-            variant={selectedCategory === "souvenirs" ? "default" : "outline"}
-            size="sm"
-            onClick={() => handleCategoryFilter("souvenirs")}
-            className={
-              selectedCategory === "souvenirs"
-                ? "bg-tumakr-sage-green hover:bg-tumakr-sage-green/90"
-                : ""
-            }
-          >
-            <Gift className="w-4 h-4 mr-1" />
-            Souvenirs
           </Button>
         </div>
 
@@ -204,22 +170,20 @@ function SearchContent() {
                 </h2>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {searchResults.tours.map((item) => (
-                    <ResultCard key={item.id} item={item} />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Souvenirs Section */}
-            {searchResults.souvenirs.length > 0 && (
-              <section className="mb-10">
-                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                  <Gift className="w-5 h-5 mr-2 text-tumakr-sage-green" />
-                  Souvenirs ({searchResults.souvenirs.length})
-                </h2>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {searchResults.souvenirs.map((item) => (
-                    <ResultCard key={item.id} item={item} />
+                    <TourCard
+                      key={item.id}
+                      tour={{
+                        bokunExperienceId: String(item.id),
+                        title: item.title,
+                        image: item.thumbnailUrl || "/placeholder.svg",
+                        description: item.description,
+                        price: item.price || undefined,
+                        duration: item.duration,
+                      }}
+                      href={item.link}
+                      categoryBadge={item.category}
+                      themeColor="tumakr-maroon"
+                    />
                   ))}
                 </div>
               </section>
@@ -228,72 +192,6 @@ function SearchContent() {
         )}
       </div>
     </div>
-  );
-}
-
-// Result Card Component
-function ResultCard({ item }: { item: SearchResult }) {
-  const config = item.type === "tour" ? categoryConfig.tours : categoryConfig.souvenirs;
-  const Icon = config.icon;
-
-  return (
-    <Link href={item.link}>
-      <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group h-full">
-        <div className="aspect-4/3 relative overflow-hidden bg-gray-100">
-          {item.thumbnailUrl ? (
-            <Image
-              src={item.thumbnailUrl}
-              alt={item.title}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Icon className="w-12 h-12 text-gray-300" />
-            </div>
-          )}
-          <Badge className={`absolute top-3 left-3 ${config.bgColor} text-white`}>
-            {config.label}
-          </Badge>
-          {item.category && (
-            <Badge
-              variant="secondary"
-              className="absolute top-3 right-3 bg-white/90 text-gray-700"
-            >
-              {item.category}
-            </Badge>
-          )}
-        </div>
-        <CardContent className="p-4">
-          <h3 className="font-semibold text-gray-900 mb-2 line-clamp-1 group-hover:text-tumakr-maroon transition-colors">
-            {item.title}
-          </h3>
-          {item.description && (
-            <p className="text-sm text-gray-600 mb-3 line-clamp-2">{item.description}</p>
-          )}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {item.duration && (
-                <span className="flex items-center text-xs text-gray-500">
-                  <Clock className="w-3 h-3 mr-1" />
-                  {item.duration}
-                </span>
-              )}
-            </div>
-            {item.price && (
-              <span
-                className={`text-sm font-semibold ${
-                  item.type === "tour" ? "text-tumakr-maroon" : "text-tumakr-sage-green"
-                }`}
-              >
-                {item.price}
-              </span>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
   );
 }
 
