@@ -413,13 +413,13 @@ export default function Header() {
                     >
                       My Page
                     </Link>
-                    <Link
+                    {/* <Link
                       href="/orders"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-tumakr-dusty-pink/10 hover:text-tumakr-maroon"
                       onClick={() => dispatch({ type: "CLOSE_USER_DROPDOWN" })}
                     >
                       Order History
-                    </Link>
+                    </Link> */}
                     <Link
                       href="/wishlist"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-tumakr-dusty-pink/10 hover:text-tumakr-maroon"
