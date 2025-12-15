@@ -101,6 +101,7 @@ export const getAllChatSessions = async (params?: {
   const response = await axios.get(`${API_URL}/chat/admin/sessions`, {
     params,
   });
-  const [sessions, total] = response.data;
+  // 백엔드는 { sessions, total, statistics } 객체를 반환함
+  const { sessions, total } = response.data;
   return { sessions, total };
 };

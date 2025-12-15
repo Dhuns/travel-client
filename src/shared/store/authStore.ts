@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { User, TokenResponse, signin, logout as logoutApi, getMe, renewToken } from '../apis/user';
+import { CHAT_STORAGE_KEY } from '../constants/chat';
 
 interface AuthState {
 	user: User | null;
@@ -105,7 +106,6 @@ export const useAuthStore = create<AuthState>()(
 				
 				// 로그아웃 시 localStorage의 채팅 캐시만 초기화 (서버 데이터는 유지)
 				if (typeof window !== 'undefined') {
-					const CHAT_STORAGE_KEY = 'chat-sessions-storage';
 					localStorage.removeItem(CHAT_STORAGE_KEY);
 				}
 			},
