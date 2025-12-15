@@ -38,21 +38,28 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://widgets.bokun.io" />
         <link rel="preconnect" href="https://api.bokun.io" />
         <link rel="dns-prefetch" href="https://api.bokun.io" />
-      </head>
-      <body className="h-full m-0 p-0 flex flex-col font-sans">
-        {/* Google Analytics 4 */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-0PTSZ0KGMP"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
+
+        {/* Google Tag Manager */}
+        <Script id="gtm-script" strategy="afterInteractive">
           {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-0PTSZ0KGMP');
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','GTM-TVQSRRWC');
           `}
         </Script>
+      </head>
+      <body className="h-full m-0 p-0 flex flex-col font-sans">
+        {/* Google Tag Manager (noscript) */}
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-TVQSRRWC"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
 
         {/* Bokun 위젯 스크립트 - Next.js Script 컴포넌트 사용 */}
         <Script
