@@ -7,6 +7,7 @@ import ChatSidebar from "@components/Chat/ChatSidebar";
 import styled from "@emotion/styled";
 import { useAuthStore } from "@shared/store/authStore";
 import useChatStore from "@shared/store/chatStore";
+import { CHAT_STORAGE_KEY } from "@shared/constants/chat";
 import { useRouter } from "next/navigation";
 
 const Container: FC = () => {
@@ -37,7 +38,6 @@ const Container: FC = () => {
   useEffect(() => {
     if (!isAuthenticated) {
       // localStorage 캐시만 초기화 (서버 데이터는 유지)
-      const CHAT_STORAGE_KEY = "chat-sessions-storage";
       if (typeof window !== "undefined") {
         localStorage.removeItem(CHAT_STORAGE_KEY);
       }
