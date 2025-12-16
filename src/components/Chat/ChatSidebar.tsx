@@ -7,9 +7,11 @@ import React, { FC } from "react";
 
 interface Props {
   onNewChat: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-const ChatSidebar: FC<Props> = ({ onNewChat }) => {
+const ChatSidebar: FC<Props> = ({ onNewChat, isOpen = false, onClose }) => {
   const router = useRouter();
   const { sessions, getCurrentSession, loadSession, deleteSession } = useChatStore();
   const currentSession = getCurrentSession();
@@ -21,27 +23,20 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
     }
   };
 
-  return (
-    <Container>
-      {/* Header */}
-      <Header>
-        <LogoWrapper onClick={() => router.push("/")}>
-          <LogoIcon>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
-              <path
-                d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              />
-            </svg>
-          </LogoIcon>
-          <LogoText>Tumakr</LogoText>
-        </LogoWrapper>
-      </Header>
+  const handleLoadSession = (sessionId: string) => {
+    loadSession(sessionId);
+    if (onClose) onClose(); // 모바일에서 세션 선택 시 사이드바 닫기
+  };
 
+  const handleNewChatClick = () => {
+    onNewChat();
+    if (onClose) onClose(); // 모바일에서 새 채팅 시작 시 사이드바 닫기
+  };
+
+  return (
+    <Container isOpen={isOpen}>
       {/* New Chat Button */}
-      <NewChatButton onClick={onNewChat}>
+      <NewChatButton onClick={handleNewChatClick}>
         <NewChatIconWrapper>
           <svg
             width="18"
@@ -91,7 +86,7 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
                 <ChatItem
                   key={session.sessionId}
                   active={currentSession?.sessionId === session.sessionId}
-                  onClick={() => loadSession(session.sessionId)}
+                  onClick={() => handleLoadSession(session.sessionId)}
                 >
                   <ChatItemIcon active={currentSession?.sessionId === session.sessionId}>
                     <svg
@@ -173,7 +168,7 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
 export default React.memo(ChatSidebar);
 
 // Styled Components
-const Container = styled.div`
+const Container = styled.div<{ isOpen?: boolean }>`
   width: 280px;
   background: linear-gradient(180deg, #fefefe 0%, #f8f7f5 100%);
   border-right: 1px solid #eee;
@@ -181,9 +176,16 @@ const Container = styled.div`
   flex-direction: column;
   overflow: hidden;
   flex-shrink: 0;
+  padding-top: 20px;
 
   @media (max-width: 1024px) {
-    display: none;
+    position: fixed;
+    top: 80px;
+    left: ${({ isOpen }) => (isOpen ? "0" : "-280px")};
+    bottom: 0;
+    z-index: 1000;
+    transition: left 0.3s ease-in-out;
+    box-shadow: ${({ isOpen }) => (isOpen ? "4px 0 12px rgba(0, 0, 0, 0.15)" : "none")};
   }
 `;
 

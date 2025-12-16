@@ -5,9 +5,10 @@ import ChatInput from "@components/Chat/ChatInput";
 import ChatMessageList from "@components/Chat/ChatMessageList";
 import ChatSidebar from "@components/Chat/ChatSidebar";
 import styled from "@emotion/styled";
+import { CHAT_STORAGE_KEY } from "@shared/constants/chat";
 import { useAuthStore } from "@shared/store/authStore";
 import useChatStore from "@shared/store/chatStore";
-import { CHAT_STORAGE_KEY } from "@shared/constants/chat";
+import { Info } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const Container: FC = () => {
@@ -28,7 +29,8 @@ const Container: FC = () => {
   const { isAuthenticated, user } = useAuthStore();
   const router = useRouter();
 
-  const [showInfoPanel, setShowInfoPanel] = useState(true);
+  const [showInfoPanel, setShowInfoPanel] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
   const session = getCurrentSession();
@@ -188,8 +190,15 @@ const Container: FC = () => {
 
   return (
     <PageContainer>
+      {/* 모바일 사이드바 오버레이 */}
+      {showSidebar && <SidebarOverlay onClick={() => setShowSidebar(false)} />}
+
       {/* 좌측 사이드바 */}
-      <ChatSidebar onNewChat={handleNewChat} />
+      <ChatSidebar
+        onNewChat={handleNewChat}
+        isOpen={showSidebar}
+        onClose={() => setShowSidebar(false)}
+      />
 
       {/* 메인 영역 */}
       <MainArea>
@@ -198,6 +207,20 @@ const Container: FC = () => {
           <ChatSection hasMessages={hasMessages}>
             {/* Top Bar */}
             <TopBar>
+              <TopBarLeft>
+                <MobileMenuButton onClick={() => setShowSidebar(!showSidebar)}>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M3 12h18M3 6h18M3 18h18" />
+                  </svg>
+                </MobileMenuButton>
+              </TopBarLeft>
               <TopBarCenter>
                 <ModelBadge>
                   <ModelIcon>
@@ -222,17 +245,7 @@ const Container: FC = () => {
                   title="Trip details"
                   active={showInfoPanel}
                 >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 16v-4M12 8h.01" />
-                  </svg>
+                  <Info className="w-5 h-5" />
                 </IconButton>
               </TopBarRight>
             </TopBar>
@@ -349,6 +362,18 @@ const TopBar = styled.div`
   position: relative;
 `;
 
+const TopBarLeft = styled.div`
+  position: absolute;
+  left: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  @media (min-width: 1025px) {
+    display: none; // 데스크톱에서는 햄버거 메뉴 숨김
+  }
+`;
+
 const TopBarCenter = styled.div`
   display: flex;
   align-items: center;
@@ -360,6 +385,44 @@ const TopBarRight = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+`;
+
+const MobileMenuButton = styled.button`
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+  background-color: transparent;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+
+  &:hover {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+  }
+
+  @media (min-width: 1025px) {
+    display: none;
+  }
+`;
+
+const SidebarOverlay = styled.div`
+  position: fixed;
+  top: 80px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none;
+
+  @media (max-width: 1024px) {
+    display: block;
+  }
 `;
 
 const ModelBadge = styled.div`
