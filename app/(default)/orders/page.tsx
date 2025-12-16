@@ -988,7 +988,7 @@ export default function OrdersPage() {
                 className={
                   bookingFilter === "all"
                     ? "border border-tumakr-maroon bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white"
-                    : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white"
+                    : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:bg-tumakr-maroon! hover:text-white!"
                 }
               >
                 All
@@ -999,7 +999,7 @@ export default function OrdersPage() {
                 className={
                   bookingFilter === "confirmed"
                     ? "border border-tumakr-maroon bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white"
-                    : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white"
+                    : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:bg-tumakr-maroon! hover:text-white!"
                 }
               >
                 Confirmed
@@ -1010,7 +1010,7 @@ export default function OrdersPage() {
                 className={
                   bookingFilter === "cancelled"
                     ? "border border-tumakr-maroon bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white"
-                    : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white"
+                    : "border border-tumakr-maroon text-tumakr-maroon bg-white hover:bg-tumakr-maroon! hover:text-white!"
                 }
               >
                 Cancelled
@@ -1377,7 +1377,7 @@ export default function OrdersPage() {
                           href={`/chat?session=${quote.sessionId}`}
                           className="flex-1"
                         >
-                          <Button className="w-full border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white">
+                          <Button className="w-full border border-tumakr-maroon text-tumakr-maroon bg-white hover:bg-tumakr-maroon! hover:text-white!">
                             Continue Chat
                             <ChevronRight className="w-4 h-4 ml-1" />
                           </Button>
@@ -1548,7 +1548,7 @@ export default function OrdersPage() {
             </p>
             <div className="flex justify-center space-x-4">
               <Link href="/contact">
-                <Button className="border border-tumakr-maroon text-tumakr-maroon bg-white hover:!bg-tumakr-maroon hover:!text-white">
+                <Button className="border border-tumakr-maroon text-tumakr-maroon bg-white hover:bg-tumakr-maroon! hover:text-white!">
                   Contact Us
                 </Button>
               </Link>

@@ -1,4 +1,3 @@
-import React, { FC, KeyboardEvent, useState, useEffect, useRef } from "react";
 import styled from "@emotion/styled";
 import {
   MAX_MESSAGE_LENGTH,
@@ -6,6 +5,8 @@ import {
   MESSAGES,
   UI_TEXT,
 } from "@shared/constants/chat";
+import { Send } from "lucide-react";
+import React, { FC, KeyboardEvent, useEffect, useRef, useState } from "react";
 
 interface Props {
   onSend: (message: string) => void;
@@ -26,7 +27,7 @@ const ChatInput: FC<Props> = ({
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = 'auto';
+      textarea.style.height = "auto";
       textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
     }
   }, [input]);
@@ -64,7 +65,7 @@ const ChatInput: FC<Props> = ({
   };
 
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    const pastedText = e.clipboardData.getData('text');
+    const pastedText = e.clipboardData.getData("text");
     const currentInput = input;
 
     // Get cursor position
@@ -75,14 +76,16 @@ const ChatInput: FC<Props> = ({
     const end = textarea.selectionEnd;
 
     // Calculate new text
-    const newText = currentInput.substring(0, start) + pastedText + currentInput.substring(end);
+    const newText =
+      currentInput.substring(0, start) + pastedText + currentInput.substring(end);
 
     // If pasted text would exceed limit, truncate it
     if (newText.length > MAX_MESSAGE_LENGTH) {
       e.preventDefault();
       const allowedLength = MAX_MESSAGE_LENGTH - (currentInput.length - (end - start));
       const truncatedText = pastedText.substring(0, allowedLength);
-      const finalText = currentInput.substring(0, start) + truncatedText + currentInput.substring(end);
+      const finalText =
+        currentInput.substring(0, start) + truncatedText + currentInput.substring(end);
       setInput(finalText);
 
       // Set cursor position after paste
@@ -117,10 +120,11 @@ const ChatInput: FC<Props> = ({
               {charCount}/{MAX_MESSAGE_LENGTH}
             </CharCount>
           )}
-          <SendButton onClick={handleSend} disabled={!input.trim() || disabled || isOverLimit}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-            </svg>
+          <SendButton
+            onClick={handleSend}
+            disabled={!input.trim() || disabled || isOverLimit}
+          >
+            <Send className="w-4.5 h-4.5" />
           </SendButton>
         </RightSection>
       </InputWrapper>
@@ -173,7 +177,7 @@ const TextArea = styled.textarea`
   resize: none;
   outline: none;
   font-family: inherit;
-  min-height: 24px;
+  min-height: 32px;
   color: #1a1a1a;
   max-height: 160px;
   overflow-y: auto;
@@ -272,7 +276,9 @@ const LoadingDots = styled.div`
   }
 
   @keyframes bounce {
-    0%, 80%, 100% {
+    0%,
+    80%,
+    100% {
       transform: scale(0);
     }
     40% {

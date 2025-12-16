@@ -1,15 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
-import styled from "@emotion/styled";
 import {
-  getQuotationByHash,
+  DraftQuotation,
+  FinalQuotation,
+} from "@/app/(without-layout)/quotation/components";
+import {
   getQuotationByBatchId,
+  getQuotationByHash,
   type QuotationResponse,
 } from "@/src/shared/apis/estimate";
-import { FinalQuotation, DraftQuotation } from "@/app/quotation/components";
+import styled from "@emotion/styled";
 import { X } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface Props {
   hash?: string;
