@@ -219,8 +219,20 @@ const useChatStore = create<ChatStore>((set, get) => ({
 
       get().saveToStorage();
     } catch (error) {
-      // Failed to load session - silent fail
-      set({ isLoading: false });
+      // Failed to load session
+      const axiosError = error as { response?: { status?: number } };
+
+      // 404 에러 (세션이 삭제되었거나 존재하지 않음)
+      if (axiosError?.response?.status === 404) {
+        // 로컬 세션 목록에서도 제거
+        const { sessions } = get();
+        const updatedSessions = sessions.filter((s) => s.sessionId !== sessionId);
+        set({ sessions: updatedSessions, isLoading: false });
+        get().saveToStorage();
+      } else {
+        // 다른 에러는 조용히 무시
+        set({ isLoading: false });
+      }
     }
   },
 
