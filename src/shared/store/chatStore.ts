@@ -225,9 +225,15 @@ const useChatStore = create<ChatStore>((set, get) => ({
       // 404 에러 (세션이 삭제되었거나 존재하지 않음)
       if (axiosError?.response?.status === 404) {
         // 로컬 세션 목록에서도 제거
-        const { sessions } = get();
+        const { sessions, currentSessionId } = get();
         const updatedSessions = sessions.filter((s) => s.sessionId !== sessionId);
-        set({ sessions: updatedSessions, isLoading: false });
+
+        set({
+          sessions: updatedSessions,
+          currentSessionId: currentSessionId === sessionId ? null : currentSessionId,
+          isLoading: false,
+        });
+
         get().saveToStorage();
       } else {
         // 다른 에러는 조용히 무시
@@ -648,42 +654,54 @@ const useChatStore = create<ChatStore>((set, get) => ({
 
   // 세션 삭제 (로컬 및 서버)
   deleteSession: async (sessionId: string) => {
-    try {
-      // 인증 토큰 확인
-      const authState = useAuthStore.getState();
-      const accessToken = authState.accessToken;
-      if (!accessToken) {
-        console.warn("No access token available");
-        return;
-      }
+    // 인증 토큰 확인
+    const authState = useAuthStore.getState();
+    const accessToken = authState.accessToken;
+    if (!accessToken) {
+      console.warn("No access token available");
+      alert("로그인이 필요합니다.");
+      return;
+    }
 
+    // Optimistic update: 즉시 로컬 상태에서 세션 제거
+    const { sessions, currentSessionId } = get();
+    const sessionToDelete = sessions.find((s) => s.sessionId === sessionId);
+    const updatedSessions = sessions.filter((s) => s.sessionId !== sessionId);
+
+    set({
+      sessions: updatedSessions,
+      currentSessionId:
+        currentSessionId === sessionId ? null : currentSessionId,
+    });
+
+    get().saveToStorage();
+
+    try {
       // 백엔드 API 호출하여 서버에서 세션 삭제
       await deleteChatSession(accessToken, sessionId);
-
-      // 로컬 상태에서 세션 제거
-      const { sessions, currentSessionId } = get();
-      const updatedSessions = sessions.filter((s) => s.sessionId !== sessionId);
-
-      set({
-        sessions: updatedSessions,
-        currentSessionId:
-          currentSessionId === sessionId ? null : currentSessionId,
-      });
-
-      get().saveToStorage();
+      console.log(`Session ${sessionId} deleted successfully`);
     } catch (error) {
-      console.error("Failed to delete session:", error);
-      // 에러가 발생해도 로컬 상태는 업데이트 (UI 일관성)
-      const { sessions, currentSessionId } = get();
-      const updatedSessions = sessions.filter((s) => s.sessionId !== sessionId);
+      // 서버 삭제 실패 시 에러 처리
+      console.error("Failed to delete session from server:", error);
+      const axiosError = error as { response?: { status?: number; data?: { message?: string } } };
 
-      set({
-        sessions: updatedSessions,
-        currentSessionId:
-          currentSessionId === sessionId ? null : currentSessionId,
-      });
+      // 404 에러면 이미 삭제된 것이므로 그냥 무시 (로컬에서는 이미 제거됨)
+      if (axiosError?.response?.status === 404) {
+        console.log("Session not found on server, already removed from local state");
+      } else {
+        // 다른 에러면 롤백하고 사용자에게 알림
+        const errorMessage = axiosError?.response?.data?.message || "채팅 삭제에 실패했습니다.";
+        alert(`삭제 실패: ${errorMessage}\n\n페이지를 새로고침한 후 다시 시도해주세요.`);
 
-      get().saveToStorage();
+        // 롤백: 삭제된 세션을 다시 추가
+        if (sessionToDelete) {
+          const { sessions: currentSessions } = get();
+          set({
+            sessions: [...currentSessions, sessionToDelete],
+          });
+          get().saveToStorage();
+        }
+      }
     }
   },
 

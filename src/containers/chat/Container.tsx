@@ -56,6 +56,11 @@ const Container: FC = () => {
   // 로그인 시 서버에서 사용자 세션 불러오기 (최초 1회만)
   useEffect(() => {
     if (!isInitialized && isAuthenticated && user?.id) {
+      // localStorage를 먼저 지우고 서버에서 최신 데이터 가져오기
+      if (typeof window !== "undefined") {
+        localStorage.removeItem(CHAT_STORAGE_KEY);
+      }
+
       loadUserSessions().then(() => {
         setIsInitialized(true);
       });

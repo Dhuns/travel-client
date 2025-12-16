@@ -18,10 +18,10 @@ const ChatSidebar: FC<Props> = ({ onNewChat, isOpen = false, onClose }) => {
   const { sessions, getCurrentSession, loadSession, deleteSession } = useChatStore();
   const currentSession = getCurrentSession();
 
-  const handleDeleteSession = (e: React.MouseEvent, sessionId: string) => {
+  const handleDeleteSession = async (e: React.MouseEvent, sessionId: string) => {
     e.stopPropagation();
     if (confirm(MESSAGES.DELETE_SESSION_CONFIRM)) {
-      deleteSession(sessionId);
+      await deleteSession(sessionId);
     }
   };
 
