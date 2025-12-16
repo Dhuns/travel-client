@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { MESSAGES } from "@shared/constants/chat";
 import useChatStore from "@shared/store/chatStore";
 import dayjs from "dayjs";
+import { Home, Plane } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { FC } from "react";
@@ -151,33 +152,12 @@ const ChatSidebar: FC<Props> = ({ onNewChat, isOpen = false, onClose }) => {
       {/* Bottom Navigation */}
       <BottomNav>
         <NavItem onClick={() => router.push("/")}>
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-            <polyline points="9 22 9 12 15 12 15 22" />
-          </svg>
+          <Home className="w-4.5 h-4.5" />
           <span>Home</span>
         </NavItem>
-        <NavItem onClick={() => router.push("/orders")}>
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
-            <rect x="9" y="3" width="6" height="4" rx="1" />
-            <path d="M9 12h6M9 16h6" />
-          </svg>
-          <span>Orders</span>
+        <NavItem onClick={() => router.push("/tours")}>
+          <Plane className="w-4.5 h-4.5" />
+          <span>Tours</span>
         </NavItem>
       </BottomNav>
     </Container>
