@@ -149,3 +149,20 @@ export const getAllChatSessions = async (
   const { sessions, total } = response.data;
   return { sessions, total };
 };
+
+// Delete Chat Session API
+export const deleteChatSession = async (
+  accessToken: string,
+  sessionId: string
+): Promise<{
+  success: boolean;
+  message: string;
+  sessionId: string;
+}> => {
+  const response = await axios.delete(`${API_URL}/chat/sessions/${sessionId}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.data;
+};
