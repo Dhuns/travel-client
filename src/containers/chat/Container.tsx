@@ -56,7 +56,7 @@ const Container: FC = () => {
   // 로그인 시 서버에서 사용자 세션 불러오기 (최초 1회만)
   useEffect(() => {
     if (!isInitialized && isAuthenticated && user?.id) {
-      loadUserSessions(user.id).then(() => {
+      loadUserSessions().then(() => {
         setIsInitialized(true);
       });
     }
