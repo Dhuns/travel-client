@@ -377,11 +377,16 @@ export default function OrdersPage() {
       setIsLoadingQuotes(true);
 
       try {
-        // ChatSession 목록 조회 (batchId가 있는 것만 = 견적 생성됨)
-        const { sessions } = await getAllChatSessions({
-          userId: user.id,
-          status: "all",
-        });
+        // Get access token from auth store
+        const accessToken = useAuthStore.getState().accessToken;
+        if (!accessToken) {
+          console.error("No access token available");
+          setIsLoadingQuotes(false);
+          return;
+        }
+
+        // ChatSession 목록 조회 (batchId가 있는 것만 = 견적 생성됨, userId는 JWT에서 추출)
+        const { sessions } = await getAllChatSessions(accessToken);
 
         // batchId가 있는 세션만 필터링
         const sessionsWithBatch = sessions.filter(

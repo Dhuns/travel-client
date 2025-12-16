@@ -55,11 +55,17 @@ export default function MyEstimatesPage() {
         return;
       }
 
+      // Get access token from auth store
+      const accessToken = useAuthStore.getState().accessToken;
+      if (!accessToken) {
+        console.error("No access token available");
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        const { sessions } = await getAllChatSessions({
-          userId: user.id,
-          status: "all",
-        });
+        // Fetch user's sessions (userId extracted from JWT)
+        const { sessions } = await getAllChatSessions(accessToken);
 
         // Filter sessions with batchId and convert to estimates
         const estimatesData: Estimate[] = sessions
