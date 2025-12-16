@@ -9,6 +9,7 @@ import {
   sendChatMessage,
   updateChatSession,
   getAllChatSessions,
+  deleteChatSession,
 } from "../apis/chat";
 import {
   MAX_CHAT_SESSIONS,
@@ -44,7 +45,7 @@ interface ChatStore {
   generateEstimateForSession: () => Promise<boolean>;
   clearSession: () => void;
   clearAllSessions: () => void;
-  deleteSession: (sessionId: string) => void;
+  deleteSession: (sessionId: string) => Promise<void>;
   loadFromStorage: () => void;
   toggleChat: () => void;
   saveToStorage: () => void;
@@ -633,18 +634,45 @@ const useChatStore = create<ChatStore>((set, get) => ({
     }
   },
 
-  // 세션 삭제 (로컬만, DB 삭제는 나중에 추가 가능)
-  deleteSession: (sessionId: string) => {
-    const { sessions, currentSessionId } = get();
-    const updatedSessions = sessions.filter((s) => s.sessionId !== sessionId);
+  // 세션 삭제 (로컬 및 서버)
+  deleteSession: async (sessionId: string) => {
+    try {
+      // 인증 토큰 확인
+      const authState = useAuthStore.getState();
+      const accessToken = authState.accessToken;
+      if (!accessToken) {
+        console.warn("No access token available");
+        return;
+      }
 
-    set({
-      sessions: updatedSessions,
-      currentSessionId:
-        currentSessionId === sessionId ? null : currentSessionId,
-    });
+      // 백엔드 API 호출하여 서버에서 세션 삭제
+      await deleteChatSession(accessToken, sessionId);
 
-    get().saveToStorage();
+      // 로컬 상태에서 세션 제거
+      const { sessions, currentSessionId } = get();
+      const updatedSessions = sessions.filter((s) => s.sessionId !== sessionId);
+
+      set({
+        sessions: updatedSessions,
+        currentSessionId:
+          currentSessionId === sessionId ? null : currentSessionId,
+      });
+
+      get().saveToStorage();
+    } catch (error) {
+      console.error("Failed to delete session:", error);
+      // 에러가 발생해도 로컬 상태는 업데이트 (UI 일관성)
+      const { sessions, currentSessionId } = get();
+      const updatedSessions = sessions.filter((s) => s.sessionId !== sessionId);
+
+      set({
+        sessions: updatedSessions,
+        currentSessionId:
+          currentSessionId === sessionId ? null : currentSessionId,
+      });
+
+      get().saveToStorage();
+    }
   },
 
   // 채팅창 토글
