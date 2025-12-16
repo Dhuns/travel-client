@@ -26,7 +26,7 @@ const Container: FC = () => {
     clearAllSessions,
   } = useChatStore();
 
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, fetchUser } = useAuthStore();
   const router = useRouter();
 
   const [showInfoPanel, setShowInfoPanel] = useState(false);
@@ -35,6 +35,13 @@ const Container: FC = () => {
 
   const session = getCurrentSession();
   const context = session?.context || {};
+
+  // 로그인 시 사용자 정보 가져오기
+  useEffect(() => {
+    if (isAuthenticated && !user) {
+      fetchUser();
+    }
+  }, [isAuthenticated, user, fetchUser]);
 
   // 비로그인 사용자 체크 (데이터는 유지, localStorage만 초기화)
   useEffect(() => {

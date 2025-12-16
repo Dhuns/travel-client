@@ -1,9 +1,7 @@
 import "./globals.css";
 
 import ErrorBoundary from "@/components/ErrorBoundary";
-import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Analytics } from "@vercel/analytics/next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
@@ -73,8 +71,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div className="flex flex-col min-h-screen flex-1">
-            <Header />
-            <main className="w-full pt-20 flex-1">
+            <main className="w-full flex-1">
               <ErrorBoundary>
                 <Suspense
                   fallback={
@@ -89,8 +86,6 @@ export default function RootLayout({
             </main>
           </div>
         </ThemeProvider>
-
-        <Analytics />
       </body>
     </html>
   );
