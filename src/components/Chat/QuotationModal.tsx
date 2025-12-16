@@ -8,7 +8,7 @@ import {
   getQuotationByBatchId,
   type QuotationResponse,
 } from "@/src/shared/apis/estimate";
-import { FinalQuotation, DraftQuotation } from "@/app/quotation/components";
+import { FinalQuotation, DraftQuotation } from "@/app/(with-footer)/quotation/components";
 import { X } from "lucide-react";
 
 interface Props {

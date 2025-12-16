@@ -10,7 +10,7 @@ const Container = dynamic(() => import("@/src/containers/chat/Container"), {
 
 export default function ChatPage() {
   return (
-    <div className="fixed inset-0 bg-white flex flex-col pt-[80px]">
+    <div className="fixed inset-0 bg-white flex flex-col pt-[80px] z-40">
       <Container />
     </div>
   );

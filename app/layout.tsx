@@ -1,7 +1,6 @@
 import "./globals.css";
 
 import ErrorBoundary from "@/components/ErrorBoundary";
-import Footer from "@/components/footer";
 import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Analytics } from "@vercel/analytics/next";
@@ -88,7 +87,6 @@ export default function RootLayout({
                 </Suspense>
               </ErrorBoundary>
             </main>
-            <Footer />
           </div>
         </ThemeProvider>
 
