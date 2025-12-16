@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { MESSAGES } from "@shared/constants/chat";
 import useChatStore from "@shared/store/chatStore";
 import dayjs from "dayjs";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { FC } from "react";
 
@@ -33,8 +34,26 @@ const ChatSidebar: FC<Props> = ({ onNewChat, isOpen = false, onClose }) => {
     if (onClose) onClose(); // 모바일에서 새 채팅 시작 시 사이드바 닫기
   };
 
+  const handleNavClick = (path: string) => {
+    router.push(path);
+    if (onClose) onClose(); // 모바일에서 네비게이션 클릭 시 사이드바 닫기
+  };
+
   return (
     <Container isOpen={isOpen}>
+      {/* Header Section */}
+      <Header>
+        <LogoWrapper onClick={() => handleNavClick("/")}>
+          <LogoIcon>
+            <Image src="/tumakr-logo(no-text).png" alt="tumakr" width={32} height={32} />
+          </LogoIcon>
+          <LogoTextWrapper>
+            <LogoTitle>tumakr</LogoTitle>
+            <LogoSubtitle>by OnedayKorea</LogoSubtitle>
+          </LogoTextWrapper>
+        </LogoWrapper>
+      </Header>
+
       {/* New Chat Button */}
       <NewChatButton onClick={handleNewChatClick}>
         <NewChatIconWrapper>
@@ -82,7 +101,7 @@ const ChatSidebar: FC<Props> = ({ onNewChat, isOpen = false, onClose }) => {
                 const bTime = b.lastMessageAt || b.createdAt;
                 return new Date(bTime).getTime() - new Date(aTime).getTime();
               })
-              .map((session, index) => (
+              .map((session) => (
                 <ChatItem
                   key={session.sessionId}
                   active={currentSession?.sessionId === session.sessionId}
@@ -170,17 +189,17 @@ export default React.memo(ChatSidebar);
 // Styled Components
 const Container = styled.div<{ isOpen?: boolean }>`
   width: 280px;
+  min-height: 100vh;
   background: linear-gradient(180deg, #fefefe 0%, #f8f7f5 100%);
   border-right: 1px solid #eee;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   flex-shrink: 0;
-  padding-top: 20px;
 
   @media (max-width: 1024px) {
     position: fixed;
-    top: 80px;
+    top: 0;
     left: ${({ isOpen }) => (isOpen ? "0" : "-280px")};
     bottom: 0;
     z-index: 1000;
@@ -192,6 +211,7 @@ const Container = styled.div<{ isOpen?: boolean }>`
 const Header = styled.div`
   padding: 20px 16px 16px;
   flex-shrink: 0;
+  border-bottom: 1px solid #eee;
 `;
 
 const LogoWrapper = styled.div`
@@ -213,19 +233,27 @@ const LogoIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 `;
 
-const LogoText = styled.span`
-  font-size: 20px;
+const LogoTextWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`;
+
+const LogoTitle = styled.span`
+  font-size: 18px;
   font-weight: 700;
-  background: linear-gradient(
-    135deg,
-    var(--color-tumakr-maroon) 0%,
-    var(--color-tumakr-maroon) 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #333;
+  line-height: 1;
+`;
+
+const LogoSubtitle = styled.span`
+  font-size: 10px;
+  font-weight: 400;
+  color: #999;
+  line-height: 1;
 `;
 
 const NewChatButton = styled.button`
