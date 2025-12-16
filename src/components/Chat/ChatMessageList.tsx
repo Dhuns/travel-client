@@ -136,7 +136,7 @@ const Container = styled.div<{ hasMessages: boolean }>`
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding-top: 8vh;
+    padding-top: 14vh;
   `}
 
   &::-webkit-scrollbar {
