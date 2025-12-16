@@ -1,13 +1,14 @@
 import { FC, useCallback, useEffect, useState } from "react";
 
-import ChatInfoPanel from "@components/Chat/ChatInfoPanel";
+import ChatInfoSidebar from "@components/Chat/ChatInfoSidebar";
 import ChatInput from "@components/Chat/ChatInput";
 import ChatMessageList from "@components/Chat/ChatMessageList";
 import ChatSidebar from "@components/Chat/ChatSidebar";
 import styled from "@emotion/styled";
+import { CHAT_STORAGE_KEY } from "@shared/constants/chat";
 import { useAuthStore } from "@shared/store/authStore";
 import useChatStore from "@shared/store/chatStore";
-import { CHAT_STORAGE_KEY } from "@shared/constants/chat";
+import { Info } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const Container: FC = () => {
@@ -25,14 +26,22 @@ const Container: FC = () => {
     clearAllSessions,
   } = useChatStore();
 
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, fetchUser } = useAuthStore();
   const router = useRouter();
 
-  const [showInfoPanel, setShowInfoPanel] = useState(true);
+  const [showInfoPanel, setShowInfoPanel] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
   const session = getCurrentSession();
   const context = session?.context || {};
+
+  // 로그인 시 사용자 정보 가져오기
+  useEffect(() => {
+    if (isAuthenticated && !user) {
+      fetchUser();
+    }
+  }, [isAuthenticated, user, fetchUser]);
 
   // 비로그인 사용자 체크 (데이터는 유지, localStorage만 초기화)
   useEffect(() => {
@@ -188,8 +197,15 @@ const Container: FC = () => {
 
   return (
     <PageContainer>
+      {/* 모바일 사이드바 오버레이 */}
+      {showSidebar && <SidebarOverlay onClick={() => setShowSidebar(false)} />}
+
       {/* 좌측 사이드바 */}
-      <ChatSidebar onNewChat={handleNewChat} />
+      <ChatSidebar
+        onNewChat={handleNewChat}
+        isOpen={showSidebar}
+        onClose={() => setShowSidebar(false)}
+      />
 
       {/* 메인 영역 */}
       <MainArea>
@@ -198,6 +214,20 @@ const Container: FC = () => {
           <ChatSection hasMessages={hasMessages}>
             {/* Top Bar */}
             <TopBar>
+              <TopBarLeft>
+                <MobileMenuButton onClick={() => setShowSidebar(!showSidebar)}>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M3 12h18M3 6h18M3 18h18" />
+                  </svg>
+                </MobileMenuButton>
+              </TopBarLeft>
               <TopBarCenter>
                 <ModelBadge>
                   <ModelIcon>
@@ -222,17 +252,7 @@ const Container: FC = () => {
                   title="Trip details"
                   active={showInfoPanel}
                 >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 16v-4M12 8h.01" />
-                  </svg>
+                  <Info className="w-5 h-5" />
                 </IconButton>
               </TopBarRight>
             </TopBar>
@@ -266,31 +286,13 @@ const Container: FC = () => {
         </ChatWrapper>
 
         {/* Right Info Panel (toggleable) */}
-        {showInfoPanel && <InfoPanelBackdrop onClick={() => setShowInfoPanel(false)} />}
-        <InfoPanel isVisible={showInfoPanel}>
-          <InfoPanelContent isVisible={showInfoPanel}>
-            <InfoPanelHeader>
-              <InfoPanelTitle>Trip Details</InfoPanelTitle>
-              <CloseButton onClick={() => setShowInfoPanel(false)}>
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              </CloseButton>
-            </InfoPanelHeader>
-            <ChatInfoPanel
-              context={context}
-              messageCount={session.messages.length}
-              batchId={session.batchId}
-            />
-          </InfoPanelContent>
-        </InfoPanel>
+        <ChatInfoSidebar
+          isOpen={showInfoPanel}
+          onClose={() => setShowInfoPanel(false)}
+          context={context}
+          messageCount={session.messages.length}
+          batchId={session.batchId}
+        />
       </MainArea>
     </PageContainer>
   );
@@ -302,7 +304,7 @@ export default Container;
 const PageContainer = styled.div`
   display: flex;
   flex: 1;
-  min-height: 0;
+  min-height: 100vh;
   background-color: #ffffff;
   overflow: hidden;
 `;
@@ -349,6 +351,18 @@ const TopBar = styled.div`
   position: relative;
 `;
 
+const TopBarLeft = styled.div`
+  position: absolute;
+  left: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  @media (min-width: 1025px) {
+    display: none; // 데스크톱에서는 햄버거 메뉴 숨김
+  }
+`;
+
 const TopBarCenter = styled.div`
   display: flex;
   align-items: center;
@@ -360,6 +374,44 @@ const TopBarRight = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+`;
+
+const MobileMenuButton = styled.button`
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+  background-color: transparent;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+
+  &:hover {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+  }
+
+  @media (min-width: 1025px) {
+    display: none;
+  }
+`;
+
+const SidebarOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none;
+
+  @media (max-width: 1024px) {
+    display: block;
+  }
 `;
 
 const ModelBadge = styled.div`
@@ -419,87 +471,6 @@ const InputHint = styled.div`
   font-size: 11px;
   color: #999;
   margin-top: 8px;
-`;
-
-const InfoPanel = styled.div<{ isVisible: boolean }>`
-  width: ${({ isVisible }) => (isVisible ? "320px" : "0")};
-  background-color: #fafafa;
-  border-left: 1px solid #f0f0f0;
-  overflow: hidden;
-  flex-shrink: 0;
-  transition: width 0.3s ease-in-out;
-
-  @media (max-width: 1280px) {
-    position: fixed;
-    right: ${({ isVisible }) => (isVisible ? "0" : "-320px")};
-    top: 80px;
-    bottom: 0;
-    width: 320px;
-    max-width: 85vw;
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.08);
-    z-index: 1001;
-    transition: right 0.3s ease-in-out;
-  }
-`;
-
-const InfoPanelContent = styled.div<{ isVisible: boolean }>`
-  width: 320px;
-  height: 100%;
-  opacity: ${({ isVisible }) => (isVisible ? "1" : "0")};
-  transition: opacity ${({ isVisible }) => (isVisible ? "0.3s 0.15s" : "0.15s")}
-    ease-in-out;
-  display: flex;
-  flex-direction: column;
-`;
-
-const InfoPanelBackdrop = styled.div`
-  display: none;
-
-  @media (max-width: 1280px) {
-    display: block;
-    position: fixed;
-    top: 80px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.4);
-    z-index: 1000;
-  }
-`;
-
-const InfoPanelHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #e8e8e8;
-  background-color: #ffffff;
-`;
-
-const InfoPanelTitle = styled.h3`
-  margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-  color: #1a1a1a;
-`;
-
-const CloseButton = styled.button`
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  border: none;
-  background-color: transparent;
-  color: #888;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s;
-
-  &:hover {
-    background-color: #f0f0f0;
-    color: #333;
-  }
 `;
 
 const LoadingContainer = styled.div`

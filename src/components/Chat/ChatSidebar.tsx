@@ -2,14 +2,18 @@ import styled from "@emotion/styled";
 import { MESSAGES } from "@shared/constants/chat";
 import useChatStore from "@shared/store/chatStore";
 import dayjs from "dayjs";
+import { Home, Plane } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { FC } from "react";
 
 interface Props {
   onNewChat: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-const ChatSidebar: FC<Props> = ({ onNewChat }) => {
+const ChatSidebar: FC<Props> = ({ onNewChat, isOpen = false, onClose }) => {
   const router = useRouter();
   const { sessions, getCurrentSession, loadSession, deleteSession } = useChatStore();
   const currentSession = getCurrentSession();
@@ -21,27 +25,38 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
     }
   };
 
+  const handleLoadSession = (sessionId: string) => {
+    loadSession(sessionId);
+    if (onClose) onClose(); // 모바일에서 세션 선택 시 사이드바 닫기
+  };
+
+  const handleNewChatClick = () => {
+    onNewChat();
+    if (onClose) onClose(); // 모바일에서 새 채팅 시작 시 사이드바 닫기
+  };
+
+  const handleNavClick = (path: string) => {
+    router.push(path);
+    if (onClose) onClose(); // 모바일에서 네비게이션 클릭 시 사이드바 닫기
+  };
+
   return (
-    <Container>
-      {/* Header */}
+    <Container isOpen={isOpen}>
+      {/* Header Section */}
       <Header>
-        <LogoWrapper onClick={() => router.push("/")}>
+        <LogoWrapper onClick={() => handleNavClick("/")}>
           <LogoIcon>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
-              <path
-                d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              />
-            </svg>
+            <Image src="/tumakr-logo(no-text).png" alt="tumakr" width={32} height={32} />
           </LogoIcon>
-          <LogoText>Tumakr</LogoText>
+          <LogoTextWrapper>
+            <LogoTitle>tumakr</LogoTitle>
+            <LogoSubtitle>by OnedayKorea</LogoSubtitle>
+          </LogoTextWrapper>
         </LogoWrapper>
       </Header>
 
       {/* New Chat Button */}
-      <NewChatButton onClick={onNewChat}>
+      <NewChatButton onClick={handleNewChatClick}>
         <NewChatIconWrapper>
           <svg
             width="18"
@@ -87,11 +102,11 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
                 const bTime = b.lastMessageAt || b.createdAt;
                 return new Date(bTime).getTime() - new Date(aTime).getTime();
               })
-              .map((session, index) => (
+              .map((session) => (
                 <ChatItem
                   key={session.sessionId}
                   active={currentSession?.sessionId === session.sessionId}
-                  onClick={() => loadSession(session.sessionId)}
+                  onClick={() => handleLoadSession(session.sessionId)}
                 >
                   <ChatItemIcon active={currentSession?.sessionId === session.sessionId}>
                     <svg
@@ -137,33 +152,12 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
       {/* Bottom Navigation */}
       <BottomNav>
         <NavItem onClick={() => router.push("/")}>
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-            <polyline points="9 22 9 12 15 12 15 22" />
-          </svg>
+          <Home className="w-4.5 h-4.5" />
           <span>Home</span>
         </NavItem>
-        <NavItem onClick={() => router.push("/orders")}>
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
-            <rect x="9" y="3" width="6" height="4" rx="1" />
-            <path d="M9 12h6M9 16h6" />
-          </svg>
-          <span>Orders</span>
+        <NavItem onClick={() => router.push("/tours")}>
+          <Plane className="w-4.5 h-4.5" />
+          <span>Tours</span>
         </NavItem>
       </BottomNav>
     </Container>
@@ -173,8 +167,9 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
 export default React.memo(ChatSidebar);
 
 // Styled Components
-const Container = styled.div`
+const Container = styled.div<{ isOpen?: boolean }>`
   width: 280px;
+  min-height: 100vh;
   background: linear-gradient(180deg, #fefefe 0%, #f8f7f5 100%);
   border-right: 1px solid #eee;
   display: flex;
@@ -183,13 +178,20 @@ const Container = styled.div`
   flex-shrink: 0;
 
   @media (max-width: 1024px) {
-    display: none;
+    position: fixed;
+    top: 0;
+    left: ${({ isOpen }) => (isOpen ? "0" : "-280px")};
+    bottom: 0;
+    z-index: 1000;
+    transition: left 0.3s ease-in-out;
+    box-shadow: ${({ isOpen }) => (isOpen ? "4px 0 12px rgba(0, 0, 0, 0.15)" : "none")};
   }
 `;
 
 const Header = styled.div`
   padding: 20px 16px 16px;
   flex-shrink: 0;
+  border-bottom: 1px solid #eee;
 `;
 
 const LogoWrapper = styled.div`
@@ -211,19 +213,27 @@ const LogoIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 `;
 
-const LogoText = styled.span`
-  font-size: 20px;
+const LogoTextWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`;
+
+const LogoTitle = styled.span`
+  font-size: 18px;
   font-weight: 700;
-  background: linear-gradient(
-    135deg,
-    var(--color-tumakr-maroon) 0%,
-    var(--color-tumakr-maroon) 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #333;
+  line-height: 1;
+`;
+
+const LogoSubtitle = styled.span`
+  font-size: 10px;
+  font-weight: 400;
+  color: #999;
+  line-height: 1;
 `;
 
 const NewChatButton = styled.button`
