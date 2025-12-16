@@ -35,13 +35,13 @@ interface ChatStore {
   // 액션
   initSession: () => Promise<boolean>;
   loadSession: (sessionId: string) => Promise<void>;
-  loadUserSessions: (userId: number) => Promise<void>;
+  loadUserSessions: () => Promise<void>;
   addMessage: (message: Omit<ChatMessage, "id" | "timestamp">) => Promise<void>;
   sendUserMessage: (content: string) => Promise<void>;
   updateLastMessage: (content: string) => void;
   setIsTyping: (isTyping: boolean) => void;
   updateContext: (context: Partial<ChatContext>) => Promise<void>;
-  generateEstimateForSession: (userId?: number) => Promise<boolean>;
+  generateEstimateForSession: () => Promise<boolean>;
   clearSession: () => void;
   clearAllSessions: () => void;
   deleteSession: (sessionId: string) => void;
@@ -113,13 +113,17 @@ const useChatStore = create<ChatStore>((set, get) => ({
       set({ isLoading: true });
 
       // 로그인한 사용자 정보 가져오기
-      const userId = authState.user?.id;
+      const accessToken = authState.accessToken;
+      if (!accessToken) {
+        console.warn("No access token available");
+        set({ isLoading: false });
+        return false;
+      }
 
       // 백엔드에 세션 생성
-      const newSession = await createChatSession({
+      const newSession = await createChatSession(accessToken, {
         title: "New Chat",
         context: {},
-        userId, // 로그인한 사용자 ID 전달
       });
 
       // 로컬 상태 업데이트
@@ -151,8 +155,17 @@ const useChatStore = create<ChatStore>((set, get) => ({
     try {
       set({ isLoading: true });
 
+      // 로그인 확인 및 accessToken 가져오기
+      const authState = useAuthStore.getState();
+      const accessToken = authState.accessToken;
+      if (!accessToken) {
+        console.warn("No access token available");
+        set({ isLoading: false });
+        return;
+      }
+
       // 백엔드에서 세션 및 메시지 가져오기
-      const session = await getChatSession(sessionId);
+      const session = await getChatSession(accessToken, sessionId);
 
       const { sessions } = get();
       const existingSessionIndex = sessions.findIndex(
@@ -211,15 +224,23 @@ const useChatStore = create<ChatStore>((set, get) => ({
   },
 
   // 사용자의 모든 세션 불러오기 (서버에서)
-  loadUserSessions: async (userId: number) => {
+  loadUserSessions: async () => {
     try {
       set({ isLoading: true });
 
-      // 서버에서 사용자의 세션 목록 가져오기
-      const { sessions: serverSessions } = await getAllChatSessions({
-        userId,
+      // 로그인 확인 및 accessToken 가져오기
+      const authState = useAuthStore.getState();
+      const accessToken = authState.accessToken;
+      if (!accessToken) {
+        console.warn("No access token available");
+        set({ isLoading: false });
+        return;
+      }
+
+      // 서버에서 사용자의 세션 목록 가져오기 (userId는 JWT에서 추출됨)
+      const { sessions: serverSessions } = await getAllChatSessions(accessToken, {
         page: 1,
-        countPerPage: 50, // 최근 50개 세션
+        limit: 50, // 최근 50개 세션
       });
 
       // 세션 데이터 변환 - 서버 응답 타입
@@ -291,6 +312,14 @@ const useChatStore = create<ChatStore>((set, get) => ({
     if (!currentSessionId) return;
 
     try {
+      // 로그인 확인 및 accessToken 가져오기
+      const authState = useAuthStore.getState();
+      const accessToken = authState.accessToken;
+      if (!accessToken) {
+        console.warn("No access token available");
+        return;
+      }
+
       // 1. 사용자 메시지 로컬 추가
       await addMessage({
         role: "user",
@@ -300,7 +329,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
 
       // 2. AI 응답 생성 요청
       setIsTyping(true);
-      const aiMessage = await generateAIResponse(currentSessionId, content);
+      const aiMessage = await generateAIResponse(accessToken, currentSessionId, content);
 
       // 3. AI 응답 로컬 추가 및 백엔드에서 업데이트된 컨텍스트/제목 반영
       const { sessions } = get();
@@ -421,6 +450,14 @@ const useChatStore = create<ChatStore>((set, get) => ({
     if (!currentSessionId) return;
 
     try {
+      // 로그인 확인 및 accessToken 가져오기
+      const authState = useAuthStore.getState();
+      const accessToken = authState.accessToken;
+      if (!accessToken) {
+        console.warn("No access token available");
+        return;
+      }
+
       // 로컬 상태 업데이트
       const updatedSessions = sessions.map((session) => {
         if (session.sessionId === currentSessionId) {
@@ -451,7 +488,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
         (s) => s.sessionId === currentSessionId
       );
       if (session) {
-        await updateChatSession(currentSessionId, {
+        await updateChatSession(accessToken, currentSessionId, {
           context: session.context,
           title: session.title,
         });
@@ -497,15 +534,23 @@ const useChatStore = create<ChatStore>((set, get) => ({
   },
 
   // 견적서 생성 (세션 기반)
-  generateEstimateForSession: async (userId) => {
+  generateEstimateForSession: async () => {
     const { currentSessionId, sessions, addMessage } = get();
     if (!currentSessionId) return false;
 
     try {
+      // 로그인 확인 및 accessToken 가져오기
+      const authState = useAuthStore.getState();
+      const accessToken = authState.accessToken;
+      if (!accessToken) {
+        console.warn("No access token available");
+        return false;
+      }
+
       set({ isGeneratingEstimate: true });
 
-      // AI 견적서 생성 API 호출
-      const result = await generateEstimate(currentSessionId, userId);
+      // AI 견적서 생성 API 호출 (userId는 JWT에서 추출됨)
+      const result = await generateEstimate(accessToken, currentSessionId);
 
       // 세션에 batchId 업데이트
       const updatedSessions = sessions.map((session) => {
@@ -522,7 +567,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
 
       // 백엔드에 batchId 동기화 (실패해도 로컬에는 유지)
       try {
-        await updateChatSession(currentSessionId, {
+        await updateChatSession(accessToken, currentSessionId, {
           batchId: result.batchId,
           status: 'active',
         });
