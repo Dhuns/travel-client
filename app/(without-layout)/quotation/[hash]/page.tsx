@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import styled from '@emotion/styled';
-import { getQuotationByHash, type QuotationResponse } from '@/src/shared/apis/estimate';
-import { FinalQuotation, DraftQuotation } from '../components';
+import { getQuotationByHash, type QuotationResponse } from "@/src/shared/apis/estimate";
+import styled from "@emotion/styled";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { DraftQuotation, FinalQuotation } from "../components";
 
 const QuotationPage = () => {
   const params = useParams();
@@ -22,7 +22,10 @@ const QuotationPage = () => {
         setQuotation(data);
       } catch (err) {
         const axiosError = err as { response?: { data?: { message?: string } } };
-        setError(axiosError?.response?.data?.message || 'Failed to load quotation. The link may be invalid or expired.');
+        setError(
+          axiosError?.response?.data?.message ||
+            "Failed to load quotation. The link may be invalid or expired."
+        );
       } finally {
         setIsLoading(false);
       }
@@ -46,14 +49,14 @@ const QuotationPage = () => {
       <ErrorContainer>
         <ErrorMessage>
           <h2>Unable to Load Quotation</h2>
-          <p>{error || 'The quotation link is invalid or has expired.'}</p>
+          <p>{error || "The quotation link is invalid or has expired."}</p>
         </ErrorMessage>
       </ErrorContainer>
     );
   }
 
   const { batchInfo } = quotation;
-  const isFinalQuotation = batchInfo.source === 'manual';
+  const isFinalQuotation = batchInfo.source === "manual";
 
   // Render Final Quotation (Manual) or Draft Quotation (AI)
   return isFinalQuotation ? (

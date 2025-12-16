@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, LogIn, Menu, Search, User, X } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -83,13 +83,6 @@ function headerReducer(state: HeaderState, action: HeaderAction): HeaderState {
  * - 사용자 정보 API: /api/user/profile로 사용자 정보 조회
  */
 export default function Header() {
-  const pathname = usePathname();
-
-  // Hide header on quotation pages
-  if (pathname?.startsWith("/quotation")) {
-    return null;
-  }
-
   // useReducer로 상태 관리
   const [state, dispatch] = useReducer(headerReducer, initialState);
   const {
