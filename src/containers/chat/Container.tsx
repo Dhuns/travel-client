@@ -1,6 +1,6 @@
 import { FC, useCallback, useEffect, useState } from "react";
 
-import ChatInfoPanel from "@components/Chat/ChatInfoPanel";
+import ChatInfoSidebar from "@components/Chat/ChatInfoSidebar";
 import ChatInput from "@components/Chat/ChatInput";
 import ChatMessageList from "@components/Chat/ChatMessageList";
 import ChatSidebar from "@components/Chat/ChatSidebar";
@@ -286,31 +286,13 @@ const Container: FC = () => {
         </ChatWrapper>
 
         {/* Right Info Panel (toggleable) */}
-        {showInfoPanel && <InfoPanelBackdrop onClick={() => setShowInfoPanel(false)} />}
-        <InfoPanel isVisible={showInfoPanel}>
-          <InfoPanelContent isVisible={showInfoPanel}>
-            <InfoPanelHeader>
-              <InfoPanelTitle>Trip Details</InfoPanelTitle>
-              <CloseButton onClick={() => setShowInfoPanel(false)}>
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              </CloseButton>
-            </InfoPanelHeader>
-            <ChatInfoPanel
-              context={context}
-              messageCount={session.messages.length}
-              batchId={session.batchId}
-            />
-          </InfoPanelContent>
-        </InfoPanel>
+        <ChatInfoSidebar
+          isOpen={showInfoPanel}
+          onClose={() => setShowInfoPanel(false)}
+          context={context}
+          messageCount={session.messages.length}
+          batchId={session.batchId}
+        />
       </MainArea>
     </PageContainer>
   );
@@ -322,7 +304,7 @@ export default Container;
 const PageContainer = styled.div`
   display: flex;
   flex: 1;
-  min-height: 0;
+  min-height: 100vh;
   background-color: #ffffff;
   overflow: hidden;
 `;
@@ -419,7 +401,7 @@ const MobileMenuButton = styled.button`
 
 const SidebarOverlay = styled.div`
   position: fixed;
-  top: 80px;
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
@@ -489,87 +471,6 @@ const InputHint = styled.div`
   font-size: 11px;
   color: #999;
   margin-top: 8px;
-`;
-
-const InfoPanel = styled.div<{ isVisible: boolean }>`
-  width: ${({ isVisible }) => (isVisible ? "320px" : "0")};
-  background-color: #fafafa;
-  border-left: 1px solid #f0f0f0;
-  overflow: hidden;
-  flex-shrink: 0;
-  transition: width 0.3s ease-in-out;
-
-  @media (max-width: 1280px) {
-    position: fixed;
-    right: ${({ isVisible }) => (isVisible ? "0" : "-320px")};
-    top: 80px;
-    bottom: 0;
-    width: 320px;
-    max-width: 85vw;
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.08);
-    z-index: 1001;
-    transition: right 0.3s ease-in-out;
-  }
-`;
-
-const InfoPanelContent = styled.div<{ isVisible: boolean }>`
-  width: 320px;
-  height: 100%;
-  opacity: ${({ isVisible }) => (isVisible ? "1" : "0")};
-  transition: opacity ${({ isVisible }) => (isVisible ? "0.3s 0.15s" : "0.15s")}
-    ease-in-out;
-  display: flex;
-  flex-direction: column;
-`;
-
-const InfoPanelBackdrop = styled.div`
-  display: none;
-
-  @media (max-width: 1280px) {
-    display: block;
-    position: fixed;
-    top: 80px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.4);
-    z-index: 1000;
-  }
-`;
-
-const InfoPanelHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #e8e8e8;
-  background-color: #ffffff;
-`;
-
-const InfoPanelTitle = styled.h3`
-  margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-  color: #1a1a1a;
-`;
-
-const CloseButton = styled.button`
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  border: none;
-  background-color: transparent;
-  color: #888;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s;
-
-  &:hover {
-    background-color: #f0f0f0;
-    color: #333;
-  }
 `;
 
 const LoadingContainer = styled.div`
