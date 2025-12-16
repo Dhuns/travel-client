@@ -10,7 +10,7 @@ import type React from "react";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "OneDay Korea - Authentic Korean Tours & Experiences",
+  title: "tumakr by oneday korea - Authentic Korean Tours & Experiences",
   description:
     "Discover Korea with local experts. Premium tours, cultural experiences, and authentic Korean products for international travelers.",
   icons: {
