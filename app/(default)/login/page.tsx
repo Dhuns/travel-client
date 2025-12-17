@@ -183,7 +183,7 @@ export default function LoginPage() {
 
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || !formData.username.trim() || !formData.password.trim()}
             className="w-full py-5 text-sm font-medium text-white bg-tumakr-maroon rounded-lg hover:bg-tumakr-maroon/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? "Signing in..." : "Sign in"}

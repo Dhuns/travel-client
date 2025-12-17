@@ -400,7 +400,17 @@ export default function SignupPage() {
             {/* Submit */}
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={
+                isSubmitting ||
+                !formData.name.trim() ||
+                !formData.email.trim() ||
+                !formData.password.trim() ||
+                !formData.confirmPassword.trim() ||
+                !emailChecked ||
+                !emailAvailable ||
+                !agreements.terms ||
+                !agreements.privacy
+              }
               className="w-full py-3 h-[44px] bg-tumakr-maroon hover:bg-tumakr-maroon/90 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
             >
               {isSubmitting ? "Creating account..." : "Create account"}

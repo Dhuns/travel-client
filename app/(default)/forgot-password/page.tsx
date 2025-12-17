@@ -113,7 +113,7 @@ export default function ForgotPasswordPage() {
           {/* 제출 버튼 */}
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || !email.trim()}
             className="w-full py-5 text-sm font-medium text-white bg-tumakr-maroon rounded-lg hover:bg-tumakr-maroon/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? "Sending..." : "Send Reset Link"}
