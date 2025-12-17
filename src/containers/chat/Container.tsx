@@ -193,7 +193,7 @@ const Container: FC = () => {
   }
 
   // 초기화 완료 후 세션이 없고, 저장된 세션도 없으면 EmptyState 표시
-  const hasMessages = session?.messages.length > 0;
+  const hasMessages = (session?.messages?.length ?? 0) > 0;
   const isFirstVisit = sessions.length === 0 && !hasMessages;
 
   if (isFirstVisit) {
@@ -235,6 +235,11 @@ const Container: FC = () => {
         </EmptyStateContent>
       </EmptyStateContainer>
     );
+  }
+
+  // session이 없으면 null 반환 (TypeScript guard)
+  if (!session) {
+    return null;
   }
 
   return (
