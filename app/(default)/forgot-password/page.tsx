@@ -50,22 +50,24 @@ export default function ForgotPasswordPage() {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-[#f5f3f0] to-[#faf8f5] flex items-center justify-center pt-32 pb-16">
-        <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8">
+      <div className="min-h-screen bg-[#faf9f7] flex items-center justify-center px-4">
+        <div className="max-w-sm w-full">
           <div className="text-center">
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
               <Mail className="w-8 h-8 text-green-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Check Your Email</h2>
-            <p className="text-gray-600 mb-4">We've sent a password reset link to</p>
-            <p className="text-tumakr-maroon font-semibold mb-6 break-all">{email}</p>
+            <h2 className="text-xl font-semibold text-gray-900 mb-1">Check Your Email</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              We've sent a password reset link to
+            </p>
+            <p className="text-tumakr-maroon font-medium mb-6 break-all">{email}</p>
             <p className="text-sm text-gray-500 mb-6">
               Click the link in the email to reset your password. The link will expire in
               1 hour.
             </p>
             <Button
               onClick={() => router.push("/login")}
-              className="w-full bg-linear-to-r from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white"
+              className="w-full py-5 text-sm font-medium text-white bg-tumakr-maroon rounded-lg hover:bg-tumakr-maroon/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Back to Login
             </Button>
@@ -76,65 +78,57 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-[#f5f3f0] to-[#faf8f5] pt-32 pb-16">
-      <div className="container mx-auto px-6">
-        <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
-          {/* 헤더 */}
-          <div className="bg-linear-to-r from-tumakr-maroon to-tumakr-maroon/90 text-white p-8 text-center">
-            <h1 className="text-3xl font-bold mb-2">Forgot Password?</h1>
-            <p className="text-[#f5f3f0]">Enter your email to reset your password</p>
-          </div>
+    <div className="min-h-screen bg-[#faf9f7] flex items-center justify-center px-4">
+      <div className="max-w-sm w-full">
+        <div className="text-center mb-8">
+          <h1 className="text-xl font-semibold text-gray-900 mb-1">Forgot Password?</h1>
+          <p className="text-sm text-gray-500">Enter your email to reset your password</p>
+        </div>
 
-          {/* 폼 */}
-          <div className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* 에러 메시지 */}
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                  <p>{error}</p>
-                </div>
-              )}
+        {/* 폼 */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* 에러 메시지 */}
+          {error && (
+            <div className="p-3 bg-red-50 rounded-lg">
+              <p className="text-sm text-red-600 text-center">{error}</p>
+            </div>
+          )}
 
-              {/* 이메일 입력 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-tumakr-maroon transition-all duration-300 text-gray-900 placeholder:text-gray-400 bg-white"
-                    autoComplete="email"
-                    placeholder="Enter your email"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* 제출 버튼 */}
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="w-full bg-linear-to-r py-5 from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? "Sending..." : "Send Reset Link"}
-              </Button>
-            </form>
-
-            {/* 돌아가기 링크 */}
-            <div className="mt-6 text-center">
-              <button
-                onClick={() => router.push("/login")}
-                className="text-tumakr-maroon hover:text-tumakr-maroon/90 font-medium transition-colors duration-300 inline-flex items-center"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Login
-              </button>
+          {/* 이메일 입력 */}
+          <div>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-tumakr-maroon transition-colors"
+                autoComplete="email"
+                placeholder="Email"
+                required
+              />
             </div>
           </div>
+
+          {/* 제출 버튼 */}
+          <Button
+            type="submit"
+            disabled={isLoading || !email.trim()}
+            className="w-full py-5 text-sm font-medium text-white bg-tumakr-maroon rounded-lg hover:bg-tumakr-maroon/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {isLoading ? "Sending..." : "Send Reset Link"}
+          </Button>
+        </form>
+
+        {/* 돌아가기 링크 */}
+        <div className="mt-6 text-center">
+          <a
+            href="/login"
+            className="text-xs text-gray-500 hover:text-tumakr-maroon transition-colors inline-flex items-center"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Login
+          </a>
         </div>
       </div>
     </div>

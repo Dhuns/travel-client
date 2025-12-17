@@ -33,7 +33,7 @@ export default async function PrivateTourPage() {
         </div>
 
         {/* 콘텐츠 */}
-        <div className="md:py-24 container mx-auto max-w-5xl px-6 relative z-10 text-center">
+        <div className="py-12 md:py-24 container mx-auto max-w-5xl px-6 relative z-10 text-center">
           {/* 배지 */}
           <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full mb-8 bg-white/20 backdrop-blur-md border border-white/30 shadow-lg">
             <Star className="w-4 h-4" fill="white" stroke="none" />
