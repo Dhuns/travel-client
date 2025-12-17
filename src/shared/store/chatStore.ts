@@ -180,17 +180,50 @@ const useChatStore = create<ChatStore>((set, get) => ({
       if (existingSessionIndex >= 0) {
         // 기존 세션 업데이트
         const updatedSessions = [...sessions];
+        const existingSession = sessions[existingSessionIndex];
+        
+        // 메시지 목록에서 가장 최근 메시지 시간 계산
+        const mappedMessages = session.messages?.map((m) => ({
+          ...m,
+          timestamp: new Date(m.sentAt || m.timestamp),
+        })) || [];
+        
+        // 메시지가 있으면 가장 최근 메시지의 시간을 사용
+        let actualLastMessageAt: Date | undefined;
+        if (mappedMessages.length > 0) {
+          const latestMessage = mappedMessages.reduce((latest, msg) => {
+            const msgTime = msg.timestamp.getTime();
+            const latestTime = latest.timestamp.getTime();
+            return msgTime > latestTime ? msg : latest;
+          });
+          actualLastMessageAt = latestMessage.timestamp;
+        } else {
+          // 메시지가 없으면 서버의 lastMessageAt 사용
+          actualLastMessageAt = session.lastMessageAt 
+            ? new Date(session.lastMessageAt)
+            : undefined;
+        }
+        
+        // 클라이언트의 lastMessageAt이 더 최신이면 유지 (사용자가 방금 메시지를 보낸 경우)
+        const clientLastMessageAt = existingSession.lastMessageAt
+          ? existingSession.lastMessageAt.getTime()
+          : 0;
+        const serverLastMessageAt = actualLastMessageAt
+          ? actualLastMessageAt.getTime()
+          : 0;
+        
+        // 클라이언트가 더 최신이고 5초 이내 차이면 클라이언트 값 유지 (네트워크 지연 고려)
+        const timeDiff = Math.abs(clientLastMessageAt - serverLastMessageAt);
+        const preservedLastMessageAt = 
+          clientLastMessageAt > serverLastMessageAt && timeDiff < 5000
+            ? existingSession.lastMessageAt
+            : actualLastMessageAt;
+        
         updatedSessions[existingSessionIndex] = {
           ...session,
           createdAt: new Date(session.createdAt),
-          lastMessageAt: session.lastMessageAt
-            ? new Date(session.lastMessageAt)
-            : undefined,
-          messages:
-            session.messages?.map((m) => ({
-              ...m,
-              timestamp: new Date(m.sentAt || m.timestamp),
-            })) || [],
+          lastMessageAt: preservedLastMessageAt,
+          messages: mappedMessages,
         };
 
         set({
@@ -396,7 +429,10 @@ const useChatStore = create<ChatStore>((set, get) => ({
             context: aiResponse.updatedContext || session.context,
             // 백엔드에서 업데이트된 제목 반영 (예: "Seoul Trip")
             title: aiResponse.updatedTitle || session.title,
-            lastMessageAt: new Date(),
+            // 백엔드 응답의 sentAt 시간을 사용 (서버 시간이 정확함)
+            lastMessageAt: aiMessage.sentAt 
+              ? new Date(aiMessage.sentAt)
+              : new Date(),
           };
         }
         return session;
