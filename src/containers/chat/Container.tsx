@@ -38,7 +38,7 @@ const Container: FC = () => {
 
   // 디버깅: 상태 변화 로그
   useEffect(() => {
-    console.log('[Container] State:', {
+    console.log("[Container] State:", {
       isInitialized,
       isAuthenticated,
       userId: user?.id,
@@ -46,7 +46,14 @@ const Container: FC = () => {
       currentSessionId,
       hasSession: !!session,
     });
-  }, [isInitialized, isAuthenticated, user?.id, sessions.length, currentSessionId, session]);
+  }, [
+    isInitialized,
+    isAuthenticated,
+    user?.id,
+    sessions.length,
+    currentSessionId,
+    session,
+  ]);
 
   // 로그인 시 사용자 정보 가져오기
   useEffect(() => {
@@ -81,7 +88,7 @@ const Container: FC = () => {
 
   // 기존 세션이 있으면 가장 최근 세션 로드 (자동 생성은 하지 않음 - Zendesk/Intercom 표준)
   useEffect(() => {
-    console.log('[Container] Session load check:', {
+    console.log("[Container] Session load check:", {
       isInitialized,
       hasSession: !!session,
       isAuthenticated,
@@ -95,7 +102,7 @@ const Container: FC = () => {
           new Date(b.lastMessageAt || b.createdAt).getTime() -
           new Date(a.lastMessageAt || a.createdAt).getTime()
       )[0];
-      console.log('[Container] Loading latest session:', latestSession?.sessionId);
+      console.log("[Container] Loading latest session:", latestSession?.sessionId);
       if (latestSession) {
         loadSession(latestSession.sessionId);
       }
@@ -502,8 +509,8 @@ const IconButton = styled.button<{ active?: boolean }>`
 `;
 
 const InputArea = styled.div`
-  padding: 0 24px 24px 24px;
-  background: linear-gradient(to bottom, transparent, #ffffff 20%);
+  padding: 12px 24px 24px 24px;
+  background: transparent;
   flex-shrink: 0;
 `;
 
