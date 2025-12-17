@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import { Home, Plane } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { FC } from "react";
+import React, { FC, useMemo } from "react";
 
 interface Props {
   onNewChat: () => void;
@@ -39,6 +39,23 @@ const ChatSidebar: FC<Props> = ({ onNewChat, isOpen = false, onClose }) => {
     router.push(path);
     if (onClose) onClose(); // 모바일에서 네비게이션 클릭 시 사이드바 닫기
   };
+
+  // 정렬된 세션 목록을 메모이제이션하여 불필요한 재정렬 방지
+  // 같은 시간일 경우 sessionId로 안정적인 정렬 보장
+  const sortedSessions = useMemo(() => {
+    return [...sessions].sort((a, b) => {
+      const aTime = a.lastMessageAt || a.createdAt;
+      const bTime = b.lastMessageAt || b.createdAt;
+      const timeDiff = new Date(bTime).getTime() - new Date(aTime).getTime();
+      
+      // 시간이 같으면 sessionId로 안정적인 정렬 (같은 순서 유지)
+      if (timeDiff === 0) {
+        return a.sessionId.localeCompare(b.sessionId);
+      }
+      
+      return timeDiff;
+    });
+  }, [sessions]);
 
   return (
     <Container isOpen={isOpen}>
@@ -96,13 +113,7 @@ const ChatSidebar: FC<Props> = ({ onNewChat, isOpen = false, onClose }) => {
               <EmptyText>Start your first conversation</EmptyText>
             </EmptyState>
           ) : (
-            [...sessions]
-              .sort((a, b) => {
-                const aTime = a.lastMessageAt || a.createdAt;
-                const bTime = b.lastMessageAt || b.createdAt;
-                return new Date(bTime).getTime() - new Date(aTime).getTime();
-              })
-              .map((session) => (
+            sortedSessions.map((session) => (
                 <ChatItem
                   key={session.sessionId}
                   active={currentSession?.sessionId === session.sessionId}
