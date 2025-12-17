@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 const Container: FC = () => {
   const {
     sessions,
+    currentSessionId,
     getCurrentSession,
     isTyping,
     isLoading,
@@ -22,7 +23,6 @@ const Container: FC = () => {
     loadUserSessions,
     sendUserMessage,
     clearSession,
-    loadFromStorage,
     clearAllSessions,
   } = useChatStore();
 
@@ -35,6 +35,18 @@ const Container: FC = () => {
 
   const session = getCurrentSession();
   const context = session?.context || {};
+
+  // 디버깅: 상태 변화 로그
+  useEffect(() => {
+    console.log('[Container] State:', {
+      isInitialized,
+      isAuthenticated,
+      userId: user?.id,
+      sessionsCount: sessions.length,
+      currentSessionId,
+      hasSession: !!session,
+    });
+  }, [isInitialized, isAuthenticated, user?.id, sessions.length, currentSessionId, session]);
 
   // 로그인 시 사용자 정보 가져오기
   useEffect(() => {
@@ -67,26 +79,28 @@ const Container: FC = () => {
     }
   }, [isInitialized, isAuthenticated, user, loadUserSessions]);
 
-  // 세션이 없으면 자동으로 새 세션 생성 또는 기존 세션 로드 (로그인한 사용자만)
+  // 기존 세션이 있으면 가장 최근 세션 로드 (자동 생성은 하지 않음 - Zendesk/Intercom 표준)
   useEffect(() => {
-    if (isInitialized && !session && isAuthenticated) {
-      // 세션이 없는 경우
-      if (sessions.length === 0) {
-        // 저장된 세션이 없으면 새로 생성
-        initSession();
-      } else {
-        // 저장된 세션이 있으면 가장 최근 세션 로드
-        const latestSession = [...sessions].sort(
-          (a, b) =>
-            new Date(b.lastMessageAt || b.createdAt).getTime() -
-            new Date(a.lastMessageAt || a.createdAt).getTime()
-        )[0];
-        if (latestSession) {
-          loadSession(latestSession.sessionId);
-        }
+    console.log('[Container] Session load check:', {
+      isInitialized,
+      hasSession: !!session,
+      isAuthenticated,
+      sessionsCount: sessions.length,
+    });
+
+    if (isInitialized && !session && isAuthenticated && sessions.length > 0) {
+      // 저장된 세션이 있으면 가장 최근 세션 로드
+      const latestSession = [...sessions].sort(
+        (a, b) =>
+          new Date(b.lastMessageAt || b.createdAt).getTime() -
+          new Date(a.lastMessageAt || a.createdAt).getTime()
+      )[0];
+      console.log('[Container] Loading latest session:', latestSession?.sessionId);
+      if (latestSession) {
+        loadSession(latestSession.sessionId);
       }
     }
-  }, [isInitialized, session, sessions.length, isAuthenticated]);
+  }, [isInitialized, session, sessions.length, isAuthenticated, loadSession]);
 
   // 새 채팅 시작
   const handleNewChat = useCallback(() => {
@@ -96,13 +110,25 @@ const Container: FC = () => {
   // 메시지 전송 핸들러
   const handleSendMessage = useCallback(
     async (content: string) => {
-      if (!session) return;
+      // 세션이 없으면 먼저 생성 (첫 메시지 전송 시)
+      if (!session) {
+        const success = await initSession();
+        if (!success) {
+          console.error("Failed to initialize session");
+          return;
+        }
+        // 세션 생성 후 약간의 딜레이를 주고 메시지 전송
+        setTimeout(async () => {
+          await sendUserMessage(content);
+        }, 100);
+        return;
+      }
 
       // 백엔드 API로 메시지 전송 및 AI 응답 받기 (Gemini AI)
       // 컨텍스트 추출은 백엔드에서 자동으로 수행됨
       await sendUserMessage(content);
     },
-    [session, sendUserMessage]
+    [session, sendUserMessage, initSession]
   );
 
   // 비로그인 사용자 로그인 유도
@@ -146,17 +172,28 @@ const Container: FC = () => {
     );
   }
 
-  if (!session) {
+  // 초기화 완료 전에는 로딩 표시
+  if (!isInitialized) {
     return (
       <LoadingContainer>
         <LoadingSpinner />
-        <LoadingText>Preparing your AI travel planner...</LoadingText>
+        <LoadingText>Loading your chat sessions...</LoadingText>
       </LoadingContainer>
     );
   }
 
-  // 메시지가 없고 세션도 없으면 EmptyState 표시 (최초 방문자)
-  const hasMessages = session.messages.length > 0;
+  // 세션 목록은 있지만 현재 세션이 로드되지 않은 경우 (로딩 중)
+  if (sessions.length > 0 && !session) {
+    return (
+      <LoadingContainer>
+        <LoadingSpinner />
+        <LoadingText>Loading chat...</LoadingText>
+      </LoadingContainer>
+    );
+  }
+
+  // 초기화 완료 후 세션이 없고, 저장된 세션도 없으면 EmptyState 표시
+  const hasMessages = session?.messages.length > 0;
   const isFirstVisit = sessions.length === 0 && !hasMessages;
 
   if (isFirstVisit) {
