@@ -91,8 +91,12 @@ export default function LoginPage() {
       }
 
       // 사용자 친화적인 메시지로 변환
-      if (errorMessage.toLowerCase().includes("invalid username or password")) {
+      const errorMessageLower = errorMessage.toLowerCase();
+      if (errorMessageLower.includes("invalid username or password")) {
         errorMessage = "Incorrect email or password. Please try again.";
+      } else {
+        // if문에 해당하지 않는 모든 에러는 서버 오류로 표시
+        errorMessage = "A server error occurred. Please try again later.";
       }
 
       setError(errorMessage);
