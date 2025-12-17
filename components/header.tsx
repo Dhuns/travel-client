@@ -165,7 +165,7 @@ export default function Header() {
       { href: "/", label: "Home" },
       // { href: "/souvenir", label: "Souvenir" }, 개발 후 추가
       { href: "/tours/themed-private", label: "Tours", hasDropdown: true },
-      { href: "/contact", label: "Contact", isContact: true }, // 개발 후 hasDropdown: true로 변경
+      { href: "/contact", label: "Contact", isContact: true, hasDropdown: true },
     ],
     []
   );
@@ -298,8 +298,6 @@ export default function Header() {
                       onMouseEnter={() => setContactDropdown(true)}
                       onMouseLeave={() => setContactDropdown(false)}
                     >
-                      {/* 
-                      개발 후 추가
                       <div className="bg-white rounded-lg shadow-xl border border-gray-200 py-2">
                         <Link
                           href="/chat"
@@ -325,7 +323,7 @@ export default function Header() {
                             Fill out our contact form
                           </div>
                         </Link>
-                      </div> */}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -517,7 +515,7 @@ export default function Header() {
                 Contact
               </Link>
 
-              {/* <div className="border-b border-gray-100 pb-2">
+              <div className="border-b border-gray-100 pb-2">
                 <div className="py-2 font-medium text-gray-900">Contact</div>
                 <div className="pl-4 space-y-2 mt-2">
                   <Link
@@ -535,7 +533,7 @@ export default function Header() {
                     Email Us
                   </Link>
                 </div>
-              </div> */}
+              </div>
 
               {/* Orders - 로그인 상태와 무관하게 항상 표시 - 개발 후 추가 */}
               {/* <Link
