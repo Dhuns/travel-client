@@ -462,16 +462,15 @@ export default function HomePageClient({ children }: HomePageClientProps) {
                 ))}
               </div>
 
-              <Button
-                disabled
-                size="lg"
-                className="bg-tumakr-mustard text-white hover:bg-tumakr-mustard/90 px-12 py-8 text-xl rounded-full shadow-2xl mt-8 group"
-              >
-                <div className="flex items-center gap-2">
-                  <MessageCircle className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                  Coming Soon
-                </div>
-              </Button>
+              <Link href="/chat">
+                <Button
+                  size="lg"
+                  className="bg-tumakr-mustard text-white hover:bg-tumakr-mustard/80 px-10 py-7 text-base lg:text-lg rounded-full shadow-2xl group/btn"
+                >
+                  <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
+                  Chat with AI Planner
+                </Button>
+              </Link>
             </div>
 
             {/* Right: Chat Preview */}
