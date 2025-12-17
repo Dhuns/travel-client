@@ -160,19 +160,6 @@ export default function HomePageClient({ children }: HomePageClientProps) {
               premium tour collections.
             </p>
             <div className="flex flex-col sm:flex-row items-start gap-4 opacity-0 animate-[fadeIn_1s_ease-in_2s_forwards]">
-              {/* Todo: 구현 후 추가
-              <Button
-                size="lg"
-                className="bg-tumakr-maroon text-white hover:bg-tumakr-maroon/90 px-8 py-6 text-lg rounded-full shadow-2xl group"
-                onClick={() =>
-                  document
-                    .getElementById("main-services")
-                    ?.scrollIntoView({ behavior: "smooth" })
-                }
-              >
-                <MessageCircle className="w-5 h-5 mr-2" />
-                Chat with AI Planner
-              </Button> */}
               <Button
                 size="lg"
                 variant="outline"
@@ -268,14 +255,15 @@ export default function HomePageClient({ children }: HomePageClientProps) {
               ))}
             </ul>
 
-            <Button
-              size="lg"
-              disabled
-              className="bg-white/60 text-tumakr-mustard cursor-not-allowed px-6 py-5 md:px-8 md:py-6 lg:px-10 lg:py-7 text-base lg:text-lg rounded-full shadow-2xl"
-            >
-              <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
-              Coming Soon
-            </Button>
+            <Link href="/chat">
+              <Button
+                size="lg"
+                className="bg-white text-tumakr-mustard hover:bg-white/90 px-6 py-5 md:px-8 md:py-6 lg:px-10 lg:py-7 text-base lg:text-lg rounded-full shadow-2xl group/btn"
+              >
+                <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
+                Chat with AI Planner
+              </Button>
+            </Link>
           </div>
         </div>
 
@@ -323,16 +311,6 @@ export default function HomePageClient({ children }: HomePageClientProps) {
               </Button>
             </Link>
           </div>
-        </div>
-
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/70">
-          <span className="text-sm font-semibold tracking-wider uppercase">
-            Scroll Down
-          </span>
-          <button onClick={scrollToTours} className="focus:outline-none">
-            <ChevronDown className="w-6 h-6 animate-bounce" />
-          </button>
         </div>
       </section>
 
