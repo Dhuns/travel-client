@@ -1,6 +1,6 @@
 import "./globals.css";
 
-import ErrorBoundary from "@/components/ErrorBoundary";
+import ErrorBoundaryWrapper from "@/components/ErrorBoundaryWrapper";
 import { ThemeProvider } from "@/components/theme-provider";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
@@ -72,7 +72,7 @@ export default function RootLayout({
         >
           <div className="flex flex-col min-h-screen flex-1">
             <main className="w-full flex-1">
-              <ErrorBoundary>
+              <ErrorBoundaryWrapper>
                 <Suspense
                   fallback={
                     <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center">
@@ -82,7 +82,7 @@ export default function RootLayout({
                 >
                   <div className="min-h-[calc(100vh-5rem)]">{children}</div>
                 </Suspense>
-              </ErrorBoundary>
+              </ErrorBoundaryWrapper>
             </main>
           </div>
         </ThemeProvider>
