@@ -12,16 +12,42 @@ interface Props {
 interface State {
   hasError: boolean;
   error: Error | null;
+  pathname: string;
 }
 
 class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = {
+      hasError: false,
+      error: null,
+      pathname: typeof window !== 'undefined' ? window.location.pathname : ''
+    };
   }
 
   static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+    return {
+      hasError: true,
+      error,
+      pathname: typeof window !== 'undefined' ? window.location.pathname : ''
+    };
+  }
+
+  componentDidMount(): void {
+    // pathname 변경 감지를 위한 초기 pathname 설정
+    this.setState({ pathname: window.location.pathname });
+  }
+
+  componentDidUpdate(): void {
+    // URL이 변경되면 에러 상태 리셋
+    const currentPathname = window.location.pathname;
+    if (this.state.hasError && this.state.pathname !== currentPathname) {
+      this.setState({
+        hasError: false,
+        error: null,
+        pathname: currentPathname
+      });
+    }
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
@@ -30,7 +56,11 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   handleReset = (): void => {
-    this.setState({ hasError: false, error: null });
+    this.setState({
+      hasError: false,
+      error: null,
+      pathname: window.location.pathname
+    });
   };
 
   render(): ReactNode {
