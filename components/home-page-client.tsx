@@ -219,7 +219,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
         className="relative min-h-screen lg:h-screen flex flex-col lg:flex-row"
       >
         {/* Left: AI Chatbot */}
-        <div className="relative w-full lg:w-1/2 bg-tumakr-mustard flex items-center justify-center py-16 px-6 md:py-20 md:px-12 lg:p-16 overflow-hidden">
+        <div className="relative w-full lg:w-1/2 min-h-screen lg:min-h-0 bg-tumakr-mustard flex items-center justify-center py-16 px-6 md:py-20 md:px-12 lg:p-16 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1),transparent)]" />
           <div className="absolute top-10 right-10 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse hidden lg:block" />
 
@@ -268,7 +268,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
         </div>
 
         {/* Right: Oneday Legacy */}
-        <div className="relative w-full lg:w-1/2 bg-tumakr-maroon flex items-center justify-center py-16 px-6 md:py-20 md:px-12 lg:p-16 overflow-hidden">
+        <div className="relative w-full lg:w-1/2 min-h-screen lg:min-h-0 bg-tumakr-maroon flex items-center justify-center py-16 px-6 md:py-20 md:px-12 lg:p-16 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(255,255,255,0.05),transparent)]" />
           <div className="absolute bottom-10 left-10 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse hidden lg:block" />
 
