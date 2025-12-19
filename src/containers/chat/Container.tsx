@@ -4,11 +4,13 @@ import ChatInfoSidebar from "@components/Chat/ChatInfoSidebar";
 import ChatInput from "@components/Chat/ChatInput";
 import ChatMessageList from "@components/Chat/ChatMessageList";
 import ChatSidebar from "@components/Chat/ChatSidebar";
+import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import { CHAT_STORAGE_KEY } from "@shared/constants/chat";
 import { useAuthStore } from "@shared/store/authStore";
 import useChatStore from "@shared/store/chatStore";
-import { Info } from "lucide-react";
+import { ChatContext } from "@shared/types/chat";
+import { Info, Globe, MessageCircle, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const Container: FC = () => {
@@ -138,6 +140,28 @@ const Container: FC = () => {
     [session, sendUserMessage, initSession]
   );
 
+  // UI 액션 선택 핸들러 (버튼, 칩, 날짜 선택 등)
+  const handleUIActionSelect = useCallback(
+    async (value: string | string[] | ChatContext) => {
+      // 값을 문자열로 변환하여 메시지로 전송
+      let messageContent: string;
+
+      if (typeof value === 'string') {
+        // 단일 선택 (버튼, 날짜 등)
+        messageContent = value;
+      } else if (Array.isArray(value)) {
+        // 다중 선택 (칩)
+        messageContent = value.join(', ');
+      } else {
+        // ChatContext (확인 카드에서 confirm/edit)
+        messageContent = 'confirm';
+      }
+
+      await handleSendMessage(messageContent);
+    },
+    [handleSendMessage]
+  );
+
   // 비로그인 사용자 로그인 유도
   if (!isAuthenticated) {
     return (
@@ -183,8 +207,12 @@ const Container: FC = () => {
   if (!isInitialized) {
     return (
       <LoadingContainer>
-        <LoadingSpinner />
-        <LoadingText>Loading your chat sessions...</LoadingText>
+        <LoadingIconWrapper>
+          <Globe className="globe-icon" />
+          <Sparkles className="sparkle-icon" />
+        </LoadingIconWrapper>
+        <LoadingText>Loading your travel plans...</LoadingText>
+        <LoadingSubtext>Preparing your personalized Korea travel assistant</LoadingSubtext>
       </LoadingContainer>
     );
   }
@@ -193,61 +221,135 @@ const Container: FC = () => {
   if (sessions.length > 0 && !session) {
     return (
       <LoadingContainer>
-        <LoadingSpinner />
-        <LoadingText>Loading chat...</LoadingText>
+        <LoadingIconWrapper>
+          <MessageCircle className="globe-icon" />
+        </LoadingIconWrapper>
+        <LoadingText>Loading conversation...</LoadingText>
+        <LoadingSubtext>Retrieving your chat history</LoadingSubtext>
       </LoadingContainer>
     );
   }
 
-  // 초기화 완료 후 세션이 없고, 저장된 세션도 없으면 EmptyState 표시
+  // 메시지가 없는 세션이면 목적지 선택 UI 표시 (새 대화)
   const hasMessages = (session?.messages?.length ?? 0) > 0;
-  const isFirstVisit = sessions.length === 0 && !hasMessages;
+  const showDestinationSelection = !hasMessages;
 
-  if (isFirstVisit) {
-    return (
-      <EmptyStateContainer>
-        <EmptyStateContent>
-          <EmptyStateIconWrapper>
-            <EmptyStateIcon>
-              <svg
-                width="56"
-                height="56"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-              </svg>
-            </EmptyStateIcon>
-          </EmptyStateIconWrapper>
-          <EmptyStateTitle>Where would you like to go in Korea?</EmptyStateTitle>
-          <EmptyStateSubtitle>
-            I can help you plan the perfect trip - just tell me about your travel dreams.
-          </EmptyStateSubtitle>
-          <EmptyStateInputWrapper>
-            <ChatInput
-              onSend={handleSendMessage}
-              disabled={isTyping}
-              placeholder="e.g., I want to explore Seoul and Busan for 5 days..."
-            />
-          </EmptyStateInputWrapper>
-          <EmptyStateHints>
-            <HintChip>Seoul in December</HintChip>
-            <HintChip>Traditional temples tour</HintChip>
-            <HintChip>K-food experience</HintChip>
-            <HintChip>DMZ visit</HintChip>
-          </EmptyStateHints>
-        </EmptyStateContent>
-      </EmptyStateContainer>
-    );
-  }
+  // 목적지 선택 핸들러
+  const handleDestinationSelect = async (destination: string) => {
+    await handleSendMessage(`I want to visit ${destination}`);
+  };
 
-  // session이 없으면 null 반환 (TypeScript guard)
-  if (!session) {
-    return null;
-  }
+  // 목적지 선택 UI 렌더링 함수
+  const renderDestinationSelection = () => (
+    <DestinationSelectionWrapper>
+      <EmptyStateContent>
+        <WelcomeBadge>
+          <Sparkles className="w-4 h-4" />
+          AI-Powered Trip Planning
+        </WelcomeBadge>
+        <EmptyStateIconWrapper>
+          <EmptyStateIcon>
+            <Globe className="w-12 h-12" strokeWidth={1.5} />
+          </EmptyStateIcon>
+        </EmptyStateIconWrapper>
+        <EmptyStateTitle>Where would you like to go in Korea?</EmptyStateTitle>
+        <EmptyStateSubtitle>
+          Choose a popular destination or tell us your dream trip
+        </EmptyStateSubtitle>
+
+        {/* 목적지 선택 버튼 그리드 */}
+        <DestinationGrid>
+          <DestinationCard onClick={() => handleDestinationSelect("Seoul")} disabled={isTyping}>
+            <DestinationImageBg style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }} />
+            <DestinationContent>
+              <DestinationEmoji>🏙️</DestinationEmoji>
+              <DestinationName>Seoul</DestinationName>
+              <DestinationDesc>Palaces, shopping, K-culture</DestinationDesc>
+            </DestinationContent>
+          </DestinationCard>
+          <DestinationCard onClick={() => handleDestinationSelect("Busan")} disabled={isTyping}>
+            <DestinationImageBg style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }} />
+            <DestinationContent>
+              <DestinationEmoji>🏖️</DestinationEmoji>
+              <DestinationName>Busan</DestinationName>
+              <DestinationDesc>Beaches, seafood, temples</DestinationDesc>
+            </DestinationContent>
+          </DestinationCard>
+          <DestinationCard onClick={() => handleDestinationSelect("Jeju")} disabled={isTyping}>
+            <DestinationImageBg style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }} />
+            <DestinationContent>
+              <DestinationEmoji>🌴</DestinationEmoji>
+              <DestinationName>Jeju Island</DestinationName>
+              <DestinationDesc>Nature, beaches, volcanic</DestinationDesc>
+            </DestinationContent>
+          </DestinationCard>
+          <DestinationCard onClick={() => handleDestinationSelect("Gyeongju")} disabled={isTyping}>
+            <DestinationImageBg style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }} />
+            <DestinationContent>
+              <DestinationEmoji>🏛️</DestinationEmoji>
+              <DestinationName>Gyeongju</DestinationName>
+              <DestinationDesc>UNESCO sites, history</DestinationDesc>
+            </DestinationContent>
+          </DestinationCard>
+          <DestinationCard onClick={() => handleDestinationSelect("Gangneung")} disabled={isTyping}>
+            <DestinationImageBg style={{ background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' }} />
+            <DestinationContent>
+              <DestinationEmoji>🌊</DestinationEmoji>
+              <DestinationName>Gangneung</DestinationName>
+              <DestinationDesc>East coast, coffee street</DestinationDesc>
+            </DestinationContent>
+          </DestinationCard>
+          <DestinationCard onClick={() => handleDestinationSelect("Jeonju")} disabled={isTyping}>
+            <DestinationImageBg style={{ background: 'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)' }} />
+            <DestinationContent>
+              <DestinationEmoji>🏡</DestinationEmoji>
+              <DestinationName>Jeonju</DestinationName>
+              <DestinationDesc>Hanok village, traditional food</DestinationDesc>
+            </DestinationContent>
+          </DestinationCard>
+        </DestinationGrid>
+
+        <OrDivider>
+          <OrLine />
+          <OrText>or describe your ideal trip</OrText>
+          <OrLine />
+        </OrDivider>
+
+        <EmptyStateInputWrapper>
+          <ChatInput
+            onSend={handleSendMessage}
+            disabled={isTyping}
+            placeholder="e.g., I want to explore Seoul and Busan for 5 days..."
+            showHint
+          />
+        </EmptyStateInputWrapper>
+
+        <TrustBadges>
+          <TrustBadge>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <path d="M9 12l2 2 4-4" />
+            </svg>
+            Verified local experts
+          </TrustBadge>
+          <TrustBadge>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 6v6l4 2" />
+            </svg>
+            Instant quotes
+          </TrustBadge>
+          <TrustBadge>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            1000+ happy travelers
+          </TrustBadge>
+        </TrustBadges>
+      </EmptyStateContent>
+    </DestinationSelectionWrapper>
+  );
 
   return (
     <PageContainer>
@@ -311,30 +413,37 @@ const Container: FC = () => {
               </TopBarRight>
             </TopBar>
 
-            {/* 메시지 리스트 */}
-            <ChatMessageList
-              messages={session.messages}
-              isTyping={isTyping}
-              hasMessages={hasMessages}
-              onSend={handleSendMessage}
-            />
+            {/* 메시지가 없으면 목적지 선택 UI, 있으면 메시지 리스트 */}
+            {showDestinationSelection ? (
+              renderDestinationSelection()
+            ) : (
+              <>
+                <ChatMessageList
+                  messages={session?.messages || []}
+                  isTyping={isTyping}
+                  hasMessages={hasMessages}
+                  onSend={handleSendMessage}
+                  onUIActionSelect={handleUIActionSelect}
+                />
 
-            {/* Input Area - shown at bottom when messages exist */}
-            {hasMessages && (
-              <InputArea>
-                <InputContainer>
-                  <ChatInput
-                    onSend={handleSendMessage}
-                    disabled={isTyping}
-                    placeholder={
-                      isTyping ? "AI is thinking..." : "Message Korea Travel AI..."
-                    }
-                  />
-                  <InputHint>
-                    AI can make mistakes. Please verify important travel information.
-                  </InputHint>
-                </InputContainer>
-              </InputArea>
+                {/* Input Area - shown at bottom when messages exist */}
+                {hasMessages && (
+                  <InputArea>
+                    <InputContainer>
+                      <ChatInput
+                        onSend={handleSendMessage}
+                        disabled={isTyping}
+                        placeholder={
+                          isTyping ? "AI is thinking..." : "Message Korea Travel AI..."
+                        }
+                      />
+                      <InputHint>
+                        AI can make mistakes. Please verify important travel information.
+                      </InputHint>
+                    </InputContainer>
+                  </InputArea>
+                )}
+              </>
             )}
           </ChatSection>
         </ChatWrapper>
@@ -344,8 +453,8 @@ const Container: FC = () => {
           isOpen={showInfoPanel}
           onClose={() => setShowInfoPanel(false)}
           context={context}
-          messageCount={session.messages.length}
-          batchId={session.batchId}
+          messageCount={session?.messages?.length || 0}
+          batchId={session?.batchId}
         />
       </MainArea>
     </PageContainer>
@@ -353,6 +462,31 @@ const Container: FC = () => {
 };
 
 export default Container;
+
+// Animations
+const float = keyframes`
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+`;
+
+const spin = keyframes`
+  to { transform: rotate(360deg); }
+`;
+
+const sparkle = keyframes`
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.7; }
+  50% { transform: scale(1.2) rotate(10deg); opacity: 1; }
+`;
+
+const fadeIn = keyframes`
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
+
+const cardHover = keyframes`
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-4px) scale(1.02); }
+`;
 
 // Styled Components
 const PageContainer = styled.div`
@@ -533,32 +667,71 @@ const LoadingContainer = styled.div`
   align-items: center;
   justify-content: center;
   flex: 1;
-  min-height: 0;
-  background-color: #ffffff;
-  gap: 16px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  gap: 20px;
+  animation: ${fadeIn} 0.3s ease;
 `;
 
-const LoadingSpinner = styled.div`
-  width: 32px;
-  height: 32px;
-  border: 2px solid #f0f0f0;
-  border-top-color: var(--color-tumakr-maroon);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+const LoadingIconWrapper = styled.div`
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-tumakr-maroon, #651d2a) 0%, #8b2438 100%);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(101, 29, 42, 0.25);
+  animation: ${float} 3s ease-in-out infinite;
 
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
+  .globe-icon {
+    width: 40px;
+    height: 40px;
+    color: white;
+    animation: ${spin} 20s linear infinite;
+  }
+
+  .sparkle-icon {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    color: #fbbf24;
+    background: white;
+    border-radius: 50%;
+    padding: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    animation: ${sparkle} 2s ease-in-out infinite;
   }
 `;
 
 const LoadingText = styled.p`
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+`;
+
+const LoadingSubtext = styled.p`
   font-size: 14px;
   color: #666;
+  margin: 0;
 `;
 
 const EmptyStateContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
+  background-color: #ffffff;
+  padding: 24px;
+  overflow-y: auto;
+`;
+
+const DestinationSelectionWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -653,6 +826,162 @@ const HintChip = styled.button`
     color: var(--color-tumakr-maroon);
     background-color: rgba(101, 29, 42, 0.03);
   }
+`;
+
+// Welcome Badge
+const WelcomeBadge = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, rgba(101, 29, 42, 0.1) 0%, rgba(101, 29, 42, 0.05) 100%);
+  border: 1px solid rgba(101, 29, 42, 0.2);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-tumakr-maroon, #651d2a);
+  margin-bottom: 8px;
+  animation: ${fadeIn} 0.5s ease;
+
+  svg {
+    animation: ${sparkle} 2s ease-in-out infinite;
+  }
+`;
+
+// Hello Vacanze 스타일 목적지 선택 그리드
+const DestinationGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 28px;
+  width: 100%;
+  max-width: 580px;
+  animation: ${fadeIn} 0.5s ease 0.2s both;
+
+  @media (max-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+`;
+
+const DestinationCard = styled.button<{ disabled?: boolean }>`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 20px;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+  opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
+  transition: all 0.3s ease;
+  text-align: center;
+  overflow: hidden;
+  min-height: 140px;
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-tumakr-maroon);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(101, 29, 42, 0.15);
+
+    & > div:first-of-type {
+      opacity: 0.25;
+    }
+
+    & span:first-of-type {
+      transform: scale(1.15);
+    }
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(-2px);
+  }
+`;
+
+const DestinationImageBg = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  opacity: 0.15;
+  transition: opacity 0.3s ease;
+`;
+
+const DestinationContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px 16px;
+  position: relative;
+  z-index: 1;
+`;
+
+const DestinationEmoji = styled.span`
+  font-size: 36px;
+  margin-bottom: 10px;
+  transition: transform 0.3s ease;
+`;
+
+const DestinationName = styled.span`
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+`;
+
+const DestinationDesc = styled.span`
+  font-size: 12px;
+  color: #888;
+  line-height: 1.4;
+`;
+
+// Trust Badges
+const TrustBadges = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 32px;
+  animation: ${fadeIn} 0.5s ease 0.4s both;
+
+  @media (max-width: 640px) {
+    gap: 12px;
+  }
+`;
+
+const TrustBadge = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #666;
+
+  svg {
+    color: var(--color-tumakr-maroon, #651d2a);
+    opacity: 0.7;
+  }
+`;
+
+const OrDivider = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 400px;
+  margin-top: 24px;
+`;
+
+const OrLine = styled.div`
+  flex: 1;
+  height: 1px;
+  background: #e5e5e5;
+`;
+
+const OrText = styled.span`
+  font-size: 13px;
+  color: #999;
 `;
 
 const LoginPromptContainer = styled.div`
