@@ -33,7 +33,8 @@ export interface Estimate {
   version: number;
   status: string;
   comment: string;
-  timeline: Record<string, string>;
+  summary?: string;
+  timeline: string | Record<string, string> | { days: Array<{ day: number; date?: string; theme: string; places: Array<{ itemId: number; nameKor: string; nameEng: string; description: string; lat?: number; lng?: number }> }> };
 }
 
 export interface Batch {

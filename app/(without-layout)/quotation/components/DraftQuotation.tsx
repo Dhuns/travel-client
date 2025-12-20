@@ -1,7 +1,7 @@
 "use client";
 
 import { EstimateDetail, QuotationResponse } from "@/src/shared/apis/estimate";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 
 import DayMap from "@/src/components/Chat/DayMap";
 import { getItemImg } from "@/src/shared/utils/base";
@@ -43,34 +43,120 @@ interface MapDataResponse {
   mapData?: MapDayData[];
 }
 
+// New JSON timeline types (친구가 짜준 것 같은 일정)
+interface TimelinePlace {
+  itemId: number;
+  nameKor: string;
+  nameEng: string;
+  description: string;
+  lat?: number;
+  lng?: number;
+}
+
+interface TimelineDay {
+  day: number;
+  date?: string;
+  theme: string;
+  places: TimelinePlace[];
+}
+
+interface TimelineData {
+  days: TimelineDay[];
+}
+
 const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
   const { batchInfo, estimateInfo, estimateDetails } = quotation;
   const [mapData, setMapData] = useState<MapDataResponse | null>(null);
   const [loadingMap, setLoadingMap] = useState(false);
 
-  // Parse timeline string to object if needed
-  const timelineByDay: Record<string, string> = React.useMemo(() => {
-    if (!estimateInfo.timeline) return {};
-
-    // If already an object, return as-is
-    if (typeof estimateInfo.timeline === "object") {
-      return estimateInfo.timeline;
+  // Parse timeline - supports both new JSON format and legacy #@# format
+  const { jsonTimeline, legacyTimeline, isJsonFormat } = useMemo(() => {
+    if (!estimateInfo.timeline) {
+      return { jsonTimeline: null, legacyTimeline: {}, isJsonFormat: false };
     }
 
-    // If string, parse it (format: "day1#@#day2#@#day3...")
-    if (typeof estimateInfo.timeline === "string") {
-      const days = (estimateInfo.timeline as string).split("#@#");
+    let timelineStr = estimateInfo.timeline;
+
+    // If already an object (from API), convert to string first
+    if (typeof timelineStr === "object") {
+      // Check if it's already the new JSON format
+      if ("days" in (timelineStr as object)) {
+        return {
+          jsonTimeline: timelineStr as unknown as TimelineData,
+          legacyTimeline: {},
+          isJsonFormat: true,
+        };
+      }
+      // Legacy object format
+      return {
+        jsonTimeline: null,
+        legacyTimeline: timelineStr as Record<string, string>,
+        isJsonFormat: false,
+      };
+    }
+
+    // Try parsing as JSON first
+    if (typeof timelineStr === "string") {
+      try {
+        const parsed = JSON.parse(timelineStr);
+        if (parsed && parsed.days && Array.isArray(parsed.days)) {
+          return {
+            jsonTimeline: parsed as TimelineData,
+            legacyTimeline: {},
+            isJsonFormat: true,
+          };
+        }
+      } catch {
+        // Not JSON, try legacy format
+      }
+
+      // Legacy format: "day1#@#day2#@#day3..."
+      const days = timelineStr.split("#@#");
       const result: Record<string, string> = {};
       days.forEach((content, index) => {
         if (content.trim()) {
           result[(index + 1).toString()] = content.trim();
         }
       });
-      return result;
+      return { jsonTimeline: null, legacyTimeline: result, isJsonFormat: false };
     }
 
-    return {};
+    return { jsonTimeline: null, legacyTimeline: {}, isJsonFormat: false };
   }, [estimateInfo.timeline]);
+
+  // Generate map data from JSON timeline (no API call needed)
+  const timelineMapData = useMemo<MapDayData[] | null>(() => {
+    if (!isJsonFormat || !jsonTimeline?.days) return null;
+
+    return jsonTimeline.days
+      .filter((day) => day.places?.length > 0)
+      .map((day) => {
+        const validPlaces = day.places.filter(
+          (p) => p.lat && p.lng && !isNaN(p.lat) && !isNaN(p.lng)
+        );
+
+        if (validPlaces.length === 0) return null;
+
+        const locations: MapLocation[] = validPlaces.map((place) => ({
+          itemId: place.itemId,
+          name: place.nameEng || place.nameKor,
+          lat: place.lat!,
+          lng: place.lng!,
+          description: place.description,
+        }));
+
+        // Calculate center as average of all coordinates
+        const avgLat = locations.reduce((sum, l) => sum + l.lat, 0) / locations.length;
+        const avgLng = locations.reduce((sum, l) => sum + l.lng, 0) / locations.length;
+
+        return {
+          day: day.day,
+          locations,
+          center: { lat: avgLat, lng: avgLng },
+        };
+      })
+      .filter((d): d is MapDayData => d !== null);
+  }, [isJsonFormat, jsonTimeline]);
 
   // Calculate totals
   const totalPrice = estimateDetails.reduce(
@@ -164,8 +250,13 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
     }));
   };
 
-  // Fetch map data
+  // Fetch map data only for legacy format (JSON format has coordinates in timeline)
   useEffect(() => {
+    // Skip API call if using JSON timeline format with coordinates
+    if (isJsonFormat && timelineMapData && timelineMapData.length > 0) {
+      return;
+    }
+
     const fetchMapData = async () => {
       if (!batchInfo.id) return;
 
@@ -183,44 +274,70 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
     };
 
     fetchMapData();
-  }, [batchInfo.id]);
+  }, [batchInfo.id, isJsonFormat, timelineMapData]);
 
   return (
     <Container>
-      <Header>
-        <Title>Draft Quotation - {batchInfo.title || "Travel Plan"}</Title>
-        <ValidUntil>
-          Valid until: {dayjs(batchInfo.validDate).format("YYYY-MM-DD")}
-        </ValidUntil>
-      </Header>
+      {/* Hero Header for JSON Timeline Format */}
+      {isJsonFormat ? (
+        <HeroHeader>
+          <HeroTitle>{batchInfo.title || "Your Korea Trip"}</HeroTitle>
+          {estimateInfo.summary && <HeroSummary>{estimateInfo.summary}</HeroSummary>}
+          <HeroMeta>
+            <MetaItem>
+              <MetaIcon>&#x1F4C5;</MetaIcon>
+              <MetaText>
+                {dayjs(batchInfo.startDate).format("MMM D")} - {dayjs(batchInfo.endDate).format("MMM D, YYYY")} ({tripDays} days)
+              </MetaText>
+            </MetaItem>
+            <MetaItem>
+              <MetaIcon>&#x1F465;</MetaIcon>
+              <MetaText>
+                {batchInfo.adultsCount > 0 && `${batchInfo.adultsCount} adults`}
+                {batchInfo.childrenCount > 0 && `, ${batchInfo.childrenCount} children`}
+                {batchInfo.infantsCount > 0 && `, ${batchInfo.infantsCount} infants`}
+              </MetaText>
+            </MetaItem>
+          </HeroMeta>
+        </HeroHeader>
+      ) : (
+        <>
+          <Header>
+            <Title>Draft Quotation - {batchInfo.title || "Travel Plan"}</Title>
+            <ValidUntil>
+              Valid until: {dayjs(batchInfo.validDate).format("YYYY-MM-DD")}
+            </ValidUntil>
+          </Header>
 
-      <Section>
-        <SectionTitle>Travel Information</SectionTitle>
-        <InfoGrid>
-          <InfoItem>
-            <Label>Travel Period</Label>
-            <Value>
-              {dayjs(batchInfo.startDate).format("YYYY-MM-DD")} ~{" "}
-              {dayjs(batchInfo.endDate).format("YYYY-MM-DD")} ({tripDays} days)
-            </Value>
-          </InfoItem>
-          <InfoItem>
-            <Label>Travelers</Label>
-            <Value>
-              {batchInfo.adultsCount > 0 && `Adults: ${batchInfo.adultsCount}`}
-              {batchInfo.childrenCount > 0 && `, Children: ${batchInfo.childrenCount}`}
-              {batchInfo.infantsCount > 0 && `, Infants: ${batchInfo.infantsCount}`}{" "}
-              (Total: {totalTravelers})
-            </Value>
-          </InfoItem>
-          {batchInfo.recipient && (
-            <InfoItem>
-              <Label>Recipient</Label>
-              <Value>{batchInfo.recipient}</Value>
-            </InfoItem>
-          )}
-        </InfoGrid>
-      </Section>
+          <Section>
+            <SectionTitle>Travel Information</SectionTitle>
+            <InfoGrid>
+              <InfoItem>
+                <Label>Travel Period</Label>
+                <Value>
+                  {dayjs(batchInfo.startDate).format("YYYY-MM-DD")} ~{" "}
+                  {dayjs(batchInfo.endDate).format("YYYY-MM-DD")} ({tripDays} days)
+                </Value>
+              </InfoItem>
+              <InfoItem>
+                <Label>Travelers</Label>
+                <Value>
+                  {batchInfo.adultsCount > 0 && `Adults: ${batchInfo.adultsCount}`}
+                  {batchInfo.childrenCount > 0 && `, Children: ${batchInfo.childrenCount}`}
+                  {batchInfo.infantsCount > 0 && `, Infants: ${batchInfo.infantsCount}`}{" "}
+                  (Total: {totalTravelers})
+                </Value>
+              </InfoItem>
+              {batchInfo.recipient && (
+                <InfoItem>
+                  <Label>Recipient</Label>
+                  <Value>{batchInfo.recipient}</Value>
+                </InfoItem>
+              )}
+            </InfoGrid>
+          </Section>
+        </>
+      )}
 
       {/* Common Services Section */}
       {commonServicesArray.length > 0 && (
@@ -274,150 +391,200 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
         </Section>
       )}
 
-      <Section>
-        <SectionTitle>Itinerary Details</SectionTitle>
-        {Object.keys(itemsByDay)
-          .sort((a, b) => Number(a) - Number(b))
-          .map((day) => {
-            const dayNumber = Number(day);
-            const items = itemsByDay[dayNumber];
-            const dayDate = dayjs(batchInfo.startDate).add(dayNumber - 1, "day");
-
-            const isExpanded = expandedDays[day];
+      {/* Itinerary Section - New JSON Format */}
+      {isJsonFormat && jsonTimeline?.days && (
+        <Section>
+          <SectionTitle>Your Itinerary</SectionTitle>
+          {jsonTimeline.days.map((dayData) => {
+            const dayDate = dayjs(batchInfo.startDate).add(dayData.day - 1, "day");
+            const dayMapData = timelineMapData?.find((m) => m.day === dayData.day);
 
             return (
-              <DaySection key={day}>
-                <DayHeader onClick={() => toggleDay(day)}>
-                  <DayHeaderLeft>
-                    <ToggleIcon isExpanded={isExpanded}>
-                      {isExpanded ? "▼" : "▶"}
-                    </ToggleIcon>
-                    <DayTitle>Day {day}</DayTitle>
-                  </DayHeaderLeft>
-                  <DayDate>{dayDate.format("YYYY-MM-DD (ddd)")}</DayDate>
-                </DayHeader>
+              <FriendlyDaySection key={dayData.day}>
+                <FriendlyDayHeader>
+                  <FriendlyDayNumber>Day {dayData.day}</FriendlyDayNumber>
+                  <FriendlyDayInfo>
+                    <FriendlyDayDate>{dayDate.format("MMMM D, YYYY (ddd)")}</FriendlyDayDate>
+                    {dayData.theme && <FriendlyDayTheme>{dayData.theme}</FriendlyDayTheme>}
+                  </FriendlyDayInfo>
+                </FriendlyDayHeader>
 
-                {isExpanded && (
-                  <>
-                    <ItemList>
-                      {items.map((detail) => {
-                        const thumbnail = detail.item.files?.find(
-                          (f) => f.type === "썸네일"
-                        );
-                        const showPrice = !batchInfo.hidePrice;
+                <FriendlyPlacesList>
+                  {dayData.places.map((place, index) => (
+                    <FriendlyPlaceCard key={`${place.itemId}-${index}`}>
+                      <PlaceOrderNumber>{index + 1}</PlaceOrderNumber>
+                      <PlaceContent>
+                        <PlaceNameRow>
+                          <PlaceName>{place.nameEng}</PlaceName>
+                          <PlaceNameKor>{place.nameKor}</PlaceNameKor>
+                        </PlaceNameRow>
+                        <PlaceDescription>{place.description}</PlaceDescription>
+                      </PlaceContent>
+                    </FriendlyPlaceCard>
+                  ))}
+                </FriendlyPlacesList>
 
-                        // Fallback image based on item type
-                        const getFallbackImage = () => {
-                          const type = detail.item.type;
-                          if (type === "여행지" || type === "Place")
-                            return "/beautiful-korean-traditional-palace-with-tourists.jpg";
-                          if (type === "숙박" || type === "Accommodation")
-                            return "/beautiful-korean-traditional-hanbok-dress.jpg";
-                          if (type === "이동수단" || type === "Transportation")
-                            return "/busan-coastal-temple.jpg";
-                          if (type === "컨텐츠" || type === "Activity")
-                            return "/korean-skincare-beauty-products-set.jpg";
-                          return "/beautiful-korean-traditional-palace-with-tourists.jpg";
-                        };
-
-                        const imageSrc = thumbnail
-                          ? getItemImg(thumbnail.itemSrc)
-                          : getFallbackImage();
-
-                        return (
-                          <ItemCard key={detail.id}>
-                            <ItemImage
-                              src={imageSrc}
-                              alt={detail.item.nameEng}
-                              onError={(e) => {
-                                e.currentTarget.src = getFallbackImage();
-                              }}
-                            />
-                            <ItemContent>
-                              <ItemHeader>
-                                <ItemType>
-                                  {typeMapping[detail.item.type] || detail.item.type}
-                                </ItemType>
-                                <ItemName>{detail.item.nameEng}</ItemName>
-                              </ItemHeader>
-                              {detail.item.description && (
-                                <ItemDescription
-                                  dangerouslySetInnerHTML={{
-                                    __html: sanitizeHtml(
-                                      draftToHtml(detail.item.description)
-                                    ),
-                                  }}
-                                />
-                              )}
-                              <ItemFooter>
-                                <ItemQuantity>
-                                  Quantity: {detail.quantity}
-                                  {showPrice && detail.originPrice && (
-                                    <span
-                                      style={{
-                                        marginLeft: "8px",
-                                        color: "#666",
-                                      }}
-                                    >
-                                      @ ${Number(detail.originPrice).toLocaleString()}
-                                    </span>
-                                  )}
-                                </ItemQuantity>
-                                {showPrice && (
-                                  <ItemPrice>
-                                    ${Number(detail.price).toLocaleString()}
-                                  </ItemPrice>
-                                )}
-                              </ItemFooter>
-                            </ItemContent>
-                          </ItemCard>
-                        );
-                      })}
-                    </ItemList>
-
-                    {/* Route Summary */}
-                    <RouteSummary>
-                      <RouteSummaryTitle>
-                        Day {day} Route Summary ({items.length} locations)
-                      </RouteSummaryTitle>
-                      <RouteSummaryList>
-                        {items.map((detail, index) => (
-                          <RouteSummaryItem key={detail.id}>
-                            <RouteSummaryNumber>{index + 1}</RouteSummaryNumber>
-                            <RouteSummaryName>{detail.item.nameEng}</RouteSummaryName>
-                          </RouteSummaryItem>
-                        ))}
-                      </RouteSummaryList>
-                    </RouteSummary>
-
-                    {/* Timeline Section */}
-                    {timelineByDay[day] && (
-                      <TimelineSection>
-                        <TimelineContent>{timelineByDay[day]}</TimelineContent>
-                      </TimelineSection>
-                    )}
-
-                    {/* Map Section */}
-                    {!loadingMap && mapData && mapData.mapData && (
-                      <>
-                        {mapData.mapData
-                          .filter((dayData: MapDayData) => dayData.day === dayNumber)
-                          .map((dayData: MapDayData) => (
-                            <DayMap
-                              key={dayData.day}
-                              day={dayData.day}
-                              locations={dayData.locations}
-                              center={dayData.center}
-                            />
-                          ))}
-                      </>
-                    )}
-                  </>
+                {/* Map from JSON timeline coordinates */}
+                {dayMapData && dayMapData.locations.length > 0 && (
+                  <DayMap
+                    day={dayData.day}
+                    locations={dayMapData.locations}
+                    center={dayMapData.center}
+                  />
                 )}
-              </DaySection>
+              </FriendlyDaySection>
             );
           })}
-      </Section>
+        </Section>
+      )}
+
+      {/* Itinerary Section - Legacy Format */}
+      {!isJsonFormat && Object.keys(itemsByDay).length > 0 && (
+        <Section>
+          <SectionTitle>Itinerary Details</SectionTitle>
+          {Object.keys(itemsByDay)
+            .sort((a, b) => Number(a) - Number(b))
+            .map((day) => {
+              const dayNumber = Number(day);
+              const items = itemsByDay[dayNumber];
+              const dayDate = dayjs(batchInfo.startDate).add(dayNumber - 1, "day");
+
+              const isExpanded = expandedDays[day];
+
+              return (
+                <DaySection key={day}>
+                  <DayHeader onClick={() => toggleDay(day)}>
+                    <DayHeaderLeft>
+                      <ToggleIcon isExpanded={isExpanded}>
+                        {isExpanded ? "▼" : "▶"}
+                      </ToggleIcon>
+                      <DayTitle>Day {day}</DayTitle>
+                    </DayHeaderLeft>
+                    <DayDate>{dayDate.format("YYYY-MM-DD (ddd)")}</DayDate>
+                  </DayHeader>
+
+                  {isExpanded && (
+                    <>
+                      <ItemList>
+                        {items.map((detail) => {
+                          const thumbnail = detail.item.files?.find(
+                            (f) => f.type === "썸네일"
+                          );
+                          const showPrice = !batchInfo.hidePrice;
+
+                          // Fallback image based on item type
+                          const getFallbackImage = () => {
+                            const type = detail.item.type;
+                            if (type === "여행지" || type === "Place")
+                              return "/beautiful-korean-traditional-palace-with-tourists.jpg";
+                            if (type === "숙박" || type === "Accommodation")
+                              return "/beautiful-korean-traditional-hanbok-dress.jpg";
+                            if (type === "이동수단" || type === "Transportation")
+                              return "/busan-coastal-temple.jpg";
+                            if (type === "컨텐츠" || type === "Activity")
+                              return "/korean-skincare-beauty-products-set.jpg";
+                            return "/beautiful-korean-traditional-palace-with-tourists.jpg";
+                          };
+
+                          const imageSrc = thumbnail
+                            ? getItemImg(thumbnail.itemSrc)
+                            : getFallbackImage();
+
+                          return (
+                            <ItemCard key={detail.id}>
+                              <ItemImage
+                                src={imageSrc}
+                                alt={detail.item.nameEng}
+                                onError={(e) => {
+                                  e.currentTarget.src = getFallbackImage();
+                                }}
+                              />
+                              <ItemContent>
+                                <ItemHeader>
+                                  <ItemType>
+                                    {typeMapping[detail.item.type] || detail.item.type}
+                                  </ItemType>
+                                  <ItemName>{detail.item.nameEng}</ItemName>
+                                </ItemHeader>
+                                {detail.item.description && (
+                                  <ItemDescription
+                                    dangerouslySetInnerHTML={{
+                                      __html: sanitizeHtml(
+                                        draftToHtml(detail.item.description)
+                                      ),
+                                    }}
+                                  />
+                                )}
+                                <ItemFooter>
+                                  <ItemQuantity>
+                                    Quantity: {detail.quantity}
+                                    {showPrice && detail.originPrice && (
+                                      <span
+                                        style={{
+                                          marginLeft: "8px",
+                                          color: "#666",
+                                        }}
+                                      >
+                                        @ ${Number(detail.originPrice).toLocaleString()}
+                                      </span>
+                                    )}
+                                  </ItemQuantity>
+                                  {showPrice && (
+                                    <ItemPrice>
+                                      ${Number(detail.price).toLocaleString()}
+                                    </ItemPrice>
+                                  )}
+                                </ItemFooter>
+                              </ItemContent>
+                            </ItemCard>
+                          );
+                        })}
+                      </ItemList>
+
+                      {/* Route Summary */}
+                      <RouteSummary>
+                        <RouteSummaryTitle>
+                          Day {day} Route Summary ({items.length} locations)
+                        </RouteSummaryTitle>
+                        <RouteSummaryList>
+                          {items.map((detail, index) => (
+                            <RouteSummaryItem key={detail.id}>
+                              <RouteSummaryNumber>{index + 1}</RouteSummaryNumber>
+                              <RouteSummaryName>{detail.item.nameEng}</RouteSummaryName>
+                            </RouteSummaryItem>
+                          ))}
+                        </RouteSummaryList>
+                      </RouteSummary>
+
+                      {/* Legacy Timeline Section */}
+                      {(legacyTimeline as Record<string, string>)[day] && (
+                        <TimelineSection>
+                          <TimelineContent>{(legacyTimeline as Record<string, string>)[day]}</TimelineContent>
+                        </TimelineSection>
+                      )}
+
+                      {/* Map Section */}
+                      {!loadingMap && mapData && mapData.mapData && (
+                        <>
+                          {mapData.mapData
+                            .filter((dayData: MapDayData) => dayData.day === dayNumber)
+                            .map((dayData: MapDayData) => (
+                              <DayMap
+                                key={dayData.day}
+                                day={dayData.day}
+                                locations={dayData.locations}
+                                center={dayData.center}
+                              />
+                            ))}
+                        </>
+                      )}
+                    </>
+                  )}
+                </DaySection>
+              );
+            })}
+        </Section>
+      )}
 
       {!batchInfo.hidePrice && (
         <TotalSection>
@@ -1151,4 +1318,185 @@ const DayBadge = styled.span`
   padding: 0.25rem 0.75rem;
   border-radius: 16px;
   border: 1px solid #e5e7eb;
+`;
+
+// ===== New JSON Timeline Styled Components =====
+
+const FriendlyDaySection = styled.div`
+  margin-bottom: 40px;
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const FriendlyDayHeader = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f3f4f6;
+`;
+
+const FriendlyDayNumber = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, var(--color-tumakr-maroon) 0%, #8b3a4a 100%);
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 12px;
+  flex-shrink: 0;
+`;
+
+const FriendlyDayInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+`;
+
+const FriendlyDayDate = styled.span`
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+`;
+
+const FriendlyDayTheme = styled.h3`
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.3;
+`;
+
+const FriendlyPlacesList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+const FriendlyPlaceCard = styled.div`
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  background: #fafafa;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f5f5f5;
+    border-color: #d1d5db;
+  }
+`;
+
+const PlaceOrderNumber = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--color-tumakr-maroon);
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 50%;
+  flex-shrink: 0;
+`;
+
+const PlaceContent = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const PlaceNameRow = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+`;
+
+const PlaceName = styled.h4`
+  font-size: 17px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+`;
+
+const PlaceNameKor = styled.span`
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 400;
+`;
+
+const PlaceDescription = styled.p`
+  font-size: 15px;
+  color: #4b5563;
+  margin: 0;
+  line-height: 1.65;
+`;
+
+// ===== Hero Header Styled Components =====
+
+const HeroHeader = styled.header`
+  background: linear-gradient(135deg, var(--color-tumakr-maroon) 0%, #8b3a4a 50%, #5a2430 100%);
+  padding: 48px 40px;
+  border-radius: 16px;
+  margin-bottom: 32px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(101, 29, 42, 0.3);
+`;
+
+const HeroTitle = styled.h1`
+  font-size: 36px;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 16px 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+`;
+
+const HeroSummary = styled.p`
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 auto 24px;
+  max-width: 600px;
+  line-height: 1.6;
+`;
+
+const HeroMeta = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+`;
+
+const MetaItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 10px 20px;
+  border-radius: 30px;
+`;
+
+const MetaIcon = styled.span`
+  font-size: 18px;
+`;
+
+const MetaText = styled.span`
+  font-size: 15px;
+  color: white;
+  font-weight: 500;
 `;

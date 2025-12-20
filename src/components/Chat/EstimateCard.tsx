@@ -32,12 +32,6 @@ const EstimateCard: FC<Props> = ({ estimate, batchId, onViewQuote }) => {
     const hash = cipher.toString();
     const encodedHash = encodeURIComponent(hash);
 
-    console.log("[EstimateCard] Opening quotation modal:", {
-      batchId,
-      hash,
-      encodedHash,
-    });
-
     // Open modal instead of navigating
     if (onViewQuote) {
       onViewQuote(encodedHash);

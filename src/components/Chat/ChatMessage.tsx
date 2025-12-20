@@ -27,6 +27,94 @@ interface Props {
   isLastMessage?: boolean;
 }
 
+// Shared card configuration for system messages
+const getSystemCardConfig = (type: SystemMessageContent['type'] | undefined) => {
+  switch (type) {
+    case 'quote_sent':
+      return {
+        gradient: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M22 2L11 13" />
+            <path d="M22 2L15 22L11 13L2 9L22 2Z" />
+          </svg>
+        ),
+        iconBg: 'rgba(255,255,255,0.2)',
+      };
+    case 'customer_approved':
+      return {
+        gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+        ),
+        iconBg: 'rgba(255,255,255,0.2)',
+      };
+    case 'customer_rejected':
+      return {
+        gradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="15" y1="9" x2="9" y2="15" />
+            <line x1="9" y1="9" x2="15" y2="15" />
+          </svg>
+        ),
+        iconBg: 'rgba(255,255,255,0.2)',
+      };
+    case 'revision_requested':
+      return {
+        gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+        ),
+        iconBg: 'rgba(255,255,255,0.2)',
+      };
+    default:
+      return {
+        gradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
+        ),
+        iconBg: 'rgba(255,255,255,0.2)',
+      };
+  }
+};
+
+// Parse system message JSON from content
+const parseSystemContent = (content: string | undefined): SystemMessageContent | null => {
+  if (!content) return null;
+  const trimmedContent = content.trim();
+  const looksLikeSystemJson = trimmedContent.includes('quote_sent') ||
+    trimmedContent.includes('customer_approved') ||
+    trimmedContent.includes('customer_rejected') ||
+    trimmedContent.includes('revision_requested');
+
+  if (!looksLikeSystemJson) return null;
+
+  try {
+    const jsonMatch = trimmedContent.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      if (parsed.type && parsed.title && parsed.message) {
+        return parsed as SystemMessageContent;
+      }
+    }
+  } catch {
+    // Invalid JSON, return null
+  }
+  return null;
+};
+
 const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onUIActionSelect, isLastMessage }) => {
   const { role, content, timestamp, type, metadata } = message;
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,6 +123,9 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
   const [revisionMessage, setRevisionMessage] = useState("");
   const [selectedResponse, setSelectedResponse] = useState<string | null>(null);
   const isUser = role === "user";
+
+  // Note: quote_sent type messages are handled below with full action buttons
+  // This early return is only for simple system messages without actions
 
   // Handle estimate-type messages
   if (type === "estimate" && metadata?.batchId) {
@@ -126,15 +217,10 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
   }
 
   // Handle system messages (quote_sent, customer responses, etc.)
-  if (role === 'system') {
-    let systemContent: SystemMessageContent | null = null;
-    try {
-      systemContent = JSON.parse(content);
-    } catch {
-      // Not a JSON system message, render as regular message
-    }
+  // Check for system JSON content regardless of role
+  const systemContent = parseSystemContent(content);
 
-    if (systemContent) {
+  if (systemContent) {
       const handleResponse = async (responseType: CustomerResponseType, msg?: string) => {
         if (!systemContent?.batchId || isSubmitting || responseSubmitted) return;
 
@@ -168,69 +254,7 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
         }
       };
 
-      const getCardConfig = () => {
-        switch (systemContent?.type) {
-          case 'quote_sent':
-            return {
-              gradient: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-              icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 2L11 13" />
-                  <path d="M22 2L15 22L11 13L2 9L22 2Z" />
-                </svg>
-              ),
-              iconBg: 'rgba(255,255,255,0.2)',
-            };
-          case 'customer_approved':
-            return {
-              gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-              icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <polyline points="22 4 12 14.01 9 11.01" />
-                </svg>
-              ),
-              iconBg: 'rgba(255,255,255,0.2)',
-            };
-          case 'customer_rejected':
-            return {
-              gradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
-              icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="15" y1="9" x2="9" y2="15" />
-                  <line x1="9" y1="9" x2="15" y2="15" />
-                </svg>
-              ),
-              iconBg: 'rgba(255,255,255,0.2)',
-            };
-          case 'revision_requested':
-            return {
-              gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-              icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                </svg>
-              ),
-              iconBg: 'rgba(255,255,255,0.2)',
-            };
-          default:
-            return {
-              gradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
-              icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="16" x2="12" y2="12" />
-                  <line x1="12" y1="8" x2="12.01" y2="8" />
-                </svg>
-              ),
-              iconBg: 'rgba(255,255,255,0.2)',
-            };
-        }
-      };
-
-      const config = getCardConfig();
+      const config = getSystemCardConfig(systemContent?.type);
 
       return (
         <MessageContainer isUser={false}>
@@ -391,7 +415,6 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
           </MessageContent>
         </MessageContainer>
       );
-    }
   }
 
   // UI action handler
@@ -854,6 +877,8 @@ const RevisionTextarea = styled.textarea`
   font-family: inherit;
   resize: none;
   transition: border-color 0.2s ease;
+  color: #1f2937;
+  background-color: #ffffff;
 
   &:focus {
     outline: none;
@@ -926,3 +951,4 @@ const SuccessMessage = styled.div`
   font-size: 14px;
   border-top: 1px solid #a7f3d0;
 `;
+

@@ -38,24 +38,9 @@ const Container: FC = () => {
   const session = getCurrentSession();
   const context = session?.context || {};
 
-  // 디버깅: 상태 변화 로그
-  useEffect(() => {
-    console.log("[Container] State:", {
-      isInitialized,
-      isAuthenticated,
-      userId: user?.id,
-      sessionsCount: sessions.length,
-      currentSessionId,
-      hasSession: !!session,
-    });
-  }, [
-    isInitialized,
-    isAuthenticated,
-    user?.id,
-    sessions.length,
-    currentSessionId,
-    session,
-  ]);
+  // 기타 지역 입력 모드
+  const [showOtherInput, setShowOtherInput] = useState(false);
+  const [otherDestination, setOtherDestination] = useState("");
 
   // 로그인 시 사용자 정보 가져오기
   useEffect(() => {
@@ -90,13 +75,6 @@ const Container: FC = () => {
 
   // 기존 세션이 있으면 가장 최근 세션 로드 (자동 생성은 하지 않음 - Zendesk/Intercom 표준)
   useEffect(() => {
-    console.log("[Container] Session load check:", {
-      isInitialized,
-      hasSession: !!session,
-      isAuthenticated,
-      sessionsCount: sessions.length,
-    });
-
     if (isInitialized && !session && isAuthenticated && sessions.length > 0) {
       // 저장된 세션이 있으면 가장 최근 세션 로드
       const latestSession = [...sessions].sort(
@@ -104,7 +82,6 @@ const Container: FC = () => {
           new Date(b.lastMessageAt || b.createdAt).getTime() -
           new Date(a.lastMessageAt || a.createdAt).getTime()
       )[0];
-      console.log("[Container] Loading latest session:", latestSession?.sessionId);
       if (latestSession) {
         loadSession(latestSession.sessionId);
       }
@@ -236,7 +213,18 @@ const Container: FC = () => {
 
   // 목적지 선택 핸들러
   const handleDestinationSelect = async (destination: string) => {
+    setShowOtherInput(false);
+    setOtherDestination("");
     await handleSendMessage(`I want to visit ${destination}`);
+  };
+
+  // 기타 지역 입력 제출 핸들러
+  const handleOtherDestinationSubmit = async () => {
+    if (otherDestination.trim()) {
+      await handleSendMessage(`I want to visit ${otherDestination.trim()}`);
+      setShowOtherInput(false);
+      setOtherDestination("");
+    }
   };
 
   // 목적지 선택 UI 렌더링 함수
@@ -291,14 +279,6 @@ const Container: FC = () => {
               <DestinationDesc>UNESCO sites, history</DestinationDesc>
             </DestinationContent>
           </DestinationCard>
-          <DestinationCard onClick={() => handleDestinationSelect("Gangneung")} disabled={isTyping}>
-            <DestinationImageBg style={{ background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' }} />
-            <DestinationContent>
-              <DestinationEmoji>🌊</DestinationEmoji>
-              <DestinationName>Gangneung</DestinationName>
-              <DestinationDesc>East coast, coffee street</DestinationDesc>
-            </DestinationContent>
-          </DestinationCard>
           <DestinationCard onClick={() => handleDestinationSelect("Jeonju")} disabled={isTyping}>
             <DestinationImageBg style={{ background: 'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)' }} />
             <DestinationContent>
@@ -307,7 +287,56 @@ const Container: FC = () => {
               <DestinationDesc>Hanok village, traditional food</DestinationDesc>
             </DestinationContent>
           </DestinationCard>
+          {/* Other destination option */}
+          <DestinationCard
+            onClick={() => setShowOtherInput(true)}
+            disabled={isTyping}
+            style={{ border: showOtherInput ? '2px solid var(--color-tumakr-maroon)' : undefined }}
+          >
+            <DestinationImageBg style={{ background: 'linear-gradient(135deg, #a8a8a8 0%, #6b6b6b 100%)' }} />
+            <DestinationContent>
+              <DestinationEmoji>✏️</DestinationEmoji>
+              <DestinationName>Other</DestinationName>
+              <DestinationDesc>Enter your destination</DestinationDesc>
+            </DestinationContent>
+          </DestinationCard>
         </DestinationGrid>
+
+        {/* Other destination input field */}
+        {showOtherInput && (
+          <OtherInputWrapper>
+            <OtherInputContainer>
+              <OtherInput
+                type="text"
+                value={otherDestination}
+                onChange={(e) => setOtherDestination(e.target.value)}
+                placeholder="Enter your destination (e.g., Gangneung, Sokcho, Daegu...)"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && otherDestination.trim()) {
+                    handleOtherDestinationSubmit();
+                  }
+                }}
+                autoFocus
+              />
+              <OtherInputButton
+                onClick={handleOtherDestinationSubmit}
+                disabled={!otherDestination.trim() || isTyping}
+              >
+                Go
+              </OtherInputButton>
+            </OtherInputContainer>
+          </OtherInputWrapper>
+        )}
+
+        {/* 7+ days trip notice */}
+        <LongTripNotice>
+          <LongTripIcon>📧</LongTripIcon>
+          <LongTripText>
+            Planning a trip longer than 7 days? Contact us at{" "}
+            <LongTripEmail href="mailto:info@onedaykorea.com">info@onedaykorea.com</LongTripEmail>
+            {" "}for personalized assistance.
+          </LongTripText>
+        </LongTripNotice>
 
         <OrDivider>
           <OrLine />
@@ -720,17 +749,6 @@ const LoadingSubtext = styled.p`
   margin: 0;
 `;
 
-const EmptyStateContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  min-height: 0;
-  background-color: #ffffff;
-  padding: 24px;
-  overflow-y: auto;
-`;
-
 const DestinationSelectionWrapper = styled.div`
   display: flex;
   align-items: center;
@@ -801,31 +819,6 @@ const EmptyStateSubtitle = styled.p`
 const EmptyStateInputWrapper = styled.div`
   width: 100%;
   margin-top: 16px;
-`;
-
-const EmptyStateHints = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 8px;
-`;
-
-const HintChip = styled.button`
-  padding: 8px 16px;
-  border: 1px solid #e5e5e5;
-  border-radius: 20px;
-  background-color: #ffffff;
-  font-size: 13px;
-  color: #555;
-  cursor: pointer;
-  transition: all 0.15s;
-
-  &:hover {
-    border-color: var(--color-tumakr-maroon);
-    color: var(--color-tumakr-maroon);
-    background-color: rgba(101, 29, 42, 0.03);
-  }
 `;
 
 // Welcome Badge
@@ -1088,5 +1081,97 @@ const SignUpButton = styled.button`
   &:hover {
     background-color: #f5f5f5;
     border-color: #ddd;
+  }
+`;
+
+// Other destination input components
+const OtherInputWrapper = styled.div`
+  width: 100%;
+  max-width: 580px;
+  margin-top: 16px;
+  animation: ${fadeIn} 0.3s ease;
+`;
+
+const OtherInputContainer = styled.div`
+  display: flex;
+  gap: 8px;
+  padding: 4px;
+  background: #ffffff;
+  border: 2px solid var(--color-tumakr-maroon);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(101, 29, 42, 0.1);
+`;
+
+const OtherInput = styled.input`
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: #333;
+  background: transparent;
+
+  &::placeholder {
+    color: #999;
+  }
+`;
+
+const OtherInputButton = styled.button<{ disabled?: boolean }>`
+  padding: 12px 24px;
+  background-color: ${({ disabled }) => (disabled ? '#ccc' : 'var(--color-tumakr-maroon)')};
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    background-color: #4a1520;
+  }
+`;
+
+// Long trip notice components
+const LongTripNotice = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(101, 29, 42, 0.05) 0%, rgba(101, 29, 42, 0.02) 100%);
+  border: 1px solid rgba(101, 29, 42, 0.15);
+  border-radius: 12px;
+  margin-top: 24px;
+  max-width: 580px;
+  animation: ${fadeIn} 0.5s ease 0.3s both;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+`;
+
+const LongTripIcon = styled.span`
+  font-size: 24px;
+  flex-shrink: 0;
+`;
+
+const LongTripText = styled.p`
+  margin: 0;
+  font-size: 13px;
+  color: #555;
+  line-height: 1.5;
+`;
+
+const LongTripEmail = styled.a`
+  color: var(--color-tumakr-maroon);
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.8;
+    text-decoration: underline;
   }
 `;
