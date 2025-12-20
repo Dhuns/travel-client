@@ -57,9 +57,13 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
   const timelineByDay: Record<string, string> = React.useMemo(() => {
     if (!estimateInfo.timeline) return {};
 
-    // If already an object, return as-is
+    // If already an object, check if it's new JSON format or legacy Record format
     if (typeof estimateInfo.timeline === "object") {
-      return estimateInfo.timeline;
+      // New JSON format has 'days' array - skip for FinalQuotation (uses legacy format)
+      if ("days" in estimateInfo.timeline) {
+        return {};
+      }
+      return estimateInfo.timeline as Record<string, string>;
     }
 
     // If string, parse it (format: "day1#@#day2#@#day3...")

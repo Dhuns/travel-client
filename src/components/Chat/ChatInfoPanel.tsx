@@ -1,7 +1,6 @@
 import { FC } from "react";
 
 import styled from "@emotion/styled";
-import useChatStore from "@shared/store/chatStore";
 import { ChatContext } from "@shared/types/chat";
 import dayjs from "dayjs";
 import { Info } from "lucide-react";
@@ -13,9 +12,6 @@ interface Props {
 }
 
 const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
-  const { canGenerateEstimate, generateEstimateForSession, isGeneratingEstimate } =
-    useChatStore();
-
   const {
     destination,
     startDate,
@@ -26,14 +22,6 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
     budget,
     preferences = [],
   } = context;
-
-  const handleGenerateEstimate = async () => {
-    if (isGeneratingEstimate) return;
-    const success = await generateEstimateForSession();
-    if (success) {
-      // Success message is now shown in chat, no need for alert
-    }
-  };
 
   // Calculate total days
   const days =
@@ -122,42 +110,7 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
         )}
       </Section>
 
-      {/* Generate Quote Button */}
-      {canGenerateEstimate() && !batchId && (
-        <EstimateButtonSection>
-          <GenerateButton
-            onClick={handleGenerateEstimate}
-            disabled={isGeneratingEstimate}
-          >
-            {isGeneratingEstimate ? (
-              <>
-                <LoadingSpinner />
-                Creating your quote...
-              </>
-            ) : (
-              <>
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-                </svg>
-                Generate AI Itinerary
-              </>
-            )}
-          </GenerateButton>
-          <EstimateHint>
-            Get your AI-suggested daily destinations. Our experts will add accommodations
-            & transport.
-          </EstimateHint>
-        </EstimateButtonSection>
-      )}
-
-      {/* Process Explanation - Collected Info 아래 */}
+      {/* Process Explanation */}
       <ProcessSection>
         <ProcessHeader>
           <ProcessIcon>
@@ -169,10 +122,10 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
           <ProcessStep>
             <StepNumber active>1</StepNumber>
             <StepContent>
-              <StepLabel active>AI Draft</StepLabel>
+              <StepLabel active>Chat with AI</StepLabel>
               <StepDescription>
-                AI creates a daily itinerary with recommended destinations and activities
-                only. (No pricing yet)
+                Tell us about your trip - where you want to go, when, and who's traveling.
+                Our AI will guide you through the planning.
               </StepDescription>
             </StepContent>
           </ProcessStep>
@@ -180,10 +133,10 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
           <ProcessStep>
             <StepNumber>2</StepNumber>
             <StepContent>
-              <StepLabel>Expert Enhancement</StepLabel>
+              <StepLabel>AI Creates Itinerary</StepLabel>
               <StepDescription>
-                Our travel experts review your draft and add accommodations,
-                transportation, tickets, and calculate accurate pricing.
+                Once we have your details, AI automatically creates a personalized daily
+                itinerary with recommended destinations.
               </StepDescription>
             </StepContent>
           </ProcessStep>
@@ -191,10 +144,21 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
           <ProcessStep>
             <StepNumber>3</StepNumber>
             <StepContent>
+              <StepLabel>Expert Review</StepLabel>
+              <StepDescription>
+                Our travel experts add accommodations, transportation, and calculate
+                accurate pricing for your complete package.
+              </StepDescription>
+            </StepContent>
+          </ProcessStep>
+          <StepConnector />
+          <ProcessStep>
+            <StepNumber>4</StepNumber>
+            <StepContent>
               <StepLabel>Final Quote</StepLabel>
               <StepDescription>
-                Receive your complete, bookable travel package with all details and final
-                pricing via email.
+                Receive your complete, bookable travel package with all details
+                via email. Ready to book!
               </StepDescription>
             </StepContent>
           </ProcessStep>
@@ -388,70 +352,4 @@ const EmptyState = styled.div`
   font-size: 13px;
   background-color: #f8f8f8;
   border-radius: 8px;
-`;
-
-// Estimate Button Styles
-const EstimateButtonSection = styled.div`
-  padding: 16px;
-  margin: 0 0 14px 0;
-  background: linear-gradient(
-    135deg,
-    var(--color-tumakr-maroon) 0%,
-    var(--color-tumakr-maroon) 100%
-  );
-  border-radius: 14px;
-  text-align: center;
-`;
-
-const GenerateButton = styled.button`
-  width: 100%;
-  padding: 14px 20px;
-  background-color: #ffffff;
-  color: var(--color-tumakr-maroon);
-  border: none;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  &:hover:not(:disabled) {
-    background-color: #f5f5f5;
-    transform: translateY(-2px);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-  }
-
-  &:disabled {
-    background-color: rgba(255, 255, 255, 0.6);
-    cursor: not-allowed;
-  }
-`;
-
-const LoadingSpinner = styled.div`
-  width: 16px;
-  height: 16px;
-  border: 2px solid var(--color-tumakr-maroon);
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-`;
-
-const EstimateHint = styled.p`
-  margin: 12px 0 0 0;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.5;
 `;

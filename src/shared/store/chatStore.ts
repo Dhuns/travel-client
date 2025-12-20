@@ -149,22 +149,18 @@ const useChatStore = create<ChatStore>((set, get) => ({
   // 세션 로드 (API에서 메시지 가져오기)
   loadSession: async (sessionId: string) => {
     try {
-      console.log("[chatStore] loadSession called with sessionId:", sessionId);
       set({ isLoading: true });
 
       // 로그인 확인 및 accessToken 가져오기
       const authState = useAuthStore.getState();
       const accessToken = authState.accessToken;
       if (!accessToken) {
-        console.warn("[chatStore] No access token available");
         set({ isLoading: false });
         return;
       }
 
-      console.log("[chatStore] Fetching session from API...");
       // 백엔드에서 세션 및 메시지 가져오기
       const session = await getChatSession(accessToken, sessionId);
-      console.log("[chatStore] Session loaded:", session);
 
       const { sessions } = get();
       const existingSessionIndex = sessions.findIndex((s) => s.sessionId === sessionId);
@@ -276,32 +272,21 @@ const useChatStore = create<ChatStore>((set, get) => ({
       // 로그인 확인 및 accessToken 가져오기
       const authState = useAuthStore.getState();
       const accessToken = authState.accessToken;
-      console.log(
-        "[chatStore] loadUserSessions - accessToken:",
-        accessToken ? "Present" : "Missing"
-      );
 
       if (!accessToken) {
-        console.warn("[chatStore] No access token available");
         set({ isLoading: false });
         return;
       }
 
-      console.log("[chatStore] Calling getAllChatSessions API...");
       // 서버에서 사용자의 세션 목록 가져오기 (userId는 JWT에서 추출됨)
       const response = await getAllChatSessions(accessToken, {
         page: 1,
         limit: 50, // 최근 50개 세션
       });
 
-      console.log("[chatStore] API Response:", response);
-      const { sessions: serverSessions, total } = response;
-      console.log(
-        `[chatStore] Loaded ${serverSessions?.length || 0} sessions (total: ${total})`
-      );
+      const { sessions: serverSessions } = response;
 
       if (!serverSessions || !Array.isArray(serverSessions)) {
-        console.error("[chatStore] Invalid sessions data:", serverSessions);
         set({ sessions: [], isLoading: false });
         return;
       }
@@ -316,21 +301,12 @@ const useChatStore = create<ChatStore>((set, get) => ({
         messages: [], // 메시지는 세션 선택 시 로드
       }));
 
-      console.log("[chatStore] Formatted sessions:", formattedSessions.length);
-
       set({
         sessions: formattedSessions,
         isLoading: false,
       });
-    } catch (error) {
-      console.error("[chatStore] Failed to load user sessions:", error);
-      const axiosError = error as any;
-      if (axiosError?.response) {
-        console.error("[chatStore] API Error Response:", {
-          status: axiosError.response.status,
-          data: axiosError.response.data,
-        });
-      }
+    } catch {
+      // Failed to load sessions - silent fail
       set({ isLoading: false, sessions: [] });
     }
   },
@@ -709,7 +685,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
     const accessToken = authState.accessToken;
     if (!accessToken) {
       console.warn("No access token available");
-      alert("로그인이 필요합니다.");
+      alert("Please sign in to continue.");
       return;
     }
 
@@ -726,22 +702,20 @@ const useChatStore = create<ChatStore>((set, get) => ({
     try {
       // 백엔드 API 호출하여 서버에서 세션 삭제
       await deleteChatSession(accessToken, sessionId);
-      console.log(`Session ${sessionId} deleted successfully`);
     } catch (error) {
       // 서버 삭제 실패 시 에러 처리
-      console.error("Failed to delete session from server:", error);
       const axiosError = error as {
         response?: { status?: number; data?: { message?: string } };
       };
 
       // 404 에러면 이미 삭제된 것이므로 그냥 무시 (로컬에서는 이미 제거됨)
       if (axiosError?.response?.status === 404) {
-        console.log("Session not found on server, already removed from local state");
+        // Already removed
       } else {
         // 다른 에러면 롤백하고 사용자에게 알림
         const errorMessage =
-          axiosError?.response?.data?.message || "채팅 삭제에 실패했습니다.";
-        alert(`삭제 실패: ${errorMessage}\n\n페이지를 새로고침한 후 다시 시도해주세요.`);
+          axiosError?.response?.data?.message || "Failed to delete chat.";
+        alert(`Delete failed: ${errorMessage}\n\nPlease refresh the page and try again.`);
 
         // 롤백: 삭제된 세션을 다시 추가
         if (sessionToDelete) {
