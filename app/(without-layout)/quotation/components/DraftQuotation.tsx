@@ -159,13 +159,8 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
   }, [isJsonFormat, jsonTimeline]);
 
   // Calculate totals
-  const totalPrice = estimateDetails.reduce(
-    (sum, detail) => sum + (Number(detail.price) || 0),
-    0
-  );
   const totalTravelers =
     batchInfo.adultsCount + batchInfo.childrenCount + batchInfo.infantsCount;
-  const pricePerPerson = totalTravelers > 0 ? totalPrice / totalTravelers : 0;
   const tripDays = dayjs(batchInfo.endDate).diff(dayjs(batchInfo.startDate), "day") + 1;
 
   // Separate common services (transportation and contents) from day-specific items
@@ -586,22 +581,6 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
         </Section>
       )}
 
-      {!batchInfo.hidePrice && (
-        <TotalSection>
-          <TotalRow>
-            <TotalLabel>Total Amount</TotalLabel>
-            <TotalAmount>${totalPrice.toLocaleString()}</TotalAmount>
-          </TotalRow>
-          {totalTravelers > 0 && (
-            <PerPersonRow>
-              <PerPersonLabel>Per Person</PerPersonLabel>
-              <PerPersonAmount>
-                ${Math.round(pricePerPerson).toLocaleString()}
-              </PerPersonAmount>
-            </PerPersonRow>
-          )}
-        </TotalSection>
-      )}
 
       {estimateInfo.comment && (
         <Section>
@@ -1030,56 +1009,6 @@ const RouteSummaryNumber = styled.div`
 const RouteSummaryName = styled.span`
   color: #1a1a1a;
   font-weight: 500;
-`;
-
-const TotalSection = styled.div`
-  background: linear-gradient(
-    135deg,
-    var(--color-tumakr-maroon) 0%,
-    var(--color-tumakr-maroon) 100%
-  );
-  padding: 24px 32px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  margin-bottom: 24px;
-`;
-
-const TotalRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-`;
-
-const TotalLabel = styled.span`
-  font-size: 18px;
-  font-weight: 600;
-  color: white;
-`;
-
-const TotalAmount = styled.span`
-  font-size: 32px;
-  font-weight: 700;
-  color: white;
-`;
-
-const PerPersonRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.3);
-`;
-
-const PerPersonLabel = styled.span`
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.9);
-`;
-
-const PerPersonAmount = styled.span`
-  font-size: 18px;
-  font-weight: 600;
-  color: white;
 `;
 
 const CommentBox = styled.div`
