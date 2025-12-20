@@ -365,7 +365,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
               {tourCategories.slice(1).map((category, index) => {
                 const IconComponent = category.icon;
                 return (
-                  <div className="relative h-full min-h-[300px] rounded-3xl overflow-hidden shadow-xl hover:shadow-3xl transition-all duration-700 transform hover:-translate-y-2 hover:-rotate-1">
+                  <div key={category.title} className="relative h-full min-h-[300px] rounded-3xl overflow-hidden shadow-xl hover:shadow-3xl transition-all duration-700 transform hover:-translate-y-2 hover:-rotate-1">
                     <Image
                       src={category.image || "/placeholder.svg"}
                       alt={category.title}

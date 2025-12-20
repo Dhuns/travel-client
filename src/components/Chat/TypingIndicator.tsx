@@ -4,10 +4,41 @@ import React from "react";
 
 const bounce = keyframes`
   0%, 80%, 100% {
-    transform: scale(0);
+    transform: scale(0.6);
+    opacity: 0.4;
   }
   40% {
-    transform: scale(1.0);
+    transform: scale(1);
+    opacity: 1;
+  }
+`;
+
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const pulse = keyframes`
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(101, 29, 42, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(101, 29, 42, 0);
+  }
+`;
+
+const sparkle = keyframes`
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(5deg);
   }
 `;
 
@@ -19,6 +50,7 @@ const Container = styled.div`
   max-width: 800px;
   margin: 0 auto;
   width: 100%;
+  animation: ${fadeIn} 0.3s ease;
 
   @media (max-width: 768px) {
     padding: 12px 16px;
@@ -26,34 +58,47 @@ const Container = styled.div`
 `;
 
 const Avatar = styled.div`
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: linear-gradient(
     135deg,
-    var(--color-tumakr-maroon) 0%,
-    var(--color-tumakr-maroon) 100%
+    var(--color-tumakr-maroon, #651d2a) 0%,
+    #8b2438 100%
   );
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   flex-shrink: 0;
+  animation: ${pulse} 2s infinite;
+
+  svg {
+    animation: ${sparkle} 3s ease-in-out infinite;
+  }
+`;
+
+const ContentWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 `;
 
 const DotsWrapper = styled.div`
   display: flex;
   align-items: center;
-  padding: 14px 18px;
-  background-color: #f3f4f6;
+  gap: 6px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #f3f4f6 100%);
   border-radius: 20px;
+  border-top-left-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 `;
 
 const Dot = styled.div`
-  width: 8px;
-  height: 8px;
-  margin: 0 3px;
-  background-color: #9ca3af;
+  width: 10px;
+  height: 10px;
+  background: linear-gradient(135deg, var(--color-tumakr-maroon, #651d2a) 0%, #8b2438 100%);
   border-radius: 50%;
   animation: ${bounce} 1.4s infinite ease-in-out both;
 
@@ -68,6 +113,12 @@ const Dot = styled.div`
   &:nth-of-type(3) {
     animation-delay: 0s;
   }
+`;
+
+const ThinkingText = styled.span`
+  font-size: 12px;
+  color: #9ca3af;
+  padding-left: 4px;
 `;
 
 const TypingIndicator: React.FC = () => {
@@ -86,11 +137,14 @@ const TypingIndicator: React.FC = () => {
           <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
         </svg>
       </Avatar>
-      <DotsWrapper>
-        <Dot />
-        <Dot />
-        <Dot />
-      </DotsWrapper>
+      <ContentWrapper>
+        <DotsWrapper>
+          <Dot />
+          <Dot />
+          <Dot />
+        </DotsWrapper>
+        <ThinkingText>AI is thinking...</ThinkingText>
+      </ContentWrapper>
     </Container>
   );
 };

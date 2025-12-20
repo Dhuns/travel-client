@@ -1,3 +1,4 @@
+import { css, keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import {
   MAX_MESSAGE_LENGTH,
@@ -5,22 +6,25 @@ import {
   MESSAGES,
   UI_TEXT,
 } from "@shared/constants/chat";
-import { Send } from "lucide-react";
+import { ArrowUp, Sparkles } from "lucide-react";
 import React, { FC, KeyboardEvent, useEffect, useRef, useState } from "react";
 
 interface Props {
   onSend: (message: string) => void;
   disabled?: boolean;
   placeholder?: string;
+  showHint?: boolean;
 }
 
 const ChatInput: FC<Props> = ({
   onSend,
   disabled = false,
   placeholder = UI_TEXT.TYPE_MESSAGE,
+  showHint = false,
 }) => {
   const [input, setInput] = useState("");
   const [isComposing, setIsComposing] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea
@@ -99,9 +103,16 @@ const ChatInput: FC<Props> = ({
   const isNearLimit = charCount > MAX_MESSAGE_LENGTH * MESSAGE_LENGTH_WARNING_THRESHOLD;
   const isOverLimit = charCount > MAX_MESSAGE_LENGTH;
 
+  const canSend = !!(input.trim() && !disabled && !isOverLimit);
+
   return (
     <Container>
-      <InputWrapper hasError={isOverLimit} disabled={disabled}>
+      <InputWrapper hasError={isOverLimit} disabled={disabled} isFocused={isFocused}>
+        {disabled && (
+          <AIThinkingIndicator>
+            <Sparkles className="w-4 h-4" />
+          </AIThinkingIndicator>
+        )}
         <TextArea
           ref={textareaRef}
           value={input}
@@ -110,6 +121,8 @@ const ChatInput: FC<Props> = ({
           onPaste={handlePaste}
           onCompositionStart={() => setIsComposing(true)}
           onCompositionEnd={() => setIsComposing(false)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           placeholder={placeholder}
           disabled={disabled}
           rows={1}
@@ -122,9 +135,12 @@ const ChatInput: FC<Props> = ({
           )}
           <SendButton
             onClick={handleSend}
-            disabled={!input.trim() || disabled || isOverLimit}
+            disabled={!canSend}
+            canSend={canSend}
+            type="button"
+            aria-label="Send message"
           >
-            <Send className="w-4.5 h-4.5" />
+            <ArrowUp className="w-5 h-5" strokeWidth={2.5} />
           </SendButton>
         </RightSection>
       </InputWrapper>
@@ -138,38 +154,88 @@ const ChatInput: FC<Props> = ({
           {UI_TEXT.GENERATING_RESPONSE}
         </DisabledHint>
       )}
+      {showHint && !disabled && !input && (
+        <KeyboardHint>
+          Press <kbd>Enter</kbd> to send, <kbd>Shift + Enter</kbd> for new line
+        </KeyboardHint>
+      )}
     </Container>
   );
 };
 
 export default ChatInput;
 
+// Animations
+const shimmer = keyframes`
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+`;
+
+const bounce = keyframes`
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+`;
+
+const pulse = keyframes`
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+`;
+
+const sparkle = keyframes`
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1.1) rotate(180deg); opacity: 0.7; }
+`;
+
 // Styled Components
 const Container = styled.div`
   width: 100%;
 `;
 
-const InputWrapper = styled.div<{ hasError?: boolean; disabled?: boolean }>`
+const InputWrapper = styled.div<{ hasError?: boolean; disabled?: boolean; isFocused?: boolean }>`
   display: flex;
   align-items: flex-end;
   gap: 12px;
-  padding: 14px 16px;
-  background-color: #ffffff;
-  border: 1px solid ${({ hasError }) => (hasError ? "#ef4444" : "#e5e5e5")};
-  border-radius: 24px;
+  padding: 12px 12px 12px 16px;
+  background-color: ${({ disabled }) => (disabled ? "#fafafa" : "#ffffff")};
+  border: 1.5px solid ${({ hasError, isFocused }) =>
+    hasError ? "#ef4444" : isFocused ? "var(--color-tumakr-maroon, #651d2a)" : "#e5e5e5"};
+  border-radius: 28px;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  opacity: ${({ disabled }) => (disabled ? 0.7 : 1)};
+  box-shadow: ${({ isFocused }) => isFocused
+    ? "0 0 0 3px rgba(101, 29, 42, 0.1), 0 4px 12px rgba(0, 0, 0, 0.06)"
+    : "0 2px 8px rgba(0, 0, 0, 0.04)"};
+  position: relative;
 
-  &:focus-within {
-    border-color: ${({ hasError }) => (hasError ? "#ef4444" : "#d1d5db")};
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  }
+  ${({ disabled }) => disabled && css`
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 28px;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(101, 29, 42, 0.05) 50%,
+        transparent 100%
+      );
+      background-size: 200% 100%;
+      animation: ${shimmer} 2s infinite;
+    }
+  `}
+`;
+
+const AIThinkingIndicator = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-tumakr-maroon, #651d2a);
+  animation: ${sparkle} 2s ease-in-out infinite;
+  flex-shrink: 0;
 `;
 
 const TextArea = styled.textarea`
   flex: 1;
-  padding: 2px 0;
+  padding: 6px 0;
   border: none;
   background: transparent;
   font-size: 15px;
@@ -177,7 +243,7 @@ const TextArea = styled.textarea`
   resize: none;
   outline: none;
   font-family: inherit;
-  min-height: 32px;
+  min-height: 28px;
   color: #1a1a1a;
   max-height: 160px;
   overflow-y: auto;
@@ -188,6 +254,7 @@ const TextArea = styled.textarea`
 
   &:disabled {
     cursor: not-allowed;
+    color: #666;
   }
 
   &::-webkit-scrollbar {
@@ -209,6 +276,7 @@ const RightSection = styled.div`
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
+  padding-bottom: 2px;
 `;
 
 const CharCount = styled.span<{ isOverLimit: boolean }>`
@@ -216,9 +284,12 @@ const CharCount = styled.span<{ isOverLimit: boolean }>`
   color: ${({ isOverLimit }) => (isOverLimit ? "#ef4444" : "#9ca3af")};
   font-weight: ${({ isOverLimit }) => (isOverLimit ? "600" : "500")};
   white-space: nowrap;
+  ${({ isOverLimit }) => isOverLimit && css`
+    animation: ${pulse} 1s infinite;
+  `}
 `;
 
-const SendButton = styled.button`
+const SendButton = styled.button<{ canSend?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -226,31 +297,32 @@ const SendButton = styled.button`
   height: 36px;
   border: none;
   border-radius: 50%;
-  background-color: ${({ disabled }) => (disabled ? "#e5e5e5" : "#1a1a1a")};
-  color: ${({ disabled }) => (disabled ? "#9ca3af" : "#ffffff")};
+  background-color: ${({ canSend }) => canSend ? "var(--color-tumakr-maroon, #651d2a)" : "#e5e5e5"};
+  color: ${({ canSend }) => (canSend ? "#ffffff" : "#9ca3af")};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
   transition: all 0.2s ease;
   flex-shrink: 0;
 
   &:hover:not(:disabled) {
-    background-color: #2d2d2d;
-    transform: scale(1.05);
+    background-color: ${({ canSend }) => canSend ? "#4a1520" : "#e5e5e5"};
+    transform: ${({ canSend }) => canSend ? "scale(1.05)" : "none"};
   }
 
   &:active:not(:disabled) {
-    transform: scale(0.95);
+    transform: ${({ canSend }) => canSend ? "scale(0.95)" : "none"};
   }
 `;
 
 const DisabledHint = styled.div`
-  margin-top: 10px;
+  margin-top: 12px;
   font-size: 13px;
-  color: #9ca3af;
+  color: var(--color-tumakr-maroon, #651d2a);
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
+  font-weight: 500;
 `;
 
 const LoadingDots = styled.div`
@@ -258,11 +330,11 @@ const LoadingDots = styled.div`
   gap: 4px;
 
   span {
-    width: 4px;
-    height: 4px;
-    background-color: #9ca3af;
+    width: 5px;
+    height: 5px;
+    background-color: var(--color-tumakr-maroon, #651d2a);
     border-radius: 50%;
-    animation: bounce 1.4s infinite ease-in-out both;
+    animation: ${bounce} 1.4s infinite ease-in-out both;
 
     &:nth-of-type(1) {
       animation-delay: -0.32s;
@@ -274,15 +346,22 @@ const LoadingDots = styled.div`
       animation-delay: 0s;
     }
   }
+`;
 
-  @keyframes bounce {
-    0%,
-    80%,
-    100% {
-      transform: scale(0);
-    }
-    40% {
-      transform: scale(1);
-    }
+const KeyboardHint = styled.div`
+  margin-top: 10px;
+  font-size: 12px;
+  color: #9ca3af;
+  text-align: center;
+
+  kbd {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-family: inherit;
+    background-color: #f3f4f6;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
 `;
