@@ -159,12 +159,13 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
         item: detail.item,
         days: [],
         quantity: 0,
-        price: Number(detail.price) || 0,
-        originPrice: Number(detail.originPrice) || 0,
+        totalPrice: 0,
+        unitPrice: Number(detail.originPrice) || Number(detail.price) || 0,
       };
     }
     acc[key].days.push(detail.days);
     acc[key].quantity += detail.quantity;
+    acc[key].totalPrice += Number(detail.price) || 0;
     return acc;
   }, {} as Record<number, any>);
 
@@ -259,13 +260,23 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
                   </ServiceDays>
                   <ServiceDetails>
                     <ServiceDetailRow>
-                      <span>Quantity</span>
-                      <span>{service.quantity}</span>
+                      <span>Days Used</span>
+                      <span>{service.days.length} days</span>
                     </ServiceDetailRow>
-                    {!batchInfo.hidePrice && service.price > 0 && (
+                    <ServiceDetailRow>
+                      <span>Quantity</span>
+                      <span>{service.quantity} pax</span>
+                    </ServiceDetailRow>
+                    {!batchInfo.hidePrice && service.unitPrice > 0 && (
+                      <ServiceDetailRow>
+                        <span>Unit Price</span>
+                        <span>${Number(service.unitPrice).toLocaleString()}</span>
+                      </ServiceDetailRow>
+                    )}
+                    {!batchInfo.hidePrice && service.totalPrice > 0 && (
                       <ServiceDetailRow className="price">
                         <span>Total</span>
-                        <span>${Number(service.price).toLocaleString()}</span>
+                        <span>${Number(service.totalPrice).toLocaleString()}</span>
                       </ServiceDetailRow>
                     )}
                   </ServiceDetails>
