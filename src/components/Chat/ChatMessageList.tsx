@@ -1,6 +1,7 @@
+import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import { AUTO_SCROLL_DELAY, UI_TEXT } from "@shared/constants/chat";
-import { ChatMessage as ChatMessageType } from "@shared/types/chat";
+import { ChatMessage as ChatMessageType, ChatContext } from "@shared/types/chat";
 import { FC, useEffect, useRef, useState } from "react";
 import ChatInput from "./ChatInput";
 import ChatMessage from "./ChatMessage";
@@ -8,11 +9,24 @@ import EstimateCard from "./EstimateCard";
 import QuotationModal from "./QuotationModal";
 import TypingIndicator from "./TypingIndicator";
 
+// Animations
+const fadeInUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
 interface Props {
   messages: ChatMessageType[];
   isTyping?: boolean;
   hasMessages?: boolean;
   onSend?: (message: string) => void;
+  onUIActionSelect?: (value: string | string[] | ChatContext) => void;
 }
 
 const ChatMessageList: FC<Props> = ({
@@ -20,6 +34,7 @@ const ChatMessageList: FC<Props> = ({
   isTyping = false,
   hasMessages = true,
   onSend,
+  onUIActionSelect,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [quotationHash, setQuotationHash] = useState<string | null>(null);
@@ -78,27 +93,37 @@ const ChatMessageList: FC<Props> = ({
           </WelcomeContainer>
         )}
 
-        {messages.map((message) => {
+        {messages.map((message, index) => {
           // Estimate card type
           if (message.type === "estimate" && message.metadata?.estimatePreview) {
             return (
-              <EstimateCardWrapper key={message.id}>
-                <EstimateCard
-                  estimate={message.metadata.estimatePreview}
-                  batchId={message.metadata?.batchId}
-                  onViewQuote={handleViewQuote}
-                />
-              </EstimateCardWrapper>
+              <MessageWrapper key={message.id} delay={index * 0.05}>
+                <EstimateCardWrapper>
+                  <EstimateCard
+                    estimate={message.metadata.estimatePreview}
+                    batchId={message.metadata?.batchId}
+                    onViewQuote={handleViewQuote}
+                  />
+                </EstimateCardWrapper>
+              </MessageWrapper>
             );
           }
 
+          // 마지막 AI 메시지인지 확인 (UI 액션은 마지막 AI 메시지에서만 표시)
+          const isLastAssistantMessage = message.role === 'assistant' &&
+            index === messages.length - 1 ||
+            (message.role === 'assistant' && messages.slice(index + 1).every(m => m.role === 'user'));
+
           // Regular text message (including estimate type)
           return (
-            <ChatMessage
-              key={message.id}
-              message={message}
-              onViewQuote={handleViewQuote}
-            />
+            <MessageWrapper key={message.id} delay={index * 0.05}>
+              <ChatMessage
+                message={message}
+                onViewQuote={handleViewQuote}
+                isLastMessage={isLastAssistantMessage}
+                onUIActionSelect={onUIActionSelect}
+              />
+            </MessageWrapper>
           );
         })}
 
@@ -165,6 +190,11 @@ const MessagesList = styled.div<{ hasMessages: boolean }>`
   max-width: 900px;
   margin: 0 auto;
   width: 100%;
+`;
+
+const MessageWrapper = styled.div<{ delay?: number }>`
+  animation: ${fadeInUp} 0.4s ease both;
+  animation-delay: ${({ delay }) => Math.min(delay || 0, 0.5)}s;
 `;
 
 const EstimateCardWrapper = styled.div`

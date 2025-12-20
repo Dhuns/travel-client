@@ -28,6 +28,82 @@ export interface EstimatePreview {
   }[];
 }
 
+// 대화 컨텍스트 (추출된 정보)
+export interface ChatContext {
+  destination?: string;
+  startDate?: string;
+  endDate?: string;
+  adults?: number;
+  children?: number;
+  infants?: number;
+  budget?: number;
+  preferences?: string[];
+}
+
+/**
+ * Hello Vacanze 스타일 구조화된 대화 단계
+ */
+export enum ConversationStep {
+  GREETING = 'greeting',
+  DESTINATION = 'destination',
+  DATES = 'dates',
+  TRAVELERS = 'travelers',
+  PREFERENCES = 'preferences',
+  CONFIRM = 'confirm',
+  ESTIMATE_READY = 'estimate_ready',
+  MODIFICATION_CHECK = 'modification_check', // 수정사항 확인
+  SEND_TO_EXPERT = 'send_to_expert', // 전문가 전송 확인
+  WAITING_EXPERT = 'waiting_expert', // 전문가 검토 대기
+  FREE_CHAT = 'free_chat',
+}
+
+/**
+ * UI 액션 타입
+ */
+export type UIActionType =
+  | 'buttons'
+  | 'date_picker'
+  | 'number_input'
+  | 'chips'
+  | 'confirm_card'
+  | 'text_input';
+
+/**
+ * UI 액션 옵션 (버튼, 칩 등)
+ */
+export interface UIActionOption {
+  id: string;
+  label: string;
+  value: string;
+  emoji?: string;
+  description?: string;
+}
+
+/**
+ * UI 액션 정의
+ */
+export interface UIAction {
+  type: UIActionType;
+  options?: UIActionOption[];
+  min?: number;
+  max?: number;
+  placeholder?: string;
+  multiSelect?: boolean;
+  contextData?: ChatContext;
+}
+
+/**
+ * 구조화된 AI 응답
+ */
+export interface StructuredAIResponse {
+  message: string;
+  currentStep: ConversationStep;
+  nextStep: ConversationStep;
+  uiAction?: UIAction;
+  extractedData?: Partial<ChatContext>;
+  isComplete?: boolean;
+}
+
 // 메시지 메타데이터
 export interface MessageMetadata {
   estimatePreview?: EstimatePreview;
@@ -39,6 +115,10 @@ export interface MessageMetadata {
   totalAmount?: number;
   itemCount?: number;
   timeline?: string;
+  isFirstEstimate?: boolean; // 1차 견적서 여부 (가격 없음)
+  // 구조화된 대화 UI 액션
+  uiAction?: UIAction;
+  conversationStep?: ConversationStep;
 }
 
 // 채팅 메시지
@@ -57,7 +137,7 @@ export interface ChatMessage {
 // 채팅 세션
 export interface ChatSession {
   sessionId: string;
-  status: 'active' | 'converted' | 'abandoned';
+  status: 'active' | 'converted' | 'abandoned' | 'estimate_ready' | 'inprogress' | 'pending_review' | 'quote_sent' | 'completed' | 'closed';
   messages: ChatMessage[];
   context: ChatContext;
   batchId?: number; // 생성된 견적서 배치 ID
@@ -66,16 +146,5 @@ export interface ChatSession {
   createdAt: Date;
   lastMessageAt?: Date;
   updatedAt?: Date; // 백엔드 업데이트 시간
-}
-
-// 대화 컨텍스트 (추출된 정보)
-export interface ChatContext {
-  destination?: string;
-  startDate?: string;
-  endDate?: string;
-  adults?: number;
-  children?: number;
-  infants?: number;
-  budget?: number;
-  preferences?: string[];
+  currentStep?: ConversationStep; // 현재 대화 단계
 }

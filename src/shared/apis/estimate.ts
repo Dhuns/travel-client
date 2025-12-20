@@ -74,7 +74,9 @@ export interface QuotationResponse {
 
 // Get quotation by hash (customer-facing, no auth required)
 export const getQuotationByHash = async (hash: string): Promise<QuotationResponse> => {
-  const response = await axios.get(`${API_URL}/estimate/client/detail/${hash}`);
+  // Hash may contain URL-unsafe characters like '/' and '+', so encode it
+  const encodedHash = encodeURIComponent(hash);
+  const response = await axios.get(`${API_URL}/estimate/client/detail/${encodedHash}`);
   return response.data;
 };
 

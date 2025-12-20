@@ -397,6 +397,11 @@ const useChatStore = create<ChatStore>((set, get) => ({
         updatedContext?: ChatContext;
         updatedTitle?: string;
       };
+
+      // estimate 타입 메시지인 경우 batchId 추출
+      const isEstimateResponse = aiMessage.type === 'estimate';
+      const estimateBatchId = aiMessage.metadata?.batchId;
+
       const updatedSessions = sessions.map((session) => {
         if (session.sessionId === currentSessionId) {
           return {
@@ -417,6 +422,10 @@ const useChatStore = create<ChatStore>((set, get) => ({
             title: aiResponse.updatedTitle || session.title,
             // 백엔드 응답의 sentAt 시간을 사용 (서버 시간이 정확함)
             lastMessageAt: aiMessage.sentAt ? new Date(aiMessage.sentAt) : new Date(),
+            // estimate 응답인 경우 batchId 업데이트
+            batchId: isEstimateResponse && estimateBatchId ? estimateBatchId : session.batchId,
+            // 견적서 생성 완료 상태 업데이트
+            status: isEstimateResponse ? 'estimate_ready' : session.status,
           };
         }
         return session;
