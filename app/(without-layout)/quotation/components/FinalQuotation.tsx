@@ -160,7 +160,6 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
         days: [],
         quantity: 0,
         totalPrice: 0,
-        unitPrice: Number(detail.originPrice) || Number(detail.price) || 0,
       };
     }
     acc[key].days.push(detail.days);
@@ -267,10 +266,10 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
                       <span>Quantity</span>
                       <span>{service.quantity} pax</span>
                     </ServiceDetailRow>
-                    {!batchInfo.hidePrice && service.unitPrice > 0 && (
+                    {!batchInfo.hidePrice && service.totalPrice > 0 && service.quantity > 0 && (
                       <ServiceDetailRow>
                         <span>Unit Price</span>
-                        <span>${Number(service.unitPrice).toLocaleString()}</span>
+                        <span>${Math.round(service.totalPrice / service.quantity).toLocaleString()} /pax</span>
                       </ServiceDetailRow>
                     )}
                     {!batchInfo.hidePrice && service.totalPrice > 0 && (
