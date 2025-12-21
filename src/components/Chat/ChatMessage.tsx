@@ -115,10 +115,43 @@ const parseSystemContent = (content: string | undefined): SystemMessageContent |
   return null;
 };
 
+// Helper to check if quote response was already submitted (persisted in localStorage)
+const QUOTE_RESPONSE_KEY = 'quote_responses';
+const getQuoteResponseStatus = (batchId: number | undefined): boolean => {
+  if (!batchId || typeof window === 'undefined') return false;
+  try {
+    const stored = localStorage.getItem(QUOTE_RESPONSE_KEY);
+    if (stored) {
+      const responses = JSON.parse(stored);
+      return responses[batchId] === true;
+    }
+  } catch {
+    // Ignore localStorage errors
+  }
+  return false;
+};
+
+const setQuoteResponseStatus = (batchId: number | undefined): void => {
+  if (!batchId || typeof window === 'undefined') return;
+  try {
+    const stored = localStorage.getItem(QUOTE_RESPONSE_KEY);
+    const responses = stored ? JSON.parse(stored) : {};
+    responses[batchId] = true;
+    localStorage.setItem(QUOTE_RESPONSE_KEY, JSON.stringify(responses));
+  } catch {
+    // Ignore localStorage errors
+  }
+};
+
 const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onUIActionSelect, isLastMessage }) => {
   const { role, content, timestamp, type, metadata } = message;
+
+  // Parse system content to get batchId for checking response status
+  const systemContentForInit = parseSystemContent(content);
+  const initialResponseSubmitted = getQuoteResponseStatus(systemContentForInit?.batchId);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [responseSubmitted, setResponseSubmitted] = useState(false);
+  const [responseSubmitted, setResponseSubmitted] = useState(initialResponseSubmitted);
   const [showRevisionInput, setShowRevisionInput] = useState(false);
   const [revisionMessage, setRevisionMessage] = useState("");
   const [selectedResponse, setSelectedResponse] = useState<string | null>(null);
@@ -232,6 +265,8 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
             responseType,
             message: msg,
           });
+          // Persist response status to localStorage
+          setQuoteResponseStatus(systemContent.batchId);
           setResponseSubmitted(true);
           setShowRevisionInput(false);
           onResponseSubmitted?.();
