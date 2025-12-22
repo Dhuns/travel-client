@@ -2,9 +2,9 @@ import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import { AUTO_SCROLL_DELAY, UI_TEXT } from "@shared/constants/chat";
 import { ChatMessage as ChatMessageType, ChatContext } from "@shared/types/chat";
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
 import ChatInput from "./ChatInput";
-import ChatMessage from "./ChatMessage";
+import ChatMessage, { QuoteResponseInfo } from "./ChatMessage";
 import EstimateCard from "./EstimateCard";
 import QuotationModal from "./QuotationModal";
 import TypingIndicator from "./TypingIndicator";
@@ -29,6 +29,20 @@ interface Props {
   onUIActionSelect?: (value: string | string[] | ChatContext) => void;
 }
 
+// Helper to parse system message content
+const parseSystemMessageContent = (content: string | undefined): { type?: string; customerMessage?: string; batchId?: number } | null => {
+  if (!content) return null;
+  try {
+    const jsonMatch = content.trim().match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+  } catch {
+    // Invalid JSON
+  }
+  return null;
+};
+
 const ChatMessageList: FC<Props> = ({
   messages,
   isTyping = false,
@@ -39,6 +53,29 @@ const ChatMessageList: FC<Props> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [quotationHash, setQuotationHash] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Calculate response info for each batchId
+  // This maps batchId -> response info (type, message)
+  const batchResponseMap = useMemo(() => {
+    const responseMap = new Map<number, QuoteResponseInfo>();
+
+    for (const msg of messages) {
+      const parsed = parseSystemMessageContent(msg.content);
+      if (parsed && parsed.batchId) {
+        // Check if this is a response message
+        if (parsed.type === 'customer_approved' || parsed.type === 'customer_rejected' || parsed.type === 'revision_requested') {
+          responseMap.set(parsed.batchId, {
+            responseType: parsed.type === 'customer_approved' ? 'approve'
+              : parsed.type === 'customer_rejected' ? 'reject'
+              : 'request_changes',
+            message: parsed.customerMessage,
+          });
+        }
+      }
+    }
+
+    return responseMap;
+  }, [messages]);
 
   const handleViewQuote = (hash: string) => {
     setQuotationHash(hash);
@@ -114,6 +151,12 @@ const ChatMessageList: FC<Props> = ({
             index === messages.length - 1 ||
             (message.role === 'assistant' && messages.slice(index + 1).every(m => m.role === 'user'));
 
+          // Get quote response info for this message if it's a quote_sent type
+          const msgContent = parseSystemMessageContent(message.content);
+          const quoteResponseInfo = msgContent?.type === 'quote_sent' && msgContent.batchId
+            ? batchResponseMap.get(msgContent.batchId)
+            : undefined;
+
           // Regular text message (including estimate type)
           return (
             <MessageWrapper key={message.id} delay={index * 0.05}>
@@ -122,6 +165,7 @@ const ChatMessageList: FC<Props> = ({
                 onViewQuote={handleViewQuote}
                 isLastMessage={isLastAssistantMessage}
                 onUIActionSelect={onUIActionSelect}
+                quoteResponseInfo={quoteResponseInfo}
               />
             </MessageWrapper>
           );

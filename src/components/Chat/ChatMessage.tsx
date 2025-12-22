@@ -19,12 +19,19 @@ interface SystemMessageContent {
   customerMessage?: string;
 }
 
+// Export for use in ChatMessageList
+export interface QuoteResponseInfo {
+  responseType: 'approve' | 'reject' | 'request_changes';
+  message?: string;
+}
+
 interface Props {
   message: ChatMessageType;
   onViewQuote?: (hash: string) => void;
   onResponseSubmitted?: () => void;
   onUIActionSelect?: (value: string | string[] | ChatContext) => void;
   isLastMessage?: boolean;
+  quoteResponseInfo?: QuoteResponseInfo;
 }
 
 // Shared card configuration for system messages
@@ -143,12 +150,14 @@ const setQuoteResponseStatus = (batchId: number | undefined): void => {
   }
 };
 
-const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onUIActionSelect, isLastMessage }) => {
+const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onUIActionSelect, isLastMessage, quoteResponseInfo }) => {
   const { role, content, timestamp, type, metadata } = message;
 
   // Parse system content to get batchId for checking response status
   const systemContentForInit = parseSystemContent(content);
-  const initialResponseSubmitted = getQuoteResponseStatus(systemContentForInit?.batchId);
+  // Use quoteResponseInfo from parent (server data) or localStorage as fallback
+  const hasServerResponse = !!quoteResponseInfo;
+  const initialResponseSubmitted = hasServerResponse || getQuoteResponseStatus(systemContentForInit?.batchId);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [responseSubmitted, setResponseSubmitted] = useState(initialResponseSubmitted);
@@ -437,13 +446,58 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
               )}
 
               {responseSubmitted && (
-                <SuccessMessage>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                    <polyline points="22 4 12 14.01 9 11.01" />
-                  </svg>
-                  Your response has been submitted successfully!
-                </SuccessMessage>
+                <ResponseSubmittedSection>
+                  {quoteResponseInfo ? (
+                    // Show detailed response info from server
+                    <ResponseDetailBox responseType={quoteResponseInfo.responseType}>
+                      <ResponseDetailHeader>
+                        {quoteResponseInfo.responseType === 'approve' && (
+                          <>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                              <polyline points="22 4 12 14.01 9 11.01" />
+                            </svg>
+                            <span>Approved</span>
+                          </>
+                        )}
+                        {quoteResponseInfo.responseType === 'reject' && (
+                          <>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="12" cy="12" r="10" />
+                              <line x1="15" y1="9" x2="9" y2="15" />
+                              <line x1="9" y1="9" x2="15" y2="15" />
+                            </svg>
+                            <span>Declined</span>
+                          </>
+                        )}
+                        {quoteResponseInfo.responseType === 'request_changes' && (
+                          <>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                            </svg>
+                            <span>Revision Requested</span>
+                          </>
+                        )}
+                      </ResponseDetailHeader>
+                      {quoteResponseInfo.responseType === 'request_changes' && quoteResponseInfo.message && (
+                        <ResponseDetailMessage>
+                          <strong>Your request:</strong>
+                          <p>{quoteResponseInfo.message}</p>
+                        </ResponseDetailMessage>
+                      )}
+                    </ResponseDetailBox>
+                  ) : (
+                    // Fallback: simple success message (localStorage only)
+                    <SuccessMessage>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
+                      </svg>
+                      Your response has been submitted successfully!
+                    </SuccessMessage>
+                  )}
+                </ResponseSubmittedSection>
               )}
             </SystemCard>
             <MessageTime>{dayjs(timestamp).format("HH:mm")}</MessageTime>
@@ -985,5 +1039,60 @@ const SuccessMessage = styled.div`
   font-weight: 500;
   font-size: 14px;
   border-top: 1px solid #a7f3d0;
+`;
+
+const ResponseSubmittedSection = styled.div`
+  border-top: 1px solid #f3f4f6;
+`;
+
+const ResponseDetailBox = styled.div<{ responseType: 'approve' | 'reject' | 'request_changes' }>`
+  padding: 16px 20px;
+  background: ${({ responseType }) => {
+    switch (responseType) {
+      case 'approve':
+        return 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)';
+      case 'reject':
+        return 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)';
+      case 'request_changes':
+        return 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)';
+    }
+  }};
+`;
+
+const ResponseDetailHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #374151;
+
+  svg {
+    flex-shrink: 0;
+  }
+`;
+
+const ResponseDetailMessage = styled.div`
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+
+  strong {
+    display: block;
+    font-size: 12px;
+    color: #92400e;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  p {
+    margin: 0;
+    color: #78350f;
+    white-space: pre-wrap;
+  }
 `;
 
