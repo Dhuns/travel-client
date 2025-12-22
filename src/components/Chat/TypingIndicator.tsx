@@ -1,6 +1,11 @@
 import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import React from "react";
+import { GenerationProgress } from "@shared/store/chatStore";
+
+interface Props {
+  progress?: GenerationProgress | null;
+}
 
 const bounce = keyframes`
   0%, 80%, 100% {
@@ -42,6 +47,15 @@ const sparkle = keyframes`
   }
 `;
 
+const progressPulse = keyframes`
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+`;
+
 const Container = styled.div`
   display: flex;
   align-items: flex-start;
@@ -57,15 +71,14 @@ const Container = styled.div`
   }
 `;
 
-const Avatar = styled.div`
+const Avatar = styled.div<{ isGenerating?: boolean }>`
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(
-    135deg,
-    var(--color-tumakr-maroon, #651d2a) 0%,
-    #8b2438 100%
-  );
+  background: ${({ isGenerating }) =>
+    isGenerating
+      ? "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
+      : "linear-gradient(135deg, var(--color-tumakr-maroon, #651d2a) 0%, #8b2438 100%)"};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -81,7 +94,9 @@ const Avatar = styled.div`
 const ContentWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  flex: 1;
+  max-width: 350px;
 `;
 
 const DotsWrapper = styled.div`
@@ -121,7 +136,153 @@ const ThinkingText = styled.span`
   padding-left: 4px;
 `;
 
-const TypingIndicator: React.FC = () => {
+// Progress-specific components
+const ProgressCard = styled.div`
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-radius: 16px;
+  padding: 16px 20px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+`;
+
+const ProgressHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+`;
+
+const ProgressIcon = styled.div`
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+
+  svg {
+    animation: ${sparkle} 2s ease-in-out infinite;
+  }
+`;
+
+const ProgressMessage = styled.span`
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e40af;
+`;
+
+const ProgressBarWrapper = styled.div`
+  height: 6px;
+  background: rgba(59, 130, 246, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+`;
+
+const ProgressBar = styled.div<{ progress: number }>`
+  height: 100%;
+  width: ${({ progress }) => progress}%;
+  background: linear-gradient(
+    90deg,
+    #3b82f6 0%,
+    #60a5fa 50%,
+    #3b82f6 100%
+  );
+  background-size: 200% 100%;
+  animation: ${progressPulse} 2s linear infinite;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+`;
+
+const ProgressSteps = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+`;
+
+const ProgressStep = styled.span<{ active?: boolean; completed?: boolean }>`
+  font-size: 10px;
+  color: ${({ active, completed }) =>
+    active ? "#2563eb" : completed ? "#10b981" : "#9ca3af"};
+  font-weight: ${({ active }) => (active ? "600" : "400")};
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+const TypingIndicator: React.FC<Props> = ({ progress }) => {
+  // If we have progress info, show detailed progress UI
+  if (progress) {
+    const steps = ['analyzing', 'creating', 'optimizing', 'finalizing'];
+    const currentIndex = steps.indexOf(progress.step);
+
+    return (
+      <Container>
+        <Avatar isGenerating>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+          </svg>
+        </Avatar>
+        <ContentWrapper>
+          <ProgressCard>
+            <ProgressHeader>
+              <ProgressIcon>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                </svg>
+              </ProgressIcon>
+              <ProgressMessage>{progress.message}</ProgressMessage>
+            </ProgressHeader>
+            <ProgressBarWrapper>
+              <ProgressBar progress={progress.progress} />
+            </ProgressBarWrapper>
+            <ProgressSteps>
+              <ProgressStep completed={currentIndex > 0} active={progress.step === 'analyzing'}>
+                {currentIndex > 0 ? (
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                  </svg>
+                ) : null}
+                Analyze
+              </ProgressStep>
+              <ProgressStep completed={currentIndex > 1} active={progress.step === 'creating'}>
+                {currentIndex > 1 ? (
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                  </svg>
+                ) : null}
+                Create
+              </ProgressStep>
+              <ProgressStep completed={currentIndex > 2} active={progress.step === 'optimizing'}>
+                {currentIndex > 2 ? (
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                  </svg>
+                ) : null}
+                Optimize
+              </ProgressStep>
+              <ProgressStep completed={currentIndex > 3} active={progress.step === 'finalizing'}>
+                Finalize
+              </ProgressStep>
+            </ProgressSteps>
+          </ProgressCard>
+        </ContentWrapper>
+      </Container>
+    );
+  }
+
+  // Default typing indicator
   return (
     <Container>
       <Avatar>

@@ -4,8 +4,10 @@ import ChatInfoSidebar from "@components/Chat/ChatInfoSidebar";
 import ChatInput from "@components/Chat/ChatInput";
 import ChatMessageList from "@components/Chat/ChatMessageList";
 import ChatSidebar from "@components/Chat/ChatSidebar";
+import ExpertRequestModal from "@components/Chat/ExpertRequestModal";
 import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
+import { sendToExpert, ExpertRequestFormData } from "@shared/apis/chat";
 import { CHAT_STORAGE_KEY } from "@shared/constants/chat";
 import { useAuthStore } from "@shared/store/authStore";
 import useChatStore from "@shared/store/chatStore";
@@ -26,14 +28,17 @@ const Container: FC = () => {
     sendUserMessage,
     clearSession,
     clearAllSessions,
+    fetchEstimateQuota,
+    estimateQuota,
   } = useChatStore();
 
-  const { isAuthenticated, user, fetchUser } = useAuthStore();
+  const { isAuthenticated, user, fetchUser, accessToken } = useAuthStore();
   const router = useRouter();
 
   const [showInfoPanel, setShowInfoPanel] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [showExpertModal, setShowExpertModal] = useState(false);
 
   const session = getCurrentSession();
   const context = session?.context || {};
@@ -42,36 +47,47 @@ const Container: FC = () => {
   const [showOtherInput, setShowOtherInput] = useState(false);
   const [otherDestination, setOtherDestination] = useState("");
 
-  // 로그인 시 사용자 정보 가져오기
-  useEffect(() => {
-    if (isAuthenticated && !user) {
-      fetchUser();
-    }
-  }, [isAuthenticated, user, fetchUser]);
-
   // 비로그인 사용자 체크 (데이터는 유지, localStorage만 초기화)
   useEffect(() => {
     if (!isAuthenticated) {
-      // localStorage 캐시만 초기화 (서버 데이터는 유지)
       if (typeof window !== "undefined") {
         localStorage.removeItem(CHAT_STORAGE_KEY);
       }
+      setIsInitialized(false);
     }
   }, [isAuthenticated]);
 
-  // 로그인 시 서버에서 사용자 세션 불러오기 (최초 1회만)
+  // 로그인 시 사용자 정보 가져오고 채팅 세션 불러오기 (통합)
   useEffect(() => {
-    if (!isInitialized && isAuthenticated && user?.id) {
-      // localStorage를 먼저 지우고 서버에서 최신 데이터 가져오기
-      if (typeof window !== "undefined") {
-        localStorage.removeItem(CHAT_STORAGE_KEY);
-      }
+    if (!isAuthenticated || isInitialized) return;
 
-      loadUserSessions().then(() => {
+    const initializeUserAndChat = async () => {
+      try {
+        // 사용자 정보가 없으면 먼저 가져오기
+        if (!user) {
+          await fetchUser();
+        }
+
+        // localStorage를 먼저 지우고 서버에서 최신 데이터 가져오기
+        if (typeof window !== "undefined") {
+          localStorage.removeItem(CHAT_STORAGE_KEY);
+        }
+
+        // 채팅 세션 불러오기
+        await loadUserSessions();
+
+        // 견적 생성 quota 로드
+        await fetchEstimateQuota();
+
         setIsInitialized(true);
-      });
-    }
-  }, [isInitialized, isAuthenticated, user, loadUserSessions]);
+      } catch (error) {
+        console.error("Failed to initialize chat:", error);
+        setIsInitialized(true); // 실패해도 초기화 완료 표시
+      }
+    };
+
+    initializeUserAndChat();
+  }, [isAuthenticated, isInitialized, user, fetchUser, loadUserSessions]);
 
   // 기존 세션이 있으면 가장 최근 세션 로드 (자동 생성은 하지 않음 - Zendesk/Intercom 표준)
   useEffect(() => {
@@ -124,6 +140,11 @@ const Container: FC = () => {
       let messageContent: string;
 
       if (typeof value === 'string') {
+        // "no_changes" 선택 시 전문가 요청 모달 열기
+        if (value === 'no_changes' || value.toLowerCase() === 'looks good') {
+          setShowExpertModal(true);
+          return;
+        }
         // 단일 선택 (버튼, 날짜 등)
         messageContent = value;
       } else if (Array.isArray(value)) {
@@ -137,6 +158,33 @@ const Container: FC = () => {
       await handleSendMessage(messageContent);
     },
     [handleSendMessage]
+  );
+
+  // 전문가 요청 모달 제출 핸들러
+  const handleExpertRequestSubmit = useCallback(
+    async (formData: ExpertRequestFormData) => {
+      if (!currentSessionId || !accessToken) {
+        throw new Error('Session or authentication not available');
+      }
+
+      await sendToExpert(accessToken, currentSessionId, formData);
+
+      // 성공 메시지를 채팅에 추가
+      const { addMessage } = useChatStore.getState();
+      await addMessage({
+        role: 'assistant',
+        type: 'system',
+        content: JSON.stringify({
+          type: 'sent_to_expert',
+          title: 'Request Sent to Expert',
+          message: 'Your travel request has been sent to our expert team! They will review your itinerary and preferences, then contact you within 24-48 hours with a detailed quote.',
+        }),
+      });
+
+      // 세션 다시 로드하여 최신 상태 반영
+      await loadSession(currentSessionId);
+    },
+    [currentSessionId, accessToken, loadSession]
   );
 
   // 비로그인 사용자 로그인 유도
@@ -350,6 +398,7 @@ const Container: FC = () => {
             disabled={isTyping}
             placeholder="e.g., I want to explore Seoul and Busan for 5 days..."
             showHint
+            sessionId={currentSessionId || undefined}
           />
         </EmptyStateInputWrapper>
 
@@ -432,6 +481,12 @@ const Container: FC = () => {
                 </ModelBadge>
               </TopBarCenter>
               <TopBarRight>
+                {estimateQuota && (
+                  <QuotaBadge $remaining={estimateQuota.remaining}>
+                    <Sparkles className="w-3.5 h-3.5" />
+                    {estimateQuota.remaining}/{estimateQuota.limit} quotes left today
+                  </QuotaBadge>
+                )}
                 <IconButton
                   onClick={() => setShowInfoPanel(!showInfoPanel)}
                   title="Trip details"
@@ -465,6 +520,7 @@ const Container: FC = () => {
                         placeholder={
                           isTyping ? "AI is thinking..." : "Message Korea Travel AI..."
                         }
+                        sessionId={currentSessionId || undefined}
                       />
                       <InputHint>
                         AI can make mistakes. Please verify important travel information.
@@ -486,6 +542,14 @@ const Container: FC = () => {
           batchId={session?.batchId}
         />
       </MainArea>
+
+      {/* Expert Request Modal */}
+      <ExpertRequestModal
+        isOpen={showExpertModal}
+        onClose={() => setShowExpertModal(false)}
+        onSubmit={handleExpertRequestSubmit}
+        context={context}
+      />
     </PageContainer>
   );
 };
@@ -591,6 +655,41 @@ const TopBarRight = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+`;
+
+const QuotaBadge = styled.div<{ $remaining: number }>`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: ${({ $remaining }) =>
+    $remaining === 0
+      ? "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)"
+      : $remaining === 1
+      ? "linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)"
+      : "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)"};
+  border: 1px solid ${({ $remaining }) =>
+    $remaining === 0 ? "#fecaca" : $remaining === 1 ? "#fde68a" : "#bbf7d0"};
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: ${({ $remaining }) =>
+    $remaining === 0 ? "#dc2626" : $remaining === 1 ? "#d97706" : "#16a34a"};
+  white-space: nowrap;
+
+  svg {
+    opacity: 0.8;
+  }
+
+  @media (max-width: 640px) {
+    padding: 4px 8px;
+    font-size: 11px;
+
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
 `;
 
 const MobileMenuButton = styled.button`

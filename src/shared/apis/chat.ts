@@ -99,6 +99,7 @@ export const generateAIResponse = async (
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
+      timeout: 60000, // 60 seconds timeout for AI response
     }
   );
   return response.data;
@@ -125,6 +126,22 @@ export const generateEstimate = async (
       },
     }
   );
+  return response.data;
+};
+
+// Get daily estimate quota
+export interface EstimateQuota {
+  used: number;
+  limit: number;
+  remaining: number;
+}
+
+export const getEstimateQuota = async (accessToken: string): Promise<EstimateQuota> => {
+  const response = await axios.get(`${API_URL}/chat/ai/estimate-quota`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
   return response.data;
 };
 
@@ -164,5 +181,77 @@ export const deleteChatSession = async (
       Authorization: `Bearer ${accessToken}`,
     },
   });
+  return response.data;
+};
+
+// Expert Request Form Data
+export interface ExpertRequestFormData {
+  budgetPerPerson: string;
+  budgetCurrency: 'USD' | 'KRW';
+  accommodationPreference: string;
+  specialRequests: string;
+  contactPreference: 'email' | 'phone' | 'kakao';
+  urgency: 'flexible' | 'soon' | 'urgent';
+}
+
+// Send to Expert API
+export const sendToExpert = async (
+  accessToken: string,
+  sessionId: string,
+  formData: ExpertRequestFormData
+): Promise<{
+  success: boolean;
+  message: string;
+}> => {
+  // Format the message from form data
+  const messageParts = [];
+
+  if (formData.budgetPerPerson) {
+    const currency = formData.budgetCurrency === 'USD' ? '$' : '₩';
+    messageParts.push(`Budget: ${currency}${formData.budgetPerPerson} per person`);
+  }
+
+  if (formData.accommodationPreference) {
+    const accommodationLabels: Record<string, string> = {
+      budget: 'Budget-friendly (hostels, guesthouses)',
+      mid: 'Mid-range (3-4 star hotels)',
+      luxury: 'Luxury (5 star hotels, resorts)',
+      flexible: 'Flexible (open to suggestions)',
+    };
+    messageParts.push(`Accommodation: ${accommodationLabels[formData.accommodationPreference] || formData.accommodationPreference}`);
+  }
+
+  if (formData.urgency && formData.urgency !== 'flexible') {
+    const urgencyLabels: Record<string, string> = {
+      soon: 'Need quote within a week',
+      urgent: 'Need quote ASAP',
+    };
+    messageParts.push(`Urgency: ${urgencyLabels[formData.urgency]}`);
+  }
+
+  if (formData.contactPreference) {
+    const contactLabels: Record<string, string> = {
+      email: 'Preferred contact: Email',
+      phone: 'Preferred contact: Phone',
+      kakao: 'Preferred contact: KakaoTalk',
+    };
+    messageParts.push(contactLabels[formData.contactPreference]);
+  }
+
+  if (formData.specialRequests?.trim()) {
+    messageParts.push(`Special requests: ${formData.specialRequests.trim()}`);
+  }
+
+  const message = messageParts.join('\n') || 'No special requests';
+
+  const response = await axios.post(
+    `${API_URL}/chat/sessions/${sessionId}/send-to-expert`,
+    { message },
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
   return response.data;
 };
