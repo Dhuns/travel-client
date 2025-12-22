@@ -2,6 +2,7 @@ import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import { AUTO_SCROLL_DELAY, UI_TEXT } from "@shared/constants/chat";
 import { ChatMessage as ChatMessageType, ChatContext } from "@shared/types/chat";
+import useChatStore, { GenerationProgress } from "@shared/store/chatStore";
 import { FC, useEffect, useMemo, useRef, useState } from "react";
 import ChatInput from "./ChatInput";
 import ChatMessage, { QuoteResponseInfo } from "./ChatMessage";
@@ -54,22 +55,82 @@ const ChatMessageList: FC<Props> = ({
   const [quotationHash, setQuotationHash] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Calculate response info for each batchId
-  // This maps batchId -> response info (type, message)
-  const batchResponseMap = useMemo(() => {
-    const responseMap = new Map<number, QuoteResponseInfo>();
+  // Get generation progress from store
+  const generationProgress = useChatStore((state) => state.generationProgress);
+  const isGeneratingEstimate = useChatStore((state) => state.isGeneratingEstimate);
+
+  // Calculate response info for each quote_sent message
+  // Key: message.id (not batchId) - each quote_sent tracks its own response status
+  // A quote_sent shows "submitted" if there's a response AFTER it (before the next quote_sent)
+  const quoteResponseByMessageId = useMemo(() => {
+    const responseMap = new Map<string, QuoteResponseInfo>();
+
+    // Collect all quote_sent messages and responses in order
+    interface QuoteMessage {
+      messageId: string;
+      batchId: number;
+      timestamp: Date;
+      type: 'quote_sent' | 'response';
+      responseType?: 'approve' | 'reject' | 'request_changes';
+      customerMessage?: string;
+    }
+
+    const quoteMessages: QuoteMessage[] = [];
 
     for (const msg of messages) {
       const parsed = parseSystemMessageContent(msg.content);
-      if (parsed && parsed.batchId) {
-        // Check if this is a response message
-        if (parsed.type === 'customer_approved' || parsed.type === 'customer_rejected' || parsed.type === 'revision_requested') {
-          responseMap.set(parsed.batchId, {
+      // Use batchId from content, or fallback to metadata.batchId for older messages
+      const batchId = parsed?.batchId || (msg.metadata?.batchId as number | undefined);
+
+      if (parsed && batchId) {
+        if (parsed.type === 'quote_sent') {
+          quoteMessages.push({
+            messageId: msg.id,
+            batchId,
+            timestamp: new Date(msg.timestamp),
+            type: 'quote_sent',
+          });
+        } else if (parsed.type === 'customer_approved' || parsed.type === 'customer_rejected' || parsed.type === 'revision_requested') {
+          quoteMessages.push({
+            messageId: msg.id,
+            batchId,
+            timestamp: new Date(msg.timestamp),
+            type: 'response',
             responseType: parsed.type === 'customer_approved' ? 'approve'
               : parsed.type === 'customer_rejected' ? 'reject'
               : 'request_changes',
-            message: parsed.customerMessage,
+            customerMessage: parsed.customerMessage,
           });
+        }
+      }
+    }
+
+    // Sort by timestamp
+    quoteMessages.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+
+    // For each quote_sent, find if there's a response for the same batchId AFTER it
+    // but BEFORE the next quote_sent for that batchId
+    for (let i = 0; i < quoteMessages.length; i++) {
+      const current = quoteMessages[i];
+      if (current.type !== 'quote_sent') continue;
+
+      // Look for a response after this quote_sent
+      for (let j = i + 1; j < quoteMessages.length; j++) {
+        const next = quoteMessages[j];
+        if (next.batchId !== current.batchId) continue;
+
+        if (next.type === 'quote_sent') {
+          // Found another quote_sent for same batchId - stop looking
+          break;
+        }
+
+        if (next.type === 'response') {
+          // Found a response - this quote_sent has been responded to
+          responseMap.set(current.messageId, {
+            responseType: next.responseType!,
+            message: next.customerMessage,
+          });
+          break;
         }
       }
     }
@@ -97,7 +158,7 @@ const ChatMessageList: FC<Props> = ({
         });
       }, AUTO_SCROLL_DELAY);
     }
-  }, [messages.length, isTyping]);
+  }, [messages.length, isTyping, isGeneratingEstimate, generationProgress]);
 
   return (
     <Container hasMessages={hasMessages}>
@@ -151,11 +212,13 @@ const ChatMessageList: FC<Props> = ({
             index === messages.length - 1 ||
             (message.role === 'assistant' && messages.slice(index + 1).every(m => m.role === 'user'));
 
-          // Get quote response info for this message if it's a quote_sent type
+          // Get quote response info for this specific quote_sent message
+          // Pass null (not undefined) for quote_sent without response to prevent localStorage fallback
           const msgContent = parseSystemMessageContent(message.content);
-          const quoteResponseInfo = msgContent?.type === 'quote_sent' && msgContent.batchId
-            ? batchResponseMap.get(msgContent.batchId)
-            : undefined;
+          const isQuoteSent = msgContent?.type === 'quote_sent' && msgContent.batchId;
+          const quoteResponseInfo = isQuoteSent
+            ? (quoteResponseByMessageId.get(message.id) ?? null) // null = checked, no response for THIS quote
+            : undefined; // undefined = not a quote_sent message
 
           // Regular text message (including estimate type)
           return (
@@ -171,8 +234,10 @@ const ChatMessageList: FC<Props> = ({
           );
         })}
 
-        {/* Typing indicator */}
-        {isTyping && <TypingIndicator />}
+        {/* Typing indicator with optional progress */}
+        {(isTyping || isGeneratingEstimate) && (
+          <TypingIndicator progress={generationProgress} />
+        )}
 
         {/* Auto-scroll anchor */}
         <div ref={messagesEndRef} />
