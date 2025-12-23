@@ -4,7 +4,11 @@ import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import { CustomerResponseType, submitCustomerQuoteResponse } from "@shared/apis/estimate";
 import useChatStore from "@shared/store/chatStore";
-import { ChatContext, ChatMessage as ChatMessageType, ChatSession } from "@shared/types/chat";
+import {
+  ChatContext,
+  ChatMessage as ChatMessageType,
+  ChatSession,
+} from "@shared/types/chat";
 import { aesEncrypt } from "@shared/utils/crypto";
 import dayjs from "dayjs";
 import ReactMarkdown from "react-markdown";
@@ -65,7 +69,7 @@ const getSystemCardConfig = (type: SystemMessageContent["type"] | undefined) => 
       };
     case "customer_approved":
       return {
-        gradient: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+        gradient: "linear-gradient(135deg, #00692c 0%, #2e8c69 100%)",
         icon: (
           <svg
             width="24"
@@ -102,7 +106,7 @@ const getSystemCardConfig = (type: SystemMessageContent["type"] | undefined) => 
       };
     case "revision_requested":
       return {
-        gradient: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+        gradient: "linear-gradient(135deg, var(--color-tumakr-mustard) 0%, #e1b936 100%)",
         icon: (
           <svg
             width="24"
@@ -364,10 +368,14 @@ const ChatMessage: FC<Props> = ({
             <ChatUIActions
               uiAction={metadata.uiAction}
               onSelect={onUIActionSelect}
-              messageId={sessionId ? `${sessionId}-${metadata.uiAction.type}` : message.messageId || message.id}
+              messageId={
+                sessionId
+                  ? `${sessionId}-${metadata.uiAction.type}`
+                  : message.messageId || message.id
+              }
             />
           )}
-          <MessageTime>{dayjs(timestamp).format("HH:mm")}</MessageTime>
+          <MessageTime>{dayjs(timestamp).format("MMM D, HH:mm")}</MessageTime>
         </MessageContent>
       </MessageContainer>
     );
@@ -386,24 +394,19 @@ const ChatMessage: FC<Props> = ({
       setIsSubmitting(true);
       setSelectedResponse(responseType);
       try {
-        await submitCustomerQuoteResponse({
+        const result = await submitCustomerQuoteResponse({
           batchId: systemContent.batchId,
           responseType,
           message: msg,
         });
 
-        // Update session status based on response type
+        // Update session status using the status returned from backend
         const currentSession = getCurrentSession();
-        if (currentSession) {
-          let newStatus: ChatSession['status'] = 'completed';
-          if (responseType === 'reject') {
-            newStatus = 'declined';
-          } else if (responseType === 'approve') {
-            newStatus = 'completed';
-          } else if (responseType === 'request_changes') {
-            newStatus = 'pending_review';
-          }
-          updateSessionStatus(currentSession.sessionId, newStatus);
+        if (currentSession && result.newStatus) {
+          updateSessionStatus(
+            currentSession.sessionId,
+            result.newStatus as ChatSession["status"]
+          );
         }
 
         // Persist response status to localStorage
@@ -633,13 +636,13 @@ const ChatMessage: FC<Props> = ({
                             height="18"
                             viewBox="0 0 24 24"
                             fill="none"
-                            stroke="var(--color-tumakr-green)"
+                            stroke="#00692c"
                             strokeWidth="2"
                           >
                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                             <polyline points="22 4 12 14.01 9 11.01" />
                           </svg>
-                          <span className="text-tumakr-green">Approved</span>
+                          <span className="text-[#00692c]">Approved</span>
                         </>
                       )}
                       {quoteResponseInfo.responseType === "reject" && (
@@ -688,7 +691,7 @@ const ChatMessage: FC<Props> = ({
               </ResponseSubmittedSection>
             )}
           </SystemCard>
-          <MessageTime>{dayjs(timestamp).format("HH:mm")}</MessageTime>
+          <MessageTime>{dayjs(timestamp).format("MMM D, HH:mm")}</MessageTime>
         </MessageContent>
       </MessageContainer>
     );
@@ -793,7 +796,7 @@ const ChatMessage: FC<Props> = ({
               </ErrorActions>
             )}
           </ErrorCard>
-          <MessageTime>{dayjs(timestamp).format("HH:mm")}</MessageTime>
+          <MessageTime>{dayjs(timestamp).format("MMM D, HH:mm")}</MessageTime>
         </MessageContent>
       </MessageContainer>
     );
@@ -838,7 +841,11 @@ const ChatMessage: FC<Props> = ({
           <ChatUIActions
             uiAction={metadata.uiAction}
             onSelect={handleUIActionSelect}
-            messageId={sessionId ? `${sessionId}-${metadata.uiAction.type}` : message.messageId || message.id}
+            messageId={
+              sessionId
+                ? `${sessionId}-${metadata.uiAction.type}`
+                : message.messageId || message.id
+            }
           />
         )}
         <MessageTime isUser={isUser}>{formatTimestamp(timestamp)}</MessageTime>
@@ -1268,7 +1275,7 @@ const ResponseButton = styled.button<{
   ${({ variant, $isSelected }) => {
     const configs = {
       approve: {
-        color: "var(--color-tumakr-green)",
+        color: "#00692c",
         bg: "#ecfdf5",
         border: "var(--color-tumakr-green)",
       },
