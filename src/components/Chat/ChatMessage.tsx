@@ -31,6 +31,7 @@ interface Props {
   onViewQuote?: (hash: string) => void;
   onResponseSubmitted?: () => void;
   onUIActionSelect?: (value: string | string[] | ChatContext) => void;
+  onQuoteAction?: (action: 'looks_good' | 'want_changes', batchId: number) => void;
   isLastMessage?: boolean;
   // undefined = not checked, null = checked but no response, object = has response
   quoteResponseInfo?: QuoteResponseInfo | null;
@@ -165,7 +166,7 @@ const setQuoteResponseStatus = (batchId: number | undefined): void => {
   }
 };
 
-const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onUIActionSelect, isLastMessage, quoteResponseInfo }) => {
+const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onUIActionSelect, onQuoteAction, isLastMessage, quoteResponseInfo }) => {
   const { role, content, timestamp, type, metadata } = message;
 
   // Parse system content to get batchId for checking response status
@@ -276,6 +277,33 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
                 View Full Itinerary
               </ViewQuotationButton>
             </EstimateActions>
+            {/* AI 견적 액션 버튼 - 마지막 메시지일 때만 표시 */}
+            {isLastMessage && onQuoteAction && (
+              <QuoteActionSection>
+                <QuoteActionLabel>What would you like to do?</QuoteActionLabel>
+                <QuoteActionButtons>
+                  <QuoteActionButton
+                    variant="approve"
+                    onClick={() => onQuoteAction('looks_good', metadata.batchId)}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span>Looks Good!</span>
+                  </QuoteActionButton>
+                  <QuoteActionButton
+                    variant="changes"
+                    onClick={() => onQuoteAction('want_changes', metadata.batchId)}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    <span>Want Changes</span>
+                  </QuoteActionButton>
+                </QuoteActionButtons>
+              </QuoteActionSection>
+            )}
           </EstimateCard>
           {isLastMessage && metadata?.uiAction && onUIActionSelect && (
             <ChatUIActions uiAction={metadata.uiAction} onSelect={onUIActionSelect} />
@@ -1302,5 +1330,74 @@ const RetryHint = styled.span`
   font-size: 12px;
   color: #9ca3af;
   text-align: center;
+`;
+
+// Quote Action Styles (for AI estimate cards)
+const QuoteActionSection = styled.div`
+  padding: 16px 20px;
+  background: #fafafa;
+  border-top: 1px solid #f3f4f6;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+const QuoteActionLabel = styled.span`
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  text-align: center;
+`;
+
+const QuoteActionButtons = styled.div`
+  display: flex;
+  gap: 10px;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+  }
+`;
+
+const QuoteActionButton = styled.button<{ variant: 'approve' | 'changes' }>`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  ${({ variant }) => variant === 'approve' ? `
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    }
+  ` : `
+    background: white;
+    color: #f59e0b;
+    border: 2px solid #f59e0b;
+
+    &:hover {
+      background: #fffbeb;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
+    }
+  `}
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  span {
+    font-weight: 600;
+  }
 `;
 

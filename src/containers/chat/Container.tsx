@@ -160,6 +160,29 @@ const Container: FC = () => {
     [handleSendMessage]
   );
 
+  // AI 견적 액션 핸들러 (Looks Good / Want Changes)
+  const handleQuoteAction = useCallback(
+    async (action: 'looks_good' | 'want_changes', batchId: number) => {
+      if (action === 'looks_good') {
+        // Looks Good → 간소화된 전문가 모달 열기
+        setShowExpertModal(true);
+      } else if (action === 'want_changes') {
+        // Want Changes → AI에게 수정 요청 질문 메시지 전송
+        // 세션이 없으면 먼저 생성
+        if (!session) {
+          const success = await initSession();
+          if (!success) {
+            console.error("Failed to initialize session");
+            return;
+          }
+        }
+        // AI에게 수정 요청 질문을 유도하는 메시지 전송
+        await sendUserMessage("want_changes");
+      }
+    },
+    [session, initSession, sendUserMessage]
+  );
+
   // 전문가 요청 모달 제출 핸들러
   const handleExpertRequestSubmit = useCallback(
     async (formData: ExpertRequestFormData) => {
@@ -508,6 +531,7 @@ const Container: FC = () => {
                   hasMessages={hasMessages}
                   onSend={handleSendMessage}
                   onUIActionSelect={handleUIActionSelect}
+                  onQuoteAction={handleQuoteAction}
                 />
 
                 {/* Input Area - shown at bottom when messages exist */}

@@ -5,10 +5,7 @@ import { keyframes } from '@emotion/react';
 interface ExpertRequestFormData {
   budgetPerPerson: string;
   budgetCurrency: 'USD' | 'KRW';
-  accommodationPreference: string;
   specialRequests: string;
-  contactPreference: 'email' | 'phone' | 'kakao';
-  urgency: 'flexible' | 'soon' | 'urgent';
 }
 
 interface Props {
@@ -29,10 +26,7 @@ const ExpertRequestModal: FC<Props> = ({ isOpen, onClose, onSubmit, context }) =
   const [formData, setFormData] = useState<ExpertRequestFormData>({
     budgetPerPerson: '',
     budgetCurrency: 'USD',
-    accommodationPreference: '',
     specialRequests: '',
-    contactPreference: 'email',
-    urgency: 'flexible',
   });
 
   if (!isOpen) return null;
@@ -148,55 +142,7 @@ const ExpertRequestModal: FC<Props> = ({ isOpen, onClose, onSubmit, context }) =
           </FormSection>
 
           <FormSection>
-            <SectionTitle>Accommodation Preference</SectionTitle>
-            <FormGroup>
-              <RadioGroup>
-                {[
-                  { value: 'budget', label: 'Budget-friendly', desc: 'Hostels, guesthouses' },
-                  { value: 'mid', label: 'Mid-range', desc: '3-4 star hotels' },
-                  { value: 'luxury', label: 'Luxury', desc: '5 star hotels, resorts' },
-                  { value: 'flexible', label: 'Flexible', desc: 'Open to suggestions' },
-                ].map(option => (
-                  <RadioOption
-                    key={option.value}
-                    $isSelected={formData.accommodationPreference === option.value}
-                    onClick={() => handleChange('accommodationPreference', option.value)}
-                  >
-                    <RadioDot $isSelected={formData.accommodationPreference === option.value} />
-                    <RadioContent>
-                      <RadioLabel>{option.label}</RadioLabel>
-                      <RadioDesc>{option.desc}</RadioDesc>
-                    </RadioContent>
-                  </RadioOption>
-                ))}
-              </RadioGroup>
-            </FormGroup>
-          </FormSection>
-
-          <FormSection>
-            <SectionTitle>How soon do you need this?</SectionTitle>
-            <FormGroup>
-              <RadioGroup $horizontal>
-                {[
-                  { value: 'flexible', label: 'Flexible', icon: '🗓️' },
-                  { value: 'soon', label: 'Within a week', icon: '⏰' },
-                  { value: 'urgent', label: 'ASAP', icon: '🚀' },
-                ].map(option => (
-                  <UrgencyOption
-                    key={option.value}
-                    $isSelected={formData.urgency === option.value}
-                    onClick={() => handleChange('urgency', option.value)}
-                  >
-                    <span>{option.icon}</span>
-                    <span>{option.label}</span>
-                  </UrgencyOption>
-                ))}
-              </RadioGroup>
-            </FormGroup>
-          </FormSection>
-
-          <FormSection>
-            <SectionTitle>Special Requests or Notes</SectionTitle>
+            <SectionTitle>Additional Requests or Notes</SectionTitle>
             <FormGroup>
               <Textarea
                 placeholder="Any special requirements? (e.g., dietary restrictions, accessibility needs, must-visit places, activities you want to avoid...)"
@@ -204,28 +150,6 @@ const ExpertRequestModal: FC<Props> = ({ isOpen, onClose, onSubmit, context }) =
                 onChange={(e) => handleChange('specialRequests', e.target.value)}
                 rows={4}
               />
-            </FormGroup>
-          </FormSection>
-
-          <FormSection>
-            <SectionTitle>Preferred Contact Method</SectionTitle>
-            <FormGroup>
-              <RadioGroup $horizontal>
-                {[
-                  { value: 'email', label: 'Email', icon: '📧' },
-                  { value: 'phone', label: 'Phone', icon: '📞' },
-                  { value: 'kakao', label: 'KakaoTalk', icon: '💬' },
-                ].map(option => (
-                  <ContactOption
-                    key={option.value}
-                    $isSelected={formData.contactPreference === option.value}
-                    onClick={() => handleChange('contactPreference', option.value)}
-                  >
-                    <span>{option.icon}</span>
-                    <span>{option.label}</span>
-                  </ContactOption>
-                ))}
-              </RadioGroup>
             </FormGroup>
           </FormSection>
 
