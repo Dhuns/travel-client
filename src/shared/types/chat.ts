@@ -142,7 +142,7 @@ export interface ChatMessage {
 // 채팅 세션
 export interface ChatSession {
   sessionId: string;
-  status: 'active' | 'converted' | 'abandoned' | 'estimate_ready' | 'inprogress' | 'pending_review' | 'quote_sent' | 'completed' | 'closed';
+  status: 'active' | 'converted' | 'abandoned' | 'estimate_ready' | 'inprogress' | 'pending_review' | 'quote_sent' | 'completed' | 'declined' | 'closed';
   messages: ChatMessage[];
   context: ChatContext;
   batchId?: number; // 생성된 견적서 배치 ID
