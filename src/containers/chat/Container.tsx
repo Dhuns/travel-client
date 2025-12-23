@@ -4,8 +4,10 @@ import ChatInfoSidebar from "@components/Chat/ChatInfoSidebar";
 import ChatInput from "@components/Chat/ChatInput";
 import ChatMessageList from "@components/Chat/ChatMessageList";
 import ChatSidebar from "@components/Chat/ChatSidebar";
+import ExpertRequestModal from "@components/Chat/ExpertRequestModal";
 import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
+import { sendToExpert, ExpertRequestFormData } from "@shared/apis/chat";
 import { CHAT_STORAGE_KEY } from "@shared/constants/chat";
 import { useAuthStore } from "@shared/store/authStore";
 import useChatStore from "@shared/store/chatStore";
@@ -26,77 +28,69 @@ const Container: FC = () => {
     sendUserMessage,
     clearSession,
     clearAllSessions,
+    fetchEstimateQuota,
+    estimateQuota,
   } = useChatStore();
 
-  const { isAuthenticated, user, fetchUser } = useAuthStore();
+  const { isAuthenticated, user, fetchUser, accessToken } = useAuthStore();
   const router = useRouter();
 
   const [showInfoPanel, setShowInfoPanel] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [showExpertModal, setShowExpertModal] = useState(false);
 
   const session = getCurrentSession();
   const context = session?.context || {};
 
-  // 디버깅: 상태 변화 로그
-  useEffect(() => {
-    console.log("[Container] State:", {
-      isInitialized,
-      isAuthenticated,
-      userId: user?.id,
-      sessionsCount: sessions.length,
-      currentSessionId,
-      hasSession: !!session,
-    });
-  }, [
-    isInitialized,
-    isAuthenticated,
-    user?.id,
-    sessions.length,
-    currentSessionId,
-    session,
-  ]);
-
-  // 로그인 시 사용자 정보 가져오기
-  useEffect(() => {
-    if (isAuthenticated && !user) {
-      fetchUser();
-    }
-  }, [isAuthenticated, user, fetchUser]);
+  // 기타 지역 입력 모드
+  const [showOtherInput, setShowOtherInput] = useState(false);
+  const [otherDestination, setOtherDestination] = useState("");
 
   // 비로그인 사용자 체크 (데이터는 유지, localStorage만 초기화)
   useEffect(() => {
     if (!isAuthenticated) {
-      // localStorage 캐시만 초기화 (서버 데이터는 유지)
       if (typeof window !== "undefined") {
         localStorage.removeItem(CHAT_STORAGE_KEY);
       }
+      setIsInitialized(false);
     }
   }, [isAuthenticated]);
 
-  // 로그인 시 서버에서 사용자 세션 불러오기 (최초 1회만)
+  // 로그인 시 사용자 정보 가져오고 채팅 세션 불러오기 (통합)
   useEffect(() => {
-    if (!isInitialized && isAuthenticated && user?.id) {
-      // localStorage를 먼저 지우고 서버에서 최신 데이터 가져오기
-      if (typeof window !== "undefined") {
-        localStorage.removeItem(CHAT_STORAGE_KEY);
-      }
+    if (!isAuthenticated || isInitialized) return;
 
-      loadUserSessions().then(() => {
+    const initializeUserAndChat = async () => {
+      try {
+        // 사용자 정보가 없으면 먼저 가져오기
+        if (!user) {
+          await fetchUser();
+        }
+
+        // localStorage를 먼저 지우고 서버에서 최신 데이터 가져오기
+        if (typeof window !== "undefined") {
+          localStorage.removeItem(CHAT_STORAGE_KEY);
+        }
+
+        // 채팅 세션 불러오기
+        await loadUserSessions();
+
+        // 견적 생성 quota 로드
+        await fetchEstimateQuota();
+
         setIsInitialized(true);
-      });
-    }
-  }, [isInitialized, isAuthenticated, user, loadUserSessions]);
+      } catch (error) {
+        console.error("Failed to initialize chat:", error);
+        setIsInitialized(true); // 실패해도 초기화 완료 표시
+      }
+    };
+
+    initializeUserAndChat();
+  }, [isAuthenticated, isInitialized, user, fetchUser, loadUserSessions]);
 
   // 기존 세션이 있으면 가장 최근 세션 로드 (자동 생성은 하지 않음 - Zendesk/Intercom 표준)
   useEffect(() => {
-    console.log("[Container] Session load check:", {
-      isInitialized,
-      hasSession: !!session,
-      isAuthenticated,
-      sessionsCount: sessions.length,
-    });
-
     if (isInitialized && !session && isAuthenticated && sessions.length > 0) {
       // 저장된 세션이 있으면 가장 최근 세션 로드
       const latestSession = [...sessions].sort(
@@ -104,7 +98,6 @@ const Container: FC = () => {
           new Date(b.lastMessageAt || b.createdAt).getTime() -
           new Date(a.lastMessageAt || a.createdAt).getTime()
       )[0];
-      console.log("[Container] Loading latest session:", latestSession?.sessionId);
       if (latestSession) {
         loadSession(latestSession.sessionId);
       }
@@ -147,6 +140,11 @@ const Container: FC = () => {
       let messageContent: string;
 
       if (typeof value === 'string') {
+        // "no_changes" 선택 시 전문가 요청 모달 열기
+        if (value === 'no_changes' || value.toLowerCase() === 'looks good') {
+          setShowExpertModal(true);
+          return;
+        }
         // 단일 선택 (버튼, 날짜 등)
         messageContent = value;
       } else if (Array.isArray(value)) {
@@ -160,6 +158,33 @@ const Container: FC = () => {
       await handleSendMessage(messageContent);
     },
     [handleSendMessage]
+  );
+
+  // 전문가 요청 모달 제출 핸들러
+  const handleExpertRequestSubmit = useCallback(
+    async (formData: ExpertRequestFormData) => {
+      if (!currentSessionId || !accessToken) {
+        throw new Error('Session or authentication not available');
+      }
+
+      await sendToExpert(accessToken, currentSessionId, formData);
+
+      // 성공 메시지를 채팅에 추가
+      const { addMessage } = useChatStore.getState();
+      await addMessage({
+        role: 'assistant',
+        type: 'system',
+        content: JSON.stringify({
+          type: 'sent_to_expert',
+          title: 'Request Sent to Expert',
+          message: 'Your travel request has been sent to our expert team! They will review your itinerary and preferences, then contact you within 24-48 hours with a detailed quote.',
+        }),
+      });
+
+      // 세션 다시 로드하여 최신 상태 반영
+      await loadSession(currentSessionId);
+    },
+    [currentSessionId, accessToken, loadSession]
   );
 
   // 비로그인 사용자 로그인 유도
@@ -236,7 +261,18 @@ const Container: FC = () => {
 
   // 목적지 선택 핸들러
   const handleDestinationSelect = async (destination: string) => {
+    setShowOtherInput(false);
+    setOtherDestination("");
     await handleSendMessage(`I want to visit ${destination}`);
+  };
+
+  // 기타 지역 입력 제출 핸들러
+  const handleOtherDestinationSubmit = async () => {
+    if (otherDestination.trim()) {
+      await handleSendMessage(`I want to visit ${otherDestination.trim()}`);
+      setShowOtherInput(false);
+      setOtherDestination("");
+    }
   };
 
   // 목적지 선택 UI 렌더링 함수
@@ -291,14 +327,6 @@ const Container: FC = () => {
               <DestinationDesc>UNESCO sites, history</DestinationDesc>
             </DestinationContent>
           </DestinationCard>
-          <DestinationCard onClick={() => handleDestinationSelect("Gangneung")} disabled={isTyping}>
-            <DestinationImageBg style={{ background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' }} />
-            <DestinationContent>
-              <DestinationEmoji>🌊</DestinationEmoji>
-              <DestinationName>Gangneung</DestinationName>
-              <DestinationDesc>East coast, coffee street</DestinationDesc>
-            </DestinationContent>
-          </DestinationCard>
           <DestinationCard onClick={() => handleDestinationSelect("Jeonju")} disabled={isTyping}>
             <DestinationImageBg style={{ background: 'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)' }} />
             <DestinationContent>
@@ -307,7 +335,56 @@ const Container: FC = () => {
               <DestinationDesc>Hanok village, traditional food</DestinationDesc>
             </DestinationContent>
           </DestinationCard>
+          {/* Other destination option */}
+          <DestinationCard
+            onClick={() => setShowOtherInput(true)}
+            disabled={isTyping}
+            style={{ border: showOtherInput ? '2px solid var(--color-tumakr-maroon)' : undefined }}
+          >
+            <DestinationImageBg style={{ background: 'linear-gradient(135deg, #a8a8a8 0%, #6b6b6b 100%)' }} />
+            <DestinationContent>
+              <DestinationEmoji>✏️</DestinationEmoji>
+              <DestinationName>Other</DestinationName>
+              <DestinationDesc>Enter your destination</DestinationDesc>
+            </DestinationContent>
+          </DestinationCard>
         </DestinationGrid>
+
+        {/* Other destination input field */}
+        {showOtherInput && (
+          <OtherInputWrapper>
+            <OtherInputContainer>
+              <OtherInput
+                type="text"
+                value={otherDestination}
+                onChange={(e) => setOtherDestination(e.target.value)}
+                placeholder="Enter your destination (e.g., Gangneung, Sokcho, Daegu...)"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && otherDestination.trim()) {
+                    handleOtherDestinationSubmit();
+                  }
+                }}
+                autoFocus
+              />
+              <OtherInputButton
+                onClick={handleOtherDestinationSubmit}
+                disabled={!otherDestination.trim() || isTyping}
+              >
+                Go
+              </OtherInputButton>
+            </OtherInputContainer>
+          </OtherInputWrapper>
+        )}
+
+        {/* 7+ days trip notice */}
+        <LongTripNotice>
+          <LongTripIcon>📧</LongTripIcon>
+          <LongTripText>
+            Planning a trip longer than 7 days? Contact us at{" "}
+            <LongTripEmail href="mailto:info@onedaykorea.com">info@onedaykorea.com</LongTripEmail>
+            {" "}for personalized assistance.
+          </LongTripText>
+        </LongTripNotice>
 
         <OrDivider>
           <OrLine />
@@ -321,6 +398,7 @@ const Container: FC = () => {
             disabled={isTyping}
             placeholder="e.g., I want to explore Seoul and Busan for 5 days..."
             showHint
+            sessionId={currentSessionId || undefined}
           />
         </EmptyStateInputWrapper>
 
@@ -403,6 +481,12 @@ const Container: FC = () => {
                 </ModelBadge>
               </TopBarCenter>
               <TopBarRight>
+                {estimateQuota && (
+                  <QuotaBadge $remaining={estimateQuota.remaining}>
+                    <Sparkles className="w-3.5 h-3.5" />
+                    {estimateQuota.remaining}/{estimateQuota.limit} quotes left today
+                  </QuotaBadge>
+                )}
                 <IconButton
                   onClick={() => setShowInfoPanel(!showInfoPanel)}
                   title="Trip details"
@@ -436,6 +520,7 @@ const Container: FC = () => {
                         placeholder={
                           isTyping ? "AI is thinking..." : "Message Korea Travel AI..."
                         }
+                        sessionId={currentSessionId || undefined}
                       />
                       <InputHint>
                         AI can make mistakes. Please verify important travel information.
@@ -457,6 +542,14 @@ const Container: FC = () => {
           batchId={session?.batchId}
         />
       </MainArea>
+
+      {/* Expert Request Modal */}
+      <ExpertRequestModal
+        isOpen={showExpertModal}
+        onClose={() => setShowExpertModal(false)}
+        onSubmit={handleExpertRequestSubmit}
+        context={context}
+      />
     </PageContainer>
   );
 };
@@ -562,6 +655,41 @@ const TopBarRight = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+`;
+
+const QuotaBadge = styled.div<{ $remaining: number }>`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: ${({ $remaining }) =>
+    $remaining === 0
+      ? "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)"
+      : $remaining === 1
+      ? "linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)"
+      : "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)"};
+  border: 1px solid ${({ $remaining }) =>
+    $remaining === 0 ? "#fecaca" : $remaining === 1 ? "#fde68a" : "#bbf7d0"};
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: ${({ $remaining }) =>
+    $remaining === 0 ? "#dc2626" : $remaining === 1 ? "#d97706" : "#16a34a"};
+  white-space: nowrap;
+
+  svg {
+    opacity: 0.8;
+  }
+
+  @media (max-width: 640px) {
+    padding: 4px 8px;
+    font-size: 11px;
+
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
 `;
 
 const MobileMenuButton = styled.button`
@@ -720,17 +848,6 @@ const LoadingSubtext = styled.p`
   margin: 0;
 `;
 
-const EmptyStateContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  min-height: 0;
-  background-color: #ffffff;
-  padding: 24px;
-  overflow-y: auto;
-`;
-
 const DestinationSelectionWrapper = styled.div`
   display: flex;
   align-items: center;
@@ -801,31 +918,6 @@ const EmptyStateSubtitle = styled.p`
 const EmptyStateInputWrapper = styled.div`
   width: 100%;
   margin-top: 16px;
-`;
-
-const EmptyStateHints = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 8px;
-`;
-
-const HintChip = styled.button`
-  padding: 8px 16px;
-  border: 1px solid #e5e5e5;
-  border-radius: 20px;
-  background-color: #ffffff;
-  font-size: 13px;
-  color: #555;
-  cursor: pointer;
-  transition: all 0.15s;
-
-  &:hover {
-    border-color: var(--color-tumakr-maroon);
-    color: var(--color-tumakr-maroon);
-    background-color: rgba(101, 29, 42, 0.03);
-  }
 `;
 
 // Welcome Badge
@@ -1088,5 +1180,97 @@ const SignUpButton = styled.button`
   &:hover {
     background-color: #f5f5f5;
     border-color: #ddd;
+  }
+`;
+
+// Other destination input components
+const OtherInputWrapper = styled.div`
+  width: 100%;
+  max-width: 580px;
+  margin-top: 16px;
+  animation: ${fadeIn} 0.3s ease;
+`;
+
+const OtherInputContainer = styled.div`
+  display: flex;
+  gap: 8px;
+  padding: 4px;
+  background: #ffffff;
+  border: 2px solid var(--color-tumakr-maroon);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(101, 29, 42, 0.1);
+`;
+
+const OtherInput = styled.input`
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: #333;
+  background: transparent;
+
+  &::placeholder {
+    color: #999;
+  }
+`;
+
+const OtherInputButton = styled.button<{ disabled?: boolean }>`
+  padding: 12px 24px;
+  background-color: ${({ disabled }) => (disabled ? '#ccc' : 'var(--color-tumakr-maroon)')};
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    background-color: #4a1520;
+  }
+`;
+
+// Long trip notice components
+const LongTripNotice = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(101, 29, 42, 0.05) 0%, rgba(101, 29, 42, 0.02) 100%);
+  border: 1px solid rgba(101, 29, 42, 0.15);
+  border-radius: 12px;
+  margin-top: 24px;
+  max-width: 580px;
+  animation: ${fadeIn} 0.5s ease 0.3s both;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+`;
+
+const LongTripIcon = styled.span`
+  font-size: 24px;
+  flex-shrink: 0;
+`;
+
+const LongTripText = styled.p`
+  margin: 0;
+  font-size: 13px;
+  color: #555;
+  line-height: 1.5;
+`;
+
+const LongTripEmail = styled.a`
+  color: var(--color-tumakr-maroon);
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.8;
+    text-decoration: underline;
   }
 `;

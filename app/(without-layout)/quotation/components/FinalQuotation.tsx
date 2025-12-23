@@ -57,9 +57,13 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
   const timelineByDay: Record<string, string> = React.useMemo(() => {
     if (!estimateInfo.timeline) return {};
 
-    // If already an object, return as-is
+    // If already an object, check if it's new JSON format or legacy Record format
     if (typeof estimateInfo.timeline === "object") {
-      return estimateInfo.timeline;
+      // New JSON format has 'days' array - skip for FinalQuotation (uses legacy format)
+      if ("days" in estimateInfo.timeline) {
+        return {};
+      }
+      return estimateInfo.timeline as Record<string, string>;
     }
 
     // If string, parse it (format: "day1#@#day2#@#day3...")
@@ -155,12 +159,12 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
         item: detail.item,
         days: [],
         quantity: 0,
-        price: Number(detail.price) || 0,
-        originPrice: Number(detail.originPrice) || 0,
+        totalPrice: 0,
       };
     }
     acc[key].days.push(detail.days);
     acc[key].quantity += detail.quantity;
+    acc[key].totalPrice += Number(detail.price) || 0;
     return acc;
   }, {} as Record<number, any>);
 
@@ -188,1028 +192,855 @@ const FinalQuotation: React.FC<FinalQuotationProps> = ({ quotation }) => {
   }, [batchInfo.id]);
 
   return (
-    <FinalContainer>
-      <FinalHeader>
-        <FinalLogo>✈️ OneDay Korea</FinalLogo>
-        <QuotationBadge>FINAL QUOTATION</QuotationBadge>
-      </FinalHeader>
+    <PageContainer>
+      {/* Header */}
+      <Header>
+        <HeaderContent>
+          <Logo>✈️ OneDay Korea</Logo>
+          <Badge>FINAL QUOTATION</Badge>
+        </HeaderContent>
+      </Header>
 
-      <FinalContent>
-        <FinalCard>
-          <FinalTitle>{batchInfo.title || "Travel Plan"}</FinalTitle>
-          <ValidUntilFinal>
-            Valid until: {dayjs(batchInfo.validDate).format("YYYY-MM-DD")}
-          </ValidUntilFinal>
-
-          <FinalSection>
-            <FinalSectionTitle>Travel Information</FinalSectionTitle>
-            <FinalInfoGrid>
-              <FinalInfoItem>
-                <FinalLabel>Travel Period</FinalLabel>
-                <FinalValue>
-                  {dayjs(batchInfo.startDate).format("YYYY-MM-DD")} ~{" "}
-                  {dayjs(batchInfo.endDate).format("YYYY-MM-DD")} ({tripDays} days)
-                </FinalValue>
-              </FinalInfoItem>
-              <FinalInfoItem>
-                <FinalLabel>Travelers</FinalLabel>
-                <FinalValue>
-                  {batchInfo.adultsCount > 0 && `Adults: ${batchInfo.adultsCount}`}
-                  {batchInfo.childrenCount > 0 &&
-                    `, Children: ${batchInfo.childrenCount}`}
-                  {batchInfo.infantsCount > 0 && `, Infants: ${batchInfo.infantsCount}`}{" "}
-                  (Total: {totalTravelers})
-                </FinalValue>
-              </FinalInfoItem>
-              {batchInfo.recipient && (
-                <FinalInfoItem>
-                  <FinalLabel>Recipient</FinalLabel>
-                  <FinalValue>{batchInfo.recipient}</FinalValue>
-                </FinalInfoItem>
-              )}
-            </FinalInfoGrid>
-          </FinalSection>
-
-          {/* Common Services Section */}
-          {commonServicesArray.length > 0 && (
-            <FinalSection>
-              <FinalSectionTitle>Common Services</FinalSectionTitle>
-              <CommonServicesGrid>
-                {commonServicesArray.map((service, index) => (
-                  <CommonServiceCard key={index}>
-                    <CommonServiceHeader>
-                      <CommonServiceName>{service.item.nameEng}</CommonServiceName>
-                    </CommonServiceHeader>
-                    <CommonServiceDetails>
-                      <CommonServiceRow style={{ flexWrap: "wrap", gap: "0.5rem" }}>
-                        <CommonServiceLabel
-                          style={{ width: "100%", marginBottom: "0.25rem" }}
-                        >
-                          Used on:
-                        </CommonServiceLabel>
-                        <DayBadgesContainer>
-                          {service.days
-                            .sort((a: number, b: number) => a - b)
-                            .map((d: number) => (
-                              <DayBadge key={d}>Day {d}</DayBadge>
-                            ))}
-                        </DayBadgesContainer>
-                      </CommonServiceRow>
-                      <CommonServiceRow>
-                        <CommonServiceLabel>Quantity:</CommonServiceLabel>
-                        <CommonServiceValue>{service.quantity}</CommonServiceValue>
-                      </CommonServiceRow>
-                      {!batchInfo.hidePrice && service.originPrice > 0 && (
-                        <CommonServiceRow>
-                          <CommonServiceLabel>Unit Price:</CommonServiceLabel>
-                          <CommonServiceValue>
-                            ${Number(service.originPrice).toLocaleString()}
-                          </CommonServiceValue>
-                        </CommonServiceRow>
-                      )}
-                      {!batchInfo.hidePrice && (
-                        <CommonServiceRow>
-                          <CommonServiceLabel>Total:</CommonServiceLabel>
-                          <CommonServiceTotal>
-                            ${Number(service.price).toLocaleString()}
-                          </CommonServiceTotal>
-                        </CommonServiceRow>
-                      )}
-                    </CommonServiceDetails>
-                  </CommonServiceCard>
-                ))}
-              </CommonServicesGrid>
-            </FinalSection>
+      {/* Hero Section */}
+      <HeroSection>
+        <HeroContent>
+          <TripTitle>{batchInfo.title || "Travel Plan"}</TripTitle>
+          <TripMeta>
+            <MetaItem>
+              <MetaIcon>📅</MetaIcon>
+              <MetaText>
+                {dayjs(batchInfo.startDate).format("MMM D")} - {dayjs(batchInfo.endDate).format("MMM D, YYYY")}
+                <MetaHighlight>{tripDays} days</MetaHighlight>
+              </MetaText>
+            </MetaItem>
+            <MetaItem>
+              <MetaIcon>👥</MetaIcon>
+              <MetaText>
+                {totalTravelers} travelers
+                <MetaHighlight>
+                  {batchInfo.adultsCount} adults
+                  {batchInfo.childrenCount > 0 && `, ${batchInfo.childrenCount} children`}
+                  {batchInfo.infantsCount > 0 && `, ${batchInfo.infantsCount} infants`}
+                </MetaHighlight>
+              </MetaText>
+            </MetaItem>
+            {batchInfo.recipient && (
+              <MetaItem>
+                <MetaIcon>✉️</MetaIcon>
+                <MetaText>For: {batchInfo.recipient}</MetaText>
+              </MetaItem>
+            )}
+          </TripMeta>
+          {batchInfo.validDate && (
+            <ValidUntil>Valid until {dayjs(batchInfo.validDate).format("MMMM D, YYYY")}</ValidUntil>
           )}
+        </HeroContent>
+      </HeroSection>
 
-          <FinalSection>
-            <FinalSectionTitle>Itinerary Details</FinalSectionTitle>
+      {/* Main Content */}
+      <MainContent>
+        {/* Common Services */}
+        {commonServicesArray.length > 0 && (
+          <Section>
+            <SectionHeader>
+              <SectionIcon>🚗</SectionIcon>
+              <SectionTitle>Transportation & Services</SectionTitle>
+            </SectionHeader>
+            <ServicesGrid>
+              {commonServicesArray.map((service, index) => (
+                <ServiceCard key={index}>
+                  <ServiceName>{service.item.nameEng}</ServiceName>
+                  <ServiceDays>
+                    {service.days
+                      .sort((a: number, b: number) => a - b)
+                      .map((d: number) => (
+                        <DayChip key={d}>Day {d}</DayChip>
+                      ))}
+                  </ServiceDays>
+                  <ServiceDetails>
+                    <ServiceDetailRow>
+                      <span>Days Used</span>
+                      <span>{service.days.length} days</span>
+                    </ServiceDetailRow>
+                    <ServiceDetailRow>
+                      <span>Quantity</span>
+                      <span>{service.quantity} pax</span>
+                    </ServiceDetailRow>
+                    {!batchInfo.hidePrice && service.totalPrice > 0 && service.quantity > 0 && (
+                      <ServiceDetailRow>
+                        <span>Unit Price</span>
+                        <span>${Math.round(service.totalPrice / service.quantity).toLocaleString()} /pax</span>
+                      </ServiceDetailRow>
+                    )}
+                    {!batchInfo.hidePrice && service.totalPrice > 0 && (
+                      <ServiceDetailRow className="price">
+                        <span>Total</span>
+                        <span>${Number(service.totalPrice).toLocaleString()}</span>
+                      </ServiceDetailRow>
+                    )}
+                  </ServiceDetails>
+                </ServiceCard>
+              ))}
+            </ServicesGrid>
+          </Section>
+        )}
+
+        {/* Daily Itinerary */}
+        <Section>
+          <SectionHeader>
+            <SectionIcon>🗓️</SectionIcon>
+            <SectionTitle>Daily Itinerary</SectionTitle>
+          </SectionHeader>
+
+          <Timeline>
             {Object.keys(itemsByDay)
               .sort((a, b) => Number(a) - Number(b))
-              .map((day) => {
+              .map((day, dayIndex) => {
                 const dayNumber = Number(day);
                 const items = itemsByDay[dayNumber];
                 const dayDate = dayjs(batchInfo.startDate).add(dayNumber - 1, "day");
+                const isLastDay = dayIndex === Object.keys(itemsByDay).length - 1;
 
                 return (
-                  <FinalDaySection key={day}>
-                    <FinalDayHeader>
-                      <FinalDayTitle>Day {day}</FinalDayTitle>
-                      <FinalDayDate>{dayDate.format("YYYY-MM-DD (ddd)")}</FinalDayDate>
-                    </FinalDayHeader>
-                    <FinalItemList>
-                      {items.map((detail, idx) => {
-                        const thumbnail = detail.item.files?.find(
-                          (f) => f.type === "썸네일"
-                        );
-                        const showPrice = !batchInfo.hidePrice;
+                  <TimelineDay key={day} isLast={isLastDay}>
+                    <TimelineMarker>
+                      <TimelineDot>{dayNumber}</TimelineDot>
+                      {!isLastDay && <TimelineLine />}
+                    </TimelineMarker>
 
-                        return (
-                          <FinalItemCard key={detail.id}>
-                            <FinalItemNumber>{idx + 1}</FinalItemNumber>
-                            {thumbnail && (
-                              <FinalItemImage
-                                src={getItemImg(thumbnail.itemSrc)}
-                                alt={detail.item.nameEng}
-                              />
-                            )}
-                            <FinalItemContent>
-                              <FinalItemHeader>
-                                <FinalItemType>
-                                  {typeMapping[detail.item.type] || detail.item.type}
-                                </FinalItemType>
-                                <FinalItemName>{detail.item.nameEng}</FinalItemName>
-                              </FinalItemHeader>
-                              {detail.item.description && (
-                                <FinalItemDescription
-                                  dangerouslySetInnerHTML={{
-                                    __html: sanitizeHtml(
-                                      draftToHtml(detail.item.description)
-                                    ),
-                                  }}
+                    <DayContent>
+                      <DayHeader>
+                        <DayLabel>Day {day}</DayLabel>
+                        <DayDate>{dayDate.format("ddd, MMM D")}</DayDate>
+                      </DayHeader>
+
+                      <PlacesList>
+                        {items.map((detail, idx) => {
+                          const thumbnail = detail.item.files?.find(
+                            (f) => f.type === "썸네일"
+                          );
+                          const showPrice = !batchInfo.hidePrice;
+
+                          return (
+                            <PlaceCard key={detail.id}>
+                              <PlaceNumber>{idx + 1}</PlaceNumber>
+                              <PlaceInfo>
+                                <PlaceHeader>
+                                  <PlaceType>{typeMapping[detail.item.type] || detail.item.type}</PlaceType>
+                                  <PlaceName>{detail.item.nameEng}</PlaceName>
+                                </PlaceHeader>
+                                {detail.item.description && (
+                                  <PlaceDescription
+                                    dangerouslySetInnerHTML={{
+                                      __html: sanitizeHtml(
+                                        draftToHtml(detail.item.description)
+                                      ),
+                                    }}
+                                  />
+                                )}
+                                <PlaceFooter>
+                                  <PlaceQuantity>
+                                    {detail.quantity} pax
+                                    {showPrice && detail.originPrice && (
+                                      <span> × ${Number(detail.originPrice).toLocaleString()}</span>
+                                    )}
+                                  </PlaceQuantity>
+                                  {showPrice && (
+                                    <PlacePrice>${Number(detail.price).toLocaleString()}</PlacePrice>
+                                  )}
+                                </PlaceFooter>
+                              </PlaceInfo>
+                              {thumbnail && (
+                                <PlaceImage
+                                  src={getItemImg(thumbnail.itemSrc)}
+                                  alt={detail.item.nameEng}
                                 />
                               )}
-                              <FinalItemFooter>
-                                <FinalItemQuantity>
-                                  Quantity: {detail.quantity}
-                                  {showPrice && detail.originPrice && (
-                                    <span style={{ marginLeft: "8px", color: "#999" }}>
-                                      @ ${Number(detail.originPrice).toLocaleString()}
-                                    </span>
-                                  )}
-                                </FinalItemQuantity>
-                                {showPrice && (
-                                  <FinalItemPrice>
-                                    ${Number(detail.price).toLocaleString()}
-                                  </FinalItemPrice>
-                                )}
-                              </FinalItemFooter>
-                            </FinalItemContent>
-                          </FinalItemCard>
-                        );
-                      })}
-                    </FinalItemList>
+                            </PlaceCard>
+                          );
+                        })}
+                      </PlacesList>
 
-                    {timelineByDay[day] && (
-                      <FinalTimelineSection>
-                        <FinalTimelineContent>{timelineByDay[day]}</FinalTimelineContent>
-                      </FinalTimelineSection>
-                    )}
+                      {timelineByDay[day] && (
+                        <DayNotes>
+                          <NotesIcon>📝</NotesIcon>
+                          <NotesText>{timelineByDay[day]}</NotesText>
+                        </DayNotes>
+                      )}
 
-                    {/* Map Section */}
-                    {!loadingMap && mapData && mapData.mapData && (
-                      <>
-                        {mapData.mapData
-                          .filter((dayData: MapDayData) => dayData.day === dayNumber)
-                          .map((dayData: MapDayData) => (
-                            <DayMap
-                              key={dayData.day}
-                              day={dayData.day}
-                              locations={dayData.locations}
-                              center={dayData.center}
-                            />
-                          ))}
-                      </>
-                    )}
-                  </FinalDaySection>
+                      {/* Map Section */}
+                      {!loadingMap && mapData && mapData.mapData && (
+                        <>
+                          {mapData.mapData
+                            .filter((dayData: MapDayData) => dayData.day === dayNumber)
+                            .map((dayData: MapDayData) => (
+                              <DayMap
+                                key={dayData.day}
+                                day={dayData.day}
+                                locations={dayData.locations}
+                                center={dayData.center}
+                              />
+                            ))}
+                        </>
+                      )}
+                    </DayContent>
+                  </TimelineDay>
                 );
               })}
-          </FinalSection>
+          </Timeline>
+        </Section>
 
-          {!batchInfo.hidePrice && (
-            <>
-              {/* Price Breakdown Section */}
-              <FinalSection>
-                <FinalSectionTitle>Price Summary</FinalSectionTitle>
-                <PriceBreakdownBox>
-                  <PriceBreakdownRow>
-                    <PriceBreakdownLabel>Items Subtotal</PriceBreakdownLabel>
-                    <PriceBreakdownValue>
-                      ${itemsSubtotal.toLocaleString()}
-                    </PriceBreakdownValue>
-                  </PriceBreakdownRow>
+        {/* Price Summary */}
+        {!batchInfo.hidePrice && (
+          <Section>
+            <SectionHeader>
+              <SectionIcon>💰</SectionIcon>
+              <SectionTitle>Price Summary</SectionTitle>
+            </SectionHeader>
 
-                  {adjustmentItems.length > 0 && (
-                    <>
-                      <AdjustmentsDivider />
-                      <AdjustmentsHeader>Adjustments</AdjustmentsHeader>
-                      {(adjustmentItems as AdjustmentItem[]).map((item, index) => (
-                        <AdjustmentRow key={index}>
-                          <AdjustmentDescription>
-                            {item.description || "Adjustment"}
-                          </AdjustmentDescription>
-                          <AdjustmentAmount isPositive={item.amount >= 0}>
-                            {item.amount >= 0 ? "+" : ""}${item.amount.toLocaleString()}
-                          </AdjustmentAmount>
-                        </AdjustmentRow>
-                      ))}
-                    </>
-                  )}
-                </PriceBreakdownBox>
-              </FinalSection>
+            <PriceCard>
+              <PriceRow>
+                <PriceLabel>Items Subtotal</PriceLabel>
+                <PriceValue>${itemsSubtotal.toLocaleString()}</PriceValue>
+              </PriceRow>
 
-              {/* Total Section */}
-              <FinalTotalSection>
-                <FinalTotalRow>
-                  <FinalTotalLabel>Total Amount</FinalTotalLabel>
-                  <FinalTotalAmount>${totalPrice.toLocaleString()}</FinalTotalAmount>
-                </FinalTotalRow>
+              {adjustmentItems.length > 0 && (
+                <AdjustmentsSection>
+                  <AdjustmentsTitle>Adjustments</AdjustmentsTitle>
+                  {(adjustmentItems as AdjustmentItem[]).map((item, index) => (
+                    <AdjustmentRow key={index}>
+                      <span>{item.description || "Adjustment"}</span>
+                      <AdjustmentValue isPositive={item.amount >= 0}>
+                        {item.amount >= 0 ? "+" : ""}${item.amount.toLocaleString()}
+                      </AdjustmentValue>
+                    </AdjustmentRow>
+                  ))}
+                </AdjustmentsSection>
+              )}
+
+              <TotalSection>
+                <TotalRow>
+                  <TotalLabel>Total Amount</TotalLabel>
+                  <TotalValue>${totalPrice.toLocaleString()}</TotalValue>
+                </TotalRow>
                 {totalTravelers > 0 && (
-                  <FinalPerPersonRow>
-                    <FinalPerPersonLabel>Per Person</FinalPerPersonLabel>
-                    <FinalPerPersonAmount>
-                      ${Math.round(pricePerPerson).toLocaleString()}
-                    </FinalPerPersonAmount>
-                  </FinalPerPersonRow>
+                  <PerPersonRow>
+                    <span>Per Person</span>
+                    <span>${Math.round(pricePerPerson).toLocaleString()}</span>
+                  </PerPersonRow>
                 )}
-              </FinalTotalSection>
-            </>
-          )}
+              </TotalSection>
+            </PriceCard>
+          </Section>
+        )}
 
-          {estimateInfo.comment && (
-            <FinalSection>
-              <FinalSectionTitle>Additional Information</FinalSectionTitle>
-              <FinalCommentBox
-                dangerouslySetInnerHTML={{
-                  __html: sanitizeHtml(draftToHtml(estimateInfo.comment)),
-                }}
-              />
-            </FinalSection>
-          )}
+        {/* Additional Information */}
+        {estimateInfo.comment && (
+          <Section>
+            <SectionHeader>
+              <SectionIcon>ℹ️</SectionIcon>
+              <SectionTitle>Additional Information</SectionTitle>
+            </SectionHeader>
+            <InfoBox
+              dangerouslySetInnerHTML={{
+                __html: sanitizeHtml(draftToHtml(estimateInfo.comment)),
+              }}
+            />
+          </Section>
+        )}
 
-          {(batchInfo.email || batchInfo.officeNumber || batchInfo.emergencyNumber) && (
-            <FinalSection>
-              <FinalSectionTitle>Contact Information</FinalSectionTitle>
-              <FinalInfoGrid>
-                {batchInfo.preparedBy && (
-                  <FinalInfoItem>
-                    <FinalLabel>Prepared By</FinalLabel>
-                    <FinalValue>{batchInfo.preparedBy}</FinalValue>
-                  </FinalInfoItem>
-                )}
-                {batchInfo.email && (
-                  <FinalInfoItem>
-                    <FinalLabel>Email</FinalLabel>
-                    <FinalValue>{batchInfo.email}</FinalValue>
-                  </FinalInfoItem>
-                )}
-                {batchInfo.officeNumber && (
-                  <FinalInfoItem>
-                    <FinalLabel>Office Number</FinalLabel>
-                    <FinalValue>{batchInfo.officeNumber}</FinalValue>
-                  </FinalInfoItem>
-                )}
-                {batchInfo.emergencyNumber && (
-                  <FinalInfoItem>
-                    <FinalLabel>Emergency Number</FinalLabel>
-                    <FinalValue>{batchInfo.emergencyNumber}</FinalValue>
-                  </FinalInfoItem>
-                )}
-                {batchInfo.officeHours && (
-                  <FinalInfoItem>
-                    <FinalLabel>Office Hours</FinalLabel>
-                    <FinalValue>{batchInfo.officeHours}</FinalValue>
-                  </FinalInfoItem>
-                )}
-                {batchInfo.address && (
-                  <FinalInfoItem>
-                    <FinalLabel>Address</FinalLabel>
-                    <FinalValue>{batchInfo.address}</FinalValue>
-                  </FinalInfoItem>
-                )}
-              </FinalInfoGrid>
-            </FinalSection>
-          )}
-        </FinalCard>
-      </FinalContent>
-    </FinalContainer>
+        {/* Contact Information */}
+        {(batchInfo.email || batchInfo.officeNumber || batchInfo.emergencyNumber) && (
+          <Section>
+            <SectionHeader>
+              <SectionIcon>📞</SectionIcon>
+              <SectionTitle>Contact Us</SectionTitle>
+            </SectionHeader>
+            <ContactGrid>
+              {batchInfo.preparedBy && (
+                <ContactItem>
+                  <ContactLabel>Prepared By</ContactLabel>
+                  <ContactValue>{batchInfo.preparedBy}</ContactValue>
+                </ContactItem>
+              )}
+              {batchInfo.email && (
+                <ContactItem>
+                  <ContactLabel>Email</ContactLabel>
+                  <ContactValue>{batchInfo.email}</ContactValue>
+                </ContactItem>
+              )}
+              {batchInfo.officeNumber && (
+                <ContactItem>
+                  <ContactLabel>Office</ContactLabel>
+                  <ContactValue>{batchInfo.officeNumber}</ContactValue>
+                </ContactItem>
+              )}
+              {batchInfo.emergencyNumber && (
+                <ContactItem>
+                  <ContactLabel>Emergency</ContactLabel>
+                  <ContactValue>{batchInfo.emergencyNumber}</ContactValue>
+                </ContactItem>
+              )}
+              {batchInfo.officeHours && (
+                <ContactItem>
+                  <ContactLabel>Hours</ContactLabel>
+                  <ContactValue>{batchInfo.officeHours}</ContactValue>
+                </ContactItem>
+              )}
+              {batchInfo.address && (
+                <ContactItem fullWidth>
+                  <ContactLabel>Address</ContactLabel>
+                  <ContactValue>{batchInfo.address}</ContactValue>
+                </ContactItem>
+              )}
+            </ContactGrid>
+          </Section>
+        )}
+      </MainContent>
+
+      {/* Footer */}
+      <Footer>
+        <FooterText>Thank you for choosing OneDay Korea</FooterText>
+      </Footer>
+    </PageContainer>
   );
 };
 
 export default FinalQuotation;
 
 // Styled Components
-const FinalContainer = styled.div`
+const PageContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(
-    135deg,
-    var(--color-tumakr-maroon) 0%,
-    var(--color-tumakr-maroon) 100%
-  );
-  padding: 0;
+  background: #f8fafc;
 `;
 
-const FinalHeader = styled.header`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem 5%;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+const Header = styled.header`
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
   position: sticky;
   top: 0;
   z-index: 100;
 `;
 
-const FinalLogo = styled.div`
-  font-size: 1.5rem;
-  font-weight: bold;
-  background: linear-gradient(
-    135deg,
-    var(--color-tumakr-maroon) 0%,
-    var(--color-tumakr-maroon) 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-`;
-
-const QuotationBadge = styled.div`
-  padding: 0.5rem 1.5rem;
-  background: linear-gradient(
-    135deg,
-    var(--color-tumakr-maroon) 0%,
-    var(--color-tumakr-maroon) 100%
-  );
-  color: white;
-  border-radius: 20px;
-  font-weight: 700;
-  font-size: 0.9rem;
-  letter-spacing: 1px;
-`;
-
-const FinalContent = styled.main`
-  max-width: 1200px;
+const HeaderContent = styled.div`
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 3rem 2rem;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;
 
-const FinalCard = styled.div`
-  background: white;
-  border-radius: 20px;
-  padding: 3rem;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-`;
-
-const FinalTitle = styled.h1`
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin: 0 0 0.5rem 0;
-  background: linear-gradient(
-    135deg,
-    var(--color-tumakr-maroon) 0%,
-    var(--color-tumakr-maroon) 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-`;
-
-const ValidUntilFinal = styled.p`
-  font-size: 0.95rem;
-  color: #666;
-  margin: 0 0 2rem 0;
-  padding-bottom: 1.5rem;
-  border-bottom: 3px solid #f0f0f0;
-`;
-
-const FinalSection = styled.section`
-  margin-bottom: 2.5rem;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-`;
-
-const FinalSectionTitle = styled.h2`
-  font-size: 1.5rem;
+const Logo = styled.div`
+  font-size: 18px;
   font-weight: 700;
   color: var(--color-tumakr-maroon);
-  margin: 0 0 1.5rem 0;
-  padding-bottom: 0.75rem;
-  border-bottom: 2px solid var(--color-tumakr-maroon);
 `;
 
-const FinalInfoGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-`;
-
-const FinalInfoItem = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-`;
-
-const FinalLabel = styled.span`
-  font-size: 0.85rem;
+const Badge = styled.div`
+  background: var(--color-tumakr-maroon);
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
   font-weight: 600;
-  color: #999;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
 `;
 
-const FinalValue = styled.span`
-  font-size: 1.05rem;
-  color: #333;
-  font-weight: 600;
+const HeroSection = styled.div`
+  background: linear-gradient(135deg, var(--color-tumakr-maroon) 0%, #4a1a3d 100%);
+  color: white;
+  padding: 48px 24px;
 `;
 
-const FinalDaySection = styled.div`
-  margin-bottom: 2.5rem;
-  padding: 1.5rem;
-  background: #f9fafb;
-  border-radius: 12px;
+const HeroContent = styled.div`
+  max-width: 1000px;
+  margin: 0 auto;
+`;
+
+const TripTitle = styled.h1`
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 24px 0;
+
+  @media (max-width: 640px) {
+    font-size: 24px;
+  }
+`;
+
+const TripMeta = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+`;
+
+const MetaItem = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+`;
+
+const MetaIcon = styled.span`
+  font-size: 20px;
+`;
+
+const MetaText = styled.div`
+  font-size: 14px;
+  opacity: 0.95;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`;
+
+const MetaHighlight = styled.span`
+  font-size: 13px;
+  opacity: 0.8;
+`;
+
+const ValidUntil = styled.div`
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 13px;
+  opacity: 0.8;
+`;
+
+const MainContent = styled.main`
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px 24px;
+`;
+
+const Section = styled.section`
+  margin-bottom: 40px;
 
   &:last-child {
     margin-bottom: 0;
   }
 `;
 
-const FinalDayHeader = styled.div`
+const SectionHeader = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #e5e7eb;
+  gap: 12px;
+  margin-bottom: 20px;
 `;
 
-const FinalDayTitle = styled.h3`
-  font-size: 1.4rem;
+const SectionIcon = styled.span`
+  font-size: 24px;
+`;
+
+const SectionTitle = styled.h2`
+  font-size: 20px;
   font-weight: 700;
-  color: var(--color-tumakr-maroon);
+  color: #1f2937;
   margin: 0;
 `;
 
-const FinalDayDate = styled.span`
-  font-size: 1rem;
-  color: #6b7280;
-  font-weight: 600;
+const ServicesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
 `;
 
-const FinalItemList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`;
-
-const FinalItemCard = styled.div`
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-  padding: 1.5rem;
+const ServiceCard = styled.div`
   background: white;
   border-radius: 12px;
-  border: 2px solid #e5e7eb;
-  transition: all 0.3s ease;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+`;
 
-  &:hover {
-    border-color: var(--color-tumakr-maroon);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+const ServiceName = styled.h3`
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 12px 0;
+`;
+
+const ServiceDays = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+`;
+
+const DayChip = styled.span`
+  background: #f3f4f6;
+  color: #4b5563;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+`;
+
+const ServiceDetails = styled.div`
+  border-top: 1px solid #f3f4f6;
+  padding-top: 12px;
+`;
+
+const ServiceDetailRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 8px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &.price {
+    color: var(--color-tumakr-maroon);
+    font-weight: 600;
   }
 `;
 
-const FinalItemNumber = styled.div`
-  width: 32px;
-  height: 32px;
+const Timeline = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const TimelineDay = styled.div<{ isLast: boolean }>`
+  display: flex;
+  gap: 24px;
+
+  @media (max-width: 640px) {
+    gap: 16px;
+  }
+`;
+
+const TimelineMarker = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   flex-shrink: 0;
+`;
+
+const TimelineDot = styled.div`
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-tumakr-maroon);
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(
-    135deg,
-    var(--color-tumakr-maroon) 0%,
-    var(--color-tumakr-maroon) 100%
-  );
-  color: white;
-  border-radius: 50%;
   font-weight: 700;
-  font-size: 0.9rem;
-`;
-
-const FinalItemImage = styled.img`
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 8px;
+  font-size: 14px;
   flex-shrink: 0;
 `;
 
-const FinalItemContent = styled.div`
+const TimelineLine = styled.div`
+  width: 2px;
   flex: 1;
+  background: #e5e7eb;
+  min-height: 40px;
+`;
+
+const DayContent = styled.div`
+  flex: 1;
+  padding-bottom: 32px;
+`;
+
+const DayHeader = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 16px;
+`;
+
+const DayLabel = styled.h3`
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+`;
+
+const DayDate = styled.span`
+  font-size: 14px;
+  color: #6b7280;
+`;
+
+const PlacesList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 12px;
 `;
 
-const FinalItemHeader = styled.div`
+const PlaceCard = styled.div`
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-`;
-
-const FinalItemType = styled.span`
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: white;
-  background: var(--color-tumakr-maroon);
-  padding: 4px 10px;
+  gap: 16px;
+  background: white;
   border-radius: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-`;
-
-const FinalItemName = styled.h4`
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin: 0;
-`;
-
-const FinalItemDescription = styled.div`
-  font-size: 0.95rem;
-  color: #666;
-  margin: 0;
-  line-height: 1.6;
-
-  /* HTML tags styling */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    margin: 0.5em 0;
-    font-weight: 600;
-    color: #1a1a1a;
-  }
-
-  h1 {
-    font-size: 1.5em;
-  }
-  h2 {
-    font-size: 1.3em;
-  }
-  h3 {
-    font-size: 1.1em;
-  }
-
-  p {
-    margin: 0.5em 0;
-  }
-
-  strong {
-    font-weight: 600;
-    color: #1a1a1a;
-  }
-
-  em {
-    font-style: italic;
-  }
-
-  u {
-    text-decoration: underline;
-  }
-
-  ul,
-  ol {
-    margin: 0.5em 0;
-    padding-left: 1.5em;
-  }
-
-  li {
-    margin: 0.25em 0;
-  }
-
-  blockquote {
-    margin: 0.5em 0;
-    padding-left: 1em;
-    border-left: 3px solid #ddd;
-    color: #666;
-  }
-
-  code {
-    background-color: #f5f5f5;
-    padding: 0.2em 0.4em;
-    border-radius: 3px;
-    font-family: monospace;
-    font-size: 0.9em;
-  }
-
-  pre {
-    background-color: #f5f5f5;
-    padding: 1em;
-    border-radius: 5px;
-    overflow-x: auto;
-
-    code {
-      background-color: transparent;
-      padding: 0;
-    }
-  }
-
-  hr {
-    border: none;
-    border-top: 1px solid #ddd;
-    margin: 1em 0;
-  }
-
-  a {
-    color: #3b82f6;
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-`;
-
-const FinalItemFooter = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: auto;
-`;
-
-const FinalItemQuantity = styled.span`
-  font-size: 0.9rem;
-  color: #6b7280;
-  font-weight: 600;
-`;
-
-const FinalItemPrice = styled.span`
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--color-tumakr-maroon);
-`;
-
-const FinalTimelineSection = styled.div`
-  margin-top: 1.5rem;
-  padding: 1.25rem;
-  background: white;
-  border-radius: 8px;
-  border-left: 4px solid var(--color-tumakr-maroon);
-`;
-
-const FinalTimelineContent = styled.p`
-  font-size: 0.95rem;
-  color: #4b5563;
-  margin: 0;
-  white-space: pre-wrap;
-  line-height: 1.6;
-`;
-
-const FinalTotalSection = styled.div`
-  background: linear-gradient(
-    135deg,
-    var(--color-tumakr-maroon) 0%,
-    var(--color-tumakr-maroon) 100%
-  );
-  padding: 2rem;
-  border-radius: 16px;
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-  margin-bottom: 2.5rem;
-`;
-
-const FinalTotalRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-`;
-
-const FinalTotalLabel = styled.span`
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: white;
-`;
-
-const FinalTotalAmount = styled.span`
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: white;
-`;
-
-const FinalPerPersonRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 1rem;
-  border-top: 2px solid rgba(255, 255, 255, 0.3);
-`;
-
-const FinalPerPersonLabel = styled.span`
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.95);
-  font-weight: 600;
-`;
-
-const FinalPerPersonAmount = styled.span`
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: white;
-`;
-
-const FinalCommentBox = styled.div`
-  padding: 1.5rem;
-  background: #f9fafb;
-  border-radius: 8px;
-  border: 2px solid #e5e7eb;
-  font-size: 0.95rem;
-  color: #4b5563;
-  line-height: 1.7;
-  word-wrap: break-word;
-
-  /* Paragraphs */
-  p {
-    margin: 0 0 1rem 0;
-
-    &:last-child {
-      margin: 0;
-    }
-  }
-
-  /* Lists */
-  ul,
-  ol {
-    margin: 0 0 1rem 0;
-    padding-left: 1.5rem;
-
-    &:last-child {
-      margin: 0;
-    }
-
-    li {
-      margin-bottom: 0.5rem;
-
-      &:last-child {
-        margin-bottom: 0;
-      }
-    }
-  }
-
-  /* Text formatting */
-  strong,
-  b {
-    font-weight: 700;
-    color: #1f2937;
-  }
-
-  em,
-  i {
-    font-style: italic;
-  }
-
-  u {
-    text-decoration: underline;
-  }
-
-  /* Headings */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    margin: 1.5rem 0 1rem 0;
-    font-weight: 700;
-    color: #1f2937;
-    line-height: 1.3;
-
-    &:first-child {
-      margin-top: 0;
-    }
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-
-  h1 {
-    font-size: 1.5rem;
-  }
-  h2 {
-    font-size: 1.3rem;
-  }
-  h3 {
-    font-size: 1.15rem;
-  }
-  h4 {
-    font-size: 1.05rem;
-  }
-  h5 {
-    font-size: 1rem;
-  }
-  h6 {
-    font-size: 0.95rem;
-  }
-
-  /* Blockquotes */
-  blockquote {
-    margin: 1rem 0;
-    padding-left: 1rem;
-    border-left: 4px solid var(--color-tumakr-maroon);
-    color: #6b7280;
-    font-style: italic;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-
-  /* Links */
-  a {
-    color: var(--color-tumakr-maroon);
-    text-decoration: underline;
-    transition: color 0.2s;
-
-    &:hover {
-      color: var(--color-tumakr-maroon);
-    }
-  }
-
-  /* Code */
-  code {
-    padding: 0.2rem 0.4rem;
-    background: #e5e7eb;
-    border-radius: 4px;
-    font-family: "Courier New", monospace;
-    font-size: 0.9em;
-  }
-
-  pre {
-    margin: 1rem 0;
-    padding: 1rem;
-    background: #1f2937;
-    color: #f3f4f6;
-    border-radius: 8px;
-    overflow-x: auto;
-
-    code {
-      background: transparent;
-      color: inherit;
-      padding: 0;
-    }
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-
-  /* Horizontal rule */
-  hr {
-    margin: 1.5rem 0;
-    border: none;
-    border-top: 2px solid #e5e7eb;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-`;
-
-const CommonServicesGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1.5rem;
-`;
-
-const CommonServiceCard = styled.div`
-  background: white;
+  padding: 16px;
   border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 1.5rem;
-  transition: all 0.2s;
+  transition: box-shadow 0.2s ease;
 
   &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  @media (max-width: 640px) {
+    flex-direction: column;
   }
 `;
 
-const CommonServiceHeader = styled.div`
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #f3f4f6;
+const PlaceNumber = styled.div`
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 13px;
+  flex-shrink: 0;
 `;
 
-const CommonServiceName = styled.h4`
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #1a1a1a;
+const PlaceInfo = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
+
+const PlaceHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+`;
+
+const PlaceType = styled.span`
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-tumakr-maroon);
+  background: rgba(128, 0, 64, 0.08);
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+`;
+
+const PlaceName = styled.h4`
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
   margin: 0;
 `;
 
-const DayBadgesContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+const PlaceDescription = styled.div`
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.5;
+  margin-bottom: 12px;
+
+  p { margin: 0 0 8px 0; &:last-child { margin: 0; } }
+  h1, h2, h3, h4, h5, h6 { font-size: 14px; font-weight: 600; margin: 8px 0; }
+  ul, ol { margin: 4px 0; padding-left: 20px; }
 `;
 
-const DayBadge = styled.span`
-  display: inline-block;
-  background: #f3f4f6;
-  color: #374151;
-  font-size: 0.85rem;
-  font-weight: 500;
-  padding: 0.25rem 0.75rem;
-  border-radius: 16px;
-  border: 1px solid #e5e7eb;
-`;
-
-const CommonServiceDetails = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-`;
-
-const CommonServiceRow = styled.div`
+const PlaceFooter = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid #f3f4f6;
 `;
 
-const CommonServiceLabel = styled.span`
-  font-size: 0.9rem;
+const PlaceQuantity = styled.span`
+  font-size: 13px;
   color: #6b7280;
-  font-weight: 500;
+
+  span {
+    opacity: 0.8;
+  }
 `;
 
-const CommonServiceValue = styled.span`
-  font-size: 0.95rem;
-  color: #1f2937;
-  font-weight: 600;
-`;
-
-const CommonServiceTotal = styled.span`
-  font-size: 1.1rem;
+const PlacePrice = styled.span`
+  font-size: 16px;
+  font-weight: 700;
   color: var(--color-tumakr-maroon);
-  font-weight: 700;
 `;
 
-const PriceBreakdownBox = styled.div`
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+const PlaceImage = styled.img`
+  width: 120px;
+  height: 90px;
+  object-fit: cover;
   border-radius: 8px;
-  padding: 20px;
+  flex-shrink: 0;
+
+  @media (max-width: 640px) {
+    width: 100%;
+    height: 160px;
+    order: -1;
+  }
 `;
 
-const PriceBreakdownRow = styled.div`
+const DayNotes = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px;
+  background: #fffbeb;
+  border-radius: 8px;
+  border-left: 3px solid #f59e0b;
+`;
+
+const NotesIcon = styled.span`
+  font-size: 16px;
+  flex-shrink: 0;
+`;
+
+const NotesText = styled.p`
+  font-size: 13px;
+  color: #92400e;
+  margin: 0;
+  line-height: 1.5;
+  white-space: pre-wrap;
+`;
+
+const PriceCard = styled.div`
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+`;
+
+const PriceRow = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f3f4f6;
 `;
 
-const PriceBreakdownLabel = styled.span`
-  font-size: 0.95rem;
+const PriceLabel = styled.span`
+  font-size: 14px;
   color: #6b7280;
-  font-weight: 500;
 `;
 
-const PriceBreakdownValue = styled.span`
-  font-size: 1.1rem;
-  color: #1f2937;
-  font-weight: 700;
-`;
-
-const AdjustmentsDivider = styled.div`
-  border-top: 1px solid #e5e7eb;
-  margin: 12px 0;
-`;
-
-const AdjustmentsHeader = styled.div`
-  font-size: 0.85rem;
-  color: #6b7280;
+const PriceValue = styled.span`
+  font-size: 15px;
   font-weight: 600;
-  margin-bottom: 8px;
+  color: #1f2937;
+`;
+
+const AdjustmentsSection = styled.div`
+  padding: 16px 20px;
+  background: #f9fafb;
+  border-bottom: 1px solid #f3f4f6;
+`;
+
+const AdjustmentsTitle = styled.div`
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  margin-bottom: 12px;
 `;
 
 const AdjustmentRow = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #f3f4f6;
+  font-size: 14px;
+  color: #4b5563;
+  margin-bottom: 8px;
 
   &:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
   }
 `;
 
-const AdjustmentDescription = styled.span`
-  font-size: 0.9rem;
-  color: #4b5563;
+const AdjustmentValue = styled.span<{ isPositive: boolean }>`
+  font-weight: 600;
+  color: ${props => props.isPositive ? '#059669' : '#dc2626'};
 `;
 
-const AdjustmentAmount = styled.span<{ isPositive: boolean }>`
-  font-size: 0.95rem;
+const TotalSection = styled.div`
+  background: var(--color-tumakr-maroon);
+  padding: 20px;
+`;
+
+const TotalRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const TotalLabel = styled.span`
+  font-size: 16px;
   font-weight: 600;
-  color: ${(props) => (props.isPositive ? "#059669" : "#dc2626")};
+  color: white;
+`;
+
+const TotalValue = styled.span`
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+`;
+
+const PerPersonRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+`;
+
+const InfoBox = styled.div`
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  color: #4b5563;
+  line-height: 1.6;
+
+  p { margin: 0 0 12px 0; &:last-child { margin: 0; } }
+  h1, h2, h3 { font-size: 16px; font-weight: 600; color: #1f2937; margin: 16px 0 8px; &:first-child { margin-top: 0; } }
+  ul, ol { margin: 8px 0; padding-left: 24px; }
+  li { margin-bottom: 4px; }
+  strong { font-weight: 600; color: #1f2937; }
+`;
+
+const ContactGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+`;
+
+const ContactItem = styled.div<{ fullWidth?: boolean }>`
+  ${props => props.fullWidth && 'grid-column: 1 / -1;'}
+`;
+
+const ContactLabel = styled.div`
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+`;
+
+const ContactValue = styled.div`
+  font-size: 14px;
+  color: #1f2937;
+  font-weight: 500;
+`;
+
+const Footer = styled.footer`
+  background: #1f2937;
+  padding: 32px 24px;
+  text-align: center;
+`;
+
+const FooterText = styled.p`
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  margin: 0;
 `;

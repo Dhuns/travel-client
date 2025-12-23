@@ -119,6 +119,11 @@ export interface MessageMetadata {
   // 구조화된 대화 UI 액션
   uiAction?: UIAction;
   conversationStep?: ConversationStep;
+  // Error handling metadata
+  isError?: boolean;
+  isRetryable?: boolean;
+  retryAfter?: number; // seconds
+  lastUserMessage?: string; // for retry
 }
 
 // 채팅 메시지

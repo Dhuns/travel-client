@@ -14,18 +14,92 @@ interface Props {
   disabled?: boolean;
   placeholder?: string;
   showHint?: boolean;
+  sessionId?: string; // For draft auto-save
 }
+
+const DRAFT_STORAGE_KEY = 'chat_draft';
+const DRAFT_DEBOUNCE_MS = 500;
 
 const ChatInput: FC<Props> = ({
   onSend,
   disabled = false,
   placeholder = UI_TEXT.TYPE_MESSAGE,
   showHint = false,
+  sessionId,
 }) => {
   const [input, setInput] = useState("");
   const [isComposing, setIsComposing] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Load draft from localStorage on mount or session change
+  useEffect(() => {
+    if (!sessionId || typeof window === 'undefined') return;
+
+    try {
+      const drafts = localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (drafts) {
+        const parsed = JSON.parse(drafts);
+        if (parsed[sessionId]) {
+          setInput(parsed[sessionId]);
+        }
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+  }, [sessionId]);
+
+  // Save draft to localStorage with debounce
+  const saveDraft = (value: string) => {
+    if (!sessionId || typeof window === 'undefined') return;
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    saveTimeoutRef.current = setTimeout(() => {
+      try {
+        const drafts = localStorage.getItem(DRAFT_STORAGE_KEY);
+        const parsed = drafts ? JSON.parse(drafts) : {};
+
+        if (value.trim()) {
+          parsed[sessionId] = value;
+        } else {
+          delete parsed[sessionId];
+        }
+
+        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(parsed));
+      } catch {
+        // Ignore localStorage errors
+      }
+    }, DRAFT_DEBOUNCE_MS);
+  };
+
+  // Clear draft for current session
+  const clearDraft = () => {
+    if (!sessionId || typeof window === 'undefined') return;
+
+    try {
+      const drafts = localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (drafts) {
+        const parsed = JSON.parse(drafts);
+        delete parsed[sessionId];
+        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(parsed));
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -49,6 +123,7 @@ const ChatInput: FC<Props> = ({
 
     onSend(trimmed);
     setInput("");
+    clearDraft(); // Clear draft after sending
   };
 
   const handleKeyPress = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -65,6 +140,7 @@ const ChatInput: FC<Props> = ({
     // Allow input up to max length
     if (value.length <= MAX_MESSAGE_LENGTH) {
       setInput(value);
+      saveDraft(value); // Auto-save draft
     }
   };
 

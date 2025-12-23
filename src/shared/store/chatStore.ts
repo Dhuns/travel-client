@@ -6,6 +6,8 @@ import {
   getAllChatSessions,
   getChatSession,
   updateChatSession,
+  getEstimateQuota,
+  EstimateQuota,
 } from "../apis/chat";
 import {
   CHAT_STORAGE_KEY,
@@ -18,6 +20,13 @@ import { useAuthStore } from "./authStore";
 
 import { create } from "zustand";
 
+// Generation progress steps
+export interface GenerationProgress {
+  step: 'analyzing' | 'creating' | 'optimizing' | 'finalizing';
+  message: string;
+  progress: number;
+}
+
 interface ChatStore {
   // 상태
   sessions: ChatSession[];
@@ -26,6 +35,8 @@ interface ChatStore {
   isLoading: boolean;
   isChatOpen: boolean;
   isGeneratingEstimate: boolean;
+  generationProgress: GenerationProgress | null;
+  estimateQuota: EstimateQuota | null;
 
   // Getters
   getCurrentSession: () => ChatSession | null;
@@ -41,6 +52,7 @@ interface ChatStore {
   setIsTyping: (isTyping: boolean) => void;
   updateContext: (context: Partial<ChatContext>) => Promise<void>;
   generateEstimateForSession: () => Promise<boolean>;
+  fetchEstimateQuota: () => Promise<void>;
   clearSession: () => void;
   clearAllSessions: () => void;
   deleteSession: (sessionId: string) => Promise<void>;
@@ -55,6 +67,8 @@ const useChatStore = create<ChatStore>((set, get) => ({
   isLoading: false,
   isChatOpen: false,
   isGeneratingEstimate: false,
+  generationProgress: null,
+  estimateQuota: null,
 
   // 현재 세션 가져오기
   getCurrentSession: () => {
@@ -149,22 +163,18 @@ const useChatStore = create<ChatStore>((set, get) => ({
   // 세션 로드 (API에서 메시지 가져오기)
   loadSession: async (sessionId: string) => {
     try {
-      console.log("[chatStore] loadSession called with sessionId:", sessionId);
       set({ isLoading: true });
 
       // 로그인 확인 및 accessToken 가져오기
       const authState = useAuthStore.getState();
       const accessToken = authState.accessToken;
       if (!accessToken) {
-        console.warn("[chatStore] No access token available");
         set({ isLoading: false });
         return;
       }
 
-      console.log("[chatStore] Fetching session from API...");
       // 백엔드에서 세션 및 메시지 가져오기
       const session = await getChatSession(accessToken, sessionId);
-      console.log("[chatStore] Session loaded:", session);
 
       const { sessions } = get();
       const existingSessionIndex = sessions.findIndex((s) => s.sessionId === sessionId);
@@ -276,32 +286,21 @@ const useChatStore = create<ChatStore>((set, get) => ({
       // 로그인 확인 및 accessToken 가져오기
       const authState = useAuthStore.getState();
       const accessToken = authState.accessToken;
-      console.log(
-        "[chatStore] loadUserSessions - accessToken:",
-        accessToken ? "Present" : "Missing"
-      );
 
       if (!accessToken) {
-        console.warn("[chatStore] No access token available");
         set({ isLoading: false });
         return;
       }
 
-      console.log("[chatStore] Calling getAllChatSessions API...");
       // 서버에서 사용자의 세션 목록 가져오기 (userId는 JWT에서 추출됨)
       const response = await getAllChatSessions(accessToken, {
         page: 1,
         limit: 50, // 최근 50개 세션
       });
 
-      console.log("[chatStore] API Response:", response);
-      const { sessions: serverSessions, total } = response;
-      console.log(
-        `[chatStore] Loaded ${serverSessions?.length || 0} sessions (total: ${total})`
-      );
+      const { sessions: serverSessions } = response;
 
       if (!serverSessions || !Array.isArray(serverSessions)) {
-        console.error("[chatStore] Invalid sessions data:", serverSessions);
         set({ sessions: [], isLoading: false });
         return;
       }
@@ -316,21 +315,12 @@ const useChatStore = create<ChatStore>((set, get) => ({
         messages: [], // 메시지는 세션 선택 시 로드
       }));
 
-      console.log("[chatStore] Formatted sessions:", formattedSessions.length);
-
       set({
         sessions: formattedSessions,
         isLoading: false,
       });
-    } catch (error) {
-      console.error("[chatStore] Failed to load user sessions:", error);
-      const axiosError = error as any;
-      if (axiosError?.response) {
-        console.error("[chatStore] API Error Response:", {
-          status: axiosError.response.status,
-          data: axiosError.response.data,
-        });
-      }
+    } catch {
+      // Failed to load sessions - silent fail
       set({ isLoading: false, sessions: [] });
     }
   },
@@ -471,16 +461,74 @@ const useChatStore = create<ChatStore>((set, get) => ({
           set({ sessions: finalSessions });
         }
       }
-    } catch (error) {
-      // Failed to send message - silent fail
+    } catch (error: any) {
       setIsTyping(false);
 
-      // Show error message
+      // 에러 유형 분류 및 상세 메시지
+      let errorMessage = "An unexpected error occurred.";
+      let isRetryable = true;
+      let retryAfter = 5;
+      let shouldReloadSession = false;
+
+      const errorMsg = error?.message?.toLowerCase() || '';
+      const errorCode = error?.code?.toLowerCase() || '';
+      const statusCode = error?.response?.status;
+
+      // Timeout detection (axios timeout or network timeout)
+      if (errorMsg.includes('timeout') || errorCode.includes('timeout') || errorCode === 'econnaborted' || statusCode === 408) {
+        errorMessage = "The response is taking longer than expected. Checking for messages...";
+        retryAfter = 5;
+        shouldReloadSession = true; // The response might have been saved on the server
+      } else if (errorMsg.includes('network') || statusCode === 0) {
+        errorMessage = "Network connection issue. Please check your internet connection.";
+        retryAfter = 10;
+        shouldReloadSession = true;
+      } else if (statusCode === 503 || statusCode === 502) {
+        errorMessage = "The server is temporarily unavailable. Our team has been notified.";
+        retryAfter = 60;
+      } else if (statusCode === 429) {
+        errorMessage = "Too many requests. Please wait a moment before trying again.";
+        retryAfter = 30;
+      } else if (statusCode === 401 || statusCode === 403) {
+        errorMessage = "Session expired. Please refresh the page to continue.";
+        isRetryable = false;
+      }
+
+      // If timeout or network error, try to reload session to get any saved messages
+      if (shouldReloadSession && currentSessionId) {
+        try {
+          // Wait a bit for server to finish processing
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          await get().loadSession(currentSessionId);
+
+          // Check if the session now has more messages (AI response was saved)
+          const reloadedSession = get().getCurrentSession();
+          const lastMessage = reloadedSession?.messages[reloadedSession.messages.length - 1];
+
+          if (lastMessage?.role === 'assistant' && !lastMessage.metadata?.isError) {
+            // Response was found! No need to show error
+            return;
+          }
+        } catch (reloadError) {
+          // Reload failed, continue to show error message
+        }
+      }
+
+      // 에러 메시지에 재시도 정보 포함
+      const fullMessage = isRetryable
+        ? `${errorMessage}\n\nPlease try again${retryAfter > 10 ? ` in ${retryAfter} seconds` : ''}.`
+        : `${errorMessage}\n\nPlease refresh the page.`;
+
       await addMessage({
         role: "assistant",
         type: "system",
-        content:
-          "Sorry, a temporary error occurred 😥\nPlease try again in a moment.\n\nIf the problem persists, try refreshing the page!",
+        content: fullMessage,
+        metadata: {
+          isError: true,
+          isRetryable,
+          retryAfter,
+          lastUserMessage: content, // 재시도를 위해 저장
+        },
       });
     }
   },
@@ -609,10 +657,32 @@ const useChatStore = create<ChatStore>((set, get) => ({
         return false;
       }
 
-      set({ isGeneratingEstimate: true });
+      // Progress simulation helper
+      const progressSteps: GenerationProgress[] = [
+        { step: 'analyzing', message: 'Analyzing your preferences...', progress: 15 },
+        { step: 'creating', message: 'Creating personalized itinerary...', progress: 45 },
+        { step: 'optimizing', message: 'Optimizing route and schedule...', progress: 75 },
+        { step: 'finalizing', message: 'Finalizing your estimate...', progress: 95 },
+      ];
+
+      set({ isGeneratingEstimate: true, generationProgress: progressSteps[0] });
+
+      // Simulate progress updates while waiting for API
+      let currentStep = 0;
+      const progressInterval = setInterval(() => {
+        currentStep++;
+        if (currentStep < progressSteps.length) {
+          set({ generationProgress: progressSteps[currentStep] });
+        }
+      }, 2500); // Update every 2.5 seconds
 
       // AI 견적서 생성 API 호출 (userId는 JWT에서 추출됨)
-      const result = await generateEstimate(accessToken, currentSessionId);
+      let result;
+      try {
+        result = await generateEstimate(accessToken, currentSessionId);
+      } finally {
+        clearInterval(progressInterval);
+      }
 
       // 세션에 batchId 업데이트
       const updatedSessions = sessions.map((session) => {
@@ -625,7 +695,10 @@ const useChatStore = create<ChatStore>((set, get) => ({
         return session;
       });
 
-      set({ sessions: updatedSessions, isGeneratingEstimate: false });
+      set({ sessions: updatedSessions, isGeneratingEstimate: false, generationProgress: null });
+
+      // quota 갱신
+      get().fetchEstimateQuota();
 
       // 백엔드에 batchId 동기화 (실패해도 로컬에는 유지)
       try {
@@ -657,7 +730,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
       return true;
     } catch (error) {
       // Failed to generate estimate - show error details
-      set({ isGeneratingEstimate: false });
+      set({ isGeneratingEstimate: false, generationProgress: null });
 
       const axiosError = error as {
         response?: { data?: { message?: string } };
@@ -675,6 +748,20 @@ const useChatStore = create<ChatStore>((set, get) => ({
       });
 
       return false;
+    }
+  },
+
+  // 견적 생성 quota 조회
+  fetchEstimateQuota: async () => {
+    try {
+      const authState = useAuthStore.getState();
+      const accessToken = authState.accessToken;
+      if (!accessToken) return;
+
+      const quota = await getEstimateQuota(accessToken);
+      set({ estimateQuota: quota });
+    } catch (error) {
+      console.error("Failed to fetch estimate quota:", error);
     }
   },
 
@@ -709,7 +796,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
     const accessToken = authState.accessToken;
     if (!accessToken) {
       console.warn("No access token available");
-      alert("로그인이 필요합니다.");
+      alert("Please sign in to continue.");
       return;
     }
 
@@ -726,22 +813,20 @@ const useChatStore = create<ChatStore>((set, get) => ({
     try {
       // 백엔드 API 호출하여 서버에서 세션 삭제
       await deleteChatSession(accessToken, sessionId);
-      console.log(`Session ${sessionId} deleted successfully`);
     } catch (error) {
       // 서버 삭제 실패 시 에러 처리
-      console.error("Failed to delete session from server:", error);
       const axiosError = error as {
         response?: { status?: number; data?: { message?: string } };
       };
 
       // 404 에러면 이미 삭제된 것이므로 그냥 무시 (로컬에서는 이미 제거됨)
       if (axiosError?.response?.status === 404) {
-        console.log("Session not found on server, already removed from local state");
+        // Already removed
       } else {
         // 다른 에러면 롤백하고 사용자에게 알림
         const errorMessage =
-          axiosError?.response?.data?.message || "채팅 삭제에 실패했습니다.";
-        alert(`삭제 실패: ${errorMessage}\n\n페이지를 새로고침한 후 다시 시도해주세요.`);
+          axiosError?.response?.data?.message || "Failed to delete chat.";
+        alert(`Delete failed: ${errorMessage}\n\nPlease refresh the page and try again.`);
 
         // 롤백: 삭제된 세션을 다시 추가
         if (sessionToDelete) {

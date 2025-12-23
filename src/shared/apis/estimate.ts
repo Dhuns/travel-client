@@ -33,7 +33,8 @@ export interface Estimate {
   version: number;
   status: string;
   comment: string;
-  timeline: Record<string, string>;
+  summary?: string;
+  timeline: string | Record<string, string> | { days: Array<{ day: number; date?: string; theme: string; places: Array<{ itemId: number; nameKor: string; nameEng: string; description: string; lat?: number; lng?: number }> }> };
 }
 
 export interface Batch {
@@ -74,8 +75,10 @@ export interface QuotationResponse {
 
 // Get quotation by hash (customer-facing, no auth required)
 export const getQuotationByHash = async (hash: string): Promise<QuotationResponse> => {
-  // Hash may contain URL-unsafe characters like '/' and '+', so encode it
-  const encodedHash = encodeURIComponent(hash);
+  // Hash comes from URL params which may already be encoded
+  // Decode first to normalize, then encode for API call
+  const decodedHash = decodeURIComponent(hash);
+  const encodedHash = encodeURIComponent(decodedHash);
   const response = await axios.get(`${API_URL}/estimate/client/detail/${encodedHash}`);
   return response.data;
 };
