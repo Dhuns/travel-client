@@ -51,6 +51,7 @@ interface ChatStore {
   updateLastMessage: (content: string) => void;
   setIsTyping: (isTyping: boolean) => void;
   updateContext: (context: Partial<ChatContext>) => Promise<void>;
+  updateSessionStatus: (sessionId: string, status: ChatSession['status']) => void;
   generateEstimateForSession: () => Promise<boolean>;
   fetchEstimateQuota: () => Promise<void>;
   clearSession: () => void;
@@ -184,12 +185,38 @@ const useChatStore = create<ChatStore>((set, get) => ({
         const updatedSessions = [...sessions];
         const existingSession = sessions[existingSessionIndex];
 
+        // localStorage에서 pending UI action 복원
+        let pendingUIAction: any = null;
+        try {
+          const uiActionsKey = 'pending_ui_actions';
+          const stored = localStorage.getItem(uiActionsKey);
+          if (stored) {
+            const uiActions = JSON.parse(stored);
+            pendingUIAction = uiActions[sessionId];
+          }
+        } catch (error) {
+          console.error('Failed to restore pending UI action:', error);
+        }
+
         // 메시지 목록에서 가장 최근 메시지 시간 계산
         const mappedMessages =
-          session.messages?.map((m) => ({
-            ...m,
-            timestamp: new Date(m.sentAt || m.timestamp),
-          })) || [];
+          session.messages?.map((m) => {
+            // 저장된 uiAction이 이 메시지에 해당하면 복원
+            if (pendingUIAction && m.messageId === pendingUIAction.messageId) {
+              return {
+                ...m,
+                timestamp: new Date(m.sentAt || m.timestamp),
+                metadata: {
+                  ...m.metadata,
+                  uiAction: pendingUIAction.uiAction,
+                },
+              };
+            }
+            return {
+              ...m,
+              timestamp: new Date(m.sentAt || m.timestamp),
+            };
+          }) || [];
 
         // 메시지가 있으면 가장 최근 메시지의 시간을 사용
         let actualLastMessageAt: Date | undefined;
@@ -236,6 +263,19 @@ const useChatStore = create<ChatStore>((set, get) => ({
         });
       } else {
         // 새로운 세션 추가
+        // localStorage에서 pending UI action 복원
+        let pendingUIAction: any = null;
+        try {
+          const uiActionsKey = 'pending_ui_actions';
+          const stored = localStorage.getItem(uiActionsKey);
+          if (stored) {
+            const uiActions = JSON.parse(stored);
+            pendingUIAction = uiActions[sessionId];
+          }
+        } catch (error) {
+          console.error('Failed to restore pending UI action:', error);
+        }
+
         set({
           sessions: [
             ...sessions,
@@ -246,10 +286,23 @@ const useChatStore = create<ChatStore>((set, get) => ({
                 ? new Date(session.lastMessageAt)
                 : undefined,
               messages:
-                session.messages?.map((m) => ({
-                  ...m,
-                  timestamp: new Date(m.sentAt || m.timestamp),
-                })) || [],
+                session.messages?.map((m) => {
+                  // 저장된 uiAction이 이 메시지에 해당하면 복원
+                  if (pendingUIAction && m.messageId === pendingUIAction.messageId) {
+                    return {
+                      ...m,
+                      timestamp: new Date(m.sentAt || m.timestamp),
+                      metadata: {
+                        ...m.metadata,
+                        uiAction: pendingUIAction.uiAction,
+                      },
+                    };
+                  }
+                  return {
+                    ...m,
+                    timestamp: new Date(m.sentAt || m.timestamp),
+                  };
+                }) || [],
             },
           ],
           currentSessionId: sessionId,
@@ -391,6 +444,23 @@ const useChatStore = create<ChatStore>((set, get) => ({
       // estimate 타입 메시지인 경우 batchId 추출
       const isEstimateResponse = aiMessage.type === 'estimate';
       const estimateBatchId = aiMessage.metadata?.batchId;
+
+      // uiAction이 있으면 localStorage에 저장 (새로고침 후 복원용)
+      if (aiMessage.metadata?.uiAction && aiMessage.messageId) {
+        try {
+          const uiActionsKey = 'pending_ui_actions';
+          const stored = localStorage.getItem(uiActionsKey);
+          const uiActions = stored ? JSON.parse(stored) : {};
+          uiActions[currentSessionId] = {
+            messageId: aiMessage.messageId,
+            uiAction: aiMessage.metadata.uiAction,
+            timestamp: Date.now(),
+          };
+          localStorage.setItem(uiActionsKey, JSON.stringify(uiActions));
+        } catch (error) {
+          console.error('Failed to store pending UI action:', error);
+        }
+      }
 
       const updatedSessions = sessions.map((session) => {
         if (session.sessionId === currentSessionId) {
@@ -641,6 +711,21 @@ const useChatStore = create<ChatStore>((set, get) => ({
     } catch (error) {
       // Failed to update context - silent fail
     }
+  },
+
+  // 세션 상태 업데이트
+  updateSessionStatus: (sessionId: string, status: ChatSession['status']) => {
+    const { sessions } = get();
+    const updatedSessions = sessions.map((session) => {
+      if (session.sessionId === sessionId) {
+        return {
+          ...session,
+          status,
+        };
+      }
+      return session;
+    });
+    set({ sessions: updatedSessions });
   },
 
   // 견적서 생성 (세션 기반)

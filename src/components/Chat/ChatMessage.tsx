@@ -1,18 +1,27 @@
-import React, { FC, useState, useEffect } from "react";
+import React, { FC, useEffect, useState } from "react";
 
-import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
-import { submitCustomerQuoteResponse, CustomerResponseType } from "@shared/apis/estimate";
-import { ChatMessage as ChatMessageType, ChatContext } from "@shared/types/chat";
+import styled from "@emotion/styled";
+import { CustomerResponseType, submitCustomerQuoteResponse } from "@shared/apis/estimate";
+import useChatStore from "@shared/store/chatStore";
+import {
+  ChatContext,
+  ChatMessage as ChatMessageType,
+  ChatSession,
+} from "@shared/types/chat";
 import { aesEncrypt } from "@shared/utils/crypto";
 import dayjs from "dayjs";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import ChatUIActions from "./ChatUIActions";
-import useChatStore from "@shared/store/chatStore";
 
 interface SystemMessageContent {
-  type: 'quote_sent' | 'customer_approved' | 'customer_rejected' | 'revision_requested' | 'sent_to_expert';
+  type:
+    | "quote_sent"
+    | "customer_approved"
+    | "customer_rejected"
+    | "revision_requested"
+    | "sent_to_expert";
   title: string;
   message: string;
   shareUrl?: string;
@@ -22,7 +31,7 @@ interface SystemMessageContent {
 
 // Export for use in ChatMessageList
 export interface QuoteResponseInfo {
-  responseType: 'approve' | 'reject' | 'request_changes';
+  responseType: "approve" | "reject" | "request_changes";
   message?: string;
 }
 
@@ -37,77 +46,120 @@ interface Props {
 }
 
 // Shared card configuration for system messages
-const getSystemCardConfig = (type: SystemMessageContent['type'] | undefined) => {
+const getSystemCardConfig = (type: SystemMessageContent["type"] | undefined) => {
   switch (type) {
-    case 'quote_sent':
+    case "quote_sent":
       return {
-        gradient: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+        gradient:
+          "linear-gradient(135deg, var(--color-tumakr-dark-blue) 0%, #0f2b58 100%)",
         icon: (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M22 2L11 13" />
             <path d="M22 2L15 22L11 13L2 9L22 2Z" />
           </svg>
         ),
-        iconBg: 'rgba(255,255,255,0.2)',
+        iconBg: "rgba(255,255,255,0.2)",
       };
-    case 'customer_approved':
+    case "customer_approved":
       return {
-        gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        gradient: "linear-gradient(135deg, #00692c 0%, #2e8c69 100%)",
         icon: (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
             <polyline points="22 4 12 14.01 9 11.01" />
           </svg>
         ),
-        iconBg: 'rgba(255,255,255,0.2)',
+        iconBg: "rgba(255,255,255,0.2)",
       };
-    case 'customer_rejected':
+    case "customer_rejected":
       return {
-        gradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
+        gradient: "linear-gradient(135deg, #1e1517 0%, var(--color-tumakr-maroon) 100%)",
         icon: (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <circle cx="12" cy="12" r="10" />
             <line x1="15" y1="9" x2="9" y2="15" />
             <line x1="9" y1="9" x2="15" y2="15" />
           </svg>
         ),
-        iconBg: 'rgba(255,255,255,0.2)',
+        iconBg: "rgba(255,255,255,0.2)",
       };
-    case 'revision_requested':
+    case "revision_requested":
       return {
-        gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+        gradient: "linear-gradient(135deg, var(--color-tumakr-mustard) 0%, #e1b936 100%)",
         icon: (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
           </svg>
         ),
-        iconBg: 'rgba(255,255,255,0.2)',
+        iconBg: "rgba(255,255,255,0.2)",
       };
-    case 'sent_to_expert':
+    case "sent_to_expert":
       return {
-        gradient: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+        gradient: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)",
         icon: (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
             <circle cx="9" cy="7" r="4" />
             <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
         ),
-        iconBg: 'rgba(255,255,255,0.2)',
+        iconBg: "rgba(255,255,255,0.2)",
       };
     default:
       return {
-        gradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
+        gradient: "linear-gradient(135deg, #6b7280 0%, #4b5563 100%)",
         icon: (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <circle cx="12" cy="12" r="10" />
             <line x1="12" y1="16" x2="12" y2="12" />
             <line x1="12" y1="8" x2="12.01" y2="8" />
           </svg>
         ),
-        iconBg: 'rgba(255,255,255,0.2)',
+        iconBg: "rgba(255,255,255,0.2)",
       };
   }
 };
@@ -116,10 +168,11 @@ const getSystemCardConfig = (type: SystemMessageContent['type'] | undefined) => 
 const parseSystemContent = (content: string | undefined): SystemMessageContent | null => {
   if (!content) return null;
   const trimmedContent = content.trim();
-  const looksLikeSystemJson = trimmedContent.includes('quote_sent') ||
-    trimmedContent.includes('customer_approved') ||
-    trimmedContent.includes('customer_rejected') ||
-    trimmedContent.includes('revision_requested');
+  const looksLikeSystemJson =
+    trimmedContent.includes("quote_sent") ||
+    trimmedContent.includes("customer_approved") ||
+    trimmedContent.includes("customer_rejected") ||
+    trimmedContent.includes("revision_requested");
 
   if (!looksLikeSystemJson) return null;
 
@@ -138,9 +191,9 @@ const parseSystemContent = (content: string | undefined): SystemMessageContent |
 };
 
 // Helper to check if quote response was already submitted (persisted in localStorage)
-const QUOTE_RESPONSE_KEY = 'quote_responses';
+const QUOTE_RESPONSE_KEY = "quote_responses";
 const getQuoteResponseStatus = (batchId: number | undefined): boolean => {
-  if (!batchId || typeof window === 'undefined') return false;
+  if (!batchId || typeof window === "undefined") return false;
   try {
     const stored = localStorage.getItem(QUOTE_RESPONSE_KEY);
     if (stored) {
@@ -154,7 +207,7 @@ const getQuoteResponseStatus = (batchId: number | undefined): boolean => {
 };
 
 const setQuoteResponseStatus = (batchId: number | undefined): void => {
-  if (!batchId || typeof window === 'undefined') return;
+  if (!batchId || typeof window === "undefined") return;
   try {
     const stored = localStorage.getItem(QUOTE_RESPONSE_KEY);
     const responses = stored ? JSON.parse(stored) : {};
@@ -165,8 +218,18 @@ const setQuoteResponseStatus = (batchId: number | undefined): void => {
   }
 };
 
-const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onUIActionSelect, isLastMessage, quoteResponseInfo }) => {
+const ChatMessage: FC<Props> = ({
+  message,
+  onViewQuote,
+  onResponseSubmitted,
+  onUIActionSelect,
+  isLastMessage,
+  quoteResponseInfo,
+}) => {
   const { role, content, timestamp, type, metadata } = message;
+  const { getCurrentSession } = useChatStore.getState();
+  const currentSession = getCurrentSession();
+  const sessionId = currentSession?.sessionId;
 
   // Parse system content to get batchId for checking response status
   const systemContentForInit = parseSystemContent(content);
@@ -214,7 +277,14 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
       <MessageContainer isUser={false}>
         <AvatarWrapper>
           <AssistantAvatar>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <circle cx="12" cy="12" r="10" />
               <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
             </svg>
@@ -224,7 +294,14 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
           <EstimateCard>
             <EstimateHeader>
               <EstimateIconWrapper>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                   <polyline points="14 2 14 8 20 8" />
                   <line x1="16" y1="13" x2="8" y2="13" />
@@ -240,7 +317,14 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
               <EstimateStats>
                 <StatItem>
                   <StatIcon>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
                       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                       <circle cx="12" cy="10" r="3" />
                     </svg>
@@ -253,7 +337,14 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
                 {!isFirstEstimate && metadata.totalAmount && (
                   <StatItem>
                     <StatIcon>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
                         <line x1="12" y1="1" x2="12" y2="23" />
                         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                       </svg>
@@ -269,18 +360,22 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
             </EstimateBody>
             <EstimateActions>
               <ViewQuotationButton onClick={handleViewClick}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
-                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" />
-                </svg>
                 View Full Itinerary
               </ViewQuotationButton>
             </EstimateActions>
           </EstimateCard>
           {isLastMessage && metadata?.uiAction && onUIActionSelect && (
-            <ChatUIActions uiAction={metadata.uiAction} onSelect={onUIActionSelect} />
+            <ChatUIActions
+              uiAction={metadata.uiAction}
+              onSelect={onUIActionSelect}
+              messageId={
+                sessionId
+                  ? `${sessionId}-${metadata.uiAction.type}`
+                  : message.messageId || message.id
+              }
+            />
           )}
-          <MessageTime>{dayjs(timestamp).format("HH:mm")}</MessageTime>
+          <MessageTime>{dayjs(timestamp).format("MMM D, HH:mm")}</MessageTime>
         </MessageContent>
       </MessageContainer>
     );
@@ -291,247 +386,315 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
   const systemContent = parseSystemContent(content);
 
   if (systemContent) {
-      const handleResponse = async (responseType: CustomerResponseType, msg?: string) => {
-        if (!systemContent?.batchId || isSubmitting || responseSubmitted) return;
+    const { getCurrentSession, updateSessionStatus } = useChatStore.getState();
 
-        setIsSubmitting(true);
-        setSelectedResponse(responseType);
-        try {
-          await submitCustomerQuoteResponse({
-            batchId: systemContent.batchId,
-            responseType,
-            message: msg,
-          });
-          // Persist response status to localStorage
-          setQuoteResponseStatus(systemContent.batchId);
-          setResponseSubmitted(true);
-          setShowRevisionInput(false);
-          onResponseSubmitted?.();
-        } catch (error) {
-          console.error('Failed to submit response:', error);
-          alert('Failed to submit response. Please try again.');
-          setSelectedResponse(null);
-        } finally {
-          setIsSubmitting(false);
+    const handleResponse = async (responseType: CustomerResponseType, msg?: string) => {
+      if (!systemContent?.batchId || isSubmitting || responseSubmitted) return;
+
+      setIsSubmitting(true);
+      setSelectedResponse(responseType);
+      try {
+        const result = await submitCustomerQuoteResponse({
+          batchId: systemContent.batchId,
+          responseType,
+          message: msg,
+        });
+
+        // Update session status using the status returned from backend
+        const currentSession = getCurrentSession();
+        if (currentSession && result.newStatus) {
+          updateSessionStatus(
+            currentSession.sessionId,
+            result.newStatus as ChatSession["status"]
+          );
         }
-      };
 
-      const handleViewQuoteClick = (e: React.MouseEvent) => {
-        e.preventDefault();
-        if (systemContent?.shareUrl && onViewQuote) {
-          const urlParts = systemContent.shareUrl.split('/quotation/');
-          if (urlParts[1]) {
-            onViewQuote(decodeURIComponent(urlParts[1]));
-          }
+        // Persist response status to localStorage
+        setQuoteResponseStatus(systemContent.batchId);
+        setResponseSubmitted(true);
+        setShowRevisionInput(false);
+        onResponseSubmitted?.();
+      } catch (error) {
+        console.error("Failed to submit response:", error);
+        alert("Failed to submit response. Please try again.");
+        setSelectedResponse(null);
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
+    const handleViewQuoteClick = (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (systemContent?.shareUrl && onViewQuote) {
+        const urlParts = systemContent.shareUrl.split("/quotation/");
+        if (urlParts[1]) {
+          onViewQuote(decodeURIComponent(urlParts[1]));
         }
-      };
+      }
+    };
 
-      const config = getSystemCardConfig(systemContent?.type);
+    const config = getSystemCardConfig(systemContent?.type);
 
-      return (
-        <MessageContainer isUser={false}>
-          <AvatarWrapper>
-            <AssistantAvatar>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-              </svg>
-            </AssistantAvatar>
-          </AvatarWrapper>
-          <MessageContent>
-            <SystemCard>
-              <SystemCardHeader style={{ background: config.gradient }}>
-                <SystemIconWrapper style={{ background: config.iconBg }}>
-                  {config.icon}
-                </SystemIconWrapper>
-                <SystemCardTitle>{systemContent.title}</SystemCardTitle>
-              </SystemCardHeader>
-              <SystemCardBody>
-                <SystemCardMessage>{systemContent.message}</SystemCardMessage>
-                {systemContent.customerMessage && (
-                  <CustomerFeedbackBox>
-                    <CustomerFeedbackHeader>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                      </svg>
-                      Your Feedback
-                    </CustomerFeedbackHeader>
-                    <CustomerFeedbackText>{systemContent.customerMessage}</CustomerFeedbackText>
-                  </CustomerFeedbackBox>
-                )}
-              </SystemCardBody>
+    // Hide quote_sent card after response is submitted
+    if (systemContent.type === "quote_sent" && responseSubmitted) {
+      return null;
+    }
 
-              {/* Action buttons for quote_sent */}
-              {systemContent.type === 'quote_sent' && !responseSubmitted && (
-                <SystemCardActions>
-                  {systemContent.shareUrl && (
-                    <PrimaryActionButton onClick={handleViewQuoteClick}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                        <polyline points="14 2 14 8 20 8" />
-                        <line x1="16" y1="13" x2="8" y2="13" />
-                        <line x1="16" y1="17" x2="8" y2="17" />
-                      </svg>
-                      View Quotation Details
-                    </PrimaryActionButton>
-                  )}
-
-                  <ResponseSection>
-                    <ResponseLabel>How would you like to proceed?</ResponseLabel>
-                    <ResponseButtonGrid>
-                      <ResponseButton
-                        variant="approve"
-                        onClick={() => handleResponse('approve')}
-                        disabled={isSubmitting}
-                        $isSelected={selectedResponse === 'approve'}
-                      >
-                        {isSubmitting && selectedResponse === 'approve' ? (
-                          <LoadingSpinner />
-                        ) : (
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>
-                        )}
-                        <ResponseButtonText>
-                          <span>Approve</span>
-                          <small>Proceed to booking</small>
-                        </ResponseButtonText>
-                      </ResponseButton>
-
-                      <ResponseButton
-                        variant="changes"
-                        onClick={() => setShowRevisionInput(true)}
-                        disabled={isSubmitting}
-                        $isSelected={showRevisionInput}
-                      >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                        </svg>
-                        <ResponseButtonText>
-                          <span>Request Changes</span>
-                          <small>Modify itinerary</small>
-                        </ResponseButtonText>
-                      </ResponseButton>
-
-                      <ResponseButton
-                        variant="decline"
-                        onClick={() => handleResponse('reject')}
-                        disabled={isSubmitting}
-                        $isSelected={selectedResponse === 'reject'}
-                      >
-                        {isSubmitting && selectedResponse === 'reject' ? (
-                          <LoadingSpinner />
-                        ) : (
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
-                          </svg>
-                        )}
-                        <ResponseButtonText>
-                          <span>Decline</span>
-                          <small>Not interested</small>
-                        </ResponseButtonText>
-                      </ResponseButton>
-                    </ResponseButtonGrid>
-                  </ResponseSection>
-
-                  {showRevisionInput && (
-                    <RevisionInputSection>
-                      <RevisionTextarea
-                        placeholder="Please describe what you'd like to change (e.g., different destinations, more activities, budget adjustments...)"
-                        value={revisionMessage}
-                        onChange={(e) => setRevisionMessage(e.target.value)}
-                        rows={4}
-                      />
-                      <RevisionActions>
-                        <SubmitRevisionButton
-                          onClick={() => handleResponse('request_changes', revisionMessage)}
-                          disabled={isSubmitting || !revisionMessage.trim()}
-                        >
-                          {isSubmitting && selectedResponse === 'request_changes' ? (
-                            <>
-                              <LoadingSpinner />
-                              Submitting...
-                            </>
-                          ) : (
-                            <>
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <line x1="22" y1="2" x2="11" y2="13" />
-                                <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                              </svg>
-                              Submit Request
-                            </>
-                          )}
-                        </SubmitRevisionButton>
-                        <CancelButton onClick={() => setShowRevisionInput(false)}>
-                          Cancel
-                        </CancelButton>
-                      </RevisionActions>
-                    </RevisionInputSection>
-                  )}
-                </SystemCardActions>
+    return (
+      <MessageContainer isUser={false}>
+        <AvatarWrapper>
+          <AssistantAvatar>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+          </AssistantAvatar>
+        </AvatarWrapper>
+        <MessageContent>
+          <SystemCard>
+            <SystemCardHeader style={{ background: config.gradient }}>
+              <SystemIconWrapper style={{ background: config.iconBg }}>
+                {config.icon}
+              </SystemIconWrapper>
+              <SystemCardTitle>{systemContent.title}</SystemCardTitle>
+            </SystemCardHeader>
+            <SystemCardBody>
+              <SystemCardMessage>{systemContent.message}</SystemCardMessage>
+              {systemContent.customerMessage && (
+                <CustomerFeedbackBox>
+                  <CustomerFeedbackHeader>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
+                    Your Feedback
+                  </CustomerFeedbackHeader>
+                  <CustomerFeedbackText>
+                    {systemContent.customerMessage}
+                  </CustomerFeedbackText>
+                </CustomerFeedbackBox>
               )}
+            </SystemCardBody>
 
-              {responseSubmitted && (
-                <ResponseSubmittedSection>
-                  {quoteResponseInfo ? (
-                    // Show detailed response info from server
-                    <ResponseDetailBox responseType={quoteResponseInfo.responseType}>
-                      <ResponseDetailHeader>
-                        {quoteResponseInfo.responseType === 'approve' && (
+            {/* Action buttons for quote_sent */}
+            {systemContent.type === "quote_sent" && !responseSubmitted && (
+              <SystemCardActions>
+                {systemContent.shareUrl && (
+                  <PrimaryActionButton onClick={handleViewQuoteClick}>
+                    View Quotation Details
+                  </PrimaryActionButton>
+                )}
+
+                <ResponseSection>
+                  <ResponseLabel>How would you like to proceed?</ResponseLabel>
+                  <ResponseButtonGrid>
+                    <ResponseButton
+                      variant="approve"
+                      onClick={() => handleResponse("approve")}
+                      disabled={isSubmitting}
+                      $isSelected={selectedResponse === "approve"}
+                    >
+                      {isSubmitting && selectedResponse === "approve" ? (
+                        <LoadingSpinner />
+                      ) : (
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                      <ResponseButtonText>
+                        <span>Approve</span>
+                        <small>Proceed to booking</small>
+                      </ResponseButtonText>
+                    </ResponseButton>
+
+                    <ResponseButton
+                      variant="changes"
+                      onClick={() => setShowRevisionInput(true)}
+                      disabled={isSubmitting}
+                      $isSelected={showRevisionInput}
+                    >
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                      </svg>
+                      <ResponseButtonText>
+                        <span>Request Changes</span>
+                        <small>Modify itinerary</small>
+                      </ResponseButtonText>
+                    </ResponseButton>
+
+                    <ResponseButton
+                      variant="decline"
+                      onClick={() => handleResponse("reject")}
+                      disabled={isSubmitting}
+                      $isSelected={selectedResponse === "reject"}
+                    >
+                      {isSubmitting && selectedResponse === "reject" ? (
+                        <LoadingSpinner />
+                      ) : (
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      )}
+                      <ResponseButtonText>
+                        <span>Decline</span>
+                        <small>Not interested</small>
+                      </ResponseButtonText>
+                    </ResponseButton>
+                  </ResponseButtonGrid>
+                </ResponseSection>
+
+                {showRevisionInput && (
+                  <RevisionInputSection>
+                    <RevisionTextarea
+                      placeholder="Please describe what you'd like to change (e.g., different destinations, more activities, budget adjustments...)"
+                      value={revisionMessage}
+                      onChange={(e) => setRevisionMessage(e.target.value)}
+                      rows={4}
+                    />
+                    <RevisionActions>
+                      <SubmitRevisionButton
+                        onClick={() => handleResponse("request_changes", revisionMessage)}
+                        disabled={isSubmitting || !revisionMessage.trim()}
+                      >
+                        {isSubmitting && selectedResponse === "request_changes" ? (
                           <>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                              <polyline points="22 4 12 14.01 9 11.01" />
+                            <LoadingSpinner />
+                            Submitting...
+                          </>
+                        ) : (
+                          <>
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            >
+                              <line x1="22" y1="2" x2="11" y2="13" />
+                              <polygon points="22 2 15 22 11 13 2 9 22 2" />
                             </svg>
-                            <span>Approved</span>
+                            Submit Request
                           </>
                         )}
-                        {quoteResponseInfo.responseType === 'reject' && (
-                          <>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <circle cx="12" cy="12" r="10" />
-                              <line x1="15" y1="9" x2="9" y2="15" />
-                              <line x1="9" y1="9" x2="15" y2="15" />
-                            </svg>
-                            <span>Declined</span>
-                          </>
-                        )}
-                        {quoteResponseInfo.responseType === 'request_changes' && (
-                          <>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                            </svg>
-                            <span>Revision Requested</span>
-                          </>
-                        )}
-                      </ResponseDetailHeader>
-                      {quoteResponseInfo.responseType === 'request_changes' && quoteResponseInfo.message && (
+                      </SubmitRevisionButton>
+                      <CancelButton onClick={() => setShowRevisionInput(false)}>
+                        Cancel
+                      </CancelButton>
+                    </RevisionActions>
+                  </RevisionInputSection>
+                )}
+              </SystemCardActions>
+            )}
+
+            {responseSubmitted && (
+              <ResponseSubmittedSection>
+                {quoteResponseInfo && (
+                  // Show detailed response info from server
+                  <ResponseDetailBox responseType={quoteResponseInfo.responseType}>
+                    <ResponseDetailHeader>
+                      {quoteResponseInfo.responseType === "approve" && (
+                        <>
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#00692c"
+                            strokeWidth="2"
+                          >
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <polyline points="22 4 12 14.01 9 11.01" />
+                          </svg>
+                          <span className="text-[#00692c]">Approved</span>
+                        </>
+                      )}
+                      {quoteResponseInfo.responseType === "reject" && (
+                        <>
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="var(--color-tumakr-maroon)"
+                            strokeWidth="2"
+                          >
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="15" y1="9" x2="9" y2="15" />
+                            <line x1="9" y1="9" x2="15" y2="15" />
+                          </svg>
+                          <span className="text-tumakr-maroon">Declined</span>
+                        </>
+                      )}
+                      {quoteResponseInfo.responseType === "request_changes" && (
+                        <>
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="var(--color-tumakr-mustard)"
+                            strokeWidth="2"
+                          >
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                          </svg>
+                          <span className="text-tumakr-mustard">Revision Requested</span>
+                        </>
+                      )}
+                    </ResponseDetailHeader>
+                    {quoteResponseInfo.responseType === "request_changes" &&
+                      quoteResponseInfo.message && (
                         <ResponseDetailMessage>
                           <strong>Your request:</strong>
                           <p>{quoteResponseInfo.message}</p>
                         </ResponseDetailMessage>
                       )}
-                    </ResponseDetailBox>
-                  ) : (
-                    // Fallback: simple success message (localStorage only)
-                    <SuccessMessage>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                        <polyline points="22 4 12 14.01 9 11.01" />
-                      </svg>
-                      Your response has been submitted successfully!
-                    </SuccessMessage>
-                  )}
-                </ResponseSubmittedSection>
-              )}
-            </SystemCard>
-            <MessageTime>{dayjs(timestamp).format("HH:mm")}</MessageTime>
-          </MessageContent>
-        </MessageContainer>
-      );
+                  </ResponseDetailBox>
+                )}
+              </ResponseSubmittedSection>
+            )}
+          </SystemCard>
+          <MessageTime>{dayjs(timestamp).format("MMM D, HH:mm")}</MessageTime>
+        </MessageContent>
+      </MessageContainer>
+    );
   }
 
   // UI action handler
@@ -563,8 +726,17 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
     return (
       <MessageContainer isUser={false}>
         <AvatarWrapper>
-          <AssistantAvatar style={{ background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <AssistantAvatar
+            style={{ background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)" }}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
               <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -575,7 +747,14 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
           <ErrorCard>
             <ErrorHeader>
               <ErrorIcon>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                   <line x1="12" y1="9" x2="12" y2="13" />
                   <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -596,7 +775,14 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
                     </>
                   ) : (
                     <>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
                         <path d="M23 4v6h-6" />
                         <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
                       </svg>
@@ -610,23 +796,16 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
               </ErrorActions>
             )}
           </ErrorCard>
-          <MessageTime>{dayjs(timestamp).format("HH:mm")}</MessageTime>
+          <MessageTime>{dayjs(timestamp).format("MMM D, HH:mm")}</MessageTime>
         </MessageContent>
       </MessageContainer>
     );
   }
 
-  // Format timestamp - show date if not today
+  // Format timestamp - always show full date and time
   const formatTimestamp = (ts: Date) => {
-    const now = dayjs();
     const messageTime = dayjs(ts);
-    if (messageTime.isSame(now, 'day')) {
-      return messageTime.format("HH:mm");
-    } else if (messageTime.isSame(now.subtract(1, 'day'), 'day')) {
-      return `Yesterday ${messageTime.format("HH:mm")}`;
-    } else {
-      return messageTime.format("MMM D, HH:mm");
-    }
+    return messageTime.format("MMM D, HH:mm");
   };
 
   return (
@@ -634,7 +813,14 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
       {!isUser && (
         <AvatarWrapper>
           <AssistantAvatar>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <circle cx="12" cy="12" r="10" />
               <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
             </svg>
@@ -652,7 +838,15 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
           )}
         </MessageBubble>
         {!isUser && isLastMessage && metadata?.uiAction && (
-          <ChatUIActions uiAction={metadata.uiAction} onSelect={handleUIActionSelect} />
+          <ChatUIActions
+            uiAction={metadata.uiAction}
+            onSelect={handleUIActionSelect}
+            messageId={
+              sessionId
+                ? `${sessionId}-${metadata.uiAction.type}`
+                : message.messageId || message.id
+            }
+          />
         )}
         <MessageTime isUser={isUser}>{formatTimestamp(timestamp)}</MessageTime>
       </MessageContent>
@@ -726,16 +920,79 @@ const MessageBubble = styled.div<{ isUser: boolean }>`
 `;
 
 const MarkdownContent = styled.div`
-  p { margin: 0 0 12px 0; &:last-child { margin-bottom: 0; } }
-  h1, h2, h3, h4, h5, h6 { margin: 20px 0 10px 0; font-weight: 600; line-height: 1.4; color: #111827; &:first-of-type { margin-top: 0; } }
-  h1 { font-size: 24px; } h2 { font-size: 20px; } h3 { font-size: 18px; }
-  ul, ol { margin: 10px 0; padding-left: 24px; }
-  li { margin: 6px 0; }
-  code { background-color: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 13px; }
-  pre { background-color: #1f2937; color: #e5e7eb; padding: 16px; border-radius: 8px; overflow-x: auto; code { background-color: transparent; padding: 0; color: inherit; } }
-  blockquote { border-left: 3px solid var(--color-tumakr-maroon); padding-left: 16px; margin: 16px 0; color: #4b5563; }
-  a { color: var(--color-tumakr-maroon); text-decoration: none; font-weight: 500; &:hover { text-decoration: underline; } }
-  strong { font-weight: 600; }
+  p {
+    margin: 0 0 12px 0;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 20px 0 10px 0;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #111827;
+    &:first-of-type {
+      margin-top: 0;
+    }
+  }
+  h1 {
+    font-size: 24px;
+  }
+  h2 {
+    font-size: 20px;
+  }
+  h3 {
+    font-size: 18px;
+  }
+  ul,
+  ol {
+    margin: 10px 0;
+    padding-left: 24px;
+  }
+  li {
+    margin: 6px 0;
+  }
+  code {
+    background-color: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 13px;
+  }
+  pre {
+    background-color: #1f2937;
+    color: #e5e7eb;
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    code {
+      background-color: transparent;
+      padding: 0;
+      color: inherit;
+    }
+  }
+  blockquote {
+    border-left: 3px solid var(--color-tumakr-maroon);
+    padding-left: 16px;
+    margin: 16px 0;
+    color: #4b5563;
+  }
+  a {
+    color: var(--color-tumakr-maroon);
+    text-decoration: none;
+    font-weight: 500;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  strong {
+    font-weight: 600;
+  }
 `;
 
 const MessageTime = styled.span<{ isUser?: boolean }>`
@@ -858,7 +1115,7 @@ const ViewQuotationButton = styled.button`
   gap: 10px;
   width: 100%;
   padding: 14px 20px;
-  background: #1a1a1a;
+  background: var(--color-tumakr-maroon);
   color: white;
   border: none;
   border-radius: 12px;
@@ -868,7 +1125,7 @@ const ViewQuotationButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background: #2d2d2d;
+    background: var(--color-tumakr-maroon);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
@@ -963,7 +1220,7 @@ const PrimaryActionButton = styled.button`
   gap: 10px;
   width: 100%;
   padding: 14px 20px;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, var(--color-tumakr-dark-blue) 0%, #0f2b58 100%);
   color: white;
   border: none;
   border-radius: 12px;
@@ -1000,7 +1257,10 @@ const ResponseButtonGrid = styled.div`
   }
 `;
 
-const ResponseButton = styled.button<{ variant: 'approve' | 'changes' | 'decline'; $isSelected?: boolean }>`
+const ResponseButton = styled.button<{
+  variant: "approve" | "changes" | "decline";
+  $isSelected?: boolean;
+}>`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1014,15 +1274,27 @@ const ResponseButton = styled.button<{ variant: 'approve' | 'changes' | 'decline
 
   ${({ variant, $isSelected }) => {
     const configs = {
-      approve: { color: '#10b981', bg: '#ecfdf5', border: '#10b981' },
-      changes: { color: '#f59e0b', bg: '#fffbeb', border: '#f59e0b' },
-      decline: { color: '#6b7280', bg: '#f9fafb', border: '#9ca3af' },
+      approve: {
+        color: "#00692c",
+        bg: "#ecfdf5",
+        border: "var(--color-tumakr-green)",
+      },
+      changes: {
+        color: "var(--color-tumakr-mustard)",
+        bg: "#fffbeb",
+        border: "var(--color-tumakr-mustard)",
+      },
+      decline: {
+        color: "var(--color-tumakr-maroon)",
+        bg: "#f5e3e3",
+        border: "var(--color-tumakr-maroon)",
+      },
     };
     const c = configs[variant];
     return `
       color: ${c.color};
-      border-color: ${$isSelected ? c.border : '#e5e7eb'};
-      background: ${$isSelected ? c.bg : 'white'};
+      border-color: ${$isSelected ? c.border : "#e5e7eb"};
+      background: ${$isSelected ? c.bg : "white"};
 
       &:hover:not(:disabled) {
         border-color: ${c.border};
@@ -1147,33 +1419,24 @@ const CancelButton = styled.button`
 
 const SuccessMessage = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: left;
+  justify-content: left;
   gap: 10px;
   padding: 16px 20px;
-  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-  color: #059669;
+  background: white;
   font-weight: 500;
   font-size: 14px;
-  border-top: 1px solid #a7f3d0;
 `;
 
 const ResponseSubmittedSection = styled.div`
   border-top: 1px solid #f3f4f6;
 `;
 
-const ResponseDetailBox = styled.div<{ responseType: 'approve' | 'reject' | 'request_changes' }>`
+const ResponseDetailBox = styled.div<{
+  responseType: "approve" | "reject" | "request_changes";
+}>`
   padding: 16px 20px;
-  background: ${({ responseType }) => {
-    switch (responseType) {
-      case 'approve':
-        return 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)';
-      case 'reject':
-        return 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)';
-      case 'request_changes':
-        return 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)';
-    }
-  }};
+  background: white;
 `;
 
 const ResponseDetailHeader = styled.div`
@@ -1278,7 +1541,7 @@ const RetryButton = styled.button`
   gap: 8px;
   width: 100%;
   padding: 12px 20px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, var(--color-tumakr-dark-blue) 0%, #0f2b58 100%);
   color: white;
   border: none;
   border-radius: 10px;
@@ -1303,4 +1566,3 @@ const RetryHint = styled.span`
   color: #9ca3af;
   text-align: center;
 `;
-

@@ -136,6 +136,21 @@ const Container: FC = () => {
   // UI 액션 선택 핸들러 (버튼, 칩, 날짜 선택 등)
   const handleUIActionSelect = useCallback(
     async (value: string | string[] | ChatContext) => {
+      // localStorage에서 pending UI action 제거 (사용자가 응답했으므로)
+      if (currentSessionId) {
+        try {
+          const uiActionsKey = 'pending_ui_actions';
+          const stored = localStorage.getItem(uiActionsKey);
+          if (stored) {
+            const uiActions = JSON.parse(stored);
+            delete uiActions[currentSessionId];
+            localStorage.setItem(uiActionsKey, JSON.stringify(uiActions));
+          }
+        } catch (error) {
+          console.error('Failed to clear pending UI action:', error);
+        }
+      }
+
       // 값을 문자열로 변환하여 메시지로 전송
       let messageContent: string;
 
@@ -157,7 +172,7 @@ const Container: FC = () => {
 
       await handleSendMessage(messageContent);
     },
-    [handleSendMessage]
+    [handleSendMessage, currentSessionId]
   );
 
   // 전문가 요청 모달 제출 핸들러

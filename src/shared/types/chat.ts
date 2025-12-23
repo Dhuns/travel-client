@@ -142,10 +142,17 @@ export interface ChatMessage {
 // 채팅 세션
 export interface ChatSession {
   sessionId: string;
-  status: 'active' | 'converted' | 'abandoned' | 'estimate_ready' | 'inprogress' | 'pending_review' | 'quote_sent' | 'completed' | 'closed';
+  status: 'active' | 'converted' | 'abandoned' | 'estimate_ready' | 'inprogress' | 'pending_review' | 'quote_sent' | 'completed' | 'declined' | 'closed';
   messages: ChatMessage[];
   context: ChatContext;
   batchId?: number; // 생성된 견적서 배치 ID
+  batch?: {
+    id: number;
+    status: string;
+    estimatePhase?: string;
+    respondedAt?: string;
+    // ... other batch fields as needed
+  };
   hasShownEstimatePrompt?: boolean; // 견적서 생성 안내를 보여줬는지 여부
   title?: string; // 대화 제목 (첫 메시지에서 생성)
   createdAt: Date;
