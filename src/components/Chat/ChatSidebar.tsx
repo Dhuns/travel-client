@@ -214,33 +214,15 @@ const ChatSidebar: FC<Props> = ({ onNewChat, isOpen = false, onClose }) => {
     return d.format("MMM D, HH:mm");
   };
 
-  const getSessionIcon = (session: (typeof sessions)[0], isActive: boolean) => {
-    const status = session.status as SessionStatus;
-    const config = getStatusConfig(status);
-
-    // 상태 아이콘이 있으면 표시, 없으면 기본 채팅 아이콘
-    const iconToShow = config.icon || (
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-      </svg>
-    );
-
-    return (
-      <ChatItemIcon
-        $statusColor={config.color}
-        $bg={config.bg}
-        $isActive={isActive}
-      >
-        {iconToShow}
-      </ChatItemIcon>
-    );
+  const shouldShowBadge = (status: SessionStatus) => {
+    return [
+      "pending_review",
+      "quote_sent",
+      "estimate_ready",
+      "completed",
+      "declined",
+      "inprogress",
+    ].includes(status);
   };
 
   return (
@@ -306,6 +288,8 @@ const ChatSidebar: FC<Props> = ({ onNewChat, isOpen = false, onClose }) => {
           ) : (
             sortedSessions.map((session) => {
               const isActive = currentSession?.sessionId === session.sessionId;
+              const status = (session.status || "active") as SessionStatus;
+              const statusConfig = getStatusConfig(status);
 
               return (
                 <ChatItem
@@ -313,10 +297,15 @@ const ChatSidebar: FC<Props> = ({ onNewChat, isOpen = false, onClose }) => {
                   active={isActive}
                   onClick={() => handleLoadSession(session.sessionId)}
                 >
-                  {getSessionIcon(session, isActive)}
                   <ChatItemContent>
                     <ChatItemTitleRow>
                       <ChatItemTitle>{session.title || "New Chat"}</ChatItemTitle>
+                      {shouldShowBadge(status) && (
+                        <StatusBadge $color={statusConfig.color} $bg={statusConfig.bg}>
+                          {statusConfig.icon}
+                          {statusConfig.label}
+                        </StatusBadge>
+                      )}
                     </ChatItemTitleRow>
                     <ChatItemMetaRow>
                       <ChatItemTime>
@@ -583,26 +572,6 @@ const ChatItem = styled.div<{ active?: boolean }>`
   }
 `;
 
-const ChatItemIcon = styled.div<{ $statusColor: string; $bg: string; $isActive: boolean }>`
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: ${({ $isActive, $bg }) =>
-    $isActive ? "var(--color-tumakr-maroon)" : $bg};
-  color: ${({ $isActive, $statusColor }) =>
-    $isActive ? "white" : $statusColor};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: all 0.15s ease;
-
-  svg {
-    width: 16px;
-    height: 16px;
-  }
-`;
-
 const ChatItemContent = styled.div`
   flex: 1;
   min-width: 0;
@@ -639,6 +608,24 @@ const ChatItemTime = styled.span`
   font-size: 12px;
   color: #9ca3af;
   white-space: nowrap;
+`;
+
+const StatusBadge = styled.span<{ $color: string; $bg: string }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 6px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  background: ${({ $bg }) => $bg};
+  color: ${({ $color }) => $color};
+
+  svg {
+    flex-shrink: 0;
+  }
 `;
 
 const DeleteButton = styled.button`
