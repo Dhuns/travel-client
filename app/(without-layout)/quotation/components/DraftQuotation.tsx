@@ -1,7 +1,7 @@
 "use client";
 
 import { EstimateDetail, QuotationResponse } from "@/src/shared/apis/estimate";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import DayMap from "@/src/components/Chat/DayMap";
 import { getItemImg } from "@/src/shared/utils/base";
@@ -282,7 +282,8 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
             <MetaItem>
               <MetaIcon>&#x1F4C5;</MetaIcon>
               <MetaText>
-                {dayjs(batchInfo.startDate).format("MMM D")} - {dayjs(batchInfo.endDate).format("MMM D, YYYY")} ({tripDays} days)
+                {dayjs(batchInfo.startDate).format("MMM D")} -{" "}
+                {dayjs(batchInfo.endDate).format("MMM D, YYYY")} ({tripDays} days)
               </MetaText>
             </MetaItem>
             <MetaItem>
@@ -318,7 +319,8 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
                 <Label>Travelers</Label>
                 <Value>
                   {batchInfo.adultsCount > 0 && `Adults: ${batchInfo.adultsCount}`}
-                  {batchInfo.childrenCount > 0 && `, Children: ${batchInfo.childrenCount}`}
+                  {batchInfo.childrenCount > 0 &&
+                    `, Children: ${batchInfo.childrenCount}`}
                   {batchInfo.infantsCount > 0 && `, Infants: ${batchInfo.infantsCount}`}{" "}
                   (Total: {totalTravelers})
                 </Value>
@@ -399,8 +401,12 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
                 <FriendlyDayHeader>
                   <FriendlyDayNumber>Day {dayData.day}</FriendlyDayNumber>
                   <FriendlyDayInfo>
-                    <FriendlyDayDate>{dayDate.format("MMMM D, YYYY (ddd)")}</FriendlyDayDate>
-                    {dayData.theme && <FriendlyDayTheme>{dayData.theme}</FriendlyDayTheme>}
+                    <FriendlyDayDate>
+                      {dayDate.format("MMMM D, YYYY (ddd)")}
+                    </FriendlyDayDate>
+                    {dayData.theme && (
+                      <FriendlyDayTheme>{dayData.theme}</FriendlyDayTheme>
+                    )}
                   </FriendlyDayInfo>
                 </FriendlyDayHeader>
 
@@ -554,7 +560,9 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
                       {/* Legacy Timeline Section */}
                       {(legacyTimeline as Record<string, string>)[day] && (
                         <TimelineSection>
-                          <TimelineContent>{(legacyTimeline as Record<string, string>)[day]}</TimelineContent>
+                          <TimelineContent>
+                            {(legacyTimeline as Record<string, string>)[day]}
+                          </TimelineContent>
                         </TimelineSection>
                       )}
 
@@ -580,7 +588,6 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
             })}
         </Section>
       )}
-
 
       {estimateInfo.comment && (
         <Section>
@@ -918,7 +925,7 @@ const ItemDescription = styled.div`
   }
 
   a {
-    color: #3b82f6;
+    color: var(--color-tumakr-dark-blue);
     text-decoration: none;
 
     &:hover {
@@ -950,7 +957,7 @@ const TimelineSection = styled.div`
   padding: 16px;
   background: white;
   border-radius: 6px;
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid var(--color-tumakr-dark-blue);
 `;
 
 const TimelineContent = styled.p`
@@ -1380,7 +1387,12 @@ const PlaceDescription = styled.p`
 // ===== Hero Header Styled Components =====
 
 const HeroHeader = styled.header`
-  background: linear-gradient(135deg, var(--color-tumakr-maroon) 0%, #8b3a4a 50%, #5a2430 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-tumakr-maroon) 0%,
+    #8b3a4a 50%,
+    #5a2430 100%
+  );
   padding: 48px 40px;
   border-radius: 16px;
   margin-bottom: 32px;

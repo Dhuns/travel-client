@@ -17,7 +17,7 @@ interface Props {
   sessionId?: string; // For draft auto-save
 }
 
-const DRAFT_STORAGE_KEY = 'chat_draft';
+const DRAFT_STORAGE_KEY = "chat_draft";
 const DRAFT_DEBOUNCE_MS = 500;
 
 const ChatInput: FC<Props> = ({
@@ -35,7 +35,7 @@ const ChatInput: FC<Props> = ({
 
   // Load draft from localStorage on mount or session change
   useEffect(() => {
-    if (!sessionId || typeof window === 'undefined') return;
+    if (!sessionId || typeof window === "undefined") return;
 
     try {
       const drafts = localStorage.getItem(DRAFT_STORAGE_KEY);
@@ -52,7 +52,7 @@ const ChatInput: FC<Props> = ({
 
   // Save draft to localStorage with debounce
   const saveDraft = (value: string) => {
-    if (!sessionId || typeof window === 'undefined') return;
+    if (!sessionId || typeof window === "undefined") return;
 
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
@@ -78,7 +78,7 @@ const ChatInput: FC<Props> = ({
 
   // Clear draft for current session
   const clearDraft = () => {
-    if (!sessionId || typeof window === 'undefined') return;
+    if (!sessionId || typeof window === "undefined") return;
 
     try {
       const drafts = localStorage.getItem(DRAFT_STORAGE_KEY);
@@ -267,41 +267,54 @@ const Container = styled.div`
   width: 100%;
 `;
 
-const InputWrapper = styled.div<{ hasError?: boolean; disabled?: boolean; isFocused?: boolean }>`
+const InputWrapper = styled.div<{
+  hasError?: boolean;
+  disabled?: boolean;
+  isFocused?: boolean;
+}>`
   display: flex;
   align-items: flex-end;
   gap: 12px;
   padding: 12px 12px 12px 16px;
   background-color: ${({ disabled }) => (disabled ? "#fafafa" : "#ffffff")};
-  border: 1.5px solid ${({ hasError, isFocused }) =>
-    hasError ? "#ef4444" : isFocused ? "var(--color-tumakr-maroon, #651d2a)" : "#e5e5e5"};
+  border: 1.5px solid
+    ${({ hasError, isFocused }) =>
+      hasError
+        ? "#ef4444"
+        : isFocused
+        ? "var(--color-tumakr-maroon, #651d2a)"
+        : "#e5e5e5"};
   border-radius: 28px;
   transition: all 0.2s ease;
-  box-shadow: ${({ isFocused }) => isFocused
-    ? "0 0 0 3px rgba(101, 29, 42, 0.1), 0 4px 12px rgba(0, 0, 0, 0.06)"
-    : "0 2px 8px rgba(0, 0, 0, 0.04)"};
+  box-shadow: ${({ isFocused }) =>
+    isFocused
+      ? "0 0 0 3px rgba(101, 29, 42, 0.1), 0 4px 12px rgba(0, 0, 0, 0.06)"
+      : "0 2px 8px rgba(0, 0, 0, 0.04)"};
   position: relative;
 
-  ${({ disabled }) => disabled && css`
-    &::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 28px;
-      background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(101, 29, 42, 0.05) 50%,
-        transparent 100%
-      );
-      background-size: 200% 100%;
-      animation: ${shimmer} 2s infinite;
-    }
-  `}
+  ${({ disabled }) =>
+    disabled &&
+    css`
+      &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 28px;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(101, 29, 42, 0.05) 50%,
+          transparent 100%
+        );
+        background-size: 200% 100%;
+        animation: ${shimmer} 2s infinite;
+      }
+    `}
 `;
 
 const AIThinkingIndicator = styled.div`
   display: flex;
+  height: 36px;
   align-items: center;
   justify-content: center;
   color: var(--color-tumakr-maroon, #651d2a);
@@ -360,9 +373,11 @@ const CharCount = styled.span<{ isOverLimit: boolean }>`
   color: ${({ isOverLimit }) => (isOverLimit ? "#ef4444" : "#9ca3af")};
   font-weight: ${({ isOverLimit }) => (isOverLimit ? "600" : "500")};
   white-space: nowrap;
-  ${({ isOverLimit }) => isOverLimit && css`
-    animation: ${pulse} 1s infinite;
-  `}
+  ${({ isOverLimit }) =>
+    isOverLimit &&
+    css`
+      animation: ${pulse} 1s infinite;
+    `}
 `;
 
 const SendButton = styled.button<{ canSend?: boolean }>`
@@ -373,19 +388,20 @@ const SendButton = styled.button<{ canSend?: boolean }>`
   height: 36px;
   border: none;
   border-radius: 50%;
-  background-color: ${({ canSend }) => canSend ? "var(--color-tumakr-maroon, #651d2a)" : "#e5e5e5"};
+  background-color: ${({ canSend }) =>
+    canSend ? "var(--color-tumakr-maroon, #651d2a)" : "#e5e5e5"};
   color: ${({ canSend }) => (canSend ? "#ffffff" : "#9ca3af")};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
   transition: all 0.2s ease;
   flex-shrink: 0;
 
   &:hover:not(:disabled) {
-    background-color: ${({ canSend }) => canSend ? "#4a1520" : "#e5e5e5"};
-    transform: ${({ canSend }) => canSend ? "scale(1.05)" : "none"};
+    background-color: ${({ canSend }) => (canSend ? "#4a1520" : "#e5e5e5")};
+    transform: ${({ canSend }) => (canSend ? "scale(1.05)" : "none")};
   }
 
   &:active:not(:disabled) {
-    transform: ${({ canSend }) => canSend ? "scale(0.95)" : "none"};
+    transform: ${({ canSend }) => (canSend ? "scale(0.95)" : "none")};
   }
 `;
 

@@ -1,5 +1,4 @@
 import styled from "@emotion/styled";
-import { keyframes } from "@emotion/react";
 import { MESSAGES } from "@shared/constants/chat";
 import useChatStore from "@shared/store/chatStore";
 import dayjs from "dayjs";
@@ -17,47 +16,155 @@ interface Props {
   onClose?: () => void;
 }
 
-type SessionStatus = 'active' | 'converted' | 'abandoned' | 'estimate_ready' | 'inprogress' | 'pending_review' | 'quote_sent' | 'completed' | 'closed';
+type SessionStatus =
+  | "active"
+  | "converted"
+  | "abandoned"
+  | "estimate_ready"
+  | "inprogress"
+  | "pending_review"
+  | "quote_sent"
+  | "completed"
+  | "declined"
+  | "closed";
 
 const getStatusConfig = (status: SessionStatus) => {
-  const configs: Record<SessionStatus, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
-    active: { label: 'Active', color: '#3b82f6', bg: '#eff6ff', icon: null },
-    inprogress: { label: 'In Progress', color: '#8b5cf6', bg: '#f5f3ff', icon: (
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-      </svg>
-    )},
-    estimate_ready: { label: 'Quote Ready', color: '#10b981', bg: '#ecfdf5', icon: (
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <polyline points="14 2 14 8 20 8" />
-      </svg>
-    )},
-    pending_review: { label: 'Awaiting Review', color: '#f59e0b', bg: '#fffbeb', icon: (
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M12 6v6l4 2"/>
-      </svg>
-    )},
-    quote_sent: { label: 'Quote Sent', color: '#3b82f6', bg: '#eff6ff', icon: (
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-        <path d="M22 2L11 13" />
-        <path d="M22 2L15 22L11 13L2 9L22 2Z" />
-      </svg>
-    )},
-    completed: { label: 'Completed', color: '#10b981', bg: '#ecfdf5', icon: (
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-        <polyline points="20 6 9 17 4 12" />
-      </svg>
-    )},
-    converted: { label: 'Booked', color: '#10b981', bg: '#ecfdf5', icon: (
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-        <polyline points="22 4 12 14.01 9 11.01" />
-      </svg>
-    )},
-    abandoned: { label: 'Inactive', color: '#9ca3af', bg: '#f9fafb', icon: null },
-    closed: { label: 'Closed', color: '#6b7280', bg: '#f3f4f6', icon: null },
+  const configs: Record<
+    SessionStatus,
+    { label: string; color: string; bg: string; icon: React.ReactNode }
+  > = {
+    active: {
+      label: "Active",
+      color: "var(--color-tumakr-sage-green)",
+      bg: "#eff6ff",
+      icon: null,
+    },
+    inprogress: {
+      label: "In Progress",
+      color: "#8b5cf6",
+      bg: "#f5f3ff",
+      icon: (
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        >
+          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+        </svg>
+      ),
+    },
+    estimate_ready: {
+      label: "Quote Ready",
+      color: "var(--color-tumakr-green)",
+      bg: "#ecfdf5",
+      icon: (
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        >
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+        </svg>
+      ),
+    },
+    pending_review: {
+      label: "Awaiting Review",
+      color: "var(--color-tumakr-mustard)",
+      bg: "#fffbeb",
+      icon: (
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 6v6l4 2" />
+        </svg>
+      ),
+    },
+    quote_sent: {
+      label: "Quote Sent",
+      color: "var(--color-tumakr-dark-blue)",
+      bg: "#eff6ff",
+      icon: (
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        >
+          <path d="M22 2L11 13" />
+          <path d="M22 2L15 22L11 13L2 9L22 2Z" />
+        </svg>
+      ),
+    },
+    completed: {
+      label: "Completed",
+      color: "var(--color-tumakr-green)",
+      bg: "#ecfdf5",
+      icon: (
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        >
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      ),
+    },
+    declined: {
+      label: "Declined",
+      color: "var(--color-tumakr-maroon)",
+      bg: "#fee2e2",
+      icon: (
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      ),
+    },
+    converted: {
+      label: "Booked",
+      color: "var(--color-tumakr-green)",
+      bg: "#ecfdf5",
+      icon: (
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        >
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+      ),
+    },
+    abandoned: { label: "Inactive", color: "#9ca3af", bg: "#f9fafb", icon: null },
+    closed: { label: "Closed", color: "#6b7280", bg: "#f3f4f6", icon: null },
   };
   return configs[status] || configs.active;
 };
@@ -102,46 +209,38 @@ const ChatSidebar: FC<Props> = ({ onNewChat, isOpen = false, onClose }) => {
   }, [sessions]);
 
   const formatTime = (date: Date | string | undefined) => {
-    if (!date) return '';
+    if (!date) return "";
     const d = dayjs(date);
-    const now = dayjs();
-
-    if (now.diff(d, 'hour') < 24) {
-      return d.format('HH:mm');
-    } else if (now.diff(d, 'day') < 7) {
-      return d.fromNow();
-    } else {
-      return d.format('MMM D');
-    }
+    return d.format("MMM D, HH:mm");
   };
 
-  const getSessionIcon = (session: typeof sessions[0], isActive: boolean) => {
+  const getSessionIcon = (session: (typeof sessions)[0], isActive: boolean) => {
     const status = session.status as SessionStatus;
+    const config = getStatusConfig(status);
 
-    if (status === 'pending_review' || status === 'quote_sent') {
-      const config = getStatusConfig(status);
-      return (
-        <ChatItemIcon active={isActive} $statusColor={config.color}>
-          {config.icon || (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
-          )}
-        </ChatItemIcon>
-      );
-    }
+    // 상태 아이콘이 있으면 표시, 없으면 기본 채팅 아이콘
+    const iconToShow = config.icon || (
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
+    );
 
     return (
-      <ChatItemIcon active={isActive}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
+      <ChatItemIcon
+        $statusColor={config.color}
+        $bg={config.bg}
+        $isActive={isActive}
+      >
+        {iconToShow}
       </ChatItemIcon>
     );
-  };
-
-  const shouldShowBadge = (status: SessionStatus) => {
-    return ['pending_review', 'quote_sent', 'estimate_ready', 'completed'].includes(status);
   };
 
   return (
@@ -163,7 +262,14 @@ const ChatSidebar: FC<Props> = ({ onNewChat, isOpen = false, onClose }) => {
       <NewChatSection>
         <NewChatButton onClick={handleNewChatClick}>
           <NewChatIconWrapper>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M12 5v14M5 12h14" />
             </svg>
           </NewChatIconWrapper>
@@ -181,18 +287,25 @@ const ChatSidebar: FC<Props> = ({ onNewChat, isOpen = false, onClose }) => {
           {sessions.length === 0 ? (
             <EmptyState>
               <EmptyIcon>
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                >
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
               </EmptyIcon>
               <EmptyTitle>No conversations yet</EmptyTitle>
-              <EmptyText>Start planning your Korea trip by clicking the button above</EmptyText>
+              <EmptyText>
+                Start planning your Korea trip by clicking the button above
+              </EmptyText>
             </EmptyState>
           ) : (
             sortedSessions.map((session) => {
               const isActive = currentSession?.sessionId === session.sessionId;
-              const status = (session.status || 'active') as SessionStatus;
-              const statusConfig = getStatusConfig(status);
 
               return (
                 <ChatItem
@@ -206,20 +319,23 @@ const ChatSidebar: FC<Props> = ({ onNewChat, isOpen = false, onClose }) => {
                       <ChatItemTitle>{session.title || "New Chat"}</ChatItemTitle>
                     </ChatItemTitleRow>
                     <ChatItemMetaRow>
-                      <ChatItemTime>{formatTime(session.lastMessageAt || session.createdAt)}</ChatItemTime>
-                      {shouldShowBadge(status) && (
-                        <StatusBadge $color={statusConfig.color} $bg={statusConfig.bg}>
-                          {statusConfig.icon}
-                          {statusConfig.label}
-                        </StatusBadge>
-                      )}
+                      <ChatItemTime>
+                        {formatTime(session.lastMessageAt || session.createdAt)}
+                      </ChatItemTime>
                     </ChatItemMetaRow>
                   </ChatItemContent>
                   <DeleteButton
                     onClick={(e) => handleDeleteSession(e, session.sessionId)}
                     title="Delete conversation"
                   >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
                       <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" />
                     </svg>
                   </DeleteButton>
@@ -246,12 +362,6 @@ const ChatSidebar: FC<Props> = ({ onNewChat, isOpen = false, onClose }) => {
 };
 
 export default React.memo(ChatSidebar);
-
-// Animations
-const pulse = keyframes`
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-`;
 
 // Styled Components
 const Container = styled.div<{ isOpen?: boolean }>`
@@ -453,8 +563,10 @@ const EmptyText = styled.div`
 const ChatItem = styled.div<{ active?: boolean }>`
   padding: 12px 14px;
   border-radius: 12px;
-  background-color: ${({ active }) => active ? "rgba(101, 29, 42, 0.06)" : "transparent"};
-  border: 1px solid ${({ active }) => active ? "rgba(101, 29, 42, 0.12)" : "transparent"};
+  background-color: ${({ active }) =>
+    active ? "rgba(101, 29, 42, 0.06)" : "transparent"};
+  border: 1px solid
+    ${({ active }) => (active ? "rgba(101, 29, 42, 0.12)" : "transparent")};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -462,7 +574,8 @@ const ChatItem = styled.div<{ active?: boolean }>`
   transition: all 0.15s ease;
 
   &:hover {
-    background-color: ${({ active }) => active ? "rgba(101, 29, 42, 0.08)" : "rgba(0, 0, 0, 0.03)"};
+    background-color: ${({ active }) =>
+      active ? "rgba(101, 29, 42, 0.08)" : "rgba(0, 0, 0, 0.03)"};
   }
 
   &:hover button {
@@ -470,23 +583,24 @@ const ChatItem = styled.div<{ active?: boolean }>`
   }
 `;
 
-const ChatItemIcon = styled.div<{ active?: boolean; $statusColor?: string }>`
-  width: 36px;
-  height: 36px;
+const ChatItemIcon = styled.div<{ $statusColor: string; $bg: string; $isActive: boolean }>`
+  width: 40px;
+  height: 40px;
   border-radius: 10px;
-  background: ${({ active, $statusColor }) =>
-    active
-      ? "linear-gradient(135deg, var(--color-tumakr-maroon) 0%, #8b1a2d 100%)"
-      : $statusColor
-      ? `${$statusColor}15`
-      : "#f3f4f6"};
-  color: ${({ active, $statusColor }) =>
-    active ? "white" : $statusColor || "#9ca3af"};
+  background: ${({ $isActive, $bg }) =>
+    $isActive ? "var(--color-tumakr-maroon)" : $bg};
+  color: ${({ $isActive, $statusColor }) =>
+    $isActive ? "white" : $statusColor};
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   transition: all 0.15s ease;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
 `;
 
 const ChatItemContent = styled.div`
@@ -524,24 +638,7 @@ const ChatItemMetaRow = styled.div`
 const ChatItemTime = styled.span`
   font-size: 12px;
   color: #9ca3af;
-`;
-
-const StatusBadge = styled.span<{ $color: string; $bg: string }>`
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  font-size: 10px;
-  font-weight: 600;
-  border-radius: 6px;
-  flex-shrink: 0;
   white-space: nowrap;
-  background: ${({ $bg }) => $bg};
-  color: ${({ $color }) => $color};
-
-  svg {
-    flex-shrink: 0;
-  }
 `;
 
 const DeleteButton = styled.button`

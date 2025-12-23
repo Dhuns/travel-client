@@ -1,7 +1,7 @@
 import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
-import React from "react";
 import { GenerationProgress } from "@shared/store/chatStore";
+import React from "react";
 
 interface Props {
   progress?: GenerationProgress | null;
@@ -77,7 +77,7 @@ const Avatar = styled.div<{ isGenerating?: boolean }>`
   border-radius: 50%;
   background: ${({ isGenerating }) =>
     isGenerating
-      ? "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
+      ? "linear-gradient(135deg, var(--color-tumakr-dark-blue) 0%, #2161c8 100%)"
       : "linear-gradient(135deg, var(--color-tumakr-maroon, #651d2a) 0%, #8b2438 100%)"};
   display: flex;
   align-items: center;
@@ -113,7 +113,11 @@ const DotsWrapper = styled.div`
 const Dot = styled.div`
   width: 10px;
   height: 10px;
-  background: linear-gradient(135deg, var(--color-tumakr-maroon, #651d2a) 0%, #8b2438 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-tumakr-maroon, #651d2a) 0%,
+    #8b2438 100%
+  );
   border-radius: 50%;
   animation: ${bounce} 1.4s infinite ease-in-out both;
 
@@ -156,7 +160,7 @@ const ProgressIcon = styled.div`
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, var(--color-tumakr-dark-blue) 0%, #2161c8 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -185,9 +189,9 @@ const ProgressBar = styled.div<{ progress: number }>`
   width: ${({ progress }) => progress}%;
   background: linear-gradient(
     90deg,
-    #3b82f6 0%,
-    #60a5fa 50%,
-    #3b82f6 100%
+    var(--color-tumakr-dark-blue) 0%,
+    #2161c8 50%,
+    var(--color-tumakr-dark-blue) 100%
   );
   background-size: 200% 100%;
   animation: ${progressPulse} 2s linear infinite;
@@ -214,7 +218,7 @@ const ProgressStep = styled.span<{ active?: boolean; completed?: boolean }>`
 const TypingIndicator: React.FC<Props> = ({ progress }) => {
   // If we have progress info, show detailed progress UI
   if (progress) {
-    const steps = ['analyzing', 'creating', 'optimizing', 'finalizing'];
+    const steps = ["analyzing", "creating", "optimizing", "finalizing"];
     const currentIndex = steps.indexOf(progress.step);
 
     return (
@@ -235,7 +239,14 @@ const TypingIndicator: React.FC<Props> = ({ progress }) => {
           <ProgressCard>
             <ProgressHeader>
               <ProgressIcon>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                   <polyline points="14 2 14 8 20 8" />
                   <line x1="16" y1="13" x2="8" y2="13" />
@@ -248,7 +259,10 @@ const TypingIndicator: React.FC<Props> = ({ progress }) => {
               <ProgressBar progress={progress.progress} />
             </ProgressBarWrapper>
             <ProgressSteps>
-              <ProgressStep completed={currentIndex > 0} active={progress.step === 'analyzing'}>
+              <ProgressStep
+                completed={currentIndex > 0}
+                active={progress.step === "analyzing"}
+              >
                 {currentIndex > 0 ? (
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
@@ -256,7 +270,10 @@ const TypingIndicator: React.FC<Props> = ({ progress }) => {
                 ) : null}
                 Analyze
               </ProgressStep>
-              <ProgressStep completed={currentIndex > 1} active={progress.step === 'creating'}>
+              <ProgressStep
+                completed={currentIndex > 1}
+                active={progress.step === "creating"}
+              >
                 {currentIndex > 1 ? (
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
@@ -264,7 +281,10 @@ const TypingIndicator: React.FC<Props> = ({ progress }) => {
                 ) : null}
                 Create
               </ProgressStep>
-              <ProgressStep completed={currentIndex > 2} active={progress.step === 'optimizing'}>
+              <ProgressStep
+                completed={currentIndex > 2}
+                active={progress.step === "optimizing"}
+              >
                 {currentIndex > 2 ? (
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
@@ -272,7 +292,10 @@ const TypingIndicator: React.FC<Props> = ({ progress }) => {
                 ) : null}
                 Optimize
               </ProgressStep>
-              <ProgressStep completed={currentIndex > 3} active={progress.step === 'finalizing'}>
+              <ProgressStep
+                completed={currentIndex > 3}
+                active={progress.step === "finalizing"}
+              >
                 Finalize
               </ProgressStep>
             </ProgressSteps>
