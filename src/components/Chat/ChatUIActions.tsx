@@ -7,14 +7,76 @@ interface ChatUIActionsProps {
   uiAction: UIAction;
   onSelect: (value: string | string[] | ChatContext) => void;
   disabled?: boolean;
+  messageId?: string; // To track which UI action this belongs to
 }
+
+const UI_ACTION_STORAGE_KEY = 'ui_action_responses';
+
+interface UIActionResponse {
+  responded: boolean;
+  value?: string;
+  type?: string;
+}
+
+// Helper to get UI action response
+const getUIActionResponse = (messageId: string | undefined): UIActionResponse | null => {
+  if (!messageId || typeof window === 'undefined') return null;
+
+  try {
+    const stored = localStorage.getItem(UI_ACTION_STORAGE_KEY);
+    if (stored) {
+      const responses = JSON.parse(stored);
+      return responses[messageId] || null;
+    }
+  } catch {
+    // Ignore errors
+  }
+  return null;
+};
+
+// Helper to mark UI action as responded with value
+const setUIActionResponse = (messageId: string | undefined, value: string, type: string): void => {
+  if (!messageId || typeof window === 'undefined') return;
+
+  try {
+    const stored = localStorage.getItem(UI_ACTION_STORAGE_KEY);
+    const responses = stored ? JSON.parse(stored) : {};
+    responses[messageId] = {
+      responded: true,
+      value,
+      type,
+    };
+    localStorage.setItem(UI_ACTION_STORAGE_KEY, JSON.stringify(responses));
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[ChatUIActions] Saved to localStorage:', { messageId, value, type });
+    }
+  } catch (error) {
+    console.error('[ChatUIActions] Failed to save to localStorage:', error);
+  }
+};
 
 /**
  * 구조화된 대화 UI 액션 컴포넌트
  * Hello Vacanze 스타일의 버튼, 칩, 날짜 선택 등을 렌더링
  */
-const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled }) => {
+const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, messageId }) => {
   const { type, options, min, max, multiSelect, contextData, placeholder } = uiAction;
+
+  // Check if this UI action has already been responded to
+  const storedResponse = getUIActionResponse(messageId);
+  const [selectedValue, setSelectedValue] = useState(storedResponse?.value || '');
+  const [hasResponded, setHasResponded] = useState(!!storedResponse?.responded);
+
+  // Debug logging
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[ChatUIActions]', {
+      messageId,
+      type,
+      storedResponse,
+      hasResponded
+    });
+  }
 
   const [selectedChips, setSelectedChips] = useState<string[]>([]);
   const [travelers, setTravelers] = useState({ adults: 2, children: 0, infants: 0 });
@@ -22,12 +84,24 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled })
 
   // 버튼 선택 (목적지 등)
   if (type === 'buttons' && options) {
+    if (hasResponded) {
+      return null;
+    }
+
+    const handleButtonClick = (value: string, label: string) => {
+      if (disabled) return;
+      setUIActionResponse(messageId, label, type);
+      setSelectedValue(label);
+      setHasResponded(true);
+      onSelect(value);
+    };
+
     return (
       <ButtonGrid>
         {options.map((option) => (
           <ActionButton
             key={option.id}
-            onClick={() => !disabled && onSelect(option.value)}
+            onClick={() => handleButtonClick(option.value, option.label)}
             disabled={disabled}
           >
             <ButtonContent>
@@ -44,6 +118,10 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled })
 
   // 칩 선택 (선호도 등 - 다중 선택 가능)
   if (type === 'chips' && options) {
+    if (hasResponded) {
+      return null;
+    }
+
     const handleChipClick = (value: string) => {
       if (disabled) return;
 
@@ -53,12 +131,26 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled })
           : [...selectedChips, value];
         setSelectedChips(newSelected);
       } else {
+        // Find the label for single select
+        const option = options.find(opt => opt.value === value);
+        const label = option?.label || value;
+        setUIActionResponse(messageId, label, type);
+        setSelectedValue(label);
+        setHasResponded(true);
         onSelect(value);
       }
     };
 
     const handleConfirm = () => {
       if (selectedChips.length > 0) {
+        // Get labels for selected chips
+        const labels = selectedChips.map(val => {
+          const option = options.find(opt => opt.value === val);
+          return option?.label || val;
+        }).join(', ');
+        setUIActionResponse(messageId, labels, type);
+        setSelectedValue(labels);
+        setHasResponded(true);
         onSelect(selectedChips);
       }
     };
@@ -89,9 +181,17 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled })
 
   // 날짜 선택
   if (type === 'date_picker') {
+    if (hasResponded) {
+      return null;
+    }
+
     const handleDateConfirm = () => {
       if (dateRange.startDate && dateRange.endDate) {
-        onSelect(`${dateRange.startDate} to ${dateRange.endDate}`);
+        const dateString = `${dateRange.startDate} to ${dateRange.endDate}`;
+        setUIActionResponse(messageId, dateString, type);
+        setSelectedValue(dateString);
+        setHasResponded(true);
+        onSelect(dateString);
       }
     };
 
@@ -143,6 +243,10 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled })
 
   // 인원 수 입력
   if (type === 'number_input') {
+    if (hasResponded) {
+      return null;
+    }
+
     const updateCount = (type: 'adults' | 'children' | 'infants', delta: number) => {
       if (disabled) return;
       setTravelers((prev) => ({
@@ -155,6 +259,9 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled })
       const totalText = `${travelers.adults} adult${travelers.adults > 1 ? 's' : ''}${
         travelers.children > 0 ? `, ${travelers.children} child${travelers.children > 1 ? 'ren' : ''}` : ''
       }${travelers.infants > 0 ? `, ${travelers.infants} infant${travelers.infants > 1 ? 's' : ''}` : ''}`;
+      setUIActionResponse(messageId, totalText, type);
+      setSelectedValue(totalText);
+      setHasResponded(true);
       onSelect(totalText);
     };
 
@@ -223,6 +330,19 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled })
   if (type === 'confirm_card' && contextData) {
     const { destination, startDate, endDate, adults, children, infants, preferences } = contextData;
 
+    if (hasResponded) {
+      return null;
+    }
+
+    const handleConfirmAction = (action: string) => {
+      if (disabled) return;
+      const actionLabel = action === 'confirm' ? 'Generate Itinerary' : 'Edit Details';
+      setUIActionResponse(messageId, actionLabel, type);
+      setSelectedValue(actionLabel);
+      setHasResponded(true);
+      onSelect(action);
+    };
+
     return (
       <ConfirmCard>
         <ConfirmCardTitle>Trip Summary</ConfirmCardTitle>
@@ -257,10 +377,10 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled })
           )}
         </ConfirmCardContent>
         <ConfirmCardActions>
-          <SecondaryButton onClick={() => onSelect('edit')} disabled={disabled}>
+          <SecondaryButton onClick={() => handleConfirmAction('edit')} disabled={disabled}>
             Edit Details
           </SecondaryButton>
-          <PrimaryButton onClick={() => onSelect('confirm')} disabled={disabled}>
+          <PrimaryButton onClick={() => handleConfirmAction('confirm')} disabled={disabled}>
             Generate Itinerary
           </PrimaryButton>
         </ConfirmCardActions>
