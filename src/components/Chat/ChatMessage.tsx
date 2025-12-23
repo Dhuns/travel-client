@@ -87,7 +87,7 @@ const getSystemCardConfig = (type: SystemMessageContent["type"] | undefined) => 
       };
     case "customer_rejected":
       return {
-        gradient: "linear-gradient(135deg, #6b7280 0%, #4b5563 100%)",
+        gradient: "linear-gradient(135deg, #1e1517 0%, var(--color-tumakr-maroon) 100%)",
         icon: (
           <svg
             width="24"
