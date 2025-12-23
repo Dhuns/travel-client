@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useState, useEffect } from "react";
 
 import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
@@ -9,14 +9,21 @@ import dayjs from "dayjs";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import ChatUIActions from "./ChatUIActions";
+import useChatStore from "@shared/store/chatStore";
 
 interface SystemMessageContent {
-  type: 'quote_sent' | 'customer_approved' | 'customer_rejected' | 'revision_requested';
+  type: 'quote_sent' | 'customer_approved' | 'customer_rejected' | 'revision_requested' | 'sent_to_expert';
   title: string;
   message: string;
   shareUrl?: string;
   batchId?: number;
   customerMessage?: string;
+}
+
+// Export for use in ChatMessageList
+export interface QuoteResponseInfo {
+  responseType: 'approve' | 'reject' | 'request_changes';
+  message?: string;
 }
 
 interface Props {
@@ -25,16 +32,170 @@ interface Props {
   onResponseSubmitted?: () => void;
   onUIActionSelect?: (value: string | string[] | ChatContext) => void;
   isLastMessage?: boolean;
+  // undefined = not checked, null = checked but no response, object = has response
+  quoteResponseInfo?: QuoteResponseInfo | null;
 }
 
-const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onUIActionSelect, isLastMessage }) => {
+// Shared card configuration for system messages
+const getSystemCardConfig = (type: SystemMessageContent['type'] | undefined) => {
+  switch (type) {
+    case 'quote_sent':
+      return {
+        gradient: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M22 2L11 13" />
+            <path d="M22 2L15 22L11 13L2 9L22 2Z" />
+          </svg>
+        ),
+        iconBg: 'rgba(255,255,255,0.2)',
+      };
+    case 'customer_approved':
+      return {
+        gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+        ),
+        iconBg: 'rgba(255,255,255,0.2)',
+      };
+    case 'customer_rejected':
+      return {
+        gradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="15" y1="9" x2="9" y2="15" />
+            <line x1="9" y1="9" x2="15" y2="15" />
+          </svg>
+        ),
+        iconBg: 'rgba(255,255,255,0.2)',
+      };
+    case 'revision_requested':
+      return {
+        gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+        ),
+        iconBg: 'rgba(255,255,255,0.2)',
+      };
+    case 'sent_to_expert':
+      return {
+        gradient: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        ),
+        iconBg: 'rgba(255,255,255,0.2)',
+      };
+    default:
+      return {
+        gradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
+        ),
+        iconBg: 'rgba(255,255,255,0.2)',
+      };
+  }
+};
+
+// Parse system message JSON from content
+const parseSystemContent = (content: string | undefined): SystemMessageContent | null => {
+  if (!content) return null;
+  const trimmedContent = content.trim();
+  const looksLikeSystemJson = trimmedContent.includes('quote_sent') ||
+    trimmedContent.includes('customer_approved') ||
+    trimmedContent.includes('customer_rejected') ||
+    trimmedContent.includes('revision_requested');
+
+  if (!looksLikeSystemJson) return null;
+
+  try {
+    const jsonMatch = trimmedContent.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      if (parsed.type && parsed.title && parsed.message) {
+        return parsed as SystemMessageContent;
+      }
+    }
+  } catch {
+    // Invalid JSON, return null
+  }
+  return null;
+};
+
+// Helper to check if quote response was already submitted (persisted in localStorage)
+const QUOTE_RESPONSE_KEY = 'quote_responses';
+const getQuoteResponseStatus = (batchId: number | undefined): boolean => {
+  if (!batchId || typeof window === 'undefined') return false;
+  try {
+    const stored = localStorage.getItem(QUOTE_RESPONSE_KEY);
+    if (stored) {
+      const responses = JSON.parse(stored);
+      return responses[batchId] === true;
+    }
+  } catch {
+    // Ignore localStorage errors
+  }
+  return false;
+};
+
+const setQuoteResponseStatus = (batchId: number | undefined): void => {
+  if (!batchId || typeof window === 'undefined') return;
+  try {
+    const stored = localStorage.getItem(QUOTE_RESPONSE_KEY);
+    const responses = stored ? JSON.parse(stored) : {};
+    responses[batchId] = true;
+    localStorage.setItem(QUOTE_RESPONSE_KEY, JSON.stringify(responses));
+  } catch {
+    // Ignore localStorage errors
+  }
+};
+
+const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onUIActionSelect, isLastMessage, quoteResponseInfo }) => {
   const { role, content, timestamp, type, metadata } = message;
+
+  // Parse system content to get batchId for checking response status
+  const systemContentForInit = parseSystemContent(content);
+  // quoteResponseInfo: undefined = not checked, null = checked but no response, object = has response
+  // Only fall back to localStorage if quoteResponseInfo is undefined (not checked by parent)
+  const parentCheckedResponse = quoteResponseInfo !== undefined;
+  const hasServerResponse = !!quoteResponseInfo && quoteResponseInfo !== null;
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [responseSubmitted, setResponseSubmitted] = useState(false);
   const [showRevisionInput, setShowRevisionInput] = useState(false);
   const [revisionMessage, setRevisionMessage] = useState("");
   const [selectedResponse, setSelectedResponse] = useState<string | null>(null);
   const isUser = role === "user";
+
+  // Sync responseSubmitted state with quoteResponseInfo from parent
+  // This ensures the state updates when messages are loaded/refreshed
+  useEffect(() => {
+    if (parentCheckedResponse) {
+      // Parent checked - use server response
+      setResponseSubmitted(hasServerResponse);
+    } else {
+      // Parent didn't check - fall back to localStorage
+      setResponseSubmitted(getQuoteResponseStatus(systemContentForInit?.batchId));
+    }
+  }, [parentCheckedResponse, hasServerResponse, systemContentForInit?.batchId]);
+
+  // Note: quote_sent type messages are handled below with full action buttons
+  // This early return is only for simple system messages without actions
 
   // Handle estimate-type messages
   if (type === "estimate" && metadata?.batchId) {
@@ -126,15 +287,10 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
   }
 
   // Handle system messages (quote_sent, customer responses, etc.)
-  if (role === 'system') {
-    let systemContent: SystemMessageContent | null = null;
-    try {
-      systemContent = JSON.parse(content);
-    } catch {
-      // Not a JSON system message, render as regular message
-    }
+  // Check for system JSON content regardless of role
+  const systemContent = parseSystemContent(content);
 
-    if (systemContent) {
+  if (systemContent) {
       const handleResponse = async (responseType: CustomerResponseType, msg?: string) => {
         if (!systemContent?.batchId || isSubmitting || responseSubmitted) return;
 
@@ -146,6 +302,8 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
             responseType,
             message: msg,
           });
+          // Persist response status to localStorage
+          setQuoteResponseStatus(systemContent.batchId);
           setResponseSubmitted(true);
           setShowRevisionInput(false);
           onResponseSubmitted?.();
@@ -168,69 +326,7 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
         }
       };
 
-      const getCardConfig = () => {
-        switch (systemContent?.type) {
-          case 'quote_sent':
-            return {
-              gradient: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-              icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 2L11 13" />
-                  <path d="M22 2L15 22L11 13L2 9L22 2Z" />
-                </svg>
-              ),
-              iconBg: 'rgba(255,255,255,0.2)',
-            };
-          case 'customer_approved':
-            return {
-              gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-              icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <polyline points="22 4 12 14.01 9 11.01" />
-                </svg>
-              ),
-              iconBg: 'rgba(255,255,255,0.2)',
-            };
-          case 'customer_rejected':
-            return {
-              gradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
-              icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="15" y1="9" x2="9" y2="15" />
-                  <line x1="9" y1="9" x2="15" y2="15" />
-                </svg>
-              ),
-              iconBg: 'rgba(255,255,255,0.2)',
-            };
-          case 'revision_requested':
-            return {
-              gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-              icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                </svg>
-              ),
-              iconBg: 'rgba(255,255,255,0.2)',
-            };
-          default:
-            return {
-              gradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
-              icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="16" x2="12" y2="12" />
-                  <line x1="12" y1="8" x2="12.01" y2="8" />
-                </svg>
-              ),
-              iconBg: 'rgba(255,255,255,0.2)',
-            };
-        }
-      };
-
-      const config = getCardConfig();
+      const config = getSystemCardConfig(systemContent?.type);
 
       return (
         <MessageContainer isUser={false}>
@@ -378,26 +474,158 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
               )}
 
               {responseSubmitted && (
-                <SuccessMessage>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                    <polyline points="22 4 12 14.01 9 11.01" />
-                  </svg>
-                  Your response has been submitted successfully!
-                </SuccessMessage>
+                <ResponseSubmittedSection>
+                  {quoteResponseInfo ? (
+                    // Show detailed response info from server
+                    <ResponseDetailBox responseType={quoteResponseInfo.responseType}>
+                      <ResponseDetailHeader>
+                        {quoteResponseInfo.responseType === 'approve' && (
+                          <>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                              <polyline points="22 4 12 14.01 9 11.01" />
+                            </svg>
+                            <span>Approved</span>
+                          </>
+                        )}
+                        {quoteResponseInfo.responseType === 'reject' && (
+                          <>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="12" cy="12" r="10" />
+                              <line x1="15" y1="9" x2="9" y2="15" />
+                              <line x1="9" y1="9" x2="15" y2="15" />
+                            </svg>
+                            <span>Declined</span>
+                          </>
+                        )}
+                        {quoteResponseInfo.responseType === 'request_changes' && (
+                          <>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                            </svg>
+                            <span>Revision Requested</span>
+                          </>
+                        )}
+                      </ResponseDetailHeader>
+                      {quoteResponseInfo.responseType === 'request_changes' && quoteResponseInfo.message && (
+                        <ResponseDetailMessage>
+                          <strong>Your request:</strong>
+                          <p>{quoteResponseInfo.message}</p>
+                        </ResponseDetailMessage>
+                      )}
+                    </ResponseDetailBox>
+                  ) : (
+                    // Fallback: simple success message (localStorage only)
+                    <SuccessMessage>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
+                      </svg>
+                      Your response has been submitted successfully!
+                    </SuccessMessage>
+                  )}
+                </ResponseSubmittedSection>
               )}
             </SystemCard>
             <MessageTime>{dayjs(timestamp).format("HH:mm")}</MessageTime>
           </MessageContent>
         </MessageContainer>
       );
-    }
   }
 
   // UI action handler
   const handleUIActionSelect = (value: string | string[] | ChatContext) => {
     if (onUIActionSelect) {
       onUIActionSelect(value);
+    }
+  };
+
+  // Retry handler for error messages
+  const sendUserMessage = useChatStore((state) => state.sendUserMessage);
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  const handleRetry = async () => {
+    if (!metadata?.lastUserMessage || isRetrying) return;
+    setIsRetrying(true);
+    try {
+      await sendUserMessage(metadata.lastUserMessage);
+    } finally {
+      setIsRetrying(false);
+    }
+  };
+
+  // Check if this is an error message
+  const isErrorMessage = metadata?.isError === true;
+
+  // Render error message with retry button
+  if (isErrorMessage) {
+    return (
+      <MessageContainer isUser={false}>
+        <AvatarWrapper>
+          <AssistantAvatar style={{ background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </AssistantAvatar>
+        </AvatarWrapper>
+        <MessageContent>
+          <ErrorCard>
+            <ErrorHeader>
+              <ErrorIcon>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              </ErrorIcon>
+              <ErrorTitle>Something went wrong</ErrorTitle>
+            </ErrorHeader>
+            <ErrorBody>
+              <ErrorMessage>{content}</ErrorMessage>
+            </ErrorBody>
+            {metadata?.isRetryable && metadata?.lastUserMessage && (
+              <ErrorActions>
+                <RetryButton onClick={handleRetry} disabled={isRetrying}>
+                  {isRetrying ? (
+                    <>
+                      <LoadingSpinner />
+                      Retrying...
+                    </>
+                  ) : (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M23 4v6h-6" />
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                      </svg>
+                      Retry Message
+                    </>
+                  )}
+                </RetryButton>
+                {metadata?.retryAfter && metadata.retryAfter > 10 && (
+                  <RetryHint>Recommended wait: {metadata.retryAfter}s</RetryHint>
+                )}
+              </ErrorActions>
+            )}
+          </ErrorCard>
+          <MessageTime>{dayjs(timestamp).format("HH:mm")}</MessageTime>
+        </MessageContent>
+      </MessageContainer>
+    );
+  }
+
+  // Format timestamp - show date if not today
+  const formatTimestamp = (ts: Date) => {
+    const now = dayjs();
+    const messageTime = dayjs(ts);
+    if (messageTime.isSame(now, 'day')) {
+      return messageTime.format("HH:mm");
+    } else if (messageTime.isSame(now.subtract(1, 'day'), 'day')) {
+      return `Yesterday ${messageTime.format("HH:mm")}`;
+    } else {
+      return messageTime.format("MMM D, HH:mm");
     }
   };
 
@@ -426,7 +654,7 @@ const ChatMessage: FC<Props> = ({ message, onViewQuote, onResponseSubmitted, onU
         {!isUser && isLastMessage && metadata?.uiAction && (
           <ChatUIActions uiAction={metadata.uiAction} onSelect={handleUIActionSelect} />
         )}
-        {!isUser && <MessageTime>{dayjs(timestamp).format("HH:mm")}</MessageTime>}
+        <MessageTime isUser={isUser}>{formatTimestamp(timestamp)}</MessageTime>
       </MessageContent>
     </MessageContainer>
   );
@@ -510,10 +738,11 @@ const MarkdownContent = styled.div`
   strong { font-weight: 600; }
 `;
 
-const MessageTime = styled.span`
+const MessageTime = styled.span<{ isUser?: boolean }>`
   font-size: 11px;
   color: #9ca3af;
-  margin-left: 4px;
+  margin-left: ${({ isUser }) => (isUser ? "0" : "4px")};
+  text-align: ${({ isUser }) => (isUser ? "right" : "left")};
 `;
 
 // Estimate Card Styles
@@ -854,6 +1083,8 @@ const RevisionTextarea = styled.textarea`
   font-family: inherit;
   resize: none;
   transition: border-color 0.2s ease;
+  color: #1f2937;
+  background-color: #ffffff;
 
   &:focus {
     outline: none;
@@ -926,3 +1157,150 @@ const SuccessMessage = styled.div`
   font-size: 14px;
   border-top: 1px solid #a7f3d0;
 `;
+
+const ResponseSubmittedSection = styled.div`
+  border-top: 1px solid #f3f4f6;
+`;
+
+const ResponseDetailBox = styled.div<{ responseType: 'approve' | 'reject' | 'request_changes' }>`
+  padding: 16px 20px;
+  background: ${({ responseType }) => {
+    switch (responseType) {
+      case 'approve':
+        return 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)';
+      case 'reject':
+        return 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)';
+      case 'request_changes':
+        return 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)';
+    }
+  }};
+`;
+
+const ResponseDetailHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #374151;
+
+  svg {
+    flex-shrink: 0;
+  }
+`;
+
+const ResponseDetailMessage = styled.div`
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+
+  strong {
+    display: block;
+    font-size: 12px;
+    color: #92400e;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  p {
+    margin: 0;
+    color: #78350f;
+    white-space: pre-wrap;
+  }
+`;
+
+// Error Card Styles
+const ErrorCard = styled.div`
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  max-width: 400px;
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+`;
+
+const ErrorHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-bottom: 1px solid rgba(239, 68, 68, 0.1);
+`;
+
+const ErrorIcon = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #fee2e2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #dc2626;
+`;
+
+const ErrorTitle = styled.h4`
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #991b1b;
+`;
+
+const ErrorBody = styled.div`
+  padding: 16px 20px;
+`;
+
+const ErrorMessage = styled.p`
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #4b5563;
+  white-space: pre-wrap;
+`;
+
+const ErrorActions = styled.div`
+  padding: 16px 20px;
+  background: #fafafa;
+  border-top: 1px solid #f3f4f6;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
+const RetryButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+`;
+
+const RetryHint = styled.span`
+  font-size: 12px;
+  color: #9ca3af;
+  text-align: center;
+`;
+
