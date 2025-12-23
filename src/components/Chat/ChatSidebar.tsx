@@ -41,8 +41,8 @@ const getStatusConfig = (status: SessionStatus) => {
     },
     inprogress: {
       label: "In Progress",
-      color: "#8b5cf6",
-      bg: "#f5f3ff",
+      color: "#555",
+      bg: "#e7e7e7",
       icon: (
         <svg
           width="10"
@@ -58,8 +58,8 @@ const getStatusConfig = (status: SessionStatus) => {
     },
     estimate_ready: {
       label: "Quote Ready",
-      color: "var(--color-tumakr-green)",
-      bg: "#ecfdf5",
+      color: "var(--color-tumakr-dark-blue)",
+      bg: "#e4f0ff",
       icon: (
         <svg
           width="10"
@@ -95,7 +95,7 @@ const getStatusConfig = (status: SessionStatus) => {
     quote_sent: {
       label: "Quote Sent",
       color: "var(--color-tumakr-dark-blue)",
-      bg: "#eff6ff",
+      bg: "#e4f0ff",
       icon: (
         <svg
           width="10"
@@ -112,8 +112,8 @@ const getStatusConfig = (status: SessionStatus) => {
     },
     completed: {
       label: "Completed",
-      color: "var(--color-tumakr-green)",
-      bg: "#ecfdf5",
+      color: "#00692c",
+      bg: "#def1e8",
       icon: (
         <svg
           width="10"
@@ -130,7 +130,7 @@ const getStatusConfig = (status: SessionStatus) => {
     declined: {
       label: "Declined",
       color: "var(--color-tumakr-maroon)",
-      bg: "#fee2e2",
+      bg: "#f6eae9",
       icon: (
         <svg
           width="10"
@@ -147,8 +147,8 @@ const getStatusConfig = (status: SessionStatus) => {
     },
     converted: {
       label: "Booked",
-      color: "var(--color-tumakr-green)",
-      bg: "#ecfdf5",
+      color: "#00692c",
+      bg: "#def1e8",
       icon: (
         <svg
           width="10"
@@ -288,7 +288,17 @@ const ChatSidebar: FC<Props> = ({ onNewChat, isOpen = false, onClose }) => {
           ) : (
             sortedSessions.map((session) => {
               const isActive = currentSession?.sessionId === session.sessionId;
-              const status = (session.status || "active") as SessionStatus;
+
+              // batch.status를 우선적으로 확인 (declined 상태 등)
+              let status: SessionStatus;
+              if (session.batch?.status === "declined") {
+                status = "declined";
+              } else if (session.batch?.status === "accepted") {
+                status = "completed";
+              } else {
+                status = (session.status || "active") as SessionStatus;
+              }
+
               const statusConfig = getStatusConfig(status);
 
               return (
