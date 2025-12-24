@@ -329,18 +329,12 @@ const Container: FC = () => {
   const renderDestinationSelection = () => (
     <DestinationSelectionWrapper>
       <EmptyStateContent>
-        <WelcomeBadge>
-          <Sparkles className="w-4 h-4" />
-          AI-Powered Trip Planning
-        </WelcomeBadge>
-        <EmptyStateIconWrapper>
-          <EmptyStateIcon>
-            <Globe className="w-12 h-12" strokeWidth={1.5} />
-          </EmptyStateIcon>
-        </EmptyStateIconWrapper>
-        <EmptyStateTitle>Where would you like to go in Korea?</EmptyStateTitle>
+        <WelcomeHeader>
+          <WelcomeTitleMain>Plan Your</WelcomeTitleMain>
+          <WelcomeTitleHighlight>Korea Adventure</WelcomeTitleHighlight>
+        </WelcomeHeader>
         <EmptyStateSubtitle>
-          Choose a popular destination or tell us your dream trip
+          Select your destination and we'll create a personalized itinerary
         </EmptyStateSubtitle>
 
         {/* 목적지 선택 버튼 그리드 */}
@@ -426,19 +420,9 @@ const Container: FC = () => {
           </OtherInputWrapper>
         )}
 
-        {/* 7+ days trip notice */}
-        <LongTripNotice>
-          <LongTripIcon>📧</LongTripIcon>
-          <LongTripText>
-            Planning a trip longer than 7 days? Contact us at{" "}
-            <LongTripEmail href="mailto:info@onedaykorea.com">info@onedaykorea.com</LongTripEmail>
-            {" "}for personalized assistance.
-          </LongTripText>
-        </LongTripNotice>
-
         <OrDivider>
           <OrLine />
-          <OrText>or describe your ideal trip</OrText>
+          <OrText>or type your request</OrText>
           <OrLine />
         </OrDivider>
 
@@ -446,7 +430,7 @@ const Container: FC = () => {
           <ChatInput
             onSend={handleSendMessage}
             disabled={isTyping}
-            placeholder="e.g., I want to explore Seoul and Busan for 5 days..."
+            placeholder="e.g., Seoul and Busan for 5 days with my family..."
             showHint
             sessionId={currentSessionId || undefined}
           />
@@ -454,27 +438,24 @@ const Container: FC = () => {
 
         <TrustBadges>
           <TrustBadge>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              <path d="M9 12l2 2 4-4" />
-            </svg>
-            Verified local experts
+            <TrustIcon>🛡️</TrustIcon>
+            Local experts
           </TrustBadge>
           <TrustBadge>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 6v6l4 2" />
-            </svg>
-            Instant quotes
+            <TrustIcon>⚡</TrustIcon>
+            Quick quotes
           </TrustBadge>
           <TrustBadge>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-            1000+ happy travelers
+            <TrustIcon>❤️</TrustIcon>
+            1000+ travelers
           </TrustBadge>
         </TrustBadges>
+
+        {/* 7+ days trip notice - 하단에 subtle하게 */}
+        <LongTripNotice>
+          Planning 7+ days? Email{" "}
+          <LongTripEmail href="mailto:info@onedaykorea.com">info@onedaykorea.com</LongTripEmail>
+        </LongTripNotice>
       </EmptyStateContent>
     </DestinationSelectionWrapper>
   );
@@ -911,40 +892,32 @@ const EmptyStateContent = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
 `;
 
-const EmptyStateIconWrapper = styled.div`
-  width: 80px;
-  height: 80px;
-  border-radius: 24px;
-  background: linear-gradient(
-    135deg,
-    var(--color-tumakr-maroon) 0%,
-    var(--color-tumakr-maroon) 100%
-  );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 8px;
+// Welcome Header - 여행 서비스 스타일
+const WelcomeHeader = styled.div`
+  text-align: center;
+  margin-bottom: 4px;
 `;
 
-const EmptyStateIcon = styled.div`
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+const WelcomeTitleMain = styled.div`
+  font-size: 16px;
+  font-weight: 500;
+  color: #666;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
 `;
 
-const EmptyStateTitle = styled.h1`
-  font-size: 28px;
-  font-weight: 600;
+const WelcomeTitleHighlight = styled.h1`
+  font-size: 36px;
+  font-weight: 700;
   color: #1a1a1a;
   margin: 0;
-  text-align: center;
+  line-height: 1.2;
 
   @media (max-width: 768px) {
-    font-size: 24px;
+    font-size: 28px;
   }
 `;
 
@@ -966,27 +939,7 @@ const EmptyStateInputWrapper = styled.div`
   margin-top: 16px;
 `;
 
-// Welcome Badge
-const WelcomeBadge = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: linear-gradient(135deg, rgba(101, 29, 42, 0.1) 0%, rgba(101, 29, 42, 0.05) 100%);
-  border: 1px solid rgba(101, 29, 42, 0.2);
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-tumakr-maroon, #651d2a);
-  margin-bottom: 8px;
-  animation: ${fadeIn} 0.5s ease;
-
-  svg {
-    animation: ${sparkle} 2s ease-in-out infinite;
-  }
-`;
-
-// Hello Vacanze 스타일 목적지 선택 그리드
+// 목적지 선택 그리드
 const DestinationGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1093,13 +1046,13 @@ const TrustBadge = styled.div`
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  color: #666;
+  font-size: 13px;
+  color: #555;
+  font-weight: 500;
+`;
 
-  svg {
-    color: var(--color-tumakr-maroon, #651d2a);
-    opacity: 0.7;
-  }
+const TrustIcon = styled.span`
+  font-size: 14px;
 `;
 
 const OrDivider = styled.div`
@@ -1277,46 +1230,20 @@ const OtherInputButton = styled.button<{ disabled?: boolean }>`
   }
 `;
 
-// Long trip notice components
+// Long trip notice - subtle footer style
 const LongTripNotice = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 20px;
-  background: linear-gradient(135deg, rgba(101, 29, 42, 0.05) 0%, rgba(101, 29, 42, 0.02) 100%);
-  border: 1px solid rgba(101, 29, 42, 0.15);
-  border-radius: 12px;
   margin-top: 24px;
-  max-width: 580px;
-  animation: ${fadeIn} 0.5s ease 0.3s both;
-
-  @media (max-width: 640px) {
-    flex-direction: column;
-    text-align: center;
-    gap: 8px;
-  }
-`;
-
-const LongTripIcon = styled.span`
-  font-size: 24px;
-  flex-shrink: 0;
-`;
-
-const LongTripText = styled.p`
-  margin: 0;
-  font-size: 13px;
-  color: #555;
-  line-height: 1.5;
+  font-size: 12px;
+  color: #999;
+  text-align: center;
 `;
 
 const LongTripEmail = styled.a`
-  color: var(--color-tumakr-maroon);
-  font-weight: 600;
-  text-decoration: none;
-  transition: opacity 0.2s;
+  color: #666;
+  text-decoration: underline;
+  transition: color 0.2s;
 
   &:hover {
-    opacity: 0.8;
-    text-decoration: underline;
+    color: var(--color-tumakr-maroon);
   }
 `;
