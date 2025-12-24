@@ -122,6 +122,33 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
       return null;
     }
 
+    // 여행 스타일에 맞는 이모지 매핑
+    const getStyleEmoji = (value: string): string => {
+      const emojiMap: Record<string, string> = {
+        'culture': '🏛️',
+        'nature': '🌿',
+        'food': '🍜',
+        'shopping': '🛍️',
+        'adventure': '🎢',
+        'relaxation': '🧘',
+        'nightlife': '🌃',
+        'photography': '📸',
+        'history': '📜',
+        'art': '🎨',
+        'beach': '🏖️',
+        'mountain': '⛰️',
+        'city': '🏙️',
+        'local': '🏘️',
+        'luxury': '✨',
+        'budget': '💰',
+        'family': '👨‍👩‍👧‍👦',
+        'romantic': '💕',
+        'solo': '🎒',
+        'group': '👥',
+      };
+      return emojiMap[value.toLowerCase()] || '✨';
+    };
+
     const handleChipClick = (value: string) => {
       if (disabled) return;
 
@@ -157,23 +184,35 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
 
     return (
       <ChipsContainer>
+        <ChipsHeader>
+          <span>🎯</span>
+          <span>Select your interests {multiSelect && '(multiple)'}</span>
+        </ChipsHeader>
         <ChipsGrid>
           {options.map((option) => (
-            <Chip
+            <StyleChip
               key={option.id}
               selected={selectedChips.includes(option.value)}
               onClick={() => handleChipClick(option.value)}
               disabled={disabled}
             >
-              {option.label}
-              {selectedChips.includes(option.value) && <Check size={14} />}
-            </Chip>
+              <StyleChipEmoji>{getStyleEmoji(option.value)}</StyleChipEmoji>
+              <StyleChipLabel>{option.label}</StyleChipLabel>
+              {selectedChips.includes(option.value) && (
+                <StyleChipCheck>
+                  <Check size={14} />
+                </StyleChipCheck>
+              )}
+            </StyleChip>
           ))}
         </ChipsGrid>
         {multiSelect && selectedChips.length > 0 && (
-          <ConfirmButton onClick={handleConfirm} disabled={disabled}>
-            Continue with {selectedChips.length} selected
-          </ConfirmButton>
+          <ChipsFooter>
+            <SelectedCount>{selectedChips.length} selected</SelectedCount>
+            <ConfirmButton onClick={handleConfirm} disabled={disabled}>
+              Continue
+            </ConfirmButton>
+          </ChipsFooter>
         )}
       </ChipsContainer>
     );
@@ -318,13 +357,22 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
       onSelect(totalText);
     };
 
+    const totalTravelers = travelers.adults + travelers.children + travelers.infants;
+
     return (
       <TravelersContainer>
+        <TravelersHeader>
+          <Users size={18} />
+          <span>Who's traveling?</span>
+        </TravelersHeader>
+
         <TravelerRow>
           <TravelerInfo>
-            <Users size={18} />
-            <TravelerLabel>Adults</TravelerLabel>
-            <TravelerAge>Age 12+</TravelerAge>
+            <TravelerEmoji>👤</TravelerEmoji>
+            <TravelerDetails>
+              <TravelerLabel>Adults</TravelerLabel>
+              <TravelerAge>Age 12+</TravelerAge>
+            </TravelerDetails>
           </TravelerInfo>
           <CounterControls>
             <CounterButton onClick={() => updateCount('adults', -1)} disabled={disabled || travelers.adults <= 1}>
@@ -339,9 +387,11 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
 
         <TravelerRow>
           <TravelerInfo>
-            <Users size={18} />
-            <TravelerLabel>Children</TravelerLabel>
-            <TravelerAge>Age 2-11</TravelerAge>
+            <TravelerEmoji>👦</TravelerEmoji>
+            <TravelerDetails>
+              <TravelerLabel>Children</TravelerLabel>
+              <TravelerAge>Age 2-11</TravelerAge>
+            </TravelerDetails>
           </TravelerInfo>
           <CounterControls>
             <CounterButton onClick={() => updateCount('children', -1)} disabled={disabled || travelers.children <= 0}>
@@ -356,9 +406,11 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
 
         <TravelerRow>
           <TravelerInfo>
-            <Users size={18} />
-            <TravelerLabel>Infants</TravelerLabel>
-            <TravelerAge>Under 2</TravelerAge>
+            <TravelerEmoji>👶</TravelerEmoji>
+            <TravelerDetails>
+              <TravelerLabel>Infants</TravelerLabel>
+              <TravelerAge>Under 2</TravelerAge>
+            </TravelerDetails>
           </TravelerInfo>
           <CounterControls>
             <CounterButton onClick={() => updateCount('infants', -1)} disabled={disabled || travelers.infants <= 0}>
@@ -371,9 +423,15 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
           </CounterControls>
         </TravelerRow>
 
+        <TravelersSummary>
+          <TravelersSummaryIcon>👥</TravelersSummaryIcon>
+          <TravelersSummaryText>
+            {totalTravelers} traveler{totalTravelers > 1 ? 's' : ''} total
+          </TravelersSummaryText>
+        </TravelersSummary>
+
         <ConfirmButton onClick={handleTravelersConfirm} disabled={disabled}>
-          Continue with {travelers.adults + travelers.children + travelers.infants} traveler
-          {travelers.adults + travelers.children + travelers.infants > 1 ? 's' : ''}
+          Confirm Travelers
         </ConfirmButton>
       </TravelersContainer>
     );
@@ -491,34 +549,92 @@ const ButtonDescription = styled.span`
 const ChipsContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   margin-top: 12px;
+  max-width: 450px;
+  background: white;
+  padding: 20px;
+  border: 1px solid #e8e8e8;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+`;
+
+const ChipsHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
 `;
 
 const ChipsGrid = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+
+  @media (max-width: 400px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
-const Chip = styled.button<{ selected?: boolean; disabled?: boolean }>`
+const StyleChip = styled.button<{ selected?: boolean; disabled?: boolean }>`
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  background: ${({ selected }) => (selected ? 'var(--color-tumakr-maroon)' : 'white')};
-  color: ${({ selected }) => (selected ? 'white' : '#333')};
-  border: 1px solid ${({ selected }) => (selected ? 'var(--color-tumakr-maroon)' : '#e5e5e5')};
-  border-radius: 20px;
-  font-size: 13px;
+  gap: 10px;
+  padding: 14px 16px;
+  background: ${({ selected }) => (selected ? 'rgba(101, 29, 42, 0.06)' : '#fafafa')};
+  color: #333;
+  border: 2px solid ${({ selected }) => (selected ? 'var(--color-tumakr-maroon)' : '#e8e8e8')};
+  border-radius: 12px;
+  font-size: 14px;
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
   opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
+  text-align: left;
 
   &:hover:not(:disabled) {
     border-color: var(--color-tumakr-maroon);
-    background: ${({ selected }) => (selected ? 'var(--color-tumakr-maroon)' : 'rgba(101, 29, 42, 0.05)')};
+    background: rgba(101, 29, 42, 0.04);
   }
+`;
+
+const StyleChipEmoji = styled.span`
+  font-size: 20px;
+  line-height: 1;
+`;
+
+const StyleChipLabel = styled.span`
+  font-weight: 500;
+  flex: 1;
+`;
+
+const StyleChipCheck = styled.span`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  background: var(--color-tumakr-maroon);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+`;
+
+const ChipsFooter = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+`;
+
+const SelectedCount = styled.span`
+  font-size: 13px;
+  color: #666;
 `;
 
 const ConfirmButton = styled.button<{ disabled?: boolean }>`
@@ -676,21 +792,36 @@ const DateDuration = styled.span`
 const TravelersContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 4px;
   margin-top: 12px;
-  max-width: 350px;
+  max-width: 380px;
   background: white;
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
-  padding: 16px;
+  border: 1px solid #e8e8e8;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+`;
+
+const TravelersHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+
+  svg {
+    color: var(--color-tumakr-maroon);
+  }
 `;
 
 const TravelerRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 14px 0;
+  border-bottom: 1px solid #f5f5f5;
 
   &:last-of-type {
     border-bottom: none;
@@ -700,52 +831,95 @@ const TravelerRow = styled.div`
 const TravelerInfo = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   color: #333;
 `;
 
+const TravelerEmoji = styled.span`
+  font-size: 24px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f8f8;
+  border-radius: 10px;
+`;
+
+const TravelerDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`;
+
 const TravelerLabel = styled.span`
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
 `;
 
 const TravelerAge = styled.span`
   font-size: 12px;
-  color: #999;
+  color: #888;
 `;
 
 const CounterControls = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 `;
 
 const CounterButton = styled.button<{ disabled?: boolean }>`
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #e5e5e5;
-  border-radius: 50%;
-  background: white;
+  border: 2px solid ${({ disabled }) => (disabled ? '#e8e8e8' : '#e8e8e8')};
+  border-radius: 10px;
+  background: ${({ disabled }) => (disabled ? '#fafafa' : 'white')};
   color: ${({ disabled }) => (disabled ? '#ccc' : '#333')};
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
     border-color: var(--color-tumakr-maroon);
     color: var(--color-tumakr-maroon);
+    background: rgba(101, 29, 42, 0.04);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.95);
   }
 `;
 
 const CounterValue = styled.span`
-  font-size: 16px;
-  font-weight: 500;
-  min-width: 24px;
+  font-size: 18px;
+  font-weight: 700;
+  min-width: 28px;
   text-align: center;
-  color: #1a1a1a;
+  color: var(--color-tumakr-maroon);
   display: inline-block;
+`;
+
+const TravelersSummary = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  background: rgba(101, 29, 42, 0.04);
+  border-radius: 10px;
+  margin-top: 8px;
+`;
+
+const TravelersSummaryIcon = styled.span`
+  font-size: 18px;
+`;
+
+const TravelersSummaryText = styled.span`
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-tumakr-maroon);
 `;
 
 const ConfirmCard = styled.div`
