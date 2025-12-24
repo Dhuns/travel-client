@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { ChatContext } from "@shared/types/chat";
+import useChatStore, { GenerationProgress } from "@shared/store/chatStore";
 import { FC } from "react";
 import ChatInfoPanel from "./ChatInfoPanel";
 
@@ -12,6 +13,7 @@ interface Props {
 }
 
 const ChatInfoSidebar: FC<Props> = ({ isOpen, onClose, context, messageCount, batchId }) => {
+  const { isGeneratingEstimate, generationProgress } = useChatStore();
   return (
     <>
       {/* Backdrop for mobile */}
@@ -38,7 +40,13 @@ const ChatInfoSidebar: FC<Props> = ({ isOpen, onClose, context, messageCount, ba
           </Header>
 
           {/* Info Panel Content */}
-          <ChatInfoPanel context={context} messageCount={messageCount} batchId={batchId} />
+          <ChatInfoPanel
+            context={context}
+            messageCount={messageCount}
+            batchId={batchId}
+            isGeneratingEstimate={isGeneratingEstimate}
+            generationProgress={generationProgress}
+          />
         </Content>
       </Container>
     </>

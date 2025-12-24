@@ -1,17 +1,27 @@
 import { FC } from "react";
 
+import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
+import { GenerationProgress } from "@shared/store/chatStore";
 import { ChatContext } from "@shared/types/chat";
 import dayjs from "dayjs";
-import { Info } from "lucide-react";
+import { Info, Loader2 } from "lucide-react";
 
 interface Props {
   context: ChatContext;
   messageCount: number;
   batchId?: number;
+  isGeneratingEstimate?: boolean;
+  generationProgress?: GenerationProgress | null;
 }
 
-const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
+const ChatInfoPanel: FC<Props> = ({
+  context,
+  messageCount,
+  batchId,
+  isGeneratingEstimate,
+  generationProgress,
+}) => {
   const {
     destination,
     startDate,
@@ -32,6 +42,72 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
 
   return (
     <Container>
+      {/* Estimate Generation Progress */}
+      {isGeneratingEstimate && (
+        <ProgressSection>
+          <ProgressHeader>
+            <ProgressIconWrapper>
+              <Loader2 className="w-5 h-5 animate-spin" />
+            </ProgressIconWrapper>
+            <ProgressTitle>Creating Your Itinerary</ProgressTitle>
+          </ProgressHeader>
+          <ProgressContent>
+            <ProgressBarWrapper>
+              <ProgressBar progress={generationProgress?.progress || 0} />
+            </ProgressBarWrapper>
+            <ProgressStep>
+              <ProgressStepIcon active={generationProgress?.step === 'analyzing'}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
+              </ProgressStepIcon>
+              <ProgressStepText active={generationProgress?.step === 'analyzing'}>
+                Analyzing preferences
+              </ProgressStepText>
+              {generationProgress?.step === 'analyzing' && <ProgressDots />}
+            </ProgressStep>
+            <ProgressStep>
+              <ProgressStepIcon active={generationProgress?.step === 'creating'}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 3v18" />
+                  <path d="M3 12h18" />
+                </svg>
+              </ProgressStepIcon>
+              <ProgressStepText active={generationProgress?.step === 'creating'}>
+                Creating itinerary
+              </ProgressStepText>
+              {generationProgress?.step === 'creating' && <ProgressDots />}
+            </ProgressStep>
+            <ProgressStep>
+              <ProgressStepIcon active={generationProgress?.step === 'optimizing'}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+              </ProgressStepIcon>
+              <ProgressStepText active={generationProgress?.step === 'optimizing'}>
+                Optimizing route
+              </ProgressStepText>
+              {generationProgress?.step === 'optimizing' && <ProgressDots />}
+            </ProgressStep>
+            <ProgressStep>
+              <ProgressStepIcon active={generationProgress?.step === 'finalizing'}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+              </ProgressStepIcon>
+              <ProgressStepText active={generationProgress?.step === 'finalizing'}>
+                Finalizing estimate
+              </ProgressStepText>
+              {generationProgress?.step === 'finalizing' && <ProgressDots />}
+            </ProgressStep>
+          </ProgressContent>
+          <ProgressHint>This usually takes 10-20 seconds...</ProgressHint>
+        </ProgressSection>
+      )}
+
       {/* Collected Information - 최상단 */}
       <Section>
         <SectionTitle>
@@ -352,4 +428,129 @@ const EmptyState = styled.div`
   font-size: 13px;
   background-color: #f8f8f8;
   border-radius: 8px;
+`;
+
+// Progress Section Styles
+const spin = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`;
+
+const pulse = keyframes`
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+`;
+
+const dots = keyframes`
+  0%, 20% { content: '.'; }
+  40% { content: '..'; }
+  60%, 100% { content: '...'; }
+`;
+
+const progressPulse = keyframes`
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+`;
+
+const ProgressSection = styled.div`
+  margin: 14px 0;
+  padding: 16px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 14px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+`;
+
+const ProgressHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+`;
+
+const ProgressIconWrapper = styled.div`
+  color: var(--color-tumakr-maroon);
+  display: flex;
+  align-items: center;
+
+  svg {
+    animation: ${spin} 1s linear infinite;
+  }
+`;
+
+const ProgressTitle = styled.h3`
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+`;
+
+const ProgressContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const ProgressBarWrapper = styled.div`
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+`;
+
+const ProgressBar = styled.div<{ progress: number }>`
+  width: ${({ progress }) => progress}%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-tumakr-maroon) 0%, #b91c3c 50%, var(--color-tumakr-maroon) 100%);
+  background-size: 200% 100%;
+  animation: ${progressPulse} 1.5s ease-in-out infinite;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+`;
+
+const ProgressStep = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+`;
+
+const ProgressStepIcon = styled.div<{ active?: boolean }>`
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: ${({ active }) => active ? 'var(--color-tumakr-maroon)' : '#e5e7eb'};
+  color: ${({ active }) => active ? 'white' : '#9ca3af'};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+`;
+
+const ProgressStepText = styled.span<{ active?: boolean }>`
+  font-size: 13px;
+  color: ${({ active }) => active ? '#1a1a1a' : '#9ca3af'};
+  font-weight: ${({ active }) => active ? '600' : '400'};
+  transition: all 0.3s ease;
+`;
+
+const ProgressDots = styled.span`
+  font-size: 13px;
+  color: var(--color-tumakr-maroon);
+  font-weight: 600;
+
+  &::after {
+    content: '...';
+    animation: ${pulse} 1s infinite;
+  }
+`;
+
+const ProgressHint = styled.div`
+  margin-top: 12px;
+  font-size: 12px;
+  color: #6b7280;
+  text-align: center;
 `;
