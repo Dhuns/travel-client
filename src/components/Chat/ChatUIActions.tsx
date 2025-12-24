@@ -201,37 +201,90 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
       input.showPicker?.();
     };
 
+    // 날짜 포맷팅 함수
+    const formatDateDisplay = (dateStr: string) => {
+      if (!dateStr) return null;
+      const date = new Date(dateStr);
+      const month = date.toLocaleDateString('en-US', { month: 'short' });
+      const day = date.getDate();
+      const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
+      return { month, day, weekday };
+    };
+
+    const startDateInfo = formatDateDisplay(dateRange.startDate);
+    const endDateInfo = formatDateDisplay(dateRange.endDate);
+
+    // 일수 계산
+    const getDayCount = () => {
+      if (!dateRange.startDate || !dateRange.endDate) return null;
+      const start = new Date(dateRange.startDate);
+      const end = new Date(dateRange.endDate);
+      const diff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      return diff;
+    };
+
+    const dayCount = getDayCount();
+
     return (
       <DatePickerContainer>
-        <DateInputGroup>
-          <DateInputWrapper>
-            <DateLabel>Arrival</DateLabel>
-            <DateInput
+        <DatePickerHeader>
+          <Calendar size={18} />
+          <span>Select your travel dates</span>
+        </DatePickerHeader>
+        <DateCardsWrapper>
+          <DateCard hasValue={!!dateRange.startDate}>
+            <DateCardLabel>Check-in</DateCardLabel>
+            {startDateInfo ? (
+              <DateCardContent>
+                <DateCardDay>{startDateInfo.day}</DateCardDay>
+                <DateCardDetails>
+                  <DateCardMonth>{startDateInfo.month}</DateCardMonth>
+                  <DateCardWeekday>{startDateInfo.weekday}</DateCardWeekday>
+                </DateCardDetails>
+              </DateCardContent>
+            ) : (
+              <DateCardPlaceholder>Select date</DateCardPlaceholder>
+            )}
+            <HiddenDateInput
               type="date"
               value={dateRange.startDate}
               onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
               onClick={handleDateInputClick}
               min={new Date().toISOString().split('T')[0]}
               disabled={disabled}
-              placeholder="Select date"
             />
-          </DateInputWrapper>
-          <DateSeparator>
-            <Calendar size={20} />
-          </DateSeparator>
-          <DateInputWrapper>
-            <DateLabel>Departure</DateLabel>
-            <DateInput
+          </DateCard>
+
+          <DateArrow>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+            {dayCount && <DateDuration>{dayCount} days</DateDuration>}
+          </DateArrow>
+
+          <DateCard hasValue={!!dateRange.endDate}>
+            <DateCardLabel>Check-out</DateCardLabel>
+            {endDateInfo ? (
+              <DateCardContent>
+                <DateCardDay>{endDateInfo.day}</DateCardDay>
+                <DateCardDetails>
+                  <DateCardMonth>{endDateInfo.month}</DateCardMonth>
+                  <DateCardWeekday>{endDateInfo.weekday}</DateCardWeekday>
+                </DateCardDetails>
+              </DateCardContent>
+            ) : (
+              <DateCardPlaceholder>Select date</DateCardPlaceholder>
+            )}
+            <HiddenDateInput
               type="date"
               value={dateRange.endDate}
               onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
               onClick={handleDateInputClick}
               min={dateRange.startDate || new Date().toISOString().split('T')[0]}
               disabled={disabled}
-              placeholder="Select date"
             />
-          </DateInputWrapper>
-        </DateInputGroup>
+          </DateCard>
+        </DateCardsWrapper>
         {dateRange.startDate && dateRange.endDate && (
           <ConfirmButton onClick={handleDateConfirm} disabled={disabled}>
             Confirm Dates
@@ -491,106 +544,133 @@ const DatePickerContainer = styled.div`
   gap: 16px;
   margin-top: 12px;
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
   position: relative;
   z-index: 100;
   background: white;
-  padding: 16px;
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e8e8e8;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 `;
 
-const DateInputGroup = styled.div`
+const DatePickerHeader = styled.div`
   display: flex;
-  align-items: flex-end;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+
+  svg {
+    color: var(--color-tumakr-maroon);
+  }
+`;
+
+const DateCardsWrapper = styled.div`
+  display: flex;
+  align-items: center;
   gap: 12px;
 `;
 
-const DateInputWrapper = styled.div`
+const DateCard = styled.label<{ hasValue?: boolean }>`
   flex: 1;
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  min-width: 140px;
-`;
-
-const DateLabel = styled.span`
-  font-size: 12px;
-  color: #666;
-`;
-
-const DateInput = styled.input`
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
-  font-size: 16px; /* 모바일에서 자동 확대 방지 */
-  background: white;
+  padding: 14px 16px;
+  background: ${({ hasValue }) => hasValue ? 'rgba(101, 29, 42, 0.04)' : '#fafafa'};
+  border: 2px solid ${({ hasValue }) => hasValue ? 'var(--color-tumakr-maroon)' : '#e8e8e8'};
+  border-radius: 12px;
   cursor: pointer;
-  min-height: 48px;
-  color: #333;
+  transition: all 0.2s ease;
+  min-height: 80px;
 
-  /* 모바일/크로스 브라우저 호환성 */
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  pointer-events: auto;
-  touch-action: manipulation;
-  position: relative;
+  &:hover {
+    border-color: var(--color-tumakr-maroon);
+    background: rgba(101, 29, 42, 0.02);
+  }
+`;
+
+const DateCardLabel = styled.span`
+  font-size: 11px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+`;
+
+const DateCardContent = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+`;
+
+const DateCardDay = styled.span`
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-tumakr-maroon);
+  line-height: 1;
+`;
+
+const DateCardDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const DateCardMonth = styled.span`
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+`;
+
+const DateCardWeekday = styled.span`
+  font-size: 12px;
+  color: #888;
+`;
+
+const DateCardPlaceholder = styled.span`
+  font-size: 14px;
+  color: #aaa;
+  margin-top: 8px;
+`;
+
+const HiddenDateInput = styled.input`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
   z-index: 10;
 
-  /* Date input 스타일링 */
   &::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    padding: 8px;
-    margin-left: 4px;
-    opacity: 1;
-    background-color: transparent;
     position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 24px;
-    height: 24px;
-  }
-
-  &::-webkit-date-and-time-value {
-    text-align: left;
-  }
-
-  /* iOS Safari 날짜 입력 수정 */
-  &::-webkit-datetime-edit {
-    padding: 0;
-  }
-
-  &::-webkit-datetime-edit-fields-wrapper {
-    padding: 0;
-  }
-
-  &:focus {
-    outline: none;
-    border-color: var(--color-tumakr-maroon);
-    box-shadow: 0 0 0 3px rgba(101, 29, 42, 0.1);
-  }
-
-  &:hover:not(:disabled) {
-    border-color: var(--color-tumakr-maroon);
-    background: #fafafa;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background: #f5f5f5;
-    pointer-events: none;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
   }
 `;
 
-const DateSeparator = styled.div`
+const DateArrow = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: center;
-  padding-bottom: 12px;
-  color: #999;
+  gap: 4px;
+  color: #ccc;
+  flex-shrink: 0;
+`;
+
+const DateDuration = styled.span`
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-tumakr-maroon);
+  white-space: nowrap;
 `;
 
 const TravelersContainer = styled.div`
