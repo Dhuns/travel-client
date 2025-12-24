@@ -73,20 +73,20 @@ export default function ResetPasswordPage() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-[#f5f3f0] to-[#faf8f5] flex items-center justify-center pt-32 pb-16">
-        <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8">
+      <div className="min-h-screen bg-black flex items-center justify-center px-4">
+        <div className="max-w-sm w-full">
           <div className="text-center">
-            <CheckCircle2 className="w-16 h-16 mx-auto text-green-500 mb-4" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            <CheckCircle2 className="w-16 h-16 mx-auto text-green-500 mb-6" />
+            <h1 className="text-xl font-semibold text-gray-900 mb-2">
               Password Reset Successful!
-            </h2>
-            <p className="text-gray-600 mb-6">
+            </h1>
+            <p className="text-sm text-gray-500 mb-6">
               Your password has been successfully reset. You can now sign in with your new
               password.
             </p>
             <Button
               onClick={() => router.push("/login")}
-              className="w-full bg-linear-to-r from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white"
+              className="w-full py-5 text-sm font-medium text-white bg-tumakr-maroon rounded-lg hover:bg-tumakr-maroon/90 transition-colors"
             >
               Go to Login
             </Button>
@@ -97,111 +97,103 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-[#f5f3f0] to-[#faf8f5] pt-32 pb-16">
-      <div className="container mx-auto px-6">
-        <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
-          {/* 헤더 */}
-          <div className="bg-linear-to-r from-tumakr-maroon to-tumakr-maroon/90 text-white p-8 text-center">
-            <h1 className="text-3xl font-bold mb-2">Reset Password</h1>
-            <p className="text-[#f5f3f0]">Enter your new password</p>
-          </div>
-
-          {/* 폼 */}
-          <div className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* 에러 메시지 */}
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                  <p>{error}</p>
-                </div>
-              )}
-
-              {/* 새 비밀번호 입력 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  New Password
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-tumakr-maroon transition-all duration-300 text-gray-900 bg-white"
-                    style={{
-                      WebkitBoxShadow: "0 0 0 1000px white inset",
-                      WebkitTextFillColor: "#111827",
-                    }}
-                    autoComplete="new-password"
-                    placeholder="Enter new password (min 8 characters)"
-                    required
-                    minLength={8}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-300"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
-                  </button>
-                </div>
-                <p className="mt-1 text-sm text-gray-500">
-                  Password must be at least 8 characters long
-                </p>
-              </div>
-
-              {/* 비밀번호 확인 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirm New Password
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-tumakr-maroon transition-all duration-300 text-gray-900 bg-white"
-                    style={{
-                      WebkitBoxShadow: "0 0 0 1000px white inset",
-                      WebkitTextFillColor: "#111827",
-                    }}
-                    autoComplete="new-password"
-                    placeholder="Confirm new password"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-300"
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
-                  </button>
-                </div>
-                {confirmPassword && password !== confirmPassword && (
-                  <p className="mt-2 text-sm text-red-600">Passwords do not match</p>
-                )}
-              </div>
-
-              {/* 제출 버튼 */}
-              <Button
-                type="submit"
-                disabled={isLoading || !token}
-                className="w-full bg-linear-to-r from-tumakr-maroon to-tumakr-maroon/90 hover:from-tumakr-maroon/90 hover:to-tumakr-maroon text-white py-3 rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? "Resetting..." : "Reset Password"}
-              </Button>
-            </form>
-          </div>
+    <div className="min-h-screen bg-[#faf9f7] flex items-center justify-center px-4">
+      <div className="max-w-sm w-full">
+        <div className="text-center mb-8">
+          <h1 className="text-xl font-semibold text-gray-900 mb-1">Reset Password</h1>
+          <p className="text-sm text-gray-500">Enter your new password</p>
         </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Error message */}
+          {error && (
+            <div className="p-3 bg-red-50 rounded-lg">
+              <p className="text-sm text-red-600 text-center">{error}</p>
+            </div>
+          )}
+
+          {/* New password input */}
+          <div>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full pl-10 pr-12 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-tumakr-maroon transition-colors"
+                autoComplete="new-password"
+                placeholder="New password (min 8 characters)"
+                required
+                minLength={8}
+              />
+              <Button
+                variant="ghost"
+                type="button"
+                size="icon"
+                onClick={() => setShowPassword(!showPassword)}
+                className="w-8 h-8 absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? (
+                  <EyeOff className="size-5" />
+                ) : (
+                  <Eye className="size-5" />
+                )}
+              </Button>
+            </div>
+            <p className="mt-1.5 text-xs text-gray-500">
+              Password must be at least 8 characters long
+            </p>
+          </div>
+
+          {/* Confirm password */}
+          <div>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full pl-10 pr-12 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-tumakr-maroon transition-colors"
+                autoComplete="new-password"
+                placeholder="Confirm new password"
+                required
+              />
+              <Button
+                variant="ghost"
+                type="button"
+                size="icon"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="w-8 h-8 absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-600"
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="size-5" />
+                ) : (
+                  <Eye className="size-5" />
+                )}
+              </Button>
+            </div>
+            {confirmPassword && password !== confirmPassword && (
+              <p className="mt-1.5 text-xs text-red-600">Passwords do not match</p>
+            )}
+          </div>
+
+          {/* Submit button */}
+          <Button
+            type="submit"
+            disabled={isLoading || !token}
+            className="w-full py-5 text-sm font-medium text-white bg-tumakr-maroon rounded-lg hover:bg-tumakr-maroon/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {isLoading ? "Resetting..." : "Reset Password"}
+          </Button>
+        </form>
+
+        <p className="mt-6 text-center text-sm text-gray-500">
+          Remember your password?{" "}
+          <a href="/login" className="text-tumakr-maroon font-medium hover:underline">
+            Sign in
+          </a>
+        </p>
       </div>
     </div>
   );

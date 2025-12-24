@@ -28,6 +28,7 @@ interface Props {
   hasMessages?: boolean;
   onSend?: (message: string) => void;
   onUIActionSelect?: (value: string | string[] | ChatContext) => void;
+  onResponseSubmitted?: () => void;
 }
 
 // Helper to parse system message content
@@ -50,6 +51,7 @@ const ChatMessageList: FC<Props> = ({
   hasMessages = true,
   onSend,
   onUIActionSelect,
+  onResponseSubmitted,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [quotationHash, setQuotationHash] = useState<string | null>(null);
@@ -228,6 +230,7 @@ const ChatMessageList: FC<Props> = ({
                 onViewQuote={handleViewQuote}
                 isLastMessage={isLastAssistantMessage}
                 onUIActionSelect={onUIActionSelect}
+                onResponseSubmitted={onResponseSubmitted}
                 quoteResponseInfo={quoteResponseInfo}
               />
             </MessageWrapper>
