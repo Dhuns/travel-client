@@ -454,45 +454,90 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
       onSelect(action);
     };
 
+    // 날짜 포맷팅
+    const formatDate = (dateStr: string) => {
+      if (!dateStr) return '';
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    };
+
+    // 총 인원 계산
+    const totalTravelers = (adults || 0) + (children || 0) + (infants || 0);
+
+    // 일수 계산
+    const getDays = () => {
+      if (!startDate || !endDate) return null;
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    };
+
+    const days = getDays();
+
     return (
       <ConfirmCard>
-        <ConfirmCardTitle>Trip Summary</ConfirmCardTitle>
+        <ConfirmCardHeader>
+          <ConfirmCardIcon>✈️</ConfirmCardIcon>
+          <ConfirmCardTitle>Your Trip Summary</ConfirmCardTitle>
+        </ConfirmCardHeader>
         <ConfirmCardContent>
           {destination && (
             <ConfirmItem>
-              <ConfirmLabel>Destination</ConfirmLabel>
-              <ConfirmValue>{destination}</ConfirmValue>
+              <ConfirmItemIcon>📍</ConfirmItemIcon>
+              <ConfirmItemContent>
+                <ConfirmLabel>Destination</ConfirmLabel>
+                <ConfirmValue>{destination}</ConfirmValue>
+              </ConfirmItemContent>
             </ConfirmItem>
           )}
           {startDate && endDate && (
             <ConfirmItem>
-              <ConfirmLabel>Travel Dates</ConfirmLabel>
-              <ConfirmValue>{startDate} ~ {endDate}</ConfirmValue>
+              <ConfirmItemIcon>📅</ConfirmItemIcon>
+              <ConfirmItemContent>
+                <ConfirmLabel>Travel Dates</ConfirmLabel>
+                <ConfirmValue>
+                  {formatDate(startDate)} - {formatDate(endDate)}
+                  {days && <ConfirmValueBadge>{days} days</ConfirmValueBadge>}
+                </ConfirmValue>
+              </ConfirmItemContent>
             </ConfirmItem>
           )}
           {adults && (
             <ConfirmItem>
-              <ConfirmLabel>Travelers</ConfirmLabel>
-              <ConfirmValue>
-                {adults} adult{adults > 1 ? 's' : ''}
-                {children ? `, ${children} child${children > 1 ? 'ren' : ''}` : ''}
-                {infants ? `, ${infants} infant${infants > 1 ? 's' : ''}` : ''}
-              </ConfirmValue>
+              <ConfirmItemIcon>👥</ConfirmItemIcon>
+              <ConfirmItemContent>
+                <ConfirmLabel>Travelers</ConfirmLabel>
+                <ConfirmValue>
+                  {totalTravelers} traveler{totalTravelers > 1 ? 's' : ''}
+                  <ConfirmValueSub>
+                    ({adults} adult{adults > 1 ? 's' : ''}
+                    {children ? `, ${children} child${children > 1 ? 'ren' : ''}` : ''}
+                    {infants ? `, ${infants} infant${infants > 1 ? 's' : ''}` : ''})
+                  </ConfirmValueSub>
+                </ConfirmValue>
+              </ConfirmItemContent>
             </ConfirmItem>
           )}
           {preferences && preferences.length > 0 && (
             <ConfirmItem>
-              <ConfirmLabel>Interests</ConfirmLabel>
-              <ConfirmValue>{preferences.join(', ')}</ConfirmValue>
+              <ConfirmItemIcon>🎯</ConfirmItemIcon>
+              <ConfirmItemContent>
+                <ConfirmLabel>Interests</ConfirmLabel>
+                <ConfirmTags>
+                  {preferences.map((pref, idx) => (
+                    <ConfirmTag key={idx}>{pref}</ConfirmTag>
+                  ))}
+                </ConfirmTags>
+              </ConfirmItemContent>
             </ConfirmItem>
           )}
         </ConfirmCardContent>
+        <ConfirmCardHint>
+          💡 Want to change something? Just tell me what to modify!
+        </ConfirmCardHint>
         <ConfirmCardActions>
-          <SecondaryButton onClick={() => handleConfirmAction('edit')} disabled={disabled}>
-            Edit Details
-          </SecondaryButton>
           <PrimaryButton onClick={() => handleConfirmAction('confirm')} disabled={disabled}>
-            Generate Itinerary
+            ✨ Generate Itinerary
           </PrimaryButton>
         </ConfirmCardActions>
       </ConfirmCard>
@@ -925,84 +970,150 @@ const TravelersSummaryText = styled.span`
 const ConfirmCard = styled.div`
   margin-top: 12px;
   background: white;
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
+  border: 1px solid #e8e8e8;
+  border-radius: 16px;
   overflow: hidden;
-  max-width: 400px;
+  max-width: 420px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 `;
 
-const ConfirmCardTitle = styled.div`
-  padding: 16px;
-  background: #fafafa;
-  border-bottom: 1px solid #e5e5e5;
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
+const ConfirmCardHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 20px;
+  background: linear-gradient(135deg, rgba(101, 29, 42, 0.06) 0%, rgba(101, 29, 42, 0.02) 100%);
+  border-bottom: 1px solid #f0f0f0;
+`;
+
+const ConfirmCardIcon = styled.span`
+  font-size: 22px;
+`;
+
+const ConfirmCardTitle = styled.h3`
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
 `;
 
 const ConfirmCardContent = styled.div`
-  padding: 16px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 `;
 
 const ConfirmItem = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
+  gap: 14px;
+`;
+
+const ConfirmItemIcon = styled.span`
+  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f8f8;
+  border-radius: 8px;
+  flex-shrink: 0;
+`;
+
+const ConfirmItemContent = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 `;
 
 const ConfirmLabel = styled.span`
+  font-size: 12px;
+  color: #888;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+`;
+
+const ConfirmValue = styled.span`
+  font-size: 15px;
+  color: #1a1a1a;
+  font-weight: 600;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+`;
+
+const ConfirmValueBadge = styled.span`
+  display: inline-flex;
+  padding: 2px 8px;
+  background: var(--color-tumakr-maroon);
+  color: white;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+`;
+
+const ConfirmValueSub = styled.span`
+  font-size: 13px;
+  color: #888;
+  font-weight: 400;
+`;
+
+const ConfirmTags = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+`;
+
+const ConfirmTag = styled.span`
+  display: inline-flex;
+  padding: 4px 10px;
+  background: #f5f5f5;
+  color: #333;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 500;
+`;
+
+const ConfirmCardHint = styled.div`
+  padding: 12px 20px;
+  background: #fffbf5;
+  border-top: 1px solid #f0f0f0;
   font-size: 13px;
   color: #666;
 `;
 
-const ConfirmValue = styled.span`
-  font-size: 14px;
-  color: #1a1a1a;
-  font-weight: 500;
-  text-align: right;
-`;
-
 const ConfirmCardActions = styled.div`
   display: flex;
-  gap: 8px;
-  padding: 16px;
-  border-top: 1px solid #e5e5e5;
-`;
-
-const SecondaryButton = styled.button<{ disabled?: boolean }>`
-  flex: 1;
-  padding: 12px 16px;
-  background: white;
-  color: #666;
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
-  font-size: 14px;
-  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
-  opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
-  transition: all 0.15s ease;
-
-  &:hover:not(:disabled) {
-    background: #f5f5f5;
-  }
+  gap: 10px;
+  padding: 16px 20px;
+  background: #fafafa;
 `;
 
 const PrimaryButton = styled.button<{ disabled?: boolean }>`
   flex: 1;
-  padding: 12px 16px;
+  padding: 14px 20px;
   background: var(--color-tumakr-maroon);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
   opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
     background: #4a1520;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
   }
 `;
