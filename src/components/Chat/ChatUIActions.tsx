@@ -461,6 +461,9 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
             </ConfirmItem>
           )}
         </ConfirmCardContent>
+        <ConfirmCardHint>
+          Need to change something? Just type in the chat below.
+        </ConfirmCardHint>
         <ConfirmCardActions>
           <PrimaryButton onClick={() => handleConfirmAction('confirm')} disabled={disabled}>
             Generate Itinerary
@@ -851,6 +854,14 @@ const ConfirmValueBadge = styled.span`
   border-radius: 4px;
   font-size: 11px;
   font-weight: 500;
+`;
+
+const ConfirmCardHint = styled.div`
+  padding: 10px 16px;
+  font-size: 12px;
+  color: #888;
+  background: #fafafa;
+  border-top: 1px solid #f0f0f0;
 `;
 
 const ConfirmCardActions = styled.div`
