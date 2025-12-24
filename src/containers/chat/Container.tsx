@@ -133,6 +133,18 @@ const Container: FC = () => {
     [session, sendUserMessage, initSession]
   );
 
+  // 견적 응답 제출 핸들러
+  const handleResponseSubmitted = useCallback(async () => {
+    if (!currentSessionId) return;
+
+    // 세션을 다시 로드하여 서버의 새 시스템 메시지 가져오기
+    try {
+      await loadSession(currentSessionId);
+    } catch (error) {
+      console.error('Failed to reload session after response:', error);
+    }
+  }, [currentSessionId, loadSession]);
+
   // UI 액션 선택 핸들러 (버튼, 칩, 날짜 선택 등)
   const handleUIActionSelect = useCallback(
     async (value: string | string[] | ChatContext) => {
@@ -523,6 +535,7 @@ const Container: FC = () => {
                   hasMessages={hasMessages}
                   onSend={handleSendMessage}
                   onUIActionSelect={handleUIActionSelect}
+                  onResponseSubmitted={handleResponseSubmitted}
                 />
 
                 {/* Input Area - shown at bottom when messages exist */}
