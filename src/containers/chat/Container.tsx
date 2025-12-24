@@ -16,19 +16,21 @@ import { Info, Globe, MessageCircle, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const Container: FC = () => {
-  const {
-    sessions,
-    currentSessionId,
-    getCurrentSession,
-    isTyping,
-    isLoading,
-    initSession,
-    loadSession,
-    loadUserSessions,
-    sendUserMessage,
-    clearSession,
-    clearAllSessions,
-  } = useChatStore();
+  // Zustand selector pattern - 필요한 상태만 개별 구독 (리렌더링 최적화)
+  const sessions = useChatStore((state) => state.sessions);
+  const currentSessionId = useChatStore((state) => state.currentSessionId);
+  const isTyping = useChatStore((state) => state.isTyping);
+  const isLoading = useChatStore((state) => state.isLoading);
+
+  // 액션은 한 번만 가져오면 됨 (참조 안정적)
+  const initSession = useChatStore((state) => state.initSession);
+  const loadSession = useChatStore((state) => state.loadSession);
+  const loadUserSessions = useChatStore((state) => state.loadUserSessions);
+  const sendUserMessage = useChatStore((state) => state.sendUserMessage);
+
+  // 현재 세션 계산 (sessions나 currentSessionId 변경 시에만 재계산)
+  const session = sessions.find((s) => s.sessionId === currentSessionId) || null;
+  const context = session?.context || {};
 
   const { isAuthenticated, user, fetchUser, accessToken } = useAuthStore();
   const router = useRouter();
@@ -37,9 +39,6 @@ const Container: FC = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [showExpertModal, setShowExpertModal] = useState(false);
-
-  const session = getCurrentSession();
-  const context = session?.context || {};
 
   // 기타 지역 입력 모드
   const [showOtherInput, setShowOtherInput] = useState(false);

@@ -13,7 +13,9 @@ interface Props {
 }
 
 const ChatInfoSidebar: FC<Props> = ({ isOpen, onClose, context, messageCount, batchId }) => {
-  const { isGeneratingEstimate, generationProgress } = useChatStore();
+  // Selector pattern - 필요한 상태만 구독
+  const isGeneratingEstimate = useChatStore((state) => state.isGeneratingEstimate);
+  const generationProgress = useChatStore((state) => state.generationProgress);
   return (
     <>
       {/* Backdrop for mobile */}
