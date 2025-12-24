@@ -330,9 +330,18 @@ const useChatStore = create<ChatStore>((set, get) => ({
     } catch (error) {
       // Failed to load session
       const axiosError = error as { response?: { status?: number } };
+      const statusCode = axiosError?.response?.status;
+
+      // 401/403 에러 시 토큰 만료 - 로그아웃 처리
+      if (statusCode === 401 || statusCode === 403) {
+        console.warn('[ChatStore] Token expired, clearing auth state');
+        useAuthStore.getState().clearAuth();
+        set({ isLoading: false });
+        return;
+      }
 
       // 404 에러 (세션이 삭제되었거나 존재하지 않음)
-      if (axiosError?.response?.status === 404) {
+      if (statusCode === 404) {
         // 로컬 세션 목록에서도 제거
         const { sessions, currentSessionId } = get();
         const updatedSessions = sessions.filter((s) => s.sessionId !== sessionId);
@@ -390,8 +399,13 @@ const useChatStore = create<ChatStore>((set, get) => ({
         sessions: formattedSessions,
         isLoading: false,
       });
-    } catch {
-      // Failed to load sessions - silent fail
+    } catch (error: any) {
+      // 401/403 에러 시 토큰 만료 - 로그아웃 처리
+      const statusCode = error?.response?.status;
+      if (statusCode === 401 || statusCode === 403) {
+        console.warn('[ChatStore] Token expired, clearing auth state');
+        useAuthStore.getState().clearAuth();
+      }
       set({ isLoading: false, sessions: [] });
     }
   },
@@ -593,8 +607,10 @@ const useChatStore = create<ChatStore>((set, get) => ({
         errorMessage = "Too many requests. Please wait a moment before trying again.";
         retryAfter = 30;
       } else if (statusCode === 401 || statusCode === 403) {
-        errorMessage = "Session expired. Please refresh the page to continue.";
+        errorMessage = "Session expired. Please log in again.";
         isRetryable = false;
+        // 토큰 만료 - 로그아웃 처리
+        useAuthStore.getState().clearAuth();
       }
 
       // If timeout or network error, try to reload session to get any saved messages
