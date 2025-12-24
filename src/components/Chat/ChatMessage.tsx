@@ -40,6 +40,7 @@ interface Props {
   onViewQuote?: (hash: string) => void;
   onResponseSubmitted?: () => void;
   onUIActionSelect?: (value: string | string[] | ChatContext) => void;
+  onLooksGoodClick?: () => void;
   isLastMessage?: boolean;
   // undefined = not checked, null = checked but no response, object = has response
   quoteResponseInfo?: QuoteResponseInfo | null;
@@ -223,6 +224,7 @@ const ChatMessage: FC<Props> = ({
   onViewQuote,
   onResponseSubmitted,
   onUIActionSelect,
+  onLooksGoodClick,
   isLastMessage,
   quoteResponseInfo,
 }) => {
@@ -363,6 +365,17 @@ const ChatMessage: FC<Props> = ({
                 View Full Itinerary
               </ViewQuotationButton>
             </EstimateActions>
+            {metadata?.showLooksGoodButton && onLooksGoodClick && (
+              <LooksGoodSection>
+                <LooksGoodHint>Need changes? Just type your request in the chat below.</LooksGoodHint>
+                <LooksGoodButton onClick={onLooksGoodClick}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Looks Good!
+                </LooksGoodButton>
+              </LooksGoodSection>
+            )}
           </EstimateCard>
           {isLastMessage && metadata?.uiAction && onUIActionSelect && (
             <ChatUIActions
@@ -1133,6 +1146,52 @@ const ViewQuotationButton = styled.button`
   &:active {
     transform: translateY(0);
   }
+`;
+
+const LooksGoodSection = styled.div`
+  padding: 16px 20px;
+  background: #fafafa;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+`;
+
+const LooksGoodButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background: #ffffff;
+  color: var(--color-tumakr-maroon, #651d2a);
+  border: 1.5px solid var(--color-tumakr-maroon, #651d2a);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--color-tumakr-maroon, #651d2a);
+    color: white;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  svg {
+    stroke-width: 2.5;
+  }
+`;
+
+const LooksGoodHint = styled.span`
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+  line-height: 1.4;
 `;
 
 // System Message Card Styles

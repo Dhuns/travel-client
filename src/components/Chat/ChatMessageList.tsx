@@ -29,6 +29,7 @@ interface Props {
   onSend?: (message: string) => void;
   onUIActionSelect?: (value: string | string[] | ChatContext) => void;
   onResponseSubmitted?: () => void;
+  onLooksGoodClick?: () => void;
 }
 
 // Helper to parse system message content
@@ -52,6 +53,7 @@ const ChatMessageList: FC<Props> = ({
   onSend,
   onUIActionSelect,
   onResponseSubmitted,
+  onLooksGoodClick,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [quotationHash, setQuotationHash] = useState<string | null>(null);
@@ -231,6 +233,7 @@ const ChatMessageList: FC<Props> = ({
                 isLastMessage={isLastAssistantMessage}
                 onUIActionSelect={onUIActionSelect}
                 onResponseSubmitted={onResponseSubmitted}
+                onLooksGoodClick={onLooksGoodClick}
                 quoteResponseInfo={quoteResponseInfo}
               />
             </MessageWrapper>
