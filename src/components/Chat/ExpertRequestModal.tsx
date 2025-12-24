@@ -7,8 +7,6 @@ interface ExpertRequestFormData {
   budgetCurrency: 'USD' | 'KRW';
   accommodationPreference: string;
   specialRequests: string;
-  contactPreference: 'email' | 'phone' | 'kakao';
-  urgency: 'flexible' | 'soon' | 'urgent';
 }
 
 interface Props {
@@ -31,8 +29,6 @@ const ExpertRequestModal: FC<Props> = ({ isOpen, onClose, onSubmit, context }) =
     budgetCurrency: 'USD',
     accommodationPreference: '',
     specialRequests: '',
-    contactPreference: 'email',
-    urgency: 'flexible',
   });
 
   if (!isOpen) return null;
@@ -174,28 +170,6 @@ const ExpertRequestModal: FC<Props> = ({ isOpen, onClose, onSubmit, context }) =
           </FormSection>
 
           <FormSection>
-            <SectionTitle>How soon do you need this?</SectionTitle>
-            <FormGroup>
-              <RadioGroup $horizontal>
-                {[
-                  { value: 'flexible', label: 'Flexible', icon: '🗓️' },
-                  { value: 'soon', label: 'Within a week', icon: '⏰' },
-                  { value: 'urgent', label: 'ASAP', icon: '🚀' },
-                ].map(option => (
-                  <UrgencyOption
-                    key={option.value}
-                    $isSelected={formData.urgency === option.value}
-                    onClick={() => handleChange('urgency', option.value)}
-                  >
-                    <span>{option.icon}</span>
-                    <span>{option.label}</span>
-                  </UrgencyOption>
-                ))}
-              </RadioGroup>
-            </FormGroup>
-          </FormSection>
-
-          <FormSection>
             <SectionTitle>Special Requests or Notes</SectionTitle>
             <FormGroup>
               <Textarea
@@ -204,28 +178,6 @@ const ExpertRequestModal: FC<Props> = ({ isOpen, onClose, onSubmit, context }) =
                 onChange={(e) => handleChange('specialRequests', e.target.value)}
                 rows={4}
               />
-            </FormGroup>
-          </FormSection>
-
-          <FormSection>
-            <SectionTitle>Preferred Contact Method</SectionTitle>
-            <FormGroup>
-              <RadioGroup $horizontal>
-                {[
-                  { value: 'email', label: 'Email', icon: '📧' },
-                  { value: 'phone', label: 'Phone', icon: '📞' },
-                  { value: 'kakao', label: 'KakaoTalk', icon: '💬' },
-                ].map(option => (
-                  <ContactOption
-                    key={option.value}
-                    $isSelected={formData.contactPreference === option.value}
-                    onClick={() => handleChange('contactPreference', option.value)}
-                  >
-                    <span>{option.icon}</span>
-                    <span>{option.label}</span>
-                  </ContactOption>
-                ))}
-              </RadioGroup>
             </FormGroup>
           </FormSection>
 
@@ -551,44 +503,6 @@ const RadioDesc = styled.div`
   font-size: 12px;
   color: #6b7280;
   margin-top: 2px;
-`;
-
-const UrgencyOption = styled.div<{ $isSelected: boolean }>`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 14px;
-  border: 2px solid ${({ $isSelected }) => $isSelected ? 'var(--color-tumakr-maroon, #651d2a)' : '#e5e7eb'};
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-  background: ${({ $isSelected }) => $isSelected ? 'rgba(101, 29, 42, 0.05)' : 'white'};
-  min-width: 100px;
-
-  span:first-of-type {
-    font-size: 24px;
-  }
-
-  span:last-of-type {
-    font-size: 13px;
-    font-weight: 500;
-    color: ${({ $isSelected }) => $isSelected ? 'var(--color-tumakr-maroon, #651d2a)' : '#6b7280'};
-  }
-
-  &:hover {
-    border-color: var(--color-tumakr-maroon, #651d2a);
-  }
-`;
-
-const ContactOption = styled(UrgencyOption)`
-  flex-direction: row;
-  justify-content: center;
-
-  span:first-of-type {
-    font-size: 18px;
-  }
 `;
 
 const SubmitSection = styled.div`
