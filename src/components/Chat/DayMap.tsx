@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { APIProvider, InfoWindow, Map, Marker, useMap } from "@vis.gl/react-google-maps";
+import { APIProvider, InfoWindow, Map, Marker, useMap, useMapsLibrary } from "@vis.gl/react-google-maps";
 import React, { useEffect, useState } from "react";
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || "";
@@ -165,6 +165,48 @@ const MapBoundsFitter: React.FC<{ locations: Location[] }> = ({ locations }) => 
   return null;
 };
 
+// Helper component to draw route polyline between locations
+const RoutePolyline: React.FC<{ locations: Location[] }> = ({ locations }) => {
+  const map = useMap();
+  const coreLibrary = useMapsLibrary("core");
+
+  useEffect(() => {
+    if (!map || !coreLibrary || !locations || locations.length < 2) return;
+
+    // Create path from locations
+    const path = locations.map(loc => ({ lat: loc.lat, lng: loc.lng }));
+
+    // @ts-ignore - google.maps is loaded via APIProvider
+    const polyline = new window.google.maps.Polyline({
+      path,
+      geodesic: true,
+      strokeColor: "#651d2a", // tumakr-maroon
+      strokeOpacity: 0.8,
+      strokeWeight: 3,
+      icons: [{
+        // @ts-ignore
+        icon: {
+          path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+          scale: 3,
+          strokeColor: "#651d2a",
+          fillColor: "#651d2a",
+          fillOpacity: 1,
+        },
+        offset: "50%",
+        repeat: "100px",
+      }],
+    });
+
+    polyline.setMap(map);
+
+    return () => {
+      polyline.setMap(null);
+    };
+  }, [map, coreLibrary, locations]);
+
+  return null;
+};
+
 const DayMap: React.FC<DayMapProps> = ({ day, locations, center }) => {
   const [selectedMarker, setSelectedMarker] = useState<Location | null>(null);
   const [isMapActive, setIsMapActive] = useState(false);
@@ -184,6 +226,19 @@ const DayMap: React.FC<DayMapProps> = ({ day, locations, center }) => {
 
   return (
     <MapWrapper>
+      <MapHeader>
+        <MapIcon>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+        </MapIcon>
+        <MapHeaderText>
+          <MapTitle>Day {day} Route</MapTitle>
+          <MapSubtitle>{locations.length} places</MapSubtitle>
+        </MapHeaderText>
+      </MapHeader>
+
       <MapContainer isActive={isMapActive} key={`map-container-${day}`}>
         <APIProvider apiKey={GOOGLE_MAPS_API_KEY} key={`api-provider-${day}`}>
           <Map
@@ -197,6 +252,7 @@ const DayMap: React.FC<DayMapProps> = ({ day, locations, center }) => {
             scrollwheel={isMapActive}
           >
             <MapBoundsFitter locations={locations} />
+            <RoutePolyline locations={locations} />
             {locations.map((location, index) => (
               <Marker
                 key={`${location.itemId}-${index}`}
@@ -282,6 +338,47 @@ const CloseMapButton = styled.button`
   &:hover {
     background: #f3f4f6;
   }
+`;
+
+const MapHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(101, 29, 42, 0.08) 0%, rgba(101, 29, 42, 0.03) 100%);
+  border-radius: 10px;
+  border: 1px solid rgba(101, 29, 42, 0.15);
+`;
+
+const MapIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--color-tumakr-maroon, #651d2a);
+  border-radius: 8px;
+  color: white;
+  flex-shrink: 0;
+`;
+
+const MapHeaderText = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`;
+
+const MapTitle = styled.h5`
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+`;
+
+const MapSubtitle = styled.span`
+  font-size: 12px;
+  color: #6b7280;
 `;
 
 export default DayMap;

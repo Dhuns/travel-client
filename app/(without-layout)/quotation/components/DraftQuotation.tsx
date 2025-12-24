@@ -245,13 +245,8 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
     }));
   };
 
-  // Fetch map data only for legacy format (JSON format has coordinates in timeline)
+  // Fetch map data from API (always fetch - JSON format may not have coordinates)
   useEffect(() => {
-    // Skip API call if using JSON timeline format with coordinates
-    if (isJsonFormat && timelineMapData && timelineMapData.length > 0) {
-      return;
-    }
-
     const fetchMapData = async () => {
       if (!batchInfo.id) return;
 
@@ -269,7 +264,7 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
     };
 
     fetchMapData();
-  }, [batchInfo.id, isJsonFormat, timelineMapData]);
+  }, [batchInfo.id]);
 
   return (
     <Container>
@@ -425,14 +420,31 @@ const DraftQuotation: React.FC<DraftQuotationProps> = ({ quotation }) => {
                   ))}
                 </FriendlyPlacesList>
 
-                {/* Map from JSON timeline coordinates */}
-                {dayMapData && dayMapData.locations.length > 0 && (
-                  <DayMap
-                    day={dayData.day}
-                    locations={dayMapData.locations}
-                    center={dayMapData.center}
-                  />
-                )}
+                {/* Map - prefer JSON coordinates, fallback to API data */}
+                {(() => {
+                  // Try JSON timeline coordinates first
+                  if (dayMapData && dayMapData.locations.length > 0) {
+                    return (
+                      <DayMap
+                        day={dayData.day}
+                        locations={dayMapData.locations}
+                        center={dayMapData.center}
+                      />
+                    );
+                  }
+                  // Fallback to API map data
+                  const apiDayData = mapData?.mapData?.find((m: MapDayData) => m.day === dayData.day);
+                  if (apiDayData && apiDayData.locations.length > 0) {
+                    return (
+                      <DayMap
+                        day={apiDayData.day}
+                        locations={apiDayData.locations}
+                        center={apiDayData.center}
+                      />
+                    );
+                  }
+                  return null;
+                })()}
               </FriendlyDaySection>
             );
           })}
