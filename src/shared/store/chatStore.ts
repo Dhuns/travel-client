@@ -18,12 +18,35 @@ import { useAuthStore } from "./authStore";
 
 import { create } from "zustand";
 
+// UUID 생성 함수 (crypto.randomUUID 폴백)
+const generateUUID = (): string => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for older browsers
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
 // Generation progress steps
 export interface GenerationProgress {
   step: 'analyzing' | 'creating' | 'optimizing' | 'finalizing';
   message: string;
   progress: number;
 }
+
+// 모듈 레벨에서 progressInterval 관리 (충돌 방지)
+let activeProgressInterval: NodeJS.Timeout | null = null;
+
+const clearActiveProgressInterval = () => {
+  if (activeProgressInterval) {
+    clearInterval(activeProgressInterval);
+    activeProgressInterval = null;
+  }
+};
 
 interface ChatStore {
   // 상태
@@ -380,7 +403,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
 
     const newMessage: ChatMessage = {
       ...message,
-      id: `temp-${Date.now()}`, // 임시 ID
+      id: `temp-${generateUUID()}`, // 고유 임시 ID (UUID)
       timestamp: new Date(),
     };
 
@@ -740,8 +763,14 @@ const useChatStore = create<ChatStore>((set, get) => ({
 
   // 견적서 생성 (세션 기반)
   generateEstimateForSession: async () => {
-    const { currentSessionId, sessions, addMessage } = get();
+    const { currentSessionId, sessions, addMessage, isGeneratingEstimate } = get();
     if (!currentSessionId) return false;
+
+    // 이미 생성 중이면 중복 호출 방지
+    if (isGeneratingEstimate) {
+      console.warn("Estimate generation already in progress");
+      return false;
+    }
 
     try {
       // 로그인 확인 및 accessToken 가져오기
@@ -751,6 +780,9 @@ const useChatStore = create<ChatStore>((set, get) => ({
         console.warn("No access token available");
         return false;
       }
+
+      // 이전 progressInterval 정리 (충돌 방지)
+      clearActiveProgressInterval();
 
       // Progress simulation helper
       const progressSteps: GenerationProgress[] = [
@@ -764,7 +796,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
 
       // Simulate progress updates while waiting for API
       let currentStep = 0;
-      const progressInterval = setInterval(() => {
+      activeProgressInterval = setInterval(() => {
         currentStep++;
         if (currentStep < progressSteps.length) {
           set({ generationProgress: progressSteps[currentStep] });
@@ -776,7 +808,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
       try {
         result = await generateEstimate(accessToken, currentSessionId);
       } finally {
-        clearInterval(progressInterval);
+        clearActiveProgressInterval();
       }
 
       // 세션에 batchId 업데이트
@@ -799,6 +831,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
       return true;
     } catch (error) {
       // Failed to generate estimate - show error details
+      clearActiveProgressInterval();
       set({ isGeneratingEstimate: false, generationProgress: null });
 
       const axiosError = error as {

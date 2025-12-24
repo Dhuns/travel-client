@@ -59,12 +59,17 @@ const Container: FC = () => {
   useEffect(() => {
     if (!isAuthenticated || isInitialized) return;
 
+    let isMounted = true; // cleanup을 위한 마운트 상태 추적
+
     const initializeUserAndChat = async () => {
       try {
         // 사용자 정보가 없으면 먼저 가져오기
         if (!user) {
           await fetchUser();
         }
+
+        // 언마운트되었으면 상태 업데이트 중단
+        if (!isMounted) return;
 
         // localStorage를 먼저 지우고 서버에서 최신 데이터 가져오기
         if (typeof window !== "undefined") {
@@ -74,14 +79,38 @@ const Container: FC = () => {
         // 채팅 세션 불러오기
         await loadUserSessions();
 
+        // 언마운트되었으면 상태 업데이트 중단
+        if (!isMounted) return;
+
+        // 세션 목록 가져온 후 최근 세션 바로 로드 (API 호출 최적화)
+        const { sessions: loadedSessions } = useChatStore.getState();
+        if (loadedSessions.length > 0) {
+          const latestSession = [...loadedSessions].sort(
+            (a, b) =>
+              new Date(b.lastMessageAt || b.createdAt).getTime() -
+              new Date(a.lastMessageAt || a.createdAt).getTime()
+          )[0];
+          if (latestSession && isMounted) {
+            await loadSession(latestSession.sessionId);
+          }
+        }
+
+        if (!isMounted) return;
+
         setIsInitialized(true);
       } catch (error) {
         console.error("Failed to initialize chat:", error);
-        setIsInitialized(true); // 실패해도 초기화 완료 표시
+        if (isMounted) {
+          setIsInitialized(true); // 실패해도 초기화 완료 표시
+        }
       }
     };
 
     initializeUserAndChat();
+
+    return () => {
+      isMounted = false; // 언마운트 시 플래그 설정
+    };
   }, [isAuthenticated, isInitialized, user, fetchUser, loadUserSessions]);
 
   // 기존 세션이 있으면 가장 최근 세션 로드 (자동 생성은 하지 않음 - Zendesk/Intercom 표준)
