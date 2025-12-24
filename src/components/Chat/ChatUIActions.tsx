@@ -122,33 +122,6 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
       return null;
     }
 
-    // 여행 스타일에 맞는 이모지 매핑
-    const getStyleEmoji = (value: string): string => {
-      const emojiMap: Record<string, string> = {
-        'culture': '🏛️',
-        'nature': '🌿',
-        'food': '🍜',
-        'shopping': '🛍️',
-        'adventure': '🎢',
-        'relaxation': '🧘',
-        'nightlife': '🌃',
-        'photography': '📸',
-        'history': '📜',
-        'art': '🎨',
-        'beach': '🏖️',
-        'mountain': '⛰️',
-        'city': '🏙️',
-        'local': '🏘️',
-        'luxury': '✨',
-        'budget': '💰',
-        'family': '👨‍👩‍👧‍👦',
-        'romantic': '💕',
-        'solo': '🎒',
-        'group': '👥',
-      };
-      return emojiMap[value.toLowerCase()] || '✨';
-    };
-
     const handleChipClick = (value: string) => {
       if (disabled) return;
 
@@ -184,10 +157,6 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
 
     return (
       <ChipsContainer>
-        <ChipsHeader>
-          <span>🎯</span>
-          <span>Select your interests {multiSelect && '(multiple)'}</span>
-        </ChipsHeader>
         <ChipsGrid>
           {options.map((option) => (
             <StyleChip
@@ -196,7 +165,6 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
               onClick={() => handleChipClick(option.value)}
               disabled={disabled}
             >
-              <StyleChipEmoji>{getStyleEmoji(option.value)}</StyleChipEmoji>
               <StyleChipLabel>{option.label}</StyleChipLabel>
               {selectedChips.includes(option.value) && (
                 <StyleChipCheck>
@@ -266,10 +234,6 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
 
     return (
       <DatePickerContainer>
-        <DatePickerHeader>
-          <Calendar size={18} />
-          <span>Select your travel dates</span>
-        </DatePickerHeader>
         <DateCardsWrapper>
           <DateCard hasValue={!!dateRange.startDate}>
             <DateCardLabel>Check-in</DateCardLabel>
@@ -361,14 +325,8 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
 
     return (
       <TravelersContainer>
-        <TravelersHeader>
-          <Users size={18} />
-          <span>Who's traveling?</span>
-        </TravelersHeader>
-
         <TravelerRow>
           <TravelerInfo>
-            <TravelerEmoji>👤</TravelerEmoji>
             <TravelerDetails>
               <TravelerLabel>Adults</TravelerLabel>
               <TravelerAge>Age 12+</TravelerAge>
@@ -387,7 +345,6 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
 
         <TravelerRow>
           <TravelerInfo>
-            <TravelerEmoji>👦</TravelerEmoji>
             <TravelerDetails>
               <TravelerLabel>Children</TravelerLabel>
               <TravelerAge>Age 2-11</TravelerAge>
@@ -406,7 +363,6 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
 
         <TravelerRow>
           <TravelerInfo>
-            <TravelerEmoji>👶</TravelerEmoji>
             <TravelerDetails>
               <TravelerLabel>Infants</TravelerLabel>
               <TravelerAge>Under 2</TravelerAge>
@@ -423,15 +379,8 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
           </CounterControls>
         </TravelerRow>
 
-        <TravelersSummary>
-          <TravelersSummaryIcon>👥</TravelersSummaryIcon>
-          <TravelersSummaryText>
-            {totalTravelers} traveler{totalTravelers > 1 ? 's' : ''} total
-          </TravelersSummaryText>
-        </TravelersSummary>
-
         <ConfirmButton onClick={handleTravelersConfirm} disabled={disabled}>
-          Confirm Travelers
+          Continue with {totalTravelers} traveler{totalTravelers > 1 ? 's' : ''}
         </ConfirmButton>
       </TravelersContainer>
     );
@@ -477,67 +426,44 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
     return (
       <ConfirmCard>
         <ConfirmCardHeader>
-          <ConfirmCardIcon>✈️</ConfirmCardIcon>
-          <ConfirmCardTitle>Your Trip Summary</ConfirmCardTitle>
+          <ConfirmCardTitle>Trip Summary</ConfirmCardTitle>
         </ConfirmCardHeader>
         <ConfirmCardContent>
           {destination && (
             <ConfirmItem>
-              <ConfirmItemIcon>📍</ConfirmItemIcon>
-              <ConfirmItemContent>
-                <ConfirmLabel>Destination</ConfirmLabel>
-                <ConfirmValue>{destination}</ConfirmValue>
-              </ConfirmItemContent>
+              <ConfirmLabel>Destination</ConfirmLabel>
+              <ConfirmValue>{destination}</ConfirmValue>
             </ConfirmItem>
           )}
           {startDate && endDate && (
             <ConfirmItem>
-              <ConfirmItemIcon>📅</ConfirmItemIcon>
-              <ConfirmItemContent>
-                <ConfirmLabel>Travel Dates</ConfirmLabel>
-                <ConfirmValue>
-                  {formatDate(startDate)} - {formatDate(endDate)}
-                  {days && <ConfirmValueBadge>{days} days</ConfirmValueBadge>}
-                </ConfirmValue>
-              </ConfirmItemContent>
+              <ConfirmLabel>Dates</ConfirmLabel>
+              <ConfirmValue>
+                {formatDate(startDate)} - {formatDate(endDate)}
+                {days && <ConfirmValueBadge>{days} days</ConfirmValueBadge>}
+              </ConfirmValue>
             </ConfirmItem>
           )}
           {adults && (
             <ConfirmItem>
-              <ConfirmItemIcon>👥</ConfirmItemIcon>
-              <ConfirmItemContent>
-                <ConfirmLabel>Travelers</ConfirmLabel>
-                <ConfirmValue>
-                  {totalTravelers} traveler{totalTravelers > 1 ? 's' : ''}
-                  <ConfirmValueSub>
-                    ({adults} adult{adults > 1 ? 's' : ''}
-                    {children ? `, ${children} child${children > 1 ? 'ren' : ''}` : ''}
-                    {infants ? `, ${infants} infant${infants > 1 ? 's' : ''}` : ''})
-                  </ConfirmValueSub>
-                </ConfirmValue>
-              </ConfirmItemContent>
+              <ConfirmLabel>Travelers</ConfirmLabel>
+              <ConfirmValue>
+                {adults} adult{adults > 1 ? 's' : ''}
+                {children ? `, ${children} child${children > 1 ? 'ren' : ''}` : ''}
+                {infants ? `, ${infants} infant${infants > 1 ? 's' : ''}` : ''}
+              </ConfirmValue>
             </ConfirmItem>
           )}
           {preferences && preferences.length > 0 && (
             <ConfirmItem>
-              <ConfirmItemIcon>🎯</ConfirmItemIcon>
-              <ConfirmItemContent>
-                <ConfirmLabel>Interests</ConfirmLabel>
-                <ConfirmTags>
-                  {preferences.map((pref, idx) => (
-                    <ConfirmTag key={idx}>{pref}</ConfirmTag>
-                  ))}
-                </ConfirmTags>
-              </ConfirmItemContent>
+              <ConfirmLabel>Interests</ConfirmLabel>
+              <ConfirmValue>{preferences.join(', ')}</ConfirmValue>
             </ConfirmItem>
           )}
         </ConfirmCardContent>
-        <ConfirmCardHint>
-          💡 Want to change something? Just tell me what to modify!
-        </ConfirmCardHint>
         <ConfirmCardActions>
           <PrimaryButton onClick={() => handleConfirmAction('confirm')} disabled={disabled}>
-            ✨ Generate Itinerary
+            Generate Itinerary
           </PrimaryButton>
         </ConfirmCardActions>
       </ConfirmCard>
@@ -594,87 +520,52 @@ const ButtonDescription = styled.span`
 const ChipsContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   margin-top: 12px;
-  max-width: 450px;
-  background: white;
-  padding: 20px;
-  border: 1px solid #e8e8e8;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-`;
-
-const ChipsHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
+  max-width: 400px;
 `;
 
 const ChipsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-
-  @media (max-width: 400px) {
-    grid-template-columns: 1fr;
-  }
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 `;
 
 const StyleChip = styled.button<{ selected?: boolean; disabled?: boolean }>`
   position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 16px;
-  background: ${({ selected }) => (selected ? 'rgba(101, 29, 42, 0.06)' : '#fafafa')};
-  color: #333;
-  border: 2px solid ${({ selected }) => (selected ? 'var(--color-tumakr-maroon)' : '#e8e8e8')};
-  border-radius: 12px;
+  gap: 6px;
+  padding: 10px 16px;
+  background: ${({ selected }) => (selected ? 'var(--color-tumakr-maroon)' : 'white')};
+  color: ${({ selected }) => (selected ? 'white' : '#333')};
+  border: 1px solid ${({ selected }) => (selected ? 'var(--color-tumakr-maroon)' : '#e5e5e5')};
+  border-radius: 20px;
   font-size: 14px;
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
   opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
-  transition: all 0.2s ease;
-  text-align: left;
+  transition: all 0.15s ease;
 
   &:hover:not(:disabled) {
     border-color: var(--color-tumakr-maroon);
-    background: rgba(101, 29, 42, 0.04);
   }
-`;
-
-const StyleChipEmoji = styled.span`
-  font-size: 20px;
-  line-height: 1;
 `;
 
 const StyleChipLabel = styled.span`
   font-weight: 500;
-  flex: 1;
 `;
 
 const StyleChipCheck = styled.span`
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 20px;
-  height: 20px;
-  background: var(--color-tumakr-maroon);
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
 `;
 
 const ChipsFooter = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
+  margin-top: 4px;
 `;
 
 const SelectedCount = styled.span`
@@ -702,37 +593,20 @@ const ConfirmButton = styled.button<{ disabled?: boolean }>`
 const DatePickerContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   margin-top: 12px;
   width: 100%;
-  max-width: 400px;
-  position: relative;
-  z-index: 100;
+  max-width: 360px;
   background: white;
-  padding: 20px;
-  border: 1px solid #e8e8e8;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-`;
-
-const DatePickerHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 4px;
-
-  svg {
-    color: var(--color-tumakr-maroon);
-  }
+  padding: 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
 `;
 
 const DateCardsWrapper = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 `;
 
 const DateCard = styled.label<{ hasValue?: boolean }>`
@@ -740,39 +614,37 @@ const DateCard = styled.label<{ hasValue?: boolean }>`
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: 14px 16px;
-  background: ${({ hasValue }) => hasValue ? 'rgba(101, 29, 42, 0.04)' : '#fafafa'};
-  border: 2px solid ${({ hasValue }) => hasValue ? 'var(--color-tumakr-maroon)' : '#e8e8e8'};
-  border-radius: 12px;
+  padding: 12px 14px;
+  background: ${({ hasValue }) => hasValue ? '#fafafa' : 'white'};
+  border: 1px solid ${({ hasValue }) => hasValue ? 'var(--color-tumakr-maroon)' : '#e5e5e5'};
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  min-height: 80px;
+  transition: all 0.15s ease;
+  min-height: 70px;
 
   &:hover {
     border-color: var(--color-tumakr-maroon);
-    background: rgba(101, 29, 42, 0.02);
   }
 `;
 
 const DateCardLabel = styled.span`
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
   color: #888;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 `;
 
 const DateCardContent = styled.div`
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 6px;
 `;
 
 const DateCardDay = styled.span`
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--color-tumakr-maroon);
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a1a;
   line-height: 1;
 `;
 
@@ -782,20 +654,20 @@ const DateCardDetails = styled.div`
 `;
 
 const DateCardMonth = styled.span`
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
   color: #333;
 `;
 
 const DateCardWeekday = styled.span`
-  font-size: 12px;
-  color: #888;
+  font-size: 11px;
+  color: #999;
 `;
 
 const DateCardPlaceholder = styled.span`
-  font-size: 14px;
-  color: #aaa;
-  margin-top: 8px;
+  font-size: 13px;
+  color: #bbb;
+  margin-top: 4px;
 `;
 
 const HiddenDateInput = styled.input`
@@ -822,73 +694,51 @@ const DateArrow = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   color: #ccc;
   flex-shrink: 0;
 `;
 
 const DateDuration = styled.span`
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-tumakr-maroon);
+  font-size: 10px;
+  font-weight: 500;
+  color: #888;
   white-space: nowrap;
 `;
 
 const TravelersContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-top: 12px;
-  max-width: 380px;
-  background: white;
-  border: 1px solid #e8e8e8;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-`;
-
-const TravelersHeader = styled.div`
-  display: flex;
-  align-items: center;
   gap: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 12px;
-
-  svg {
-    color: var(--color-tumakr-maroon);
-  }
+  margin-top: 12px;
+  max-width: 320px;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 16px;
 `;
 
 const TravelerRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 0;
-  border-bottom: 1px solid #f5f5f5;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
 
   &:last-of-type {
     border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  &:first-of-type {
+    padding-top: 0;
   }
 `;
 
 const TravelerInfo = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
   color: #333;
-`;
-
-const TravelerEmoji = styled.span`
-  font-size: 24px;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f8f8f8;
-  border-radius: 10px;
 `;
 
 const TravelerDetails = styled.div`
@@ -898,222 +748,130 @@ const TravelerDetails = styled.div`
 `;
 
 const TravelerLabel = styled.span`
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
   color: #1a1a1a;
 `;
 
 const TravelerAge = styled.span`
   font-size: 12px;
-  color: #888;
+  color: #999;
 `;
 
 const CounterControls = styled.div`
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 `;
 
 const CounterButton = styled.button<{ disabled?: boolean }>`
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid ${({ disabled }) => (disabled ? '#e8e8e8' : '#e8e8e8')};
-  border-radius: 10px;
-  background: ${({ disabled }) => (disabled ? '#fafafa' : 'white')};
-  color: ${({ disabled }) => (disabled ? '#ccc' : '#333')};
-  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
-  transition: all 0.2s ease;
-
-  &:hover:not(:disabled) {
-    border-color: var(--color-tumakr-maroon);
-    color: var(--color-tumakr-maroon);
-    background: rgba(101, 29, 42, 0.04);
-  }
-
-  &:active:not(:disabled) {
-    transform: scale(0.95);
-  }
-`;
-
-const CounterValue = styled.span`
-  font-size: 18px;
-  font-weight: 700;
-  min-width: 28px;
-  text-align: center;
-  color: var(--color-tumakr-maroon);
-  display: inline-block;
-`;
-
-const TravelersSummary = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 14px;
-  background: rgba(101, 29, 42, 0.04);
-  border-radius: 10px;
-  margin-top: 8px;
-`;
-
-const TravelersSummaryIcon = styled.span`
-  font-size: 18px;
-`;
-
-const TravelersSummaryText = styled.span`
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-tumakr-maroon);
-`;
-
-const ConfirmCard = styled.div`
-  margin-top: 12px;
-  background: white;
-  border: 1px solid #e8e8e8;
-  border-radius: 16px;
-  overflow: hidden;
-  max-width: 420px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-`;
-
-const ConfirmCardHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 18px 20px;
-  background: linear-gradient(135deg, rgba(101, 29, 42, 0.06) 0%, rgba(101, 29, 42, 0.02) 100%);
-  border-bottom: 1px solid #f0f0f0;
-`;
-
-const ConfirmCardIcon = styled.span`
-  font-size: 22px;
-`;
-
-const ConfirmCardTitle = styled.h3`
-  margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-  color: #1a1a1a;
-`;
-
-const ConfirmCardContent = styled.div`
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-`;
-
-const ConfirmItem = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-`;
-
-const ConfirmItemIcon = styled.span`
-  font-size: 18px;
   width: 32px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f8f8f8;
-  border-radius: 8px;
-  flex-shrink: 0;
+  border: 1px solid #e5e5e5;
+  border-radius: 50%;
+  background: white;
+  color: ${({ disabled }) => (disabled ? '#ccc' : '#333')};
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+  transition: all 0.15s ease;
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-tumakr-maroon);
+    color: var(--color-tumakr-maroon);
+  }
 `;
 
-const ConfirmItemContent = styled.div`
-  flex: 1;
+const CounterValue = styled.span`
+  font-size: 16px;
+  font-weight: 600;
+  min-width: 24px;
+  text-align: center;
+  color: #1a1a1a;
+`;
+
+const ConfirmCard = styled.div`
+  margin-top: 12px;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  overflow: hidden;
+  max-width: 360px;
+`;
+
+const ConfirmCardHeader = styled.div`
+  padding: 14px 16px;
+  background: #fafafa;
+  border-bottom: 1px solid #e5e5e5;
+`;
+
+const ConfirmCardTitle = styled.h3`
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+`;
+
+const ConfirmCardContent = styled.div`
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 12px;
+`;
+
+const ConfirmItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
 `;
 
 const ConfirmLabel = styled.span`
-  font-size: 12px;
-  color: #888;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-`;
-
-const ConfirmValue = styled.span`
-  font-size: 15px;
-  color: #1a1a1a;
-  font-weight: 600;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-`;
-
-const ConfirmValueBadge = styled.span`
-  display: inline-flex;
-  padding: 2px 8px;
-  background: var(--color-tumakr-maroon);
-  color: white;
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: 600;
-`;
-
-const ConfirmValueSub = styled.span`
-  font-size: 13px;
-  color: #888;
-  font-weight: 400;
-`;
-
-const ConfirmTags = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 2px;
-`;
-
-const ConfirmTag = styled.span`
-  display: inline-flex;
-  padding: 4px 10px;
-  background: #f5f5f5;
-  color: #333;
-  border-radius: 14px;
-  font-size: 13px;
-  font-weight: 500;
-`;
-
-const ConfirmCardHint = styled.div`
-  padding: 12px 20px;
-  background: #fffbf5;
-  border-top: 1px solid #f0f0f0;
   font-size: 13px;
   color: #666;
 `;
 
-const ConfirmCardActions = styled.div`
+const ConfirmValue = styled.span`
+  font-size: 14px;
+  color: #1a1a1a;
+  font-weight: 500;
+  text-align: right;
   display: flex;
-  gap: 10px;
-  padding: 16px 20px;
-  background: #fafafa;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+`;
+
+const ConfirmValueBadge = styled.span`
+  display: inline-flex;
+  padding: 2px 6px;
+  background: #f0f0f0;
+  color: #666;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+`;
+
+const ConfirmCardActions = styled.div`
+  padding: 12px 16px;
+  border-top: 1px solid #e5e5e5;
 `;
 
 const PrimaryButton = styled.button<{ disabled?: boolean }>`
-  flex: 1;
-  padding: 14px 20px;
+  width: 100%;
+  padding: 12px 16px;
   background: var(--color-tumakr-maroon);
   color: white;
   border: none;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 600;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
   opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
-  transition: all 0.2s ease;
+  transition: background 0.15s ease;
 
   &:hover:not(:disabled) {
     background: #4a1520;
-    transform: translateY(-1px);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
   }
 `;
