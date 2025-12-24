@@ -28,8 +28,6 @@ const Container: FC = () => {
     sendUserMessage,
     clearSession,
     clearAllSessions,
-    fetchEstimateQuota,
-    estimateQuota,
   } = useChatStore();
 
   const { isAuthenticated, user, fetchUser, accessToken } = useAuthStore();
@@ -75,9 +73,6 @@ const Container: FC = () => {
 
         // 채팅 세션 불러오기
         await loadUserSessions();
-
-        // 견적 생성 quota 로드
-        await fetchEstimateQuota();
 
         setIsInitialized(true);
       } catch (error) {
@@ -508,12 +503,6 @@ const Container: FC = () => {
                 </ModelBadge>
               </TopBarCenter>
               <TopBarRight>
-                {estimateQuota && (
-                  <QuotaBadge $remaining={estimateQuota.remaining}>
-                    <Sparkles className="w-3.5 h-3.5" />
-                    {estimateQuota.remaining}/{estimateQuota.limit} quotes left today
-                  </QuotaBadge>
-                )}
                 <IconButton
                   onClick={() => setShowInfoPanel(!showInfoPanel)}
                   title="Trip details"
@@ -536,6 +525,7 @@ const Container: FC = () => {
                   onSend={handleSendMessage}
                   onUIActionSelect={handleUIActionSelect}
                   onResponseSubmitted={handleResponseSubmitted}
+                  onLooksGoodClick={() => setShowExpertModal(true)}
                 />
 
                 {/* Input Area - shown at bottom when messages exist */}
