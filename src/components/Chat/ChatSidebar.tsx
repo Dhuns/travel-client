@@ -171,8 +171,15 @@ const getStatusConfig = (status: SessionStatus) => {
 
 const ChatSidebar: FC<Props> = ({ onNewChat, isOpen = false, onClose }) => {
   const router = useRouter();
-  const { sessions, getCurrentSession, loadSession, deleteSession } = useChatStore();
-  const currentSession = getCurrentSession();
+
+  // Selector pattern - 필요한 상태만 구독
+  const sessions = useChatStore((state) => state.sessions);
+  const currentSessionId = useChatStore((state) => state.currentSessionId);
+  const loadSession = useChatStore((state) => state.loadSession);
+  const deleteSession = useChatStore((state) => state.deleteSession);
+
+  // 현재 세션 계산
+  const currentSession = sessions.find((s) => s.sessionId === currentSessionId) || null;
 
   const handleDeleteSession = async (e: React.MouseEvent, sessionId: string) => {
     e.stopPropagation();

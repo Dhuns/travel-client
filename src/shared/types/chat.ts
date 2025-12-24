@@ -116,6 +116,7 @@ export interface MessageMetadata {
   itemCount?: number;
   timeline?: string;
   isFirstEstimate?: boolean; // 1차 견적서 여부 (가격 없음)
+  showLooksGoodButton?: boolean; // Looks Good 버튼 표시 여부
   // 구조화된 대화 UI 액션
   uiAction?: UIAction;
   conversationStep?: ConversationStep;

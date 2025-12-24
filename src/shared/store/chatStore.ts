@@ -6,8 +6,6 @@ import {
   getAllChatSessions,
   getChatSession,
   updateChatSession,
-  getEstimateQuota,
-  EstimateQuota,
 } from "../apis/chat";
 import {
   CHAT_STORAGE_KEY,
@@ -20,12 +18,35 @@ import { useAuthStore } from "./authStore";
 
 import { create } from "zustand";
 
+// UUID 생성 함수 (crypto.randomUUID 폴백)
+const generateUUID = (): string => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for older browsers
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
 // Generation progress steps
 export interface GenerationProgress {
   step: 'analyzing' | 'creating' | 'optimizing' | 'finalizing';
   message: string;
   progress: number;
 }
+
+// 모듈 레벨에서 progressInterval 관리 (충돌 방지)
+let activeProgressInterval: NodeJS.Timeout | null = null;
+
+const clearActiveProgressInterval = () => {
+  if (activeProgressInterval) {
+    clearInterval(activeProgressInterval);
+    activeProgressInterval = null;
+  }
+};
 
 interface ChatStore {
   // 상태
@@ -36,7 +57,6 @@ interface ChatStore {
   isChatOpen: boolean;
   isGeneratingEstimate: boolean;
   generationProgress: GenerationProgress | null;
-  estimateQuota: EstimateQuota | null;
 
   // Getters
   getCurrentSession: () => ChatSession | null;
@@ -53,7 +73,6 @@ interface ChatStore {
   updateContext: (context: Partial<ChatContext>) => Promise<void>;
   updateSessionStatus: (sessionId: string, status: ChatSession['status']) => void;
   generateEstimateForSession: () => Promise<boolean>;
-  fetchEstimateQuota: () => Promise<void>;
   clearSession: () => void;
   clearAllSessions: () => void;
   deleteSession: (sessionId: string) => Promise<void>;
@@ -69,7 +88,6 @@ const useChatStore = create<ChatStore>((set, get) => ({
   isChatOpen: false,
   isGeneratingEstimate: false,
   generationProgress: null,
-  estimateQuota: null,
 
   // 현재 세션 가져오기
   getCurrentSession: () => {
@@ -385,7 +403,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
 
     const newMessage: ChatMessage = {
       ...message,
-      id: `temp-${Date.now()}`, // 임시 ID
+      id: `temp-${generateUUID()}`, // 고유 임시 ID (UUID)
       timestamp: new Date(),
     };
 
@@ -441,6 +459,10 @@ const useChatStore = create<ChatStore>((set, get) => ({
         updatedTitle?: string;
       };
 
+      // 현재 세션의 기존 batchId 확인 (수정 요청 시 재생성 감지용)
+      const currentSessionData = sessions.find(s => s.sessionId === currentSessionId);
+      const existingBatchId = currentSessionData?.batchId;
+
       // estimate 타입 메시지인 경우 batchId 추출
       const isEstimateResponse = aiMessage.type === 'estimate';
       const estimateBatchId = aiMessage.metadata?.batchId;
@@ -495,6 +517,17 @@ const useChatStore = create<ChatStore>((set, get) => ({
         sessions: updatedSessions,
         isTyping: false,
       });
+
+      // estimate 타입 응답이거나 batchId가 있는 세션의 응답이면 세션 다시 로드
+      // (서버에서 추가 메시지가 생성되었을 수 있음 - 견적 카드, showLooksGoodButton 등)
+      // existingBatchId: 수정 요청 시 세션에 이미 batchId가 있으면 재생성 발생 가능
+      if (isEstimateResponse || estimateBatchId || existingBatchId) {
+        try {
+          await get().loadSession(currentSessionId);
+        } catch (reloadError) {
+          console.error('Failed to reload session after estimate response:', reloadError);
+        }
+      }
 
       // AI 응답 후 견적서 생성이 가능한지 체크 (enhanced conditions)
       const currentSession = updatedSessions.find(
@@ -730,8 +763,14 @@ const useChatStore = create<ChatStore>((set, get) => ({
 
   // 견적서 생성 (세션 기반)
   generateEstimateForSession: async () => {
-    const { currentSessionId, sessions, addMessage } = get();
+    const { currentSessionId, sessions, addMessage, isGeneratingEstimate } = get();
     if (!currentSessionId) return false;
+
+    // 이미 생성 중이면 중복 호출 방지
+    if (isGeneratingEstimate) {
+      console.warn("Estimate generation already in progress");
+      return false;
+    }
 
     try {
       // 로그인 확인 및 accessToken 가져오기
@@ -741,6 +780,9 @@ const useChatStore = create<ChatStore>((set, get) => ({
         console.warn("No access token available");
         return false;
       }
+
+      // 이전 progressInterval 정리 (충돌 방지)
+      clearActiveProgressInterval();
 
       // Progress simulation helper
       const progressSteps: GenerationProgress[] = [
@@ -754,7 +796,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
 
       // Simulate progress updates while waiting for API
       let currentStep = 0;
-      const progressInterval = setInterval(() => {
+      activeProgressInterval = setInterval(() => {
         currentStep++;
         if (currentStep < progressSteps.length) {
           set({ generationProgress: progressSteps[currentStep] });
@@ -766,7 +808,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
       try {
         result = await generateEstimate(accessToken, currentSessionId);
       } finally {
-        clearInterval(progressInterval);
+        clearActiveProgressInterval();
       }
 
       // 세션에 batchId 업데이트
@@ -782,39 +824,14 @@ const useChatStore = create<ChatStore>((set, get) => ({
 
       set({ sessions: updatedSessions, isGeneratingEstimate: false, generationProgress: null });
 
-      // quota 갱신
-      get().fetchEstimateQuota();
-
-      // 백엔드에 batchId 동기화 (실패해도 로컬에는 유지)
-      try {
-        await updateChatSession(accessToken, currentSessionId, {
-          batchId: result.batchId,
-          status: "active",
-        });
-      } catch (syncError) {
-        // 백엔드 동기화 실패는 로그만 출력 (사용자 경험에 영향 없음)
-        console.error("Failed to sync batchId to backend:", syncError);
-      }
-
-      // Add quote generation success message
-      await addMessage({
-        role: "assistant",
-        type: "estimate",
-        content: `🎉 Your quote has been generated!\n\n💰 Estimated Cost: ₩${result.totalAmount.toLocaleString()}\n📦 Included Items: ${
-          result.itemCount
-        }\n\nYou can now click the **'View My Quote'** button\nin the right panel to see the detailed itinerary!\n\n✨ Our travel experts will review and send\nyou the final quote within 24 hours.`,
-        metadata: {
-          batchId: result.batchId,
-          estimateId: result.estimateId,
-          totalAmount: result.totalAmount,
-          itemCount: result.itemCount,
-          timeline: result.timeline,
-        },
-      });
+      // 서버에서 세션 다시 로드하여 생성된 메시지 가져오기
+      // (서버에서 견적 메시지와 showLooksGoodButton 메타데이터가 포함된 메시지가 생성됨)
+      await get().loadSession(currentSessionId);
 
       return true;
     } catch (error) {
       // Failed to generate estimate - show error details
+      clearActiveProgressInterval();
       set({ isGeneratingEstimate: false, generationProgress: null });
 
       const axiosError = error as {
@@ -833,20 +850,6 @@ const useChatStore = create<ChatStore>((set, get) => ({
       });
 
       return false;
-    }
-  },
-
-  // 견적 생성 quota 조회
-  fetchEstimateQuota: async () => {
-    try {
-      const authState = useAuthStore.getState();
-      const accessToken = authState.accessToken;
-      if (!accessToken) return;
-
-      const quota = await getEstimateQuota(accessToken);
-      set({ estimateQuota: quota });
-    } catch (error) {
-      console.error("Failed to fetch estimate quota:", error);
     }
   },
 

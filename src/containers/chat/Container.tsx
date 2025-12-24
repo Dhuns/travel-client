@@ -16,21 +16,21 @@ import { Info, Globe, MessageCircle, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const Container: FC = () => {
-  const {
-    sessions,
-    currentSessionId,
-    getCurrentSession,
-    isTyping,
-    isLoading,
-    initSession,
-    loadSession,
-    loadUserSessions,
-    sendUserMessage,
-    clearSession,
-    clearAllSessions,
-    fetchEstimateQuota,
-    estimateQuota,
-  } = useChatStore();
+  // Zustand selector pattern - 필요한 상태만 개별 구독 (리렌더링 최적화)
+  const sessions = useChatStore((state) => state.sessions);
+  const currentSessionId = useChatStore((state) => state.currentSessionId);
+  const isTyping = useChatStore((state) => state.isTyping);
+  const isLoading = useChatStore((state) => state.isLoading);
+
+  // 액션은 한 번만 가져오면 됨 (참조 안정적)
+  const initSession = useChatStore((state) => state.initSession);
+  const loadSession = useChatStore((state) => state.loadSession);
+  const loadUserSessions = useChatStore((state) => state.loadUserSessions);
+  const sendUserMessage = useChatStore((state) => state.sendUserMessage);
+
+  // 현재 세션 계산 (sessions나 currentSessionId 변경 시에만 재계산)
+  const session = sessions.find((s) => s.sessionId === currentSessionId) || null;
+  const context = session?.context || {};
 
   const { isAuthenticated, user, fetchUser, accessToken } = useAuthStore();
   const router = useRouter();
@@ -39,9 +39,6 @@ const Container: FC = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [showExpertModal, setShowExpertModal] = useState(false);
-
-  const session = getCurrentSession();
-  const context = session?.context || {};
 
   // 기타 지역 입력 모드
   const [showOtherInput, setShowOtherInput] = useState(false);
@@ -61,12 +58,17 @@ const Container: FC = () => {
   useEffect(() => {
     if (!isAuthenticated || isInitialized) return;
 
+    let isMounted = true; // cleanup을 위한 마운트 상태 추적
+
     const initializeUserAndChat = async () => {
       try {
         // 사용자 정보가 없으면 먼저 가져오기
         if (!user) {
           await fetchUser();
         }
+
+        // 언마운트되었으면 상태 업데이트 중단
+        if (!isMounted) return;
 
         // localStorage를 먼저 지우고 서버에서 최신 데이터 가져오기
         if (typeof window !== "undefined") {
@@ -76,17 +78,38 @@ const Container: FC = () => {
         // 채팅 세션 불러오기
         await loadUserSessions();
 
-        // 견적 생성 quota 로드
-        await fetchEstimateQuota();
+        // 언마운트되었으면 상태 업데이트 중단
+        if (!isMounted) return;
+
+        // 세션 목록 가져온 후 최근 세션 바로 로드 (API 호출 최적화)
+        const { sessions: loadedSessions } = useChatStore.getState();
+        if (loadedSessions.length > 0) {
+          const latestSession = [...loadedSessions].sort(
+            (a, b) =>
+              new Date(b.lastMessageAt || b.createdAt).getTime() -
+              new Date(a.lastMessageAt || a.createdAt).getTime()
+          )[0];
+          if (latestSession && isMounted) {
+            await loadSession(latestSession.sessionId);
+          }
+        }
+
+        if (!isMounted) return;
 
         setIsInitialized(true);
       } catch (error) {
         console.error("Failed to initialize chat:", error);
-        setIsInitialized(true); // 실패해도 초기화 완료 표시
+        if (isMounted) {
+          setIsInitialized(true); // 실패해도 초기화 완료 표시
+        }
       }
     };
 
     initializeUserAndChat();
+
+    return () => {
+      isMounted = false; // 언마운트 시 플래그 설정
+    };
   }, [isAuthenticated, isInitialized, user, fetchUser, loadUserSessions]);
 
   // 기존 세션이 있으면 가장 최근 세션 로드 (자동 생성은 하지 않음 - Zendesk/Intercom 표준)
@@ -306,18 +329,12 @@ const Container: FC = () => {
   const renderDestinationSelection = () => (
     <DestinationSelectionWrapper>
       <EmptyStateContent>
-        <WelcomeBadge>
-          <Sparkles className="w-4 h-4" />
-          AI-Powered Trip Planning
-        </WelcomeBadge>
-        <EmptyStateIconWrapper>
-          <EmptyStateIcon>
-            <Globe className="w-12 h-12" strokeWidth={1.5} />
-          </EmptyStateIcon>
-        </EmptyStateIconWrapper>
-        <EmptyStateTitle>Where would you like to go in Korea?</EmptyStateTitle>
+        <WelcomeHeader>
+          <WelcomeTitleMain>Plan Your</WelcomeTitleMain>
+          <WelcomeTitleHighlight>Korea Adventure</WelcomeTitleHighlight>
+        </WelcomeHeader>
         <EmptyStateSubtitle>
-          Choose a popular destination or tell us your dream trip
+          Select your destination and we'll create a personalized itinerary
         </EmptyStateSubtitle>
 
         {/* 목적지 선택 버튼 그리드 */}
@@ -403,19 +420,9 @@ const Container: FC = () => {
           </OtherInputWrapper>
         )}
 
-        {/* 7+ days trip notice */}
-        <LongTripNotice>
-          <LongTripIcon>📧</LongTripIcon>
-          <LongTripText>
-            Planning a trip longer than 7 days? Contact us at{" "}
-            <LongTripEmail href="mailto:info@onedaykorea.com">info@onedaykorea.com</LongTripEmail>
-            {" "}for personalized assistance.
-          </LongTripText>
-        </LongTripNotice>
-
         <OrDivider>
           <OrLine />
-          <OrText>or describe your ideal trip</OrText>
+          <OrText>or type your request</OrText>
           <OrLine />
         </OrDivider>
 
@@ -423,7 +430,7 @@ const Container: FC = () => {
           <ChatInput
             onSend={handleSendMessage}
             disabled={isTyping}
-            placeholder="e.g., I want to explore Seoul and Busan for 5 days..."
+            placeholder="e.g., Seoul and Busan for 5 days with my family..."
             showHint
             sessionId={currentSessionId || undefined}
           />
@@ -431,27 +438,24 @@ const Container: FC = () => {
 
         <TrustBadges>
           <TrustBadge>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              <path d="M9 12l2 2 4-4" />
-            </svg>
-            Verified local experts
+            <TrustIcon>🛡️</TrustIcon>
+            Local experts
           </TrustBadge>
           <TrustBadge>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 6v6l4 2" />
-            </svg>
-            Instant quotes
+            <TrustIcon>⚡</TrustIcon>
+            Quick quotes
           </TrustBadge>
           <TrustBadge>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-            1000+ happy travelers
+            <TrustIcon>❤️</TrustIcon>
+            1000+ travelers
           </TrustBadge>
         </TrustBadges>
+
+        {/* 7+ days trip notice - 하단에 subtle하게 */}
+        <LongTripNotice>
+          Planning 7+ days? Email{" "}
+          <LongTripEmail href="mailto:info@onedaykorea.com">info@onedaykorea.com</LongTripEmail>
+        </LongTripNotice>
       </EmptyStateContent>
     </DestinationSelectionWrapper>
   );
@@ -508,12 +512,6 @@ const Container: FC = () => {
                 </ModelBadge>
               </TopBarCenter>
               <TopBarRight>
-                {estimateQuota && (
-                  <QuotaBadge $remaining={estimateQuota.remaining}>
-                    <Sparkles className="w-3.5 h-3.5" />
-                    {estimateQuota.remaining}/{estimateQuota.limit} quotes left today
-                  </QuotaBadge>
-                )}
                 <IconButton
                   onClick={() => setShowInfoPanel(!showInfoPanel)}
                   title="Trip details"
@@ -536,6 +534,7 @@ const Container: FC = () => {
                   onSend={handleSendMessage}
                   onUIActionSelect={handleUIActionSelect}
                   onResponseSubmitted={handleResponseSubmitted}
+                  onLooksGoodClick={() => setShowExpertModal(true)}
                 />
 
                 {/* Input Area - shown at bottom when messages exist */}
@@ -893,40 +892,32 @@ const EmptyStateContent = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
 `;
 
-const EmptyStateIconWrapper = styled.div`
-  width: 80px;
-  height: 80px;
-  border-radius: 24px;
-  background: linear-gradient(
-    135deg,
-    var(--color-tumakr-maroon) 0%,
-    var(--color-tumakr-maroon) 100%
-  );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 8px;
+// Welcome Header - 여행 서비스 스타일
+const WelcomeHeader = styled.div`
+  text-align: center;
+  margin-bottom: 4px;
 `;
 
-const EmptyStateIcon = styled.div`
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+const WelcomeTitleMain = styled.div`
+  font-size: 16px;
+  font-weight: 500;
+  color: #666;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
 `;
 
-const EmptyStateTitle = styled.h1`
-  font-size: 28px;
-  font-weight: 600;
+const WelcomeTitleHighlight = styled.h1`
+  font-size: 36px;
+  font-weight: 700;
   color: #1a1a1a;
   margin: 0;
-  text-align: center;
+  line-height: 1.2;
 
   @media (max-width: 768px) {
-    font-size: 24px;
+    font-size: 28px;
   }
 `;
 
@@ -948,27 +939,7 @@ const EmptyStateInputWrapper = styled.div`
   margin-top: 16px;
 `;
 
-// Welcome Badge
-const WelcomeBadge = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: linear-gradient(135deg, rgba(101, 29, 42, 0.1) 0%, rgba(101, 29, 42, 0.05) 100%);
-  border: 1px solid rgba(101, 29, 42, 0.2);
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-tumakr-maroon, #651d2a);
-  margin-bottom: 8px;
-  animation: ${fadeIn} 0.5s ease;
-
-  svg {
-    animation: ${sparkle} 2s ease-in-out infinite;
-  }
-`;
-
-// Hello Vacanze 스타일 목적지 선택 그리드
+// 목적지 선택 그리드
 const DestinationGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1075,13 +1046,13 @@ const TrustBadge = styled.div`
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  color: #666;
+  font-size: 13px;
+  color: #555;
+  font-weight: 500;
+`;
 
-  svg {
-    color: var(--color-tumakr-maroon, #651d2a);
-    opacity: 0.7;
-  }
+const TrustIcon = styled.span`
+  font-size: 14px;
 `;
 
 const OrDivider = styled.div`
@@ -1259,46 +1230,20 @@ const OtherInputButton = styled.button<{ disabled?: boolean }>`
   }
 `;
 
-// Long trip notice components
+// Long trip notice - subtle footer style
 const LongTripNotice = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 20px;
-  background: linear-gradient(135deg, rgba(101, 29, 42, 0.05) 0%, rgba(101, 29, 42, 0.02) 100%);
-  border: 1px solid rgba(101, 29, 42, 0.15);
-  border-radius: 12px;
   margin-top: 24px;
-  max-width: 580px;
-  animation: ${fadeIn} 0.5s ease 0.3s both;
-
-  @media (max-width: 640px) {
-    flex-direction: column;
-    text-align: center;
-    gap: 8px;
-  }
-`;
-
-const LongTripIcon = styled.span`
-  font-size: 24px;
-  flex-shrink: 0;
-`;
-
-const LongTripText = styled.p`
-  margin: 0;
-  font-size: 13px;
-  color: #555;
-  line-height: 1.5;
+  font-size: 12px;
+  color: #999;
+  text-align: center;
 `;
 
 const LongTripEmail = styled.a`
-  color: var(--color-tumakr-maroon);
-  font-weight: 600;
-  text-decoration: none;
-  transition: opacity 0.2s;
+  color: #666;
+  text-decoration: underline;
+  transition: color 0.2s;
 
   &:hover {
-    opacity: 0.8;
-    text-decoration: underline;
+    color: var(--color-tumakr-maroon);
   }
 `;

@@ -159,21 +159,28 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
       <ChipsContainer>
         <ChipsGrid>
           {options.map((option) => (
-            <Chip
+            <StyleChip
               key={option.id}
               selected={selectedChips.includes(option.value)}
               onClick={() => handleChipClick(option.value)}
               disabled={disabled}
             >
-              {option.label}
-              {selectedChips.includes(option.value) && <Check size={14} />}
-            </Chip>
+              <StyleChipLabel>{option.label}</StyleChipLabel>
+              {selectedChips.includes(option.value) && (
+                <StyleChipCheck>
+                  <Check size={14} />
+                </StyleChipCheck>
+              )}
+            </StyleChip>
           ))}
         </ChipsGrid>
         {multiSelect && selectedChips.length > 0 && (
-          <ConfirmButton onClick={handleConfirm} disabled={disabled}>
-            Continue with {selectedChips.length} selected
-          </ConfirmButton>
+          <ChipsFooter>
+            <SelectedCount>{selectedChips.length} selected</SelectedCount>
+            <ConfirmButton onClick={handleConfirm} disabled={disabled}>
+              Continue
+            </ConfirmButton>
+          </ChipsFooter>
         )}
       </ChipsContainer>
     );
@@ -201,37 +208,86 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
       input.showPicker?.();
     };
 
+    // 날짜 포맷팅 함수
+    const formatDateDisplay = (dateStr: string) => {
+      if (!dateStr) return null;
+      const date = new Date(dateStr);
+      const month = date.toLocaleDateString('en-US', { month: 'short' });
+      const day = date.getDate();
+      const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
+      return { month, day, weekday };
+    };
+
+    const startDateInfo = formatDateDisplay(dateRange.startDate);
+    const endDateInfo = formatDateDisplay(dateRange.endDate);
+
+    // 일수 계산
+    const getDayCount = () => {
+      if (!dateRange.startDate || !dateRange.endDate) return null;
+      const start = new Date(dateRange.startDate);
+      const end = new Date(dateRange.endDate);
+      const diff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      return diff;
+    };
+
+    const dayCount = getDayCount();
+
     return (
       <DatePickerContainer>
-        <DateInputGroup>
-          <DateInputWrapper>
-            <DateLabel>Arrival</DateLabel>
-            <DateInput
+        <DateCardsWrapper>
+          <DateCard hasValue={!!dateRange.startDate}>
+            <DateCardLabel>Check-in</DateCardLabel>
+            {startDateInfo ? (
+              <DateCardContent>
+                <DateCardDay>{startDateInfo.day}</DateCardDay>
+                <DateCardDetails>
+                  <DateCardMonth>{startDateInfo.month}</DateCardMonth>
+                  <DateCardWeekday>{startDateInfo.weekday}</DateCardWeekday>
+                </DateCardDetails>
+              </DateCardContent>
+            ) : (
+              <DateCardPlaceholder>Select date</DateCardPlaceholder>
+            )}
+            <HiddenDateInput
               type="date"
               value={dateRange.startDate}
               onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
               onClick={handleDateInputClick}
               min={new Date().toISOString().split('T')[0]}
               disabled={disabled}
-              placeholder="Select date"
             />
-          </DateInputWrapper>
-          <DateSeparator>
-            <Calendar size={20} />
-          </DateSeparator>
-          <DateInputWrapper>
-            <DateLabel>Departure</DateLabel>
-            <DateInput
+          </DateCard>
+
+          <DateArrow>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+            {dayCount && <DateDuration>{dayCount} days</DateDuration>}
+          </DateArrow>
+
+          <DateCard hasValue={!!dateRange.endDate}>
+            <DateCardLabel>Check-out</DateCardLabel>
+            {endDateInfo ? (
+              <DateCardContent>
+                <DateCardDay>{endDateInfo.day}</DateCardDay>
+                <DateCardDetails>
+                  <DateCardMonth>{endDateInfo.month}</DateCardMonth>
+                  <DateCardWeekday>{endDateInfo.weekday}</DateCardWeekday>
+                </DateCardDetails>
+              </DateCardContent>
+            ) : (
+              <DateCardPlaceholder>Select date</DateCardPlaceholder>
+            )}
+            <HiddenDateInput
               type="date"
               value={dateRange.endDate}
               onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
               onClick={handleDateInputClick}
               min={dateRange.startDate || new Date().toISOString().split('T')[0]}
               disabled={disabled}
-              placeholder="Select date"
             />
-          </DateInputWrapper>
-        </DateInputGroup>
+          </DateCard>
+        </DateCardsWrapper>
         {dateRange.startDate && dateRange.endDate && (
           <ConfirmButton onClick={handleDateConfirm} disabled={disabled}>
             Confirm Dates
@@ -265,13 +321,16 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
       onSelect(totalText);
     };
 
+    const totalTravelers = travelers.adults + travelers.children + travelers.infants;
+
     return (
       <TravelersContainer>
         <TravelerRow>
           <TravelerInfo>
-            <Users size={18} />
-            <TravelerLabel>Adults</TravelerLabel>
-            <TravelerAge>Age 12+</TravelerAge>
+            <TravelerDetails>
+              <TravelerLabel>Adults</TravelerLabel>
+              <TravelerAge>Age 12+</TravelerAge>
+            </TravelerDetails>
           </TravelerInfo>
           <CounterControls>
             <CounterButton onClick={() => updateCount('adults', -1)} disabled={disabled || travelers.adults <= 1}>
@@ -286,9 +345,10 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
 
         <TravelerRow>
           <TravelerInfo>
-            <Users size={18} />
-            <TravelerLabel>Children</TravelerLabel>
-            <TravelerAge>Age 2-11</TravelerAge>
+            <TravelerDetails>
+              <TravelerLabel>Children</TravelerLabel>
+              <TravelerAge>Age 2-11</TravelerAge>
+            </TravelerDetails>
           </TravelerInfo>
           <CounterControls>
             <CounterButton onClick={() => updateCount('children', -1)} disabled={disabled || travelers.children <= 0}>
@@ -303,9 +363,10 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
 
         <TravelerRow>
           <TravelerInfo>
-            <Users size={18} />
-            <TravelerLabel>Infants</TravelerLabel>
-            <TravelerAge>Under 2</TravelerAge>
+            <TravelerDetails>
+              <TravelerLabel>Infants</TravelerLabel>
+              <TravelerAge>Under 2</TravelerAge>
+            </TravelerDetails>
           </TravelerInfo>
           <CounterControls>
             <CounterButton onClick={() => updateCount('infants', -1)} disabled={disabled || travelers.infants <= 0}>
@@ -319,8 +380,7 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
         </TravelerRow>
 
         <ConfirmButton onClick={handleTravelersConfirm} disabled={disabled}>
-          Continue with {travelers.adults + travelers.children + travelers.infants} traveler
-          {travelers.adults + travelers.children + travelers.infants > 1 ? 's' : ''}
+          Continue with {totalTravelers} traveler{totalTravelers > 1 ? 's' : ''}
         </ConfirmButton>
       </TravelersContainer>
     );
@@ -343,9 +403,31 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
       onSelect(action);
     };
 
+    // 날짜 포맷팅
+    const formatDate = (dateStr: string) => {
+      if (!dateStr) return '';
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    };
+
+    // 총 인원 계산
+    const totalTravelers = (adults || 0) + (children || 0) + (infants || 0);
+
+    // 일수 계산
+    const getDays = () => {
+      if (!startDate || !endDate) return null;
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    };
+
+    const days = getDays();
+
     return (
       <ConfirmCard>
-        <ConfirmCardTitle>Trip Summary</ConfirmCardTitle>
+        <ConfirmCardHeader>
+          <ConfirmCardTitle>Trip Summary</ConfirmCardTitle>
+        </ConfirmCardHeader>
         <ConfirmCardContent>
           {destination && (
             <ConfirmItem>
@@ -355,8 +437,11 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
           )}
           {startDate && endDate && (
             <ConfirmItem>
-              <ConfirmLabel>Travel Dates</ConfirmLabel>
-              <ConfirmValue>{startDate} ~ {endDate}</ConfirmValue>
+              <ConfirmLabel>Dates</ConfirmLabel>
+              <ConfirmValue>
+                {formatDate(startDate)} - {formatDate(endDate)}
+                {days && <ConfirmValueBadge>{days} days</ConfirmValueBadge>}
+              </ConfirmValue>
             </ConfirmItem>
           )}
           {adults && (
@@ -376,10 +461,10 @@ const ChatUIActions: FC<ChatUIActionsProps> = ({ uiAction, onSelect, disabled, m
             </ConfirmItem>
           )}
         </ConfirmCardContent>
+        <ConfirmCardHint>
+          Need to change something? Just type in the chat below.
+        </ConfirmCardHint>
         <ConfirmCardActions>
-          <SecondaryButton onClick={() => handleConfirmAction('edit')} disabled={disabled}>
-            Edit Details
-          </SecondaryButton>
           <PrimaryButton onClick={() => handleConfirmAction('confirm')} disabled={disabled}>
             Generate Itinerary
           </PrimaryButton>
@@ -440,6 +525,7 @@ const ChipsContainer = styled.div`
   flex-direction: column;
   gap: 12px;
   margin-top: 12px;
+  max-width: 400px;
 `;
 
 const ChipsGrid = styled.div`
@@ -448,24 +534,46 @@ const ChipsGrid = styled.div`
   gap: 8px;
 `;
 
-const Chip = styled.button<{ selected?: boolean; disabled?: boolean }>`
+const StyleChip = styled.button<{ selected?: boolean; disabled?: boolean }>`
+  position: relative;
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
+  padding: 10px 16px;
   background: ${({ selected }) => (selected ? 'var(--color-tumakr-maroon)' : 'white')};
   color: ${({ selected }) => (selected ? 'white' : '#333')};
   border: 1px solid ${({ selected }) => (selected ? 'var(--color-tumakr-maroon)' : '#e5e5e5')};
   border-radius: 20px;
-  font-size: 13px;
+  font-size: 14px;
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
   opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
   transition: all 0.15s ease;
 
   &:hover:not(:disabled) {
     border-color: var(--color-tumakr-maroon);
-    background: ${({ selected }) => (selected ? 'var(--color-tumakr-maroon)' : 'rgba(101, 29, 42, 0.05)')};
   }
+`;
+
+const StyleChipLabel = styled.span`
+  font-weight: 500;
+`;
+
+const StyleChipCheck = styled.span`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ChipsFooter = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+`;
+
+const SelectedCount = styled.span`
+  font-size: 13px;
+  color: #666;
 `;
 
 const ConfirmButton = styled.button<{ disabled?: boolean }>`
@@ -488,117 +596,125 @@ const ConfirmButton = styled.button<{ disabled?: boolean }>`
 const DatePickerContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   margin-top: 12px;
   width: 100%;
-  max-width: 420px;
-  position: relative;
-  z-index: 100;
+  max-width: 360px;
   background: white;
   padding: 16px;
   border: 1px solid #e5e5e5;
   border-radius: 12px;
 `;
 
-const DateInputGroup = styled.div`
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
-`;
-
-const DateInputWrapper = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 140px;
-`;
-
-const DateLabel = styled.span`
-  font-size: 12px;
-  color: #666;
-`;
-
-const DateInput = styled.input`
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
-  font-size: 16px; /* 모바일에서 자동 확대 방지 */
-  background: white;
-  cursor: pointer;
-  min-height: 48px;
-  color: #333;
-
-  /* 모바일/크로스 브라우저 호환성 */
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  pointer-events: auto;
-  touch-action: manipulation;
-  position: relative;
-  z-index: 10;
-
-  /* Date input 스타일링 */
-  &::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    padding: 8px;
-    margin-left: 4px;
-    opacity: 1;
-    background-color: transparent;
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 24px;
-    height: 24px;
-  }
-
-  &::-webkit-date-and-time-value {
-    text-align: left;
-  }
-
-  /* iOS Safari 날짜 입력 수정 */
-  &::-webkit-datetime-edit {
-    padding: 0;
-  }
-
-  &::-webkit-datetime-edit-fields-wrapper {
-    padding: 0;
-  }
-
-  &:focus {
-    outline: none;
-    border-color: var(--color-tumakr-maroon);
-    box-shadow: 0 0 0 3px rgba(101, 29, 42, 0.1);
-  }
-
-  &:hover:not(:disabled) {
-    border-color: var(--color-tumakr-maroon);
-    background: #fafafa;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background: #f5f5f5;
-    pointer-events: none;
-  }
-`;
-
-const DateSeparator = styled.div`
+const DateCardsWrapper = styled.div`
   display: flex;
   align-items: center;
-  padding-bottom: 12px;
+  gap: 10px;
+`;
+
+const DateCard = styled.label<{ hasValue?: boolean }>`
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px;
+  background: ${({ hasValue }) => hasValue ? '#fafafa' : 'white'};
+  border: 1px solid ${({ hasValue }) => hasValue ? 'var(--color-tumakr-maroon)' : '#e5e5e5'};
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-height: 70px;
+
+  &:hover {
+    border-color: var(--color-tumakr-maroon);
+  }
+`;
+
+const DateCardLabel = styled.span`
+  font-size: 11px;
+  font-weight: 500;
+  color: #888;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+`;
+
+const DateCardContent = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+`;
+
+const DateCardDay = styled.span`
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1;
+`;
+
+const DateCardDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const DateCardMonth = styled.span`
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+`;
+
+const DateCardWeekday = styled.span`
+  font-size: 11px;
   color: #999;
+`;
+
+const DateCardPlaceholder = styled.span`
+  font-size: 13px;
+  color: #bbb;
+  margin-top: 4px;
+`;
+
+const HiddenDateInput = styled.input`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 10;
+
+  &::-webkit-calendar-picker-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+`;
+
+const DateArrow = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: #ccc;
+  flex-shrink: 0;
+`;
+
+const DateDuration = styled.span`
+  font-size: 10px;
+  font-weight: 500;
+  color: #888;
+  white-space: nowrap;
 `;
 
 const TravelersContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   margin-top: 12px;
-  max-width: 350px;
+  max-width: 320px;
   background: white;
   border: 1px solid #e5e5e5;
   border-radius: 12px;
@@ -609,24 +725,35 @@ const TravelerRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0;
+  padding: 10px 0;
   border-bottom: 1px solid #f0f0f0;
 
   &:last-of-type {
     border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  &:first-of-type {
+    padding-top: 0;
   }
 `;
 
 const TravelerInfo = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
   color: #333;
+`;
+
+const TravelerDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 `;
 
 const TravelerLabel = styled.span`
   font-size: 14px;
   font-weight: 500;
+  color: #1a1a1a;
 `;
 
 const TravelerAge = styled.span`
@@ -661,11 +788,10 @@ const CounterButton = styled.button<{ disabled?: boolean }>`
 
 const CounterValue = styled.span`
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
   min-width: 24px;
   text-align: center;
   color: #1a1a1a;
-  display: inline-block;
 `;
 
 const ConfirmCard = styled.div`
@@ -674,13 +800,17 @@ const ConfirmCard = styled.div`
   border: 1px solid #e5e5e5;
   border-radius: 12px;
   overflow: hidden;
-  max-width: 400px;
+  max-width: 360px;
 `;
 
-const ConfirmCardTitle = styled.div`
-  padding: 16px;
+const ConfirmCardHeader = styled.div`
+  padding: 14px 16px;
   background: #fafafa;
   border-bottom: 1px solid #e5e5e5;
+`;
+
+const ConfirmCardTitle = styled.h3`
+  margin: 0;
   font-size: 14px;
   font-weight: 600;
   color: #333;
@@ -709,34 +839,38 @@ const ConfirmValue = styled.span`
   color: #1a1a1a;
   font-weight: 500;
   text-align: right;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+`;
+
+const ConfirmValueBadge = styled.span`
+  display: inline-flex;
+  padding: 2px 6px;
+  background: #f0f0f0;
+  color: #666;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+`;
+
+const ConfirmCardHint = styled.div`
+  padding: 10px 16px;
+  font-size: 12px;
+  color: #888;
+  background: #fafafa;
+  border-top: 1px solid #f0f0f0;
 `;
 
 const ConfirmCardActions = styled.div`
-  display: flex;
-  gap: 8px;
-  padding: 16px;
+  padding: 12px 16px;
   border-top: 1px solid #e5e5e5;
 `;
 
-const SecondaryButton = styled.button<{ disabled?: boolean }>`
-  flex: 1;
-  padding: 12px 16px;
-  background: white;
-  color: #666;
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
-  font-size: 14px;
-  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
-  opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
-  transition: all 0.15s ease;
-
-  &:hover:not(:disabled) {
-    background: #f5f5f5;
-  }
-`;
-
 const PrimaryButton = styled.button<{ disabled?: boolean }>`
-  flex: 1;
+  width: 100%;
   padding: 12px 16px;
   background: var(--color-tumakr-maroon);
   color: white;
@@ -746,7 +880,7 @@ const PrimaryButton = styled.button<{ disabled?: boolean }>`
   font-weight: 500;
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
   opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
-  transition: all 0.15s ease;
+  transition: background 0.15s ease;
 
   &:hover:not(:disabled) {
     background: #4a1520;

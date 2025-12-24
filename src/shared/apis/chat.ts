@@ -129,22 +129,6 @@ export const generateEstimate = async (
   return response.data;
 };
 
-// Get daily estimate quota
-export interface EstimateQuota {
-  used: number;
-  limit: number;
-  remaining: number;
-}
-
-export const getEstimateQuota = async (accessToken: string): Promise<EstimateQuota> => {
-  const response = await axios.get(`${API_URL}/chat/ai/estimate-quota`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-  return response.data;
-};
-
 // Get All Sessions API (user's sessions only)
 export const getAllChatSessions = async (
   accessToken: string,
@@ -190,8 +174,6 @@ export interface ExpertRequestFormData {
   budgetCurrency: 'USD' | 'KRW';
   accommodationPreference: string;
   specialRequests: string;
-  contactPreference: 'email' | 'phone' | 'kakao';
-  urgency: 'flexible' | 'soon' | 'urgent';
 }
 
 // Send to Expert API
@@ -219,23 +201,6 @@ export const sendToExpert = async (
       flexible: 'Flexible (open to suggestions)',
     };
     messageParts.push(`Accommodation: ${accommodationLabels[formData.accommodationPreference] || formData.accommodationPreference}`);
-  }
-
-  if (formData.urgency && formData.urgency !== 'flexible') {
-    const urgencyLabels: Record<string, string> = {
-      soon: 'Need quote within a week',
-      urgent: 'Need quote ASAP',
-    };
-    messageParts.push(`Urgency: ${urgencyLabels[formData.urgency]}`);
-  }
-
-  if (formData.contactPreference) {
-    const contactLabels: Record<string, string> = {
-      email: 'Preferred contact: Email',
-      phone: 'Preferred contact: Phone',
-      kakao: 'Preferred contact: KakaoTalk',
-    };
-    messageParts.push(contactLabels[formData.contactPreference]);
   }
 
   if (formData.specialRequests?.trim()) {
