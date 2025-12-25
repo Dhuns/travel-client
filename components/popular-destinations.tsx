@@ -17,7 +17,7 @@ export async function PopularDestinations() {
   const backendTours = await getPopularTours();
   const popularDestinations = backendTours
     .slice(0, 4)
-    .map(tour => transformBackendTourToFrontend(tour));
+    .map((tour) => transformBackendTourToFrontend(tour));
 
   return (
     <section className="py-20 bg-white">
@@ -33,13 +33,13 @@ export async function PopularDestinations() {
             Discover Korea&apos;s most beloved destinations with our expert local guides
           </p>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
           {popularDestinations.map((tour, index) => (
             <div
               key={index}
               className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group flex flex-col h-full"
             >
-              <div className="relative aspect-[4/3] overflow-hidden">
+              <div className="relative aspect-4/3 overflow-hidden">
                 <Image
                   src={tour.image || "/placeholder.svg"}
                   alt={tour.title}
@@ -51,11 +51,6 @@ export async function PopularDestinations() {
                 <div className="absolute top-4 left-4">
                   <span className="bg-tumakr-maroon/90 text-white px-3 py-1 rounded-full text-xs font-medium">
                     {categoryDisplayNames[tour.category]}
-                  </span>
-                </div>
-                <div className="absolute top-4 right-4">
-                  <span className="bg-white text-tumakr-maroon px-3 py-1 rounded-full text-xs font-bold">
-                    {tour.price}
                   </span>
                 </div>
                 <div className="absolute bottom-3 right-3">

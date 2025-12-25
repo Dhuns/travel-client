@@ -1,23 +1,52 @@
-import { ChatContext, ChatMessage, ChatSession } from "../types/chat";
-import { useAuthStore } from "./authStore";
 import {
   createChatSession,
+  deleteChatSession,
   generateAIResponse,
   generateEstimate,
-  getChatMessages,
-  getChatSession,
-  sendChatMessage,
-  updateChatSession,
   getAllChatSessions,
+  getChatSession,
+  updateChatSession,
 } from "../apis/chat";
 import {
-  MAX_CHAT_SESSIONS,
   CHAT_STORAGE_KEY,
-  MIN_MESSAGES_FOR_ESTIMATE,
+  MAX_CHAT_SESSIONS,
   MESSAGES,
+  MIN_MESSAGES_FOR_ESTIMATE,
 } from "../constants/chat";
+import { ChatContext, ChatMessage, ChatSession } from "../types/chat";
+import { useAuthStore } from "./authStore";
 
 import { create } from "zustand";
+
+// UUID 생성 함수 (crypto.randomUUID 폴백)
+const generateUUID = (): string => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for older browsers
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
+// Generation progress steps
+export interface GenerationProgress {
+  step: 'analyzing' | 'creating' | 'optimizing' | 'finalizing';
+  message: string;
+  progress: number;
+}
+
+// 모듈 레벨에서 progressInterval 관리 (충돌 방지)
+let activeProgressInterval: NodeJS.Timeout | null = null;
+
+const clearActiveProgressInterval = () => {
+  if (activeProgressInterval) {
+    clearInterval(activeProgressInterval);
+    activeProgressInterval = null;
+  }
+};
 
 interface ChatStore {
   // 상태
@@ -27,6 +56,7 @@ interface ChatStore {
   isLoading: boolean;
   isChatOpen: boolean;
   isGeneratingEstimate: boolean;
+  generationProgress: GenerationProgress | null;
 
   // Getters
   getCurrentSession: () => ChatSession | null;
@@ -35,19 +65,18 @@ interface ChatStore {
   // 액션
   initSession: () => Promise<boolean>;
   loadSession: (sessionId: string) => Promise<void>;
-  loadUserSessions: (userId: number) => Promise<void>;
+  loadUserSessions: () => Promise<void>;
   addMessage: (message: Omit<ChatMessage, "id" | "timestamp">) => Promise<void>;
   sendUserMessage: (content: string) => Promise<void>;
   updateLastMessage: (content: string) => void;
   setIsTyping: (isTyping: boolean) => void;
   updateContext: (context: Partial<ChatContext>) => Promise<void>;
-  generateEstimateForSession: (userId?: number) => Promise<boolean>;
+  updateSessionStatus: (sessionId: string, status: ChatSession['status']) => void;
+  generateEstimateForSession: () => Promise<boolean>;
   clearSession: () => void;
   clearAllSessions: () => void;
-  deleteSession: (sessionId: string) => void;
-  loadFromStorage: () => void;
+  deleteSession: (sessionId: string) => Promise<void>;
   toggleChat: () => void;
-  saveToStorage: () => void;
 }
 
 const useChatStore = create<ChatStore>((set, get) => ({
@@ -58,6 +87,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
   isLoading: false,
   isChatOpen: false,
   isGeneratingEstimate: false,
+  generationProgress: null,
 
   // 현재 세션 가져오기
   getCurrentSession: () => {
@@ -113,13 +143,17 @@ const useChatStore = create<ChatStore>((set, get) => ({
       set({ isLoading: true });
 
       // 로그인한 사용자 정보 가져오기
-      const userId = authState.user?.id;
+      const accessToken = authState.accessToken;
+      if (!accessToken) {
+        console.warn("No access token available");
+        set({ isLoading: false });
+        return false;
+      }
 
       // 백엔드에 세션 생성
-      const newSession = await createChatSession({
+      const newSession = await createChatSession(accessToken, {
         title: "New Chat",
         context: {},
-        userId, // 로그인한 사용자 ID 전달
       });
 
       // 로컬 상태 업데이트
@@ -137,7 +171,6 @@ const useChatStore = create<ChatStore>((set, get) => ({
         isLoading: false,
       });
 
-      get().saveToStorage();
       return true;
     } catch (error) {
       // Failed to create session - silent fail
@@ -151,28 +184,94 @@ const useChatStore = create<ChatStore>((set, get) => ({
     try {
       set({ isLoading: true });
 
+      // 로그인 확인 및 accessToken 가져오기
+      const authState = useAuthStore.getState();
+      const accessToken = authState.accessToken;
+      if (!accessToken) {
+        set({ isLoading: false });
+        return;
+      }
+
       // 백엔드에서 세션 및 메시지 가져오기
-      const session = await getChatSession(sessionId);
+      const session = await getChatSession(accessToken, sessionId);
 
       const { sessions } = get();
-      const existingSessionIndex = sessions.findIndex(
-        (s) => s.sessionId === sessionId
-      );
+      const existingSessionIndex = sessions.findIndex((s) => s.sessionId === sessionId);
 
       if (existingSessionIndex >= 0) {
         // 기존 세션 업데이트
         const updatedSessions = [...sessions];
+        const existingSession = sessions[existingSessionIndex];
+
+        // localStorage에서 pending UI action 복원
+        let pendingUIAction: any = null;
+        try {
+          const uiActionsKey = 'pending_ui_actions';
+          const stored = localStorage.getItem(uiActionsKey);
+          if (stored) {
+            const uiActions = JSON.parse(stored);
+            pendingUIAction = uiActions[sessionId];
+          }
+        } catch (error) {
+          console.error('Failed to restore pending UI action:', error);
+        }
+
+        // 메시지 목록에서 가장 최근 메시지 시간 계산
+        const mappedMessages =
+          session.messages?.map((m) => {
+            // 저장된 uiAction이 이 메시지에 해당하면 복원
+            if (pendingUIAction && m.messageId === pendingUIAction.messageId) {
+              return {
+                ...m,
+                timestamp: new Date(m.sentAt || m.timestamp),
+                metadata: {
+                  ...m.metadata,
+                  uiAction: pendingUIAction.uiAction,
+                },
+              };
+            }
+            return {
+              ...m,
+              timestamp: new Date(m.sentAt || m.timestamp),
+            };
+          }) || [];
+
+        // 메시지가 있으면 가장 최근 메시지의 시간을 사용
+        let actualLastMessageAt: Date | undefined;
+        if (mappedMessages.length > 0) {
+          const latestMessage = mappedMessages.reduce((latest, msg) => {
+            const msgTime = msg.timestamp.getTime();
+            const latestTime = latest.timestamp.getTime();
+            return msgTime > latestTime ? msg : latest;
+          });
+          actualLastMessageAt = latestMessage.timestamp;
+        } else {
+          // 메시지가 없으면 서버의 lastMessageAt 사용
+          actualLastMessageAt = session.lastMessageAt
+            ? new Date(session.lastMessageAt)
+            : undefined;
+        }
+
+        // 클라이언트의 lastMessageAt이 더 최신이면 유지 (사용자가 방금 메시지를 보낸 경우)
+        const clientLastMessageAt = existingSession.lastMessageAt
+          ? existingSession.lastMessageAt.getTime()
+          : 0;
+        const serverLastMessageAt = actualLastMessageAt
+          ? actualLastMessageAt.getTime()
+          : 0;
+
+        // 클라이언트가 더 최신이고 5초 이내 차이면 클라이언트 값 유지 (네트워크 지연 고려)
+        const timeDiff = Math.abs(clientLastMessageAt - serverLastMessageAt);
+        const preservedLastMessageAt =
+          clientLastMessageAt > serverLastMessageAt && timeDiff < 5000
+            ? existingSession.lastMessageAt
+            : actualLastMessageAt;
+
         updatedSessions[existingSessionIndex] = {
           ...session,
           createdAt: new Date(session.createdAt),
-          lastMessageAt: session.lastMessageAt
-            ? new Date(session.lastMessageAt)
-            : undefined,
-          messages:
-            session.messages?.map((m) => ({
-              ...m,
-              timestamp: new Date(m.sentAt || m.timestamp),
-            })) || [],
+          lastMessageAt: preservedLastMessageAt,
+          messages: mappedMessages,
         };
 
         set({
@@ -182,6 +281,19 @@ const useChatStore = create<ChatStore>((set, get) => ({
         });
       } else {
         // 새로운 세션 추가
+        // localStorage에서 pending UI action 복원
+        let pendingUIAction: any = null;
+        try {
+          const uiActionsKey = 'pending_ui_actions';
+          const stored = localStorage.getItem(uiActionsKey);
+          if (stored) {
+            const uiActions = JSON.parse(stored);
+            pendingUIAction = uiActions[sessionId];
+          }
+        } catch (error) {
+          console.error('Failed to restore pending UI action:', error);
+        }
+
         set({
           sessions: [
             ...sessions,
@@ -192,47 +304,89 @@ const useChatStore = create<ChatStore>((set, get) => ({
                 ? new Date(session.lastMessageAt)
                 : undefined,
               messages:
-                session.messages?.map((m) => ({
-                  ...m,
-                  timestamp: new Date(m.sentAt || m.timestamp),
-                })) || [],
+                session.messages?.map((m) => {
+                  // 저장된 uiAction이 이 메시지에 해당하면 복원
+                  if (pendingUIAction && m.messageId === pendingUIAction.messageId) {
+                    return {
+                      ...m,
+                      timestamp: new Date(m.sentAt || m.timestamp),
+                      metadata: {
+                        ...m.metadata,
+                        uiAction: pendingUIAction.uiAction,
+                      },
+                    };
+                  }
+                  return {
+                    ...m,
+                    timestamp: new Date(m.sentAt || m.timestamp),
+                  };
+                }) || [],
             },
           ],
           currentSessionId: sessionId,
           isLoading: false,
         });
       }
-
-      get().saveToStorage();
     } catch (error) {
-      // Failed to load session - silent fail
-      set({ isLoading: false });
+      // Failed to load session
+      const axiosError = error as { response?: { status?: number } };
+      const statusCode = axiosError?.response?.status;
+
+      // 401/403 에러 시 토큰 만료 - 로그아웃 처리
+      if (statusCode === 401 || statusCode === 403) {
+        console.warn('[ChatStore] Token expired, clearing auth state');
+        useAuthStore.getState().clearAuth();
+        set({ isLoading: false });
+        return;
+      }
+
+      // 404 에러 (세션이 삭제되었거나 존재하지 않음)
+      if (statusCode === 404) {
+        // 로컬 세션 목록에서도 제거
+        const { sessions, currentSessionId } = get();
+        const updatedSessions = sessions.filter((s) => s.sessionId !== sessionId);
+
+        set({
+          sessions: updatedSessions,
+          currentSessionId: currentSessionId === sessionId ? null : currentSessionId,
+          isLoading: false,
+        });
+      } else {
+        // 다른 에러는 조용히 무시
+        set({ isLoading: false });
+      }
     }
   },
 
   // 사용자의 모든 세션 불러오기 (서버에서)
-  loadUserSessions: async (userId: number) => {
+  loadUserSessions: async () => {
     try {
       set({ isLoading: true });
 
-      // 서버에서 사용자의 세션 목록 가져오기
-      const { sessions: serverSessions } = await getAllChatSessions({
-        userId,
+      // 로그인 확인 및 accessToken 가져오기
+      const authState = useAuthStore.getState();
+      const accessToken = authState.accessToken;
+
+      if (!accessToken) {
+        set({ isLoading: false });
+        return;
+      }
+
+      // 서버에서 사용자의 세션 목록 가져오기 (userId는 JWT에서 추출됨)
+      const response = await getAllChatSessions(accessToken, {
         page: 1,
-        countPerPage: 50, // 최근 50개 세션
+        limit: 50, // 최근 50개 세션
       });
 
-      // 세션 데이터 변환 - 서버 응답 타입
-      type ServerSessionResponse = {
-        sessionId: string;
-        status: 'active' | 'converted' | 'abandoned';
-        context: ChatContext;
-        batchId?: number;
-        title?: string;
-        createdAt: string;
-        lastActivityAt?: string;
-      };
-      const formattedSessions: ChatSession[] = (serverSessions as unknown as ServerSessionResponse[]).map((session) => ({
+      const { sessions: serverSessions } = response;
+
+      if (!serverSessions || !Array.isArray(serverSessions)) {
+        set({ sessions: [], isLoading: false });
+        return;
+      }
+
+      // 세션 데이터 변환
+      const formattedSessions: ChatSession[] = serverSessions.map((session: any) => ({
         ...session,
         createdAt: new Date(session.createdAt),
         lastMessageAt: session.lastActivityAt
@@ -245,11 +399,14 @@ const useChatStore = create<ChatStore>((set, get) => ({
         sessions: formattedSessions,
         isLoading: false,
       });
-
-      get().saveToStorage();
-    } catch (error) {
-      console.error("Failed to load user sessions:", error);
-      set({ isLoading: false });
+    } catch (error: any) {
+      // 401/403 에러 시 토큰 만료 - 로그아웃 처리
+      const statusCode = error?.response?.status;
+      if (statusCode === 401 || statusCode === 403) {
+        console.warn('[ChatStore] Token expired, clearing auth state');
+        useAuthStore.getState().clearAuth();
+      }
+      set({ isLoading: false, sessions: [] });
     }
   },
 
@@ -260,7 +417,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
 
     const newMessage: ChatMessage = {
       ...message,
-      id: `temp-${Date.now()}`, // 임시 ID
+      id: `temp-${generateUUID()}`, // 고유 임시 ID (UUID)
       timestamp: new Date(),
     };
 
@@ -282,7 +439,6 @@ const useChatStore = create<ChatStore>((set, get) => ({
     });
 
     set({ sessions: updatedSessions });
-    get().saveToStorage();
   },
 
   // 사용자 메시지 전송 및 AI 응답 받기
@@ -291,6 +447,14 @@ const useChatStore = create<ChatStore>((set, get) => ({
     if (!currentSessionId) return;
 
     try {
+      // 로그인 확인 및 accessToken 가져오기
+      const authState = useAuthStore.getState();
+      const accessToken = authState.accessToken;
+      if (!accessToken) {
+        console.warn("No access token available");
+        return;
+      }
+
       // 1. 사용자 메시지 로컬 추가
       await addMessage({
         role: "user",
@@ -300,11 +464,40 @@ const useChatStore = create<ChatStore>((set, get) => ({
 
       // 2. AI 응답 생성 요청
       setIsTyping(true);
-      const aiMessage = await generateAIResponse(currentSessionId, content);
+      const aiMessage = await generateAIResponse(accessToken, currentSessionId, content);
 
       // 3. AI 응답 로컬 추가 및 백엔드에서 업데이트된 컨텍스트/제목 반영
       const { sessions } = get();
-      const aiResponse = aiMessage as ChatMessage & { updatedContext?: ChatContext; updatedTitle?: string };
+      const aiResponse = aiMessage as ChatMessage & {
+        updatedContext?: ChatContext;
+        updatedTitle?: string;
+      };
+
+      // 현재 세션의 기존 batchId 확인 (수정 요청 시 재생성 감지용)
+      const currentSessionData = sessions.find(s => s.sessionId === currentSessionId);
+      const existingBatchId = currentSessionData?.batchId;
+
+      // estimate 타입 메시지인 경우 batchId 추출
+      const isEstimateResponse = aiMessage.type === 'estimate';
+      const estimateBatchId = aiMessage.metadata?.batchId;
+
+      // uiAction이 있으면 localStorage에 저장 (새로고침 후 복원용)
+      if (aiMessage.metadata?.uiAction && aiMessage.messageId) {
+        try {
+          const uiActionsKey = 'pending_ui_actions';
+          const stored = localStorage.getItem(uiActionsKey);
+          const uiActions = stored ? JSON.parse(stored) : {};
+          uiActions[currentSessionId] = {
+            messageId: aiMessage.messageId,
+            uiAction: aiMessage.metadata.uiAction,
+            timestamp: Date.now(),
+          };
+          localStorage.setItem(uiActionsKey, JSON.stringify(uiActions));
+        } catch (error) {
+          console.error('Failed to store pending UI action:', error);
+        }
+      }
+
       const updatedSessions = sessions.map((session) => {
         if (session.sessionId === currentSessionId) {
           return {
@@ -315,19 +508,20 @@ const useChatStore = create<ChatStore>((set, get) => ({
                 ...aiMessage,
                 id: aiMessage.messageId || `msg-${Date.now()}`,
                 messageId: aiMessage.messageId,
-                timestamp: aiMessage.sentAt
-                  ? new Date(aiMessage.sentAt)
-                  : new Date(),
-                sentAt: aiMessage.sentAt
-                  ? new Date(aiMessage.sentAt)
-                  : undefined,
+                timestamp: aiMessage.sentAt ? new Date(aiMessage.sentAt) : new Date(),
+                sentAt: aiMessage.sentAt ? new Date(aiMessage.sentAt) : undefined,
               },
             ],
             // 백엔드가 추출한 컨텍스트 반영
             context: aiResponse.updatedContext || session.context,
             // 백엔드에서 업데이트된 제목 반영 (예: "Seoul Trip")
             title: aiResponse.updatedTitle || session.title,
-            lastMessageAt: new Date(),
+            // 백엔드 응답의 sentAt 시간을 사용 (서버 시간이 정확함)
+            lastMessageAt: aiMessage.sentAt ? new Date(aiMessage.sentAt) : new Date(),
+            // estimate 응답인 경우 batchId 업데이트
+            batchId: isEstimateResponse && estimateBatchId ? estimateBatchId : session.batchId,
+            // 견적서 생성 완료 상태 업데이트
+            status: isEstimateResponse ? 'estimate_ready' : session.status,
           };
         }
         return session;
@@ -338,13 +532,26 @@ const useChatStore = create<ChatStore>((set, get) => ({
         isTyping: false,
       });
 
-      get().saveToStorage();
+      // estimate 타입 응답이거나 batchId가 있는 세션의 응답이면 세션 다시 로드
+      // (서버에서 추가 메시지가 생성되었을 수 있음 - 견적 카드, showLooksGoodButton 등)
+      // existingBatchId: 수정 요청 시 세션에 이미 batchId가 있으면 재생성 발생 가능
+      if (isEstimateResponse || estimateBatchId || existingBatchId) {
+        try {
+          await get().loadSession(currentSessionId);
+        } catch (reloadError) {
+          console.error('Failed to reload session after estimate response:', reloadError);
+        }
+      }
 
       // AI 응답 후 견적서 생성이 가능한지 체크 (enhanced conditions)
       const currentSession = updatedSessions.find(
         (s) => s.sessionId === currentSessionId
       );
-      if (currentSession && !currentSession.hasShownEstimatePrompt && !currentSession.batchId) {
+      if (
+        currentSession &&
+        !currentSession.hasShownEstimatePrompt &&
+        !currentSession.batchId
+      ) {
         // Update current session temporarily to check canGenerateEstimate
         set({ sessions: updatedSessions });
 
@@ -369,19 +576,78 @@ const useChatStore = create<ChatStore>((set, get) => ({
           });
 
           set({ sessions: finalSessions });
-          get().saveToStorage();
         }
       }
-    } catch (error) {
-      // Failed to send message - silent fail
+    } catch (error: any) {
       setIsTyping(false);
 
-      // Show error message
+      // 에러 유형 분류 및 상세 메시지
+      let errorMessage = "An unexpected error occurred.";
+      let isRetryable = true;
+      let retryAfter = 5;
+      let shouldReloadSession = false;
+
+      const errorMsg = error?.message?.toLowerCase() || '';
+      const errorCode = error?.code?.toLowerCase() || '';
+      const statusCode = error?.response?.status;
+
+      // Timeout detection (axios timeout or network timeout)
+      if (errorMsg.includes('timeout') || errorCode.includes('timeout') || errorCode === 'econnaborted' || statusCode === 408) {
+        errorMessage = "The response is taking longer than expected. Checking for messages...";
+        retryAfter = 5;
+        shouldReloadSession = true; // The response might have been saved on the server
+      } else if (errorMsg.includes('network') || statusCode === 0) {
+        errorMessage = "Network connection issue. Please check your internet connection.";
+        retryAfter = 10;
+        shouldReloadSession = true;
+      } else if (statusCode === 503 || statusCode === 502) {
+        errorMessage = "The server is temporarily unavailable. Our team has been notified.";
+        retryAfter = 60;
+      } else if (statusCode === 429) {
+        errorMessage = "Too many requests. Please wait a moment before trying again.";
+        retryAfter = 30;
+      } else if (statusCode === 401 || statusCode === 403) {
+        errorMessage = "Session expired. Please log in again.";
+        isRetryable = false;
+        // 토큰 만료 - 로그아웃 처리
+        useAuthStore.getState().clearAuth();
+      }
+
+      // If timeout or network error, try to reload session to get any saved messages
+      if (shouldReloadSession && currentSessionId) {
+        try {
+          // Wait a bit for server to finish processing
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          await get().loadSession(currentSessionId);
+
+          // Check if the session now has more messages (AI response was saved)
+          const reloadedSession = get().getCurrentSession();
+          const lastMessage = reloadedSession?.messages[reloadedSession.messages.length - 1];
+
+          if (lastMessage?.role === 'assistant' && !lastMessage.metadata?.isError) {
+            // Response was found! No need to show error
+            return;
+          }
+        } catch (reloadError) {
+          // Reload failed, continue to show error message
+        }
+      }
+
+      // 에러 메시지에 재시도 정보 포함
+      const fullMessage = isRetryable
+        ? `${errorMessage}\n\nPlease try again${retryAfter > 10 ? ` in ${retryAfter} seconds` : ''}.`
+        : `${errorMessage}\n\nPlease refresh the page.`;
+
       await addMessage({
         role: "assistant",
         type: "system",
-        content:
-          "Sorry, a temporary error occurred 😥\nPlease try again in a moment.\n\nIf the problem persists, try refreshing the page!",
+        content: fullMessage,
+        metadata: {
+          isError: true,
+          isRetryable,
+          retryAfter,
+          lastUserMessage: content, // 재시도를 위해 저장
+        },
       });
     }
   },
@@ -392,10 +658,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
     if (!currentSessionId) return;
 
     const updatedSessions = sessions.map((session) => {
-      if (
-        session.sessionId === currentSessionId &&
-        session.messages.length > 0
-      ) {
+      if (session.sessionId === currentSessionId && session.messages.length > 0) {
         const messages = [...session.messages];
         const lastIndex = messages.length - 1;
         messages[lastIndex] = {
@@ -421,6 +684,14 @@ const useChatStore = create<ChatStore>((set, get) => ({
     if (!currentSessionId) return;
 
     try {
+      // 로그인 확인 및 accessToken 가져오기
+      const authState = useAuthStore.getState();
+      const accessToken = authState.accessToken;
+      if (!accessToken) {
+        console.warn("No access token available");
+        return;
+      }
+
       // 로컬 상태 업데이트
       const updatedSessions = sessions.map((session) => {
         if (session.sessionId === currentSessionId) {
@@ -447,17 +718,13 @@ const useChatStore = create<ChatStore>((set, get) => ({
       set({ sessions: updatedSessions });
 
       // 백엔드 동기화
-      const session = updatedSessions.find(
-        (s) => s.sessionId === currentSessionId
-      );
+      const session = updatedSessions.find((s) => s.sessionId === currentSessionId);
       if (session) {
-        await updateChatSession(currentSessionId, {
+        await updateChatSession(accessToken, currentSessionId, {
           context: session.context,
           title: session.title,
         });
       }
-
-      get().saveToStorage();
 
       // 필수 정보가 모두 채워졌는지 체크하고 안내 메시지 표시
       if (session && !session.hasShownEstimatePrompt && !session.batchId) {
@@ -488,7 +755,6 @@ const useChatStore = create<ChatStore>((set, get) => ({
           });
 
           set({ sessions: finalSessions });
-          get().saveToStorage();
         }
       }
     } catch (error) {
@@ -496,16 +762,70 @@ const useChatStore = create<ChatStore>((set, get) => ({
     }
   },
 
+  // 세션 상태 업데이트
+  updateSessionStatus: (sessionId: string, status: ChatSession['status']) => {
+    const { sessions } = get();
+    const updatedSessions = sessions.map((session) => {
+      if (session.sessionId === sessionId) {
+        return {
+          ...session,
+          status,
+        };
+      }
+      return session;
+    });
+    set({ sessions: updatedSessions });
+  },
+
   // 견적서 생성 (세션 기반)
-  generateEstimateForSession: async (userId) => {
-    const { currentSessionId, sessions, addMessage } = get();
+  generateEstimateForSession: async () => {
+    const { currentSessionId, sessions, addMessage, isGeneratingEstimate } = get();
     if (!currentSessionId) return false;
 
-    try {
-      set({ isGeneratingEstimate: true });
+    // 이미 생성 중이면 중복 호출 방지
+    if (isGeneratingEstimate) {
+      console.warn("Estimate generation already in progress");
+      return false;
+    }
 
-      // AI 견적서 생성 API 호출
-      const result = await generateEstimate(currentSessionId, userId);
+    try {
+      // 로그인 확인 및 accessToken 가져오기
+      const authState = useAuthStore.getState();
+      const accessToken = authState.accessToken;
+      if (!accessToken) {
+        console.warn("No access token available");
+        return false;
+      }
+
+      // 이전 progressInterval 정리 (충돌 방지)
+      clearActiveProgressInterval();
+
+      // Progress simulation helper
+      const progressSteps: GenerationProgress[] = [
+        { step: 'analyzing', message: 'Analyzing your preferences...', progress: 15 },
+        { step: 'creating', message: 'Creating personalized itinerary...', progress: 45 },
+        { step: 'optimizing', message: 'Optimizing route and schedule...', progress: 75 },
+        { step: 'finalizing', message: 'Finalizing your estimate...', progress: 95 },
+      ];
+
+      set({ isGeneratingEstimate: true, generationProgress: progressSteps[0] });
+
+      // Simulate progress updates while waiting for API
+      let currentStep = 0;
+      activeProgressInterval = setInterval(() => {
+        currentStep++;
+        if (currentStep < progressSteps.length) {
+          set({ generationProgress: progressSteps[currentStep] });
+        }
+      }, 2500); // Update every 2.5 seconds
+
+      // AI 견적서 생성 API 호출 (userId는 JWT에서 추출됨)
+      let result;
+      try {
+        result = await generateEstimate(accessToken, currentSessionId);
+      } finally {
+        clearActiveProgressInterval();
+      }
 
       // 세션에 batchId 업데이트
       const updatedSessions = sessions.map((session) => {
@@ -518,41 +838,26 @@ const useChatStore = create<ChatStore>((set, get) => ({
         return session;
       });
 
-      set({ sessions: updatedSessions, isGeneratingEstimate: false });
+      set({ sessions: updatedSessions, isGeneratingEstimate: false, generationProgress: null });
 
-      // 백엔드에 batchId 동기화 (실패해도 로컬에는 유지)
-      try {
-        await updateChatSession(currentSessionId, {
-          batchId: result.batchId,
-          status: 'active',
-        });
-      } catch (syncError) {
-        // 백엔드 동기화 실패는 로그만 출력 (사용자 경험에 영향 없음)
-        console.error('Failed to sync batchId to backend:', syncError);
-      }
+      // 서버에서 세션 다시 로드하여 생성된 메시지 가져오기
+      // (서버에서 견적 메시지와 showLooksGoodButton 메타데이터가 포함된 메시지가 생성됨)
+      await get().loadSession(currentSessionId);
 
-      // Add quote generation success message
-      await addMessage({
-        role: "assistant",
-        type: "estimate",
-        content: `🎉 Your quote has been generated!\n\n💰 Estimated Cost: ₩${result.totalAmount.toLocaleString()}\n📦 Included Items: ${result.itemCount}\n\nYou can now click the **'View My Quote'** button\nin the right panel to see the detailed itinerary!\n\n✨ Our travel experts will review and send\nyou the final quote within 24 hours.`,
-        metadata: {
-          batchId: result.batchId,
-          estimateId: result.estimateId,
-          totalAmount: result.totalAmount,
-          itemCount: result.itemCount,
-          timeline: result.timeline,
-        },
-      });
-
-      get().saveToStorage();
       return true;
     } catch (error) {
       // Failed to generate estimate - show error details
-      set({ isGeneratingEstimate: false });
+      clearActiveProgressInterval();
+      set({ isGeneratingEstimate: false, generationProgress: null });
 
-      const axiosError = error as { response?: { data?: { message?: string } }; message?: string };
-      const errorMessage = axiosError?.response?.data?.message || axiosError?.message || "An unknown error occurred.";
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
+      const errorMessage =
+        axiosError?.response?.data?.message ||
+        axiosError?.message ||
+        "An unknown error occurred.";
 
       await addMessage({
         role: "assistant",
@@ -581,72 +886,65 @@ const useChatStore = create<ChatStore>((set, get) => ({
       isLoading: false,
       isGeneratingEstimate: false,
     });
-    
+
     // localStorage에서도 삭제
     if (typeof window !== "undefined") {
       localStorage.removeItem(CHAT_STORAGE_KEY);
     }
   },
 
-  // 세션 삭제 (로컬만, DB 삭제는 나중에 추가 가능)
-  deleteSession: (sessionId: string) => {
+  // 세션 삭제 (로컬 및 서버)
+  deleteSession: async (sessionId: string) => {
+    // 인증 토큰 확인
+    const authState = useAuthStore.getState();
+    const accessToken = authState.accessToken;
+    if (!accessToken) {
+      console.warn("No access token available");
+      alert("Please sign in to continue.");
+      return;
+    }
+
+    // Optimistic update: 즉시 로컬 상태에서 세션 제거
     const { sessions, currentSessionId } = get();
+    const sessionToDelete = sessions.find((s) => s.sessionId === sessionId);
     const updatedSessions = sessions.filter((s) => s.sessionId !== sessionId);
 
     set({
       sessions: updatedSessions,
-      currentSessionId:
-        currentSessionId === sessionId ? null : currentSessionId,
+      currentSessionId: currentSessionId === sessionId ? null : currentSessionId,
     });
 
-    get().saveToStorage();
+    try {
+      // 백엔드 API 호출하여 서버에서 세션 삭제
+      await deleteChatSession(accessToken, sessionId);
+    } catch (error) {
+      // 서버 삭제 실패 시 에러 처리
+      const axiosError = error as {
+        response?: { status?: number; data?: { message?: string } };
+      };
+
+      // 404 에러면 이미 삭제된 것이므로 그냥 무시 (로컬에서는 이미 제거됨)
+      if (axiosError?.response?.status === 404) {
+        // Already removed
+      } else {
+        // 다른 에러면 롤백하고 사용자에게 알림
+        const errorMessage =
+          axiosError?.response?.data?.message || "Failed to delete chat.";
+        alert(`Delete failed: ${errorMessage}\n\nPlease refresh the page and try again.`);
+
+        // 롤백: 삭제된 세션을 다시 추가
+        if (sessionToDelete) {
+          const { sessions: currentSessions } = get();
+          set({
+            sessions: [...currentSessions, sessionToDelete],
+          });
+        }
+      }
+    }
   },
 
   // 채팅창 토글
   toggleChat: () => set((state) => ({ isChatOpen: !state.isChatOpen })),
-
-  /**
-   * localStorage에서 세션 데이터 로드
-   */
-  loadFromStorage: () => {
-    if (typeof window === "undefined") return;
-
-    try {
-      const stored = localStorage.getItem(CHAT_STORAGE_KEY);
-      if (!stored) return;
-
-      const parsed = JSON.parse(stored) as ChatSession[];
-
-      // Date 객체 복원
-      const sessions = parsed.map((s) => ({
-        ...s,
-        createdAt: new Date(s.createdAt),
-        lastMessageAt: s.lastMessageAt ? new Date(s.lastMessageAt) : undefined,
-        messages: s.messages.map((m) => ({
-          ...m,
-          timestamp: new Date(m.timestamp),
-        })),
-      }));
-
-      set({ sessions });
-    } catch (error) {
-      console.error("Failed to load chat sessions from storage:", error);
-    }
-  },
-
-  /**
-   * 세션 데이터를 localStorage에 저장
-   */
-  saveToStorage: () => {
-    if (typeof window === "undefined") return;
-
-    try {
-      const { sessions } = get();
-      localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(sessions));
-    } catch (error) {
-      console.error("Failed to save chat sessions to storage:", error);
-    }
-  },
 }));
 
 export default useChatStore;

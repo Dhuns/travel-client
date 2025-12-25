@@ -1,10 +1,14 @@
 "use client";
 
-import { Heart } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  checkWishlist,
+  toggleWishlist,
+  ToggleWishlistData,
+} from "@/src/shared/apis/wishlist";
 import { useAuthStore } from "@/src/shared/store/authStore";
-import { toggleWishlist, checkWishlist, ToggleWishlistData } from "@/src/shared/apis/wishlist";
+import { Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface FavoriteButtonProps {
   tourId: string; // bokunExperienceId
@@ -101,16 +105,14 @@ export function FavoriteButton({
     <button
       onClick={handleToggleFavorite}
       disabled={isLoading}
-      className={`p-2 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white transition-all duration-200 ${
+      className={`p-2 rounded-full cursor-pointer bg-white/90 backdrop-blur-sm hover:bg-white transition-all duration-200 ${
         isLoading ? "opacity-50 cursor-not-allowed" : ""
       } ${className}`}
       aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
     >
       <Heart
         className={`w-5 h-5 transition-all duration-200 ${
-          isFavorite
-            ? "fill-red-500 text-red-500"
-            : "text-gray-600 hover:text-red-500"
+          isFavorite ? "fill-red-500 text-red-500" : "text-gray-600 hover:text-red-500"
         }`}
       />
     </button>

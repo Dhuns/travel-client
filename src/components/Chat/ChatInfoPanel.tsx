@@ -1,20 +1,27 @@
 import { FC } from "react";
 
+import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
-import useChatStore from "@shared/store/chatStore";
+import { GenerationProgress } from "@shared/store/chatStore";
 import { ChatContext } from "@shared/types/chat";
 import dayjs from "dayjs";
+import { Info, Loader2 } from "lucide-react";
 
 interface Props {
   context: ChatContext;
   messageCount: number;
   batchId?: number;
+  isGeneratingEstimate?: boolean;
+  generationProgress?: GenerationProgress | null;
 }
 
-const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
-  const { canGenerateEstimate, generateEstimateForSession, isGeneratingEstimate } =
-    useChatStore();
-
+const ChatInfoPanel: FC<Props> = ({
+  context,
+  messageCount,
+  batchId,
+  isGeneratingEstimate,
+  generationProgress,
+}) => {
   const {
     destination,
     startDate,
@@ -26,14 +33,6 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
     preferences = [],
   } = context;
 
-  const handleGenerateEstimate = async () => {
-    if (isGeneratingEstimate) return;
-    const success = await generateEstimateForSession();
-    if (success) {
-      // Success message is now shown in chat, no need for alert
-    }
-  };
-
   // Calculate total days
   const days =
     startDate && endDate ? dayjs(endDate).diff(dayjs(startDate), "day") + 1 : null;
@@ -43,6 +42,72 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
 
   return (
     <Container>
+      {/* Estimate Generation Progress */}
+      {isGeneratingEstimate && (
+        <ProgressSection>
+          <ProgressHeader>
+            <ProgressIconWrapper>
+              <Loader2 className="w-5 h-5 animate-spin" />
+            </ProgressIconWrapper>
+            <ProgressTitle>Creating Your Itinerary</ProgressTitle>
+          </ProgressHeader>
+          <ProgressContent>
+            <ProgressBarWrapper>
+              <ProgressBar progress={generationProgress?.progress || 0} />
+            </ProgressBarWrapper>
+            <ProgressStep>
+              <ProgressStepIcon active={generationProgress?.step === 'analyzing'}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
+              </ProgressStepIcon>
+              <ProgressStepText active={generationProgress?.step === 'analyzing'}>
+                Analyzing preferences
+              </ProgressStepText>
+              {generationProgress?.step === 'analyzing' && <ProgressDots />}
+            </ProgressStep>
+            <ProgressStep>
+              <ProgressStepIcon active={generationProgress?.step === 'creating'}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 3v18" />
+                  <path d="M3 12h18" />
+                </svg>
+              </ProgressStepIcon>
+              <ProgressStepText active={generationProgress?.step === 'creating'}>
+                Creating itinerary
+              </ProgressStepText>
+              {generationProgress?.step === 'creating' && <ProgressDots />}
+            </ProgressStep>
+            <ProgressStep>
+              <ProgressStepIcon active={generationProgress?.step === 'optimizing'}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+              </ProgressStepIcon>
+              <ProgressStepText active={generationProgress?.step === 'optimizing'}>
+                Optimizing route
+              </ProgressStepText>
+              {generationProgress?.step === 'optimizing' && <ProgressDots />}
+            </ProgressStep>
+            <ProgressStep>
+              <ProgressStepIcon active={generationProgress?.step === 'finalizing'}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+              </ProgressStepIcon>
+              <ProgressStepText active={generationProgress?.step === 'finalizing'}>
+                Finalizing estimate
+              </ProgressStepText>
+              {generationProgress?.step === 'finalizing' && <ProgressDots />}
+            </ProgressStep>
+          </ProgressContent>
+          <ProgressHint>This usually takes 10-20 seconds...</ProgressHint>
+        </ProgressSection>
+      )}
+
       {/* Collected Information - 최상단 */}
       <Section>
         <SectionTitle>
@@ -121,56 +186,11 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
         )}
       </Section>
 
-      {/* Generate Quote Button */}
-      {canGenerateEstimate() && !batchId && (
-        <EstimateButtonSection>
-          <GenerateButton
-            onClick={handleGenerateEstimate}
-            disabled={isGeneratingEstimate}
-          >
-            {isGeneratingEstimate ? (
-              <>
-                <LoadingSpinner />
-                Creating your quote...
-              </>
-            ) : (
-              <>
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-                </svg>
-                Generate AI Itinerary
-              </>
-            )}
-          </GenerateButton>
-          <EstimateHint>
-            Get your AI-suggested daily destinations. Our experts will add accommodations
-            & transport.
-          </EstimateHint>
-        </EstimateButtonSection>
-      )}
-
-      {/* Process Explanation - Collected Info 아래 */}
+      {/* Process Explanation */}
       <ProcessSection>
         <ProcessHeader>
           <ProcessIcon>
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 16v-4M12 8h.01" />
-            </svg>
+            <Info className="w-5 h-5" />
           </ProcessIcon>
           <ProcessTitle>How It Works</ProcessTitle>
         </ProcessHeader>
@@ -178,10 +198,10 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
           <ProcessStep>
             <StepNumber active>1</StepNumber>
             <StepContent>
-              <StepLabel active>AI Draft</StepLabel>
+              <StepLabel active>Chat with AI</StepLabel>
               <StepDescription>
-                AI creates a daily itinerary with recommended destinations and activities
-                only. (No pricing yet)
+                Tell us about your trip - where you want to go, when, and who's traveling.
+                Our AI will guide you through the planning.
               </StepDescription>
             </StepContent>
           </ProcessStep>
@@ -189,10 +209,10 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
           <ProcessStep>
             <StepNumber>2</StepNumber>
             <StepContent>
-              <StepLabel>Expert Enhancement</StepLabel>
+              <StepLabel>AI Creates Itinerary</StepLabel>
               <StepDescription>
-                Our travel experts review your draft and add accommodations,
-                transportation, tickets, and calculate accurate pricing.
+                Once we have your details, AI automatically creates a personalized daily
+                itinerary with recommended destinations.
               </StepDescription>
             </StepContent>
           </ProcessStep>
@@ -200,10 +220,21 @@ const ChatInfoPanel: FC<Props> = ({ context, messageCount, batchId }) => {
           <ProcessStep>
             <StepNumber>3</StepNumber>
             <StepContent>
+              <StepLabel>Expert Review</StepLabel>
+              <StepDescription>
+                Our travel experts add accommodations, transportation, and calculate
+                accurate pricing for your complete package.
+              </StepDescription>
+            </StepContent>
+          </ProcessStep>
+          <StepConnector />
+          <ProcessStep>
+            <StepNumber>4</StepNumber>
+            <StepContent>
               <StepLabel>Final Quote</StepLabel>
               <StepDescription>
-                Receive your complete, bookable travel package with all details and final
-                pricing via email.
+                Receive your complete, bookable travel package with all details
+                via email. Ready to book!
               </StepDescription>
             </StepContent>
           </ProcessStep>
@@ -399,68 +430,127 @@ const EmptyState = styled.div`
   border-radius: 8px;
 `;
 
-// Estimate Button Styles
-const EstimateButtonSection = styled.div`
-  padding: 16px;
-  margin: 0 0 14px 0;
-  background: linear-gradient(
-    135deg,
-    var(--color-tumakr-maroon) 0%,
-    var(--color-tumakr-maroon) 100%
-  );
-  border-radius: 14px;
-  text-align: center;
+// Progress Section Styles
+const spin = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 `;
 
-const GenerateButton = styled.button`
-  width: 100%;
-  padding: 14px 20px;
-  background-color: #ffffff;
+const pulse = keyframes`
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+`;
+
+const dots = keyframes`
+  0%, 20% { content: '.'; }
+  40% { content: '..'; }
+  60%, 100% { content: '...'; }
+`;
+
+const progressPulse = keyframes`
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+`;
+
+const ProgressSection = styled.div`
+  margin: 14px 0;
+  padding: 16px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 14px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+`;
+
+const ProgressHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+`;
+
+const ProgressIconWrapper = styled.div`
   color: var(--color-tumakr-maroon);
-  border: none;
-  border-radius: 10px;
-  font-size: 15px;
+  display: flex;
+  align-items: center;
+
+  svg {
+    animation: ${spin} 1s linear infinite;
+  }
+`;
+
+const ProgressTitle = styled.h3`
+  margin: 0;
+  font-size: 14px;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  color: #1a1a1a;
+`;
+
+const ProgressContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const ProgressBarWrapper = styled.div`
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+`;
+
+const ProgressBar = styled.div<{ progress: number }>`
+  width: ${({ progress }) => progress}%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-tumakr-maroon) 0%, #b91c3c 50%, var(--color-tumakr-maroon) 100%);
+  background-size: 200% 100%;
+  animation: ${progressPulse} 1.5s ease-in-out infinite;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+`;
+
+const ProgressStep = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+`;
+
+const ProgressStepIcon = styled.div<{ active?: boolean }>`
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: ${({ active }) => active ? 'var(--color-tumakr-maroon)' : '#e5e7eb'};
+  color: ${({ active }) => active ? 'white' : '#9ca3af'};
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+`;
 
-  &:hover:not(:disabled) {
-    background-color: #f5f5f5;
-    transform: translateY(-2px);
-  }
+const ProgressStepText = styled.span<{ active?: boolean }>`
+  font-size: 13px;
+  color: ${({ active }) => active ? '#1a1a1a' : '#9ca3af'};
+  font-weight: ${({ active }) => active ? '600' : '400'};
+  transition: all 0.3s ease;
+`;
 
-  &:active:not(:disabled) {
-    transform: translateY(0);
-  }
+const ProgressDots = styled.span`
+  font-size: 13px;
+  color: var(--color-tumakr-maroon);
+  font-weight: 600;
 
-  &:disabled {
-    background-color: rgba(255, 255, 255, 0.6);
-    cursor: not-allowed;
+  &::after {
+    content: '...';
+    animation: ${pulse} 1s infinite;
   }
 `;
 
-const LoadingSpinner = styled.div`
-  width: 16px;
-  height: 16px;
-  border: 2px solid var(--color-tumakr-maroon);
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-`;
-
-const EstimateHint = styled.p`
-  margin: 12px 0 0 0;
+const ProgressHint = styled.div`
+  margin-top: 12px;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.5;
+  color: #6b7280;
+  text-align: center;
 `;

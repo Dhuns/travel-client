@@ -1,5 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async redirects() {
+    return [
+      {
+        source: '/tours/private/:id*',
+        destination: '/tours/themed-private/:id*',
+        permanent: true,
+      },
+    ];
+  },
   typescript: {
     // TypeScript errors will fail the build
     ignoreBuildErrors: false,

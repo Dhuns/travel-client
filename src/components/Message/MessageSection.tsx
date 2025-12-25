@@ -223,7 +223,7 @@ export default function MessageSection({
                               : "bg-white text-gray-900 border rounded-bl-sm shadow-sm"
                           }`}
                         >
-                          <p className="text-sm whitespace-pre-wrap break-words">
+                          <p className="text-sm whitespace-pre-wrap wrap-break-words">
                             {msg.content}
                           </p>
                         </div>

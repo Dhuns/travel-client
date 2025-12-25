@@ -1,10 +1,7 @@
 import "./globals.css";
 
-import ErrorBoundary from "@/components/ErrorBoundary";
-import Footer from "@/components/footer";
-import Header from "@/components/header";
+import ErrorBoundaryWrapper from "@/components/ErrorBoundaryWrapper";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Analytics } from "@vercel/analytics/next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
@@ -13,7 +10,7 @@ import type React from "react";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "OneDay Korea - Authentic Korean Tours & Experiences",
+  title: "tumakr by OnedayKorea - Korea Tours & Experiences",
   description:
     "Discover Korea with local experts. Premium tours, cultural experiences, and authentic Korean products for international travelers.",
   icons: {
@@ -38,8 +35,29 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://widgets.bokun.io" />
         <link rel="preconnect" href="https://api.bokun.io" />
         <link rel="dns-prefetch" href="https://api.bokun.io" />
+
+        {/* Google Tag Manager */}
+        <Script id="gtm-script" strategy="afterInteractive">
+          {`
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','GTM-TVQSRRWC');
+          `}
+        </Script>
       </head>
       <body className="h-full m-0 p-0 flex flex-col font-sans">
+        {/* Google Tag Manager (noscript) */}
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-TVQSRRWC"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
+
         {/* Bokun 위젯 스크립트 - Next.js Script 컴포넌트 사용 */}
         <Script
           src="https://widgets.bokun.io/assets/javascripts/apps/build/BokunWidgetsLoader.js?bookingChannelUUID=0a1af831-37c4-40d2-8aa7-2a8b7b985ea2"
@@ -53,9 +71,8 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div className="flex flex-col min-h-screen flex-1">
-            <Header />
-            <main className="w-full pt-20 flex-1">
-              <ErrorBoundary>
+            <main className="w-full flex-1">
+              <ErrorBoundaryWrapper>
                 <Suspense
                   fallback={
                     <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center">
@@ -65,13 +82,10 @@ export default function RootLayout({
                 >
                   <div className="min-h-[calc(100vh-5rem)]">{children}</div>
                 </Suspense>
-              </ErrorBoundary>
+              </ErrorBoundaryWrapper>
             </main>
-            <Footer />
           </div>
         </ThemeProvider>
-
-        <Analytics />
       </body>
     </html>
   );

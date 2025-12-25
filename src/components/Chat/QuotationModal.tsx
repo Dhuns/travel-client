@@ -1,15 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
-import styled from "@emotion/styled";
 import {
-  getQuotationByHash,
+  DraftQuotation,
+  FinalQuotation,
+} from "@/app/(without-layout)/quotation/components";
+import {
   getQuotationByBatchId,
+  getQuotationByHash,
   type QuotationResponse,
 } from "@/src/shared/apis/estimate";
-import { FinalQuotation, DraftQuotation } from "@/app/quotation/components";
+import styled from "@emotion/styled";
 import { X } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface Props {
   hash?: string;
@@ -87,7 +90,15 @@ const QuotationModal: React.FC<Props> = ({ hash, batchId, isOpen, onClose }) => 
 
           {!isLoading && !error && quotation && (
             <>
-              {quotation.batchInfo.source === "manual" ? (
+              {/*
+                FinalQuotation 표시 조건:
+                1. manual 소스 (관리자가 직접 작성)
+                2. sentAt이 있음 (관리자가 최소 1회 이상 전송함)
+
+                DraftQuotation 표시 조건:
+                - AI 소스이고 아직 sentAt이 없음 (관리자 검토 전 AI 초안)
+              */}
+              {quotation.batchInfo.source === "manual" || quotation.batchInfo.sentAt ? (
                 <FinalQuotation quotation={quotation} />
               ) : (
                 <DraftQuotation quotation={quotation} />

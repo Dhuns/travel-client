@@ -1,78 +1,131 @@
 import { FC, useCallback, useEffect, useState } from "react";
 
-import ChatInfoPanel from "@components/Chat/ChatInfoPanel";
+import ChatInfoSidebar from "@components/Chat/ChatInfoSidebar";
 import ChatInput from "@components/Chat/ChatInput";
 import ChatMessageList from "@components/Chat/ChatMessageList";
 import ChatSidebar from "@components/Chat/ChatSidebar";
+import ExpertRequestModal from "@components/Chat/ExpertRequestModal";
+import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
+import { sendToExpert, ExpertRequestFormData } from "@shared/apis/chat";
+import { CHAT_STORAGE_KEY } from "@shared/constants/chat";
 import { useAuthStore } from "@shared/store/authStore";
 import useChatStore from "@shared/store/chatStore";
+import { ChatContext } from "@shared/types/chat";
+import { Info, Globe, MessageCircle, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const Container: FC = () => {
-  const {
-    sessions,
-    getCurrentSession,
-    isTyping,
-    isLoading,
-    initSession,
-    loadSession,
-    loadUserSessions,
-    sendUserMessage,
-    clearSession,
-    loadFromStorage,
-    clearAllSessions,
-  } = useChatStore();
+  // Zustand selector pattern - 필요한 상태만 개별 구독 (리렌더링 최적화)
+  const sessions = useChatStore((state) => state.sessions);
+  const currentSessionId = useChatStore((state) => state.currentSessionId);
+  const isTyping = useChatStore((state) => state.isTyping);
+  const isLoading = useChatStore((state) => state.isLoading);
 
-  const { isAuthenticated, user } = useAuthStore();
+  // 액션은 한 번만 가져오면 됨 (참조 안정적)
+  const initSession = useChatStore((state) => state.initSession);
+  const loadSession = useChatStore((state) => state.loadSession);
+  const loadUserSessions = useChatStore((state) => state.loadUserSessions);
+  const sendUserMessage = useChatStore((state) => state.sendUserMessage);
+
+  // 현재 세션 계산 (sessions나 currentSessionId 변경 시에만 재계산)
+  const session = sessions.find((s) => s.sessionId === currentSessionId) || null;
+  const context = session?.context || {};
+
+  const { isAuthenticated, user, fetchUser, accessToken } = useAuthStore();
   const router = useRouter();
 
-  const [showInfoPanel, setShowInfoPanel] = useState(true);
+  const [showInfoPanel, setShowInfoPanel] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [showExpertModal, setShowExpertModal] = useState(false);
 
-  const session = getCurrentSession();
-  const context = session?.context || {};
+  // 기타 지역 입력 모드
+  const [showOtherInput, setShowOtherInput] = useState(false);
+  const [otherDestination, setOtherDestination] = useState("");
 
   // 비로그인 사용자 체크 (데이터는 유지, localStorage만 초기화)
   useEffect(() => {
     if (!isAuthenticated) {
-      // localStorage 캐시만 초기화 (서버 데이터는 유지)
-      const CHAT_STORAGE_KEY = "chat-sessions-storage";
       if (typeof window !== "undefined") {
         localStorage.removeItem(CHAT_STORAGE_KEY);
       }
+      setIsInitialized(false);
     }
   }, [isAuthenticated]);
 
-  // 로그인 시 서버에서 사용자 세션 불러오기 (최초 1회만)
+  // 로그인 시 사용자 정보 가져오고 채팅 세션 불러오기 (통합)
   useEffect(() => {
-    if (!isInitialized && isAuthenticated && user?.id) {
-      loadUserSessions(user.id).then(() => {
-        setIsInitialized(true);
-      });
-    }
-  }, [isInitialized, isAuthenticated, user, loadUserSessions]);
+    if (!isAuthenticated || isInitialized) return;
 
-  // 세션이 없으면 자동으로 새 세션 생성 또는 기존 세션 로드 (로그인한 사용자만)
-  useEffect(() => {
-    if (isInitialized && !session && isAuthenticated) {
-      // 세션이 없는 경우
-      if (sessions.length === 0) {
-        // 저장된 세션이 없으면 새로 생성
-        initSession();
-      } else {
-        // 저장된 세션이 있으면 가장 최근 세션 로드
-        const latestSession = [...sessions].sort(
-          (a, b) =>
-            new Date(b.lastMessageAt || b.createdAt).getTime() -
-            new Date(a.lastMessageAt || a.createdAt).getTime()
-        )[0];
-        if (latestSession) {
-          loadSession(latestSession.sessionId);
+    let isMounted = true; // cleanup을 위한 마운트 상태 추적
+
+    const initializeUserAndChat = async () => {
+      try {
+        // 사용자 정보가 없으면 먼저 가져오기
+        if (!user) {
+          await fetchUser();
+        }
+
+        // 언마운트되었으면 상태 업데이트 중단
+        if (!isMounted) return;
+
+        // localStorage를 먼저 지우고 서버에서 최신 데이터 가져오기
+        if (typeof window !== "undefined") {
+          localStorage.removeItem(CHAT_STORAGE_KEY);
+        }
+
+        // 채팅 세션 불러오기
+        await loadUserSessions();
+
+        // 언마운트되었으면 상태 업데이트 중단
+        if (!isMounted) return;
+
+        // 세션 목록 가져온 후 최근 세션 바로 로드 (API 호출 최적화)
+        const { sessions: loadedSessions } = useChatStore.getState();
+        if (loadedSessions.length > 0) {
+          const latestSession = [...loadedSessions].sort(
+            (a, b) =>
+              new Date(b.lastMessageAt || b.createdAt).getTime() -
+              new Date(a.lastMessageAt || a.createdAt).getTime()
+          )[0];
+          if (latestSession && isMounted) {
+            await loadSession(latestSession.sessionId);
+          }
+        }
+
+        if (!isMounted) return;
+
+        setIsInitialized(true);
+      } catch (error) {
+        console.error("Failed to initialize chat:", error);
+        if (isMounted) {
+          setIsInitialized(true); // 실패해도 초기화 완료 표시
         }
       }
+    };
+
+    initializeUserAndChat();
+
+    return () => {
+      isMounted = false; // 언마운트 시 플래그 설정
+    };
+  }, [isAuthenticated, isInitialized, user, fetchUser, loadUserSessions]);
+
+  // 기존 세션이 있으면 가장 최근 세션 로드 (자동 생성은 하지 않음 - Zendesk/Intercom 표준)
+  useEffect(() => {
+    if (isInitialized && !session && isAuthenticated && sessions.length > 0) {
+      // 저장된 세션이 있으면 가장 최근 세션 로드
+      const latestSession = [...sessions].sort(
+        (a, b) =>
+          new Date(b.lastMessageAt || b.createdAt).getTime() -
+          new Date(a.lastMessageAt || a.createdAt).getTime()
+      )[0];
+      if (latestSession) {
+        loadSession(latestSession.sessionId);
+      }
     }
-  }, [isInitialized, session, sessions.length, isAuthenticated]);
+  }, [isInitialized, session, sessions.length, isAuthenticated, loadSession]);
 
   // 새 채팅 시작
   const handleNewChat = useCallback(() => {
@@ -82,13 +135,106 @@ const Container: FC = () => {
   // 메시지 전송 핸들러
   const handleSendMessage = useCallback(
     async (content: string) => {
-      if (!session) return;
+      // 세션이 없으면 먼저 생성 (첫 메시지 전송 시)
+      if (!session) {
+        const success = await initSession();
+        if (!success) {
+          console.error("Failed to initialize session");
+          return;
+        }
+        // 세션 생성 후 약간의 딜레이를 주고 메시지 전송
+        setTimeout(async () => {
+          await sendUserMessage(content);
+        }, 100);
+        return;
+      }
 
       // 백엔드 API로 메시지 전송 및 AI 응답 받기 (Gemini AI)
       // 컨텍스트 추출은 백엔드에서 자동으로 수행됨
       await sendUserMessage(content);
     },
-    [session, sendUserMessage]
+    [session, sendUserMessage, initSession]
+  );
+
+  // 견적 응답 제출 핸들러
+  const handleResponseSubmitted = useCallback(async () => {
+    if (!currentSessionId) return;
+
+    // 세션을 다시 로드하여 서버의 새 시스템 메시지 가져오기
+    try {
+      await loadSession(currentSessionId);
+    } catch (error) {
+      console.error('Failed to reload session after response:', error);
+    }
+  }, [currentSessionId, loadSession]);
+
+  // UI 액션 선택 핸들러 (버튼, 칩, 날짜 선택 등)
+  const handleUIActionSelect = useCallback(
+    async (value: string | string[] | ChatContext) => {
+      // localStorage에서 pending UI action 제거 (사용자가 응답했으므로)
+      if (currentSessionId) {
+        try {
+          const uiActionsKey = 'pending_ui_actions';
+          const stored = localStorage.getItem(uiActionsKey);
+          if (stored) {
+            const uiActions = JSON.parse(stored);
+            delete uiActions[currentSessionId];
+            localStorage.setItem(uiActionsKey, JSON.stringify(uiActions));
+          }
+        } catch (error) {
+          console.error('Failed to clear pending UI action:', error);
+        }
+      }
+
+      // 값을 문자열로 변환하여 메시지로 전송
+      let messageContent: string;
+
+      if (typeof value === 'string') {
+        // "no_changes" 선택 시 전문가 요청 모달 열기
+        if (value === 'no_changes' || value.toLowerCase() === 'looks good') {
+          setShowExpertModal(true);
+          return;
+        }
+        // 단일 선택 (버튼, 날짜 등)
+        messageContent = value;
+      } else if (Array.isArray(value)) {
+        // 다중 선택 (칩)
+        messageContent = value.join(', ');
+      } else {
+        // ChatContext (확인 카드에서 confirm/edit)
+        messageContent = 'confirm';
+      }
+
+      await handleSendMessage(messageContent);
+    },
+    [handleSendMessage, currentSessionId]
+  );
+
+  // 전문가 요청 모달 제출 핸들러
+  const handleExpertRequestSubmit = useCallback(
+    async (formData: ExpertRequestFormData) => {
+      if (!currentSessionId || !accessToken) {
+        throw new Error('Session or authentication not available');
+      }
+
+      await sendToExpert(accessToken, currentSessionId, formData);
+
+      // 성공 메시지를 채팅에 추가
+      const { addMessage } = useChatStore.getState();
+      await addMessage({
+        role: 'assistant',
+        type: 'system',
+        content: JSON.stringify({
+          type: 'sent_to_expert',
+          title: 'Request Sent to Expert',
+          message: 'Your travel request has been sent to our expert team! They will review your itinerary and preferences, then contact you within 24-48 hours with a detailed quote.',
+        }),
+      });
+
+      // 세션 다시 로드하여 최신 상태 반영
+      await loadSession(currentSessionId);
+    },
+    [currentSessionId, accessToken, loadSession]
   );
 
   // 비로그인 사용자 로그인 유도
@@ -132,64 +278,199 @@ const Container: FC = () => {
     );
   }
 
-  if (!session) {
+  // 초기화 완료 전에는 로딩 표시
+  if (!isInitialized) {
     return (
       <LoadingContainer>
-        <LoadingSpinner />
-        <LoadingText>Preparing your AI travel planner...</LoadingText>
+        <LoadingIconWrapper>
+          <Globe className="globe-icon" />
+          <Sparkles className="sparkle-icon" />
+        </LoadingIconWrapper>
+        <LoadingText>Loading your travel plans...</LoadingText>
+        <LoadingSubtext>Preparing your personalized Korea travel assistant</LoadingSubtext>
       </LoadingContainer>
     );
   }
 
-  // 메시지가 없고 세션도 없으면 EmptyState 표시 (최초 방문자)
-  const hasMessages = session.messages.length > 0;
-  const isFirstVisit = sessions.length === 0 && !hasMessages;
-
-  if (isFirstVisit) {
+  // 세션 목록은 있지만 현재 세션이 로드되지 않은 경우 (로딩 중)
+  if (sessions.length > 0 && !session) {
     return (
-      <EmptyStateContainer>
-        <EmptyStateContent>
-          <EmptyStateIconWrapper>
-            <EmptyStateIcon>
-              <svg
-                width="56"
-                height="56"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-              </svg>
-            </EmptyStateIcon>
-          </EmptyStateIconWrapper>
-          <EmptyStateTitle>Where would you like to go in Korea?</EmptyStateTitle>
-          <EmptyStateSubtitle>
-            I can help you plan the perfect trip - just tell me about your travel dreams.
-          </EmptyStateSubtitle>
-          <EmptyStateInputWrapper>
-            <ChatInput
-              onSend={handleSendMessage}
-              disabled={isTyping}
-              placeholder="e.g., I want to explore Seoul and Busan for 5 days..."
-            />
-          </EmptyStateInputWrapper>
-          <EmptyStateHints>
-            <HintChip>Seoul in December</HintChip>
-            <HintChip>Traditional temples tour</HintChip>
-            <HintChip>K-food experience</HintChip>
-            <HintChip>DMZ visit</HintChip>
-          </EmptyStateHints>
-        </EmptyStateContent>
-      </EmptyStateContainer>
+      <LoadingContainer>
+        <LoadingIconWrapper>
+          <MessageCircle className="globe-icon" />
+        </LoadingIconWrapper>
+        <LoadingText>Loading conversation...</LoadingText>
+        <LoadingSubtext>Retrieving your chat history</LoadingSubtext>
+      </LoadingContainer>
     );
   }
 
+  // 메시지가 없는 세션이면 목적지 선택 UI 표시 (새 대화)
+  const hasMessages = (session?.messages?.length ?? 0) > 0;
+  const showDestinationSelection = !hasMessages;
+
+  // 목적지 선택 핸들러
+  const handleDestinationSelect = async (destination: string) => {
+    setShowOtherInput(false);
+    setOtherDestination("");
+    await handleSendMessage(`I want to visit ${destination}`);
+  };
+
+  // 기타 지역 입력 제출 핸들러
+  const handleOtherDestinationSubmit = async () => {
+    if (otherDestination.trim()) {
+      await handleSendMessage(`I want to visit ${otherDestination.trim()}`);
+      setShowOtherInput(false);
+      setOtherDestination("");
+    }
+  };
+
+  // 목적지 선택 UI 렌더링 함수
+  const renderDestinationSelection = () => (
+    <DestinationSelectionWrapper>
+      <EmptyStateContent>
+        <WelcomeHeader>
+          <WelcomeTitleMain>Plan Your</WelcomeTitleMain>
+          <WelcomeTitleHighlight>Korea Adventure</WelcomeTitleHighlight>
+        </WelcomeHeader>
+        <EmptyStateSubtitle>
+          Select your destination and we'll create a personalized itinerary
+        </EmptyStateSubtitle>
+
+        {/* 목적지 선택 버튼 그리드 */}
+        <DestinationGrid>
+          <DestinationCard onClick={() => handleDestinationSelect("Seoul")} disabled={isTyping}>
+            <DestinationImageBg style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }} />
+            <DestinationContent>
+              <DestinationEmoji>🏙️</DestinationEmoji>
+              <DestinationName>Seoul</DestinationName>
+              <DestinationDesc>Palaces, shopping, K-culture</DestinationDesc>
+            </DestinationContent>
+          </DestinationCard>
+          <DestinationCard onClick={() => handleDestinationSelect("Busan")} disabled={isTyping}>
+            <DestinationImageBg style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }} />
+            <DestinationContent>
+              <DestinationEmoji>🏖️</DestinationEmoji>
+              <DestinationName>Busan</DestinationName>
+              <DestinationDesc>Beaches, seafood, temples</DestinationDesc>
+            </DestinationContent>
+          </DestinationCard>
+          <DestinationCard onClick={() => handleDestinationSelect("Jeju")} disabled={isTyping}>
+            <DestinationImageBg style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }} />
+            <DestinationContent>
+              <DestinationEmoji>🌴</DestinationEmoji>
+              <DestinationName>Jeju Island</DestinationName>
+              <DestinationDesc>Nature, beaches, volcanic</DestinationDesc>
+            </DestinationContent>
+          </DestinationCard>
+          <DestinationCard onClick={() => handleDestinationSelect("Gyeongju")} disabled={isTyping}>
+            <DestinationImageBg style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }} />
+            <DestinationContent>
+              <DestinationEmoji>🏛️</DestinationEmoji>
+              <DestinationName>Gyeongju</DestinationName>
+              <DestinationDesc>UNESCO sites, history</DestinationDesc>
+            </DestinationContent>
+          </DestinationCard>
+          <DestinationCard onClick={() => handleDestinationSelect("Jeonju")} disabled={isTyping}>
+            <DestinationImageBg style={{ background: 'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)' }} />
+            <DestinationContent>
+              <DestinationEmoji>🏡</DestinationEmoji>
+              <DestinationName>Jeonju</DestinationName>
+              <DestinationDesc>Hanok village, traditional food</DestinationDesc>
+            </DestinationContent>
+          </DestinationCard>
+          {/* Other destination option */}
+          <DestinationCard
+            onClick={() => setShowOtherInput(true)}
+            disabled={isTyping}
+            style={{ border: showOtherInput ? '2px solid var(--color-tumakr-maroon)' : undefined }}
+          >
+            <DestinationImageBg style={{ background: 'linear-gradient(135deg, #a8a8a8 0%, #6b6b6b 100%)' }} />
+            <DestinationContent>
+              <DestinationEmoji>✏️</DestinationEmoji>
+              <DestinationName>Other</DestinationName>
+              <DestinationDesc>Enter your destination</DestinationDesc>
+            </DestinationContent>
+          </DestinationCard>
+        </DestinationGrid>
+
+        {/* Other destination input field */}
+        {showOtherInput && (
+          <OtherInputWrapper>
+            <OtherInputContainer>
+              <OtherInput
+                type="text"
+                value={otherDestination}
+                onChange={(e) => setOtherDestination(e.target.value)}
+                placeholder="Enter your destination (e.g., Gangneung, Sokcho, Daegu...)"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && otherDestination.trim()) {
+                    handleOtherDestinationSubmit();
+                  }
+                }}
+                autoFocus
+              />
+              <OtherInputButton
+                onClick={handleOtherDestinationSubmit}
+                disabled={!otherDestination.trim() || isTyping}
+              >
+                Go
+              </OtherInputButton>
+            </OtherInputContainer>
+          </OtherInputWrapper>
+        )}
+
+        <OrDivider>
+          <OrLine />
+          <OrText>or type your request</OrText>
+          <OrLine />
+        </OrDivider>
+
+        <EmptyStateInputWrapper>
+          <ChatInput
+            onSend={handleSendMessage}
+            disabled={isTyping}
+            placeholder="e.g., Seoul and Busan for 5 days with my family..."
+            showHint
+            sessionId={currentSessionId || undefined}
+          />
+        </EmptyStateInputWrapper>
+
+        <TrustBadges>
+          <TrustBadge>
+            <TrustIcon>🛡️</TrustIcon>
+            Local experts
+          </TrustBadge>
+          <TrustBadge>
+            <TrustIcon>⚡</TrustIcon>
+            Quick quotes
+          </TrustBadge>
+          <TrustBadge>
+            <TrustIcon>❤️</TrustIcon>
+            1000+ travelers
+          </TrustBadge>
+        </TrustBadges>
+
+        {/* 7+ days trip notice - 하단에 subtle하게 */}
+        <LongTripNotice>
+          Planning 7+ days? Email{" "}
+          <LongTripEmail href="mailto:info@onedaykorea.com">info@onedaykorea.com</LongTripEmail>
+        </LongTripNotice>
+      </EmptyStateContent>
+    </DestinationSelectionWrapper>
+  );
+
   return (
     <PageContainer>
+      {/* 모바일 사이드바 오버레이 */}
+      {showSidebar && <SidebarOverlay onClick={() => setShowSidebar(false)} />}
+
       {/* 좌측 사이드바 */}
-      <ChatSidebar onNewChat={handleNewChat} />
+      <ChatSidebar
+        onNewChat={handleNewChat}
+        isOpen={showSidebar}
+        onClose={() => setShowSidebar(false)}
+      />
 
       {/* 메인 영역 */}
       <MainArea>
@@ -198,6 +479,20 @@ const Container: FC = () => {
           <ChatSection hasMessages={hasMessages}>
             {/* Top Bar */}
             <TopBar>
+              <TopBarLeft>
+                <MobileMenuButton onClick={() => setShowSidebar(!showSidebar)}>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M3 12h18M3 6h18M3 18h18" />
+                  </svg>
+                </MobileMenuButton>
+              </TopBarLeft>
               <TopBarCenter>
                 <ModelBadge>
                   <ModelIcon>
@@ -222,87 +517,102 @@ const Container: FC = () => {
                   title="Trip details"
                   active={showInfoPanel}
                 >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 16v-4M12 8h.01" />
-                  </svg>
+                  <Info className="w-5 h-5" />
                 </IconButton>
               </TopBarRight>
             </TopBar>
 
-            {/* 메시지 리스트 */}
-            <ChatMessageList
-              messages={session.messages}
-              isTyping={isTyping}
-              hasMessages={hasMessages}
-              onSend={handleSendMessage}
-            />
+            {/* 메시지가 없으면 목적지 선택 UI, 있으면 메시지 리스트 */}
+            {showDestinationSelection ? (
+              renderDestinationSelection()
+            ) : (
+              <>
+                <ChatMessageList
+                  messages={session?.messages || []}
+                  isTyping={isTyping}
+                  hasMessages={hasMessages}
+                  onSend={handleSendMessage}
+                  onUIActionSelect={handleUIActionSelect}
+                  onResponseSubmitted={handleResponseSubmitted}
+                  onLooksGoodClick={() => setShowExpertModal(true)}
+                />
 
-            {/* Input Area - shown at bottom when messages exist */}
-            {hasMessages && (
-              <InputArea>
-                <InputContainer>
-                  <ChatInput
-                    onSend={handleSendMessage}
-                    disabled={isTyping}
-                    placeholder={
-                      isTyping ? "AI is thinking..." : "Message Korea Travel AI..."
-                    }
-                  />
-                  <InputHint>
-                    AI can make mistakes. Please verify important travel information.
-                  </InputHint>
-                </InputContainer>
-              </InputArea>
+                {/* Input Area - shown at bottom when messages exist */}
+                {hasMessages && (
+                  <InputArea>
+                    <InputContainer>
+                      <ChatInput
+                        onSend={handleSendMessage}
+                        disabled={isTyping}
+                        placeholder={
+                          isTyping ? "AI is thinking..." : "Message Korea Travel AI..."
+                        }
+                        sessionId={currentSessionId || undefined}
+                      />
+                      <InputHint>
+                        AI can make mistakes. Please verify important travel information.
+                      </InputHint>
+                    </InputContainer>
+                  </InputArea>
+                )}
+              </>
             )}
           </ChatSection>
         </ChatWrapper>
 
         {/* Right Info Panel (toggleable) */}
-        {showInfoPanel && <InfoPanelBackdrop onClick={() => setShowInfoPanel(false)} />}
-        <InfoPanel isVisible={showInfoPanel}>
-          <InfoPanelContent isVisible={showInfoPanel}>
-            <InfoPanelHeader>
-              <InfoPanelTitle>Trip Details</InfoPanelTitle>
-              <CloseButton onClick={() => setShowInfoPanel(false)}>
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              </CloseButton>
-            </InfoPanelHeader>
-            <ChatInfoPanel
-              context={context}
-              messageCount={session.messages.length}
-              batchId={session.batchId}
-            />
-          </InfoPanelContent>
-        </InfoPanel>
+        <ChatInfoSidebar
+          isOpen={showInfoPanel}
+          onClose={() => setShowInfoPanel(false)}
+          context={context}
+          messageCount={session?.messages?.length || 0}
+          batchId={session?.batchId}
+        />
       </MainArea>
+
+      {/* Expert Request Modal */}
+      <ExpertRequestModal
+        isOpen={showExpertModal}
+        onClose={() => setShowExpertModal(false)}
+        onSubmit={handleExpertRequestSubmit}
+        context={context}
+      />
     </PageContainer>
   );
 };
 
 export default Container;
 
+// Animations
+const float = keyframes`
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+`;
+
+const spin = keyframes`
+  to { transform: rotate(360deg); }
+`;
+
+const sparkle = keyframes`
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.7; }
+  50% { transform: scale(1.2) rotate(10deg); opacity: 1; }
+`;
+
+const fadeIn = keyframes`
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
+
+const cardHover = keyframes`
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-4px) scale(1.02); }
+`;
+
 // Styled Components
 const PageContainer = styled.div`
   display: flex;
   flex: 1;
-  min-height: 0;
+  min-height: 100vh;
   background-color: #ffffff;
   overflow: hidden;
 `;
@@ -349,6 +659,18 @@ const TopBar = styled.div`
   position: relative;
 `;
 
+const TopBarLeft = styled.div`
+  position: absolute;
+  left: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  @media (min-width: 1025px) {
+    display: none; // 데스크톱에서는 햄버거 메뉴 숨김
+  }
+`;
+
 const TopBarCenter = styled.div`
   display: flex;
   align-items: center;
@@ -360,6 +682,79 @@ const TopBarRight = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+`;
+
+const QuotaBadge = styled.div<{ $remaining: number }>`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: ${({ $remaining }) =>
+    $remaining === 0
+      ? "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)"
+      : $remaining === 1
+      ? "linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)"
+      : "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)"};
+  border: 1px solid ${({ $remaining }) =>
+    $remaining === 0 ? "#fecaca" : $remaining === 1 ? "#fde68a" : "#bbf7d0"};
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: ${({ $remaining }) =>
+    $remaining === 0 ? "#dc2626" : $remaining === 1 ? "#d97706" : "#16a34a"};
+  white-space: nowrap;
+
+  svg {
+    opacity: 0.8;
+  }
+
+  @media (max-width: 640px) {
+    padding: 4px 8px;
+    font-size: 11px;
+
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+`;
+
+const MobileMenuButton = styled.button`
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+  background-color: transparent;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+
+  &:hover {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+  }
+
+  @media (min-width: 1025px) {
+    display: none;
+  }
+`;
+
+const SidebarOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none;
+
+  @media (max-width: 1024px) {
+    display: block;
+  }
 `;
 
 const ModelBadge = styled.div`
@@ -403,8 +798,8 @@ const IconButton = styled.button<{ active?: boolean }>`
 `;
 
 const InputArea = styled.div`
-  padding: 0 24px 24px 24px;
-  background: linear-gradient(to bottom, transparent, #ffffff 20%);
+  padding: 12px 24px 24px 24px;
+  background: transparent;
   flex-shrink: 0;
 `;
 
@@ -421,119 +816,66 @@ const InputHint = styled.div`
   margin-top: 8px;
 `;
 
-const InfoPanel = styled.div<{ isVisible: boolean }>`
-  width: ${({ isVisible }) => (isVisible ? "320px" : "0")};
-  background-color: #fafafa;
-  border-left: 1px solid #f0f0f0;
-  overflow: hidden;
-  flex-shrink: 0;
-  transition: width 0.3s ease-in-out;
-
-  @media (max-width: 1280px) {
-    position: fixed;
-    right: ${({ isVisible }) => (isVisible ? "0" : "-320px")};
-    top: 80px;
-    bottom: 0;
-    width: 320px;
-    max-width: 85vw;
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.08);
-    z-index: 1001;
-    transition: right 0.3s ease-in-out;
-  }
-`;
-
-const InfoPanelContent = styled.div<{ isVisible: boolean }>`
-  width: 320px;
-  height: 100%;
-  opacity: ${({ isVisible }) => (isVisible ? "1" : "0")};
-  transition: opacity ${({ isVisible }) => (isVisible ? "0.3s 0.15s" : "0.15s")}
-    ease-in-out;
-  display: flex;
-  flex-direction: column;
-`;
-
-const InfoPanelBackdrop = styled.div`
-  display: none;
-
-  @media (max-width: 1280px) {
-    display: block;
-    position: fixed;
-    top: 80px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.4);
-    z-index: 1000;
-  }
-`;
-
-const InfoPanelHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #e8e8e8;
-  background-color: #ffffff;
-`;
-
-const InfoPanelTitle = styled.h3`
-  margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-  color: #1a1a1a;
-`;
-
-const CloseButton = styled.button`
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  border: none;
-  background-color: transparent;
-  color: #888;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s;
-
-  &:hover {
-    background-color: #f0f0f0;
-    color: #333;
-  }
-`;
-
 const LoadingContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   flex: 1;
-  min-height: 0;
-  background-color: #ffffff;
-  gap: 16px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  gap: 20px;
+  animation: ${fadeIn} 0.3s ease;
 `;
 
-const LoadingSpinner = styled.div`
-  width: 32px;
-  height: 32px;
-  border: 2px solid #f0f0f0;
-  border-top-color: var(--color-tumakr-maroon);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+const LoadingIconWrapper = styled.div`
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-tumakr-maroon, #651d2a) 0%, #8b2438 100%);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(101, 29, 42, 0.25);
+  animation: ${float} 3s ease-in-out infinite;
 
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
+  .globe-icon {
+    width: 40px;
+    height: 40px;
+    color: white;
+    animation: ${spin} 20s linear infinite;
+  }
+
+  .sparkle-icon {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    color: #fbbf24;
+    background: white;
+    border-radius: 50%;
+    padding: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    animation: ${sparkle} 2s ease-in-out infinite;
   }
 `;
 
 const LoadingText = styled.p`
-  font-size: 14px;
-  color: #666;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
 `;
 
-const EmptyStateContainer = styled.div`
+const LoadingSubtext = styled.p`
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+`;
+
+const DestinationSelectionWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -550,40 +892,32 @@ const EmptyStateContent = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
 `;
 
-const EmptyStateIconWrapper = styled.div`
-  width: 80px;
-  height: 80px;
-  border-radius: 24px;
-  background: linear-gradient(
-    135deg,
-    var(--color-tumakr-maroon) 0%,
-    var(--color-tumakr-maroon) 100%
-  );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 8px;
+// Welcome Header - 여행 서비스 스타일
+const WelcomeHeader = styled.div`
+  text-align: center;
+  margin-bottom: 4px;
 `;
 
-const EmptyStateIcon = styled.div`
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+const WelcomeTitleMain = styled.div`
+  font-size: 16px;
+  font-weight: 500;
+  color: #666;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
 `;
 
-const EmptyStateTitle = styled.h1`
-  font-size: 28px;
-  font-weight: 600;
+const WelcomeTitleHighlight = styled.h1`
+  font-size: 36px;
+  font-weight: 700;
   color: #1a1a1a;
   margin: 0;
-  text-align: center;
+  line-height: 1.2;
 
   @media (max-width: 768px) {
-    font-size: 24px;
+    font-size: 28px;
   }
 `;
 
@@ -605,29 +939,140 @@ const EmptyStateInputWrapper = styled.div`
   margin-top: 16px;
 `;
 
-const EmptyStateHints = styled.div`
+// 목적지 선택 그리드
+const DestinationGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 28px;
+  width: 100%;
+  max-width: 580px;
+  animation: ${fadeIn} 0.5s ease 0.2s both;
+
+  @media (max-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+`;
+
+const DestinationCard = styled.button<{ disabled?: boolean }>`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 20px;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+  opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
+  transition: all 0.3s ease;
+  text-align: center;
+  overflow: hidden;
+  min-height: 140px;
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-tumakr-maroon);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(101, 29, 42, 0.15);
+
+    & > div:first-of-type {
+      opacity: 0.25;
+    }
+
+    & span:first-of-type {
+      transform: scale(1.15);
+    }
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(-2px);
+  }
+`;
+
+const DestinationImageBg = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  opacity: 0.15;
+  transition: opacity 0.3s ease;
+`;
+
+const DestinationContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px 16px;
+  position: relative;
+  z-index: 1;
+`;
+
+const DestinationEmoji = styled.span`
+  font-size: 36px;
+  margin-bottom: 10px;
+  transition: transform 0.3s ease;
+`;
+
+const DestinationName = styled.span`
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+`;
+
+const DestinationDesc = styled.span`
+  font-size: 12px;
+  color: #888;
+  line-height: 1.4;
+`;
+
+// Trust Badges
+const TrustBadges = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 16px;
+  margin-top: 32px;
+  animation: ${fadeIn} 0.5s ease 0.4s both;
+
+  @media (max-width: 640px) {
+    gap: 12px;
+  }
 `;
 
-const HintChip = styled.button`
-  padding: 8px 16px;
-  border: 1px solid #e5e5e5;
-  border-radius: 20px;
-  background-color: #ffffff;
+const TrustBadge = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 13px;
   color: #555;
-  cursor: pointer;
-  transition: all 0.15s;
+  font-weight: 500;
+`;
 
-  &:hover {
-    border-color: var(--color-tumakr-maroon);
-    color: var(--color-tumakr-maroon);
-    background-color: rgba(101, 29, 42, 0.03);
-  }
+const TrustIcon = styled.span`
+  font-size: 14px;
+`;
+
+const OrDivider = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 400px;
+  margin-top: 24px;
+`;
+
+const OrLine = styled.div`
+  flex: 1;
+  height: 1px;
+  background: #e5e5e5;
+`;
+
+const OrText = styled.span`
+  font-size: 13px;
+  color: #999;
 `;
 
 const LoginPromptContainer = styled.div`
@@ -734,5 +1179,71 @@ const SignUpButton = styled.button`
   &:hover {
     background-color: #f5f5f5;
     border-color: #ddd;
+  }
+`;
+
+// Other destination input components
+const OtherInputWrapper = styled.div`
+  width: 100%;
+  max-width: 580px;
+  margin-top: 16px;
+  animation: ${fadeIn} 0.3s ease;
+`;
+
+const OtherInputContainer = styled.div`
+  display: flex;
+  gap: 8px;
+  padding: 4px;
+  background: #ffffff;
+  border: 2px solid var(--color-tumakr-maroon);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(101, 29, 42, 0.1);
+`;
+
+const OtherInput = styled.input`
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: #333;
+  background: transparent;
+
+  &::placeholder {
+    color: #999;
+  }
+`;
+
+const OtherInputButton = styled.button<{ disabled?: boolean }>`
+  padding: 12px 24px;
+  background-color: ${({ disabled }) => (disabled ? '#ccc' : 'var(--color-tumakr-maroon)')};
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    background-color: #4a1520;
+  }
+`;
+
+// Long trip notice - subtle footer style
+const LongTripNotice = styled.div`
+  margin-top: 24px;
+  font-size: 12px;
+  color: #999;
+  text-align: center;
+`;
+
+const LongTripEmail = styled.a`
+  color: #666;
+  text-decoration: underline;
+  transition: color 0.2s;
+
+  &:hover {
+    color: var(--color-tumakr-maroon);
   }
 `;

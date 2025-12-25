@@ -31,10 +31,10 @@ interface HomePageClientProps {
 export default function HomePageClient({ children }: HomePageClientProps) {
   const tourCategories = [
     {
-      title: "History Tours",
-      description: "Deep dive into Korea's rich heritage",
+      title: "Themed Private Tour",
+      description: "Themed private tours tailored to your story",
       image: "/korea-palace-4.jpg",
-      link: "/tours/history",
+      link: "/tours/themed-private",
       icon: MapPin,
       color: "var(--color-tumakr-maroon)", // tumakr-maroon
     },
@@ -47,10 +47,10 @@ export default function HomePageClient({ children }: HomePageClientProps) {
       color: "var(--color-tumakr-mustard)", // tumakr-mustard
     },
     {
-      title: "Private Tours",
-      description: "Exclusive experiences tailored just for you",
-      image: "/korean-dmz-border-historical-site-and-observation-.jpg",
-      link: "/tours/private",
+      title: "History Tours",
+      description: "Deep dive into Korea's rich heritage",
+      image: "/korea-palace.jpg",
+      link: "/tours/history",
       icon: Users,
       color: "var(--color-tumakr-sage-green)", // tumakr-sage-green
     },
@@ -160,19 +160,6 @@ export default function HomePageClient({ children }: HomePageClientProps) {
               premium tour collections.
             </p>
             <div className="flex flex-col sm:flex-row items-start gap-4 opacity-0 animate-[fadeIn_1s_ease-in_2s_forwards]">
-              {/* Todo: 구현 후 추가
-              <Button
-                size="lg"
-                className="bg-tumakr-maroon text-white hover:bg-tumakr-maroon/90 px-8 py-6 text-lg rounded-full shadow-2xl group"
-                onClick={() =>
-                  document
-                    .getElementById("main-services")
-                    ?.scrollIntoView({ behavior: "smooth" })
-                }
-              >
-                <MessageCircle className="w-5 h-5 mr-2" />
-                Chat with AI Planner
-              </Button> */}
               <Button
                 size="lg"
                 variant="outline"
@@ -232,7 +219,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
         className="relative min-h-screen lg:h-screen flex flex-col lg:flex-row"
       >
         {/* Left: AI Chatbot */}
-        <div className="relative w-full lg:w-1/2 bg-tumakr-mustard flex items-center justify-center py-16 px-6 md:py-20 md:px-12 lg:p-16 overflow-hidden">
+        <div className="relative w-full lg:w-1/2 min-h-screen lg:min-h-0 bg-tumakr-mustard flex items-center justify-center py-16 px-6 md:py-20 md:px-12 lg:p-16 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1),transparent)]" />
           <div className="absolute top-10 right-10 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse hidden lg:block" />
 
@@ -268,19 +255,20 @@ export default function HomePageClient({ children }: HomePageClientProps) {
               ))}
             </ul>
 
-            <Button
-              size="lg"
-              disabled
-              className="bg-white/60 text-tumakr-mustard cursor-not-allowed px-6 py-5 md:px-8 md:py-6 lg:px-10 lg:py-7 text-base lg:text-lg rounded-full shadow-2xl"
-            >
-              <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
-              Coming Soon
-            </Button>
+            <Link href="/chat">
+              <Button
+                size="lg"
+                className="bg-white text-tumakr-mustard hover:bg-white/90 px-6 py-5 md:px-8 md:py-6 lg:px-10 lg:py-7 text-base lg:text-lg rounded-full shadow-2xl group/btn"
+              >
+                <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
+                Chat with AI Planner
+              </Button>
+            </Link>
           </div>
         </div>
 
         {/* Right: Oneday Legacy */}
-        <div className="relative w-full lg:w-1/2 bg-tumakr-maroon flex items-center justify-center py-16 px-6 md:py-20 md:px-12 lg:p-16 overflow-hidden">
+        <div className="relative w-full lg:w-1/2 min-h-screen lg:min-h-0 bg-tumakr-maroon flex items-center justify-center py-16 px-6 md:py-20 md:px-12 lg:p-16 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(255,255,255,0.05),transparent)]" />
           <div className="absolute bottom-10 left-10 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse hidden lg:block" />
 
@@ -323,16 +311,6 @@ export default function HomePageClient({ children }: HomePageClientProps) {
               </Button>
             </Link>
           </div>
-        </div>
-
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/70">
-          <span className="text-sm font-semibold tracking-wider uppercase">
-            Scroll Down
-          </span>
-          <button onClick={scrollToTours} className="focus:outline-none">
-            <ChevronDown className="w-6 h-6 animate-bounce" />
-          </button>
         </div>
       </section>
 
@@ -387,51 +365,45 @@ export default function HomePageClient({ children }: HomePageClientProps) {
               {tourCategories.slice(1).map((category, index) => {
                 const IconComponent = category.icon;
                 return (
-                  <Link
-                    href={category.link}
-                    key={index + 1}
-                    className="block group flex-1"
-                  >
-                    <div className="relative h-full min-h-[300px] rounded-3xl overflow-hidden shadow-xl hover:shadow-3xl transition-all duration-700 transform hover:-translate-y-2 hover:-rotate-1">
-                      <Image
-                        src={category.image || "/placeholder.svg"}
-                        alt={category.title}
-                        fill
-                        className="object-cover transition-transform duration-1000 group-hover:scale-110"
-                      />
-                      <div
-                        className={`absolute inset-0 bg-linear-to-br ${
-                          index === 0
-                            ? "from-tumakr-mustard/80 to-tumakr-mustard"
-                            : "from-tumakr-sage-green/80 to-tumakr-sage-green"
-                        } opacity-85 group-hover:opacity-90 transition-opacity`}
-                      />
+                  <div key={category.title} className="relative h-full min-h-[300px] rounded-3xl overflow-hidden shadow-xl hover:shadow-3xl transition-all duration-700 transform hover:-translate-y-2 hover:-rotate-1">
+                    <Image
+                      src={category.image || "/placeholder.svg"}
+                      alt={category.title}
+                      fill
+                      className="object-cover transition-transform duration-1000 group-hover:scale-110"
+                    />
+                    <div
+                      className={`absolute inset-0 bg-linear-to-br ${
+                        index === 0
+                          ? "from-tumakr-mustard/80 to-tumakr-mustard"
+                          : "from-tumakr-sage-green/80 to-tumakr-sage-green"
+                      } opacity-85 group-hover:opacity-90 transition-opacity`}
+                    />
 
-                      <div className="absolute inset-0 p-8 flex flex-col justify-between">
-                        <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center self-start">
-                          <IconComponent
-                            className="w-6 h-6"
-                            style={{ color: category.color }}
-                          />
-                        </div>
+                    <div className="absolute inset-0 p-8 flex flex-col justify-between">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center self-start">
+                        <IconComponent
+                          className="w-6 h-6"
+                          style={{ color: category.color }}
+                        />
+                      </div>
 
-                        <div>
-                          <h3
-                            className={`${
-                              index === 1 ? "text-3xl lg:text-4xl" : "text-3xl"
-                            } font-bold text-white mb-3`}
-                          >
-                            {category.title}
-                          </h3>
-                          <p className="text-white/90 mb-4">{category.description}</p>
-                          <span className="inline-flex items-center text-white font-semibold group-hover:text-white/80 transition-colors">
-                            Learn More{" "}
-                            <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform" />
-                          </span>
-                        </div>
+                      <div>
+                        <h3
+                          className={`${
+                            index === 1 ? "text-3xl lg:text-4xl" : "text-3xl"
+                          } font-bold text-white mb-3`}
+                        >
+                          {category.title}
+                        </h3>
+                        <p className="text-white/90 mb-4">{category.description}</p>
+                        <span className="inline-flex items-center text-white font-semibold group-hover:text-white/80 transition-colors">
+                          Cooming Soon{" "}
+                          <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform" />
+                        </span>
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 );
               })}
             </div>
@@ -490,16 +462,15 @@ export default function HomePageClient({ children }: HomePageClientProps) {
                 ))}
               </div>
 
-              <Button
-                disabled
-                size="lg"
-                className="bg-tumakr-mustard text-white hover:bg-tumakr-mustard/90 px-12 py-8 text-xl rounded-full shadow-2xl mt-8 group"
-              >
-                <div className="flex items-center gap-2">
-                  <MessageCircle className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                  Coming Soon
-                </div>
-              </Button>
+              <Link href="/chat">
+                <Button
+                  size="lg"
+                  className="bg-tumakr-mustard text-white hover:bg-tumakr-mustard/80 px-10 py-7 text-base lg:text-lg rounded-full shadow-2xl group/btn"
+                >
+                  <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
+                  Chat with AI Planner
+                </Button>
+              </Link>
             </div>
 
             {/* Right: Chat Preview */}

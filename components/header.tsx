@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, LogIn, Menu, Search, User, X } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -83,13 +83,6 @@ function headerReducer(state: HeaderState, action: HeaderAction): HeaderState {
  * - 사용자 정보 API: /api/user/profile로 사용자 정보 조회
  */
 export default function Header() {
-  const pathname = usePathname();
-
-  // Hide header on quotation pages
-  if (pathname?.startsWith("/quotation")) {
-    return null;
-  }
-
   // useReducer로 상태 관리
   const [state, dispatch] = useReducer(headerReducer, initialState);
   const {
@@ -142,20 +135,25 @@ export default function Header() {
 
   const tourCategories = useMemo(
     () => [
+      // {
+      //   href: "/tours/history",
+      //   label: "History Tour",
+      //   description: "Explore Korea's rich historical heritage",
+      // },
       {
-        href: "/tours/history",
-        label: "History Tour",
-        description: "Explore Korea's rich historical heritage",
+        href: "/tours/themed-private",
+        label: "Themed Private Tour",
+        description: "Themed private tours tailored to your story",
       },
+      // {
+      //   href: "/tours/multiday",
+      //   label: "Multiday Tour",
+      //   description: "Extended adventures across Korea",
+      // },
       {
-        href: "/tours/private",
-        label: "Private Tour",
-        description: "Personalized tours for your group",
-      },
-      {
-        href: "/tours/multiday",
-        label: "Multiday Tour",
-        description: "Extended adventures across Korea",
+        href: "/tours",
+        label: "All Tours",
+        description: "Explore all tours",
       },
     ],
     []
@@ -166,8 +164,8 @@ export default function Header() {
     () => [
       { href: "/", label: "Home" },
       // { href: "/souvenir", label: "Souvenir" }, 개발 후 추가
-      { href: "/tours", label: "Tours", hasDropdown: true },
-      { href: "/contact", label: "Contact", isContact: true }, // 개발 후 hasDropdown: true로 변경
+      { href: "/tours/themed-private", label: "Tours", hasDropdown: true },
+      { href: "/contact", label: "Contact", isContact: true, hasDropdown: true },
     ],
     []
   );
@@ -239,7 +237,7 @@ export default function Header() {
             />
             <div className="flex flex-col items-start">
               <span className="text-2xl font-bold text-gray-900">tumakr</span>
-              <span className="text-xs text-gray-400">Tumakr by OnedayKorea</span>
+              <span className="text-xs text-gray-400">by OnedayKorea</span>
             </div>
           </Link>
 
@@ -300,8 +298,6 @@ export default function Header() {
                       onMouseEnter={() => setContactDropdown(true)}
                       onMouseLeave={() => setContactDropdown(false)}
                     >
-                      {/* 
-                      개발 후 추가
                       <div className="bg-white rounded-lg shadow-xl border border-gray-200 py-2">
                         <Link
                           href="/chat"
@@ -327,7 +323,7 @@ export default function Header() {
                             Fill out our contact form
                           </div>
                         </Link>
-                      </div> */}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -408,13 +404,13 @@ export default function Header() {
                     >
                       My Page
                     </Link>
-                    <Link
+                    {/* <Link
                       href="/orders"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-tumakr-dusty-pink/10 hover:text-tumakr-maroon"
                       onClick={() => dispatch({ type: "CLOSE_USER_DROPDOWN" })}
                     >
                       Order History
-                    </Link>
+                    </Link> */}
                     <Link
                       href="/wishlist"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-tumakr-dusty-pink/10 hover:text-tumakr-maroon"
@@ -519,7 +515,7 @@ export default function Header() {
                 Contact
               </Link>
 
-              {/* <div className="border-b border-gray-100 pb-2">
+              <div className="border-b border-gray-100 pb-2">
                 <div className="py-2 font-medium text-gray-900">Contact</div>
                 <div className="pl-4 space-y-2 mt-2">
                   <Link
@@ -537,7 +533,7 @@ export default function Header() {
                     Email Us
                   </Link>
                 </div>
-              </div> */}
+              </div>
 
               {/* Orders - 로그인 상태와 무관하게 항상 표시 - 개발 후 추가 */}
               {/* <Link

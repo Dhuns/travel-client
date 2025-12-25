@@ -2,65 +2,274 @@ import styled from "@emotion/styled";
 import { MESSAGES } from "@shared/constants/chat";
 import useChatStore from "@shared/store/chatStore";
 import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import { Home, Plane } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { FC } from "react";
+import React, { FC, useMemo } from "react";
+
+dayjs.extend(relativeTime);
 
 interface Props {
   onNewChat: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-const ChatSidebar: FC<Props> = ({ onNewChat }) => {
-  const router = useRouter();
-  const { sessions, getCurrentSession, loadSession, deleteSession } = useChatStore();
-  const currentSession = getCurrentSession();
+type SessionStatus =
+  | "active"
+  | "converted"
+  | "abandoned"
+  | "estimate_ready"
+  | "inprogress"
+  | "pending_review"
+  | "quote_sent"
+  | "completed"
+  | "declined"
+  | "closed";
 
-  const handleDeleteSession = (e: React.MouseEvent, sessionId: string) => {
+const getStatusConfig = (status: SessionStatus) => {
+  const configs: Record<
+    SessionStatus,
+    { label: string; color: string; bg: string; icon: React.ReactNode }
+  > = {
+    active: {
+      label: "Active",
+      color: "var(--color-tumakr-sage-green)",
+      bg: "#eff6ff",
+      icon: null,
+    },
+    inprogress: {
+      label: "In Progress",
+      color: "#555",
+      bg: "#e7e7e7",
+      icon: (
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        >
+          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+        </svg>
+      ),
+    },
+    estimate_ready: {
+      label: "Quote Ready",
+      color: "var(--color-tumakr-dark-blue)",
+      bg: "#e4f0ff",
+      icon: (
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        >
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+        </svg>
+      ),
+    },
+    pending_review: {
+      label: "Awaiting Review",
+      color: "var(--color-tumakr-mustard)",
+      bg: "#fffbeb",
+      icon: (
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 6v6l4 2" />
+        </svg>
+      ),
+    },
+    quote_sent: {
+      label: "Quote Sent",
+      color: "var(--color-tumakr-dark-blue)",
+      bg: "#e4f0ff",
+      icon: (
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        >
+          <path d="M22 2L11 13" />
+          <path d="M22 2L15 22L11 13L2 9L22 2Z" />
+        </svg>
+      ),
+    },
+    completed: {
+      label: "Completed",
+      color: "#00692c",
+      bg: "#def1e8",
+      icon: (
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        >
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      ),
+    },
+    declined: {
+      label: "Declined",
+      color: "var(--color-tumakr-maroon)",
+      bg: "#f6eae9",
+      icon: (
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      ),
+    },
+    converted: {
+      label: "Booked",
+      color: "#00692c",
+      bg: "#def1e8",
+      icon: (
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        >
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+      ),
+    },
+    abandoned: { label: "Inactive", color: "#9ca3af", bg: "#f9fafb", icon: null },
+    closed: { label: "Closed", color: "#6b7280", bg: "#f3f4f6", icon: null },
+  };
+  return configs[status] || configs.active;
+};
+
+const ChatSidebar: FC<Props> = ({ onNewChat, isOpen = false, onClose }) => {
+  const router = useRouter();
+
+  // Selector pattern - 필요한 상태만 구독
+  const sessions = useChatStore((state) => state.sessions);
+  const currentSessionId = useChatStore((state) => state.currentSessionId);
+  const loadSession = useChatStore((state) => state.loadSession);
+  const deleteSession = useChatStore((state) => state.deleteSession);
+
+  // 현재 세션 계산
+  const currentSession = sessions.find((s) => s.sessionId === currentSessionId) || null;
+
+  const handleDeleteSession = async (e: React.MouseEvent, sessionId: string) => {
     e.stopPropagation();
     if (confirm(MESSAGES.DELETE_SESSION_CONFIRM)) {
-      deleteSession(sessionId);
+      await deleteSession(sessionId);
     }
   };
 
+  const handleLoadSession = (sessionId: string) => {
+    loadSession(sessionId);
+    if (onClose) onClose();
+  };
+
+  const handleNewChatClick = () => {
+    onNewChat();
+    if (onClose) onClose();
+  };
+
+  const handleNavClick = (path: string) => {
+    router.push(path);
+    if (onClose) onClose();
+  };
+
+  const sortedSessions = useMemo(() => {
+    return [...sessions].sort((a, b) => {
+      const aTime = a.lastMessageAt || a.createdAt;
+      const bTime = b.lastMessageAt || b.createdAt;
+      const timeDiff = new Date(bTime).getTime() - new Date(aTime).getTime();
+      if (timeDiff === 0) {
+        return a.sessionId.localeCompare(b.sessionId);
+      }
+      return timeDiff;
+    });
+  }, [sessions]);
+
+  const formatTime = (date: Date | string | undefined) => {
+    if (!date) return "";
+    const d = dayjs(date);
+    return d.format("MMM D, HH:mm");
+  };
+
+  const shouldShowBadge = (status: SessionStatus) => {
+    return [
+      "pending_review",
+      "quote_sent",
+      "estimate_ready",
+      "completed",
+      "declined",
+      "inprogress",
+    ].includes(status);
+  };
+
   return (
-    <Container>
-      {/* Header */}
+    <Container isOpen={isOpen}>
+      {/* Header Section */}
       <Header>
-        <LogoWrapper onClick={() => router.push("/")}>
+        <LogoWrapper onClick={() => handleNavClick("/")}>
           <LogoIcon>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
-              <path
-                d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              />
-            </svg>
+            <Image src="/tumakr-logo(no-text).png" alt="tumakr" width={32} height={32} />
           </LogoIcon>
-          <LogoText>Tumakr</LogoText>
+          <LogoTextWrapper>
+            <LogoTitle>tumakr</LogoTitle>
+            <LogoSubtitle>by OnedayKorea</LogoSubtitle>
+          </LogoTextWrapper>
         </LogoWrapper>
       </Header>
 
       {/* New Chat Button */}
-      <NewChatButton onClick={onNewChat}>
-        <NewChatIconWrapper>
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-        </NewChatIconWrapper>
-        <span>New Conversation</span>
-      </NewChatButton>
+      <NewChatSection>
+        <NewChatButton onClick={handleNewChatClick}>
+          <NewChatIconWrapper>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </NewChatIconWrapper>
+          <span>New Conversation</span>
+        </NewChatButton>
+      </NewChatSection>
 
       {/* Chat List */}
       <ChatListSection>
         <SectionHeader>
-          <SectionLabel>History</SectionLabel>
+          <SectionLabel>Conversations</SectionLabel>
           <SessionCount>{sessions.length}</SessionCount>
         </SectionHeader>
         <ChatList>
@@ -68,8 +277,8 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
             <EmptyState>
               <EmptyIcon>
                 <svg
-                  width="32"
-                  height="32"
+                  width="40"
+                  height="40"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -78,44 +287,52 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
               </EmptyIcon>
-              <EmptyText>Start your first conversation</EmptyText>
+              <EmptyTitle>No conversations yet</EmptyTitle>
+              <EmptyText>
+                Start planning your Korea trip by clicking the button above
+              </EmptyText>
             </EmptyState>
           ) : (
-            [...sessions]
-              .sort((a, b) => {
-                const aTime = a.lastMessageAt || a.createdAt;
-                const bTime = b.lastMessageAt || b.createdAt;
-                return new Date(bTime).getTime() - new Date(aTime).getTime();
-              })
-              .map((session, index) => (
+            sortedSessions.map((session) => {
+              const isActive = currentSession?.sessionId === session.sessionId;
+
+              // batch.status를 우선적으로 확인 (declined 상태 등)
+              let status: SessionStatus;
+              if (session.batch?.status === "declined") {
+                status = "declined";
+              } else if (session.batch?.status === "accepted") {
+                status = "completed";
+              } else {
+                status = (session.status || "active") as SessionStatus;
+              }
+
+              const statusConfig = getStatusConfig(status);
+
+              return (
                 <ChatItem
                   key={session.sessionId}
-                  active={currentSession?.sessionId === session.sessionId}
-                  onClick={() => loadSession(session.sessionId)}
+                  active={isActive}
+                  onClick={() => handleLoadSession(session.sessionId)}
                 >
-                  <ChatItemIcon active={currentSession?.sessionId === session.sessionId}>
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                    </svg>
-                  </ChatItemIcon>
                   <ChatItemContent>
-                    <ChatItemTitle>{session.title || "New Chat"}</ChatItemTitle>
-                    <ChatItemMeta>
-                      {dayjs(session.lastMessageAt || session.createdAt).format(
-                        "MMM D, HH:mm"
+                    <ChatItemTitleRow>
+                      <ChatItemTitle>{session.title || "New Chat"}</ChatItemTitle>
+                      {shouldShowBadge(status) && (
+                        <StatusBadge $color={statusConfig.color} $bg={statusConfig.bg}>
+                          {statusConfig.icon}
+                          {statusConfig.label}
+                        </StatusBadge>
                       )}
-                    </ChatItemMeta>
+                    </ChatItemTitleRow>
+                    <ChatItemMetaRow>
+                      <ChatItemTime>
+                        {formatTime(session.lastMessageAt || session.createdAt)}
+                      </ChatItemTime>
+                    </ChatItemMetaRow>
                   </ChatItemContent>
                   <DeleteButton
                     onClick={(e) => handleDeleteSession(e, session.sessionId)}
-                    title="Delete"
+                    title="Delete conversation"
                   >
                     <svg
                       width="14"
@@ -129,7 +346,8 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
                     </svg>
                   </DeleteButton>
                 </ChatItem>
-              ))
+              );
+            })
           )}
         </ChatList>
       </ChatListSection>
@@ -137,33 +355,12 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
       {/* Bottom Navigation */}
       <BottomNav>
         <NavItem onClick={() => router.push("/")}>
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-            <polyline points="9 22 9 12 15 12 15 22" />
-          </svg>
+          <Home size={18} />
           <span>Home</span>
         </NavItem>
-        <NavItem onClick={() => router.push("/orders")}>
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
-            <rect x="9" y="3" width="6" height="4" rx="1" />
-            <path d="M9 12h6M9 16h6" />
-          </svg>
-          <span>Orders</span>
+        <NavItem onClick={() => router.push("/tours")}>
+          <Plane size={18} />
+          <span>Tours</span>
         </NavItem>
       </BottomNav>
     </Container>
@@ -173,31 +370,39 @@ const ChatSidebar: FC<Props> = ({ onNewChat }) => {
 export default React.memo(ChatSidebar);
 
 // Styled Components
-const Container = styled.div`
-  width: 280px;
-  background: linear-gradient(180deg, #fefefe 0%, #f8f7f5 100%);
-  border-right: 1px solid #eee;
+const Container = styled.div<{ isOpen?: boolean }>`
+  width: 300px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+  border-right: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   flex-shrink: 0;
 
   @media (max-width: 1024px) {
-    display: none;
+    position: fixed;
+    top: 0;
+    left: ${({ isOpen }) => (isOpen ? "0" : "-300px")};
+    bottom: 0;
+    z-index: 1000;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: ${({ isOpen }) => (isOpen ? "4px 0 24px rgba(0, 0, 0, 0.12)" : "none")};
   }
 `;
 
 const Header = styled.div`
-  padding: 20px 16px 16px;
+  padding: 20px 16px;
   flex-shrink: 0;
+  border-bottom: 1px solid #e5e7eb;
 `;
 
 const LogoWrapper = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   cursor: pointer;
-  padding: 8px 12px;
+  padding: 10px 12px;
   border-radius: 12px;
   transition: all 0.2s ease;
 
@@ -207,33 +412,42 @@ const LogoWrapper = styled.div`
 `;
 
 const LogoIcon = styled.div`
-  color: var(--color-tumakr-maroon);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 `;
 
-const LogoText = styled.span`
+const LogoTextWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`;
+
+const LogoTitle = styled.span`
   font-size: 20px;
   font-weight: 700;
-  background: linear-gradient(
-    135deg,
-    var(--color-tumakr-maroon) 0%,
-    var(--color-tumakr-maroon) 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #1f2937;
+  line-height: 1;
+  letter-spacing: -0.5px;
+`;
+
+const LogoSubtitle = styled.span`
+  font-size: 11px;
+  font-weight: 500;
+  color: #9ca3af;
+  line-height: 1;
+`;
+
+const NewChatSection = styled.div`
+  padding: 16px;
+  flex-shrink: 0;
 `;
 
 const NewChatButton = styled.button`
-  margin: 0 16px 20px 16px;
+  width: 100%;
   padding: 14px 18px;
-  background: linear-gradient(
-    135deg,
-    var(--color-tumakr-maroon) 0%,
-    var(--color-tumakr-maroon) 100%
-  );
+  background: linear-gradient(135deg, var(--color-tumakr-maroon) 0%, #8b1a2d 100%);
   border: none;
   border-radius: 14px;
   font-size: 14px;
@@ -244,7 +458,6 @@ const NewChatButton = styled.button`
   gap: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
-  flex-shrink: 0;
   box-shadow: 0 4px 12px rgba(101, 29, 42, 0.25);
 
   &:hover {
@@ -261,20 +474,20 @@ const NewChatIconWrapper = styled.span`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
+  border-radius: 10px;
 `;
 
 const ChatListSection = styled.div`
   flex: 1;
   overflow-y: auto;
   min-height: 0;
-  padding: 0 12px;
+  padding: 0 12px 12px 12px;
 
   &::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
   }
 
   &::-webkit-scrollbar-track {
@@ -282,8 +495,12 @@ const ChatListSection = styled.div`
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(101, 29, 42, 0.15);
-    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.2);
   }
 `;
 
@@ -291,13 +508,18 @@ const SectionHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 8px 12px 8px;
+  padding: 12px 8px;
+  position: sticky;
+  top: 0;
+  background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.9) 100%);
+  backdrop-filter: blur(8px);
+  z-index: 1;
 `;
 
 const SectionLabel = styled.div`
   font-size: 12px;
   font-weight: 600;
-  color: #888;
+  color: #6b7280;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 `;
@@ -307,7 +529,7 @@ const SessionCount = styled.span`
   font-weight: 600;
   color: var(--color-tumakr-maroon);
   background: rgba(101, 29, 42, 0.1);
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 10px;
 `;
 
@@ -322,27 +544,35 @@ const EmptyState = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 48px 24px;
   text-align: center;
 `;
 
 const EmptyIcon = styled.div`
-  color: #ccc;
-  margin-bottom: 12px;
+  color: #d1d5db;
+  margin-bottom: 16px;
+`;
+
+const EmptyTitle = styled.div`
+  font-size: 15px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 6px;
 `;
 
 const EmptyText = styled.div`
   font-size: 13px;
-  color: #999;
+  color: #9ca3af;
+  line-height: 1.5;
 `;
 
 const ChatItem = styled.div<{ active?: boolean }>`
   padding: 12px 14px;
   border-radius: 12px;
   background-color: ${({ active }) =>
-    active ? "rgba(101, 29, 42, 0.08)" : "transparent"};
+    active ? "rgba(101, 29, 42, 0.06)" : "transparent"};
   border: 1px solid
-    ${({ active }) => (active ? "rgba(101, 29, 42, 0.15)" : "transparent")};
+    ${({ active }) => (active ? "rgba(101, 29, 42, 0.12)" : "transparent")};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -351,7 +581,7 @@ const ChatItem = styled.div<{ active?: boolean }>`
 
   &:hover {
     background-color: ${({ active }) =>
-      active ? "rgba(101, 29, 42, 0.1)" : "rgba(0, 0, 0, 0.03)"};
+      active ? "rgba(101, 29, 42, 0.08)" : "rgba(0, 0, 0, 0.03)"};
   }
 
   &:hover button {
@@ -359,51 +589,69 @@ const ChatItem = styled.div<{ active?: boolean }>`
   }
 `;
 
-const ChatItemIcon = styled.div<{ active?: boolean }>`
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  background: ${({ active }) =>
-    active
-      ? "linear-gradient(135deg, var(--color-tumakr-maroon) 0%, var(--color-tumakr-maroon) 100%)"
-      : "#f0f0f0"};
-  color: ${({ active }) => (active ? "white" : "#888")};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: all 0.15s ease;
-`;
-
 const ChatItemContent = styled.div`
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
+`;
+
+const ChatItemTitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 `;
 
 const ChatItemTitle = styled.span`
   font-size: 14px;
-  color: #333;
+  color: #1f2937;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 500;
+  flex-shrink: 1;
+  min-width: 0;
 `;
 
-const ChatItemMeta = styled.span`
-  font-size: 11px;
-  color: #999;
+const ChatItemMetaRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const ChatItemTime = styled.span`
+  font-size: 12px;
+  color: #9ca3af;
+  white-space: nowrap;
+`;
+
+const StatusBadge = styled.span<{ $color: string; $bg: string }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 6px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  background: ${({ $bg }) => $bg};
+  color: ${({ $color }) => $color};
+
+  svg {
+    flex-shrink: 0;
+  }
 `;
 
 const DeleteButton = styled.button`
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 8px;
   background-color: transparent;
   border: none;
-  color: #bbb;
+  color: #d1d5db;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -420,10 +668,10 @@ const DeleteButton = styled.button`
 
 const BottomNav = styled.div`
   padding: 16px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #e5e7eb;
   flex-shrink: 0;
   display: flex;
-  gap: 8px;
+  gap: 10px;
 `;
 
 const NavItem = styled.button`
@@ -435,15 +683,16 @@ const NavItem = styled.button`
   padding: 12px 8px;
   font-size: 11px;
   font-weight: 500;
-  color: #666;
-  background: #f5f5f5;
-  border: none;
+  color: #6b7280;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.15s ease;
 
   &:hover {
-    background-color: rgba(101, 29, 42, 0.08);
+    background-color: rgba(101, 29, 42, 0.06);
+    border-color: rgba(101, 29, 42, 0.15);
     color: var(--color-tumakr-maroon);
   }
 
